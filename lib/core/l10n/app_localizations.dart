@@ -122,17 +122,23 @@ abstract class AppLocalizations {
   /// **'Yesterday'**
   String get yesterday;
 
+  /// No description provided for @tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get tomorrow;
+
   /// No description provided for @expenses.
   ///
   /// In en, this message translates to:
-  /// **'EXPENSES'**
+  /// **'Expenses'**
   String get expenses;
 
-  /// No description provided for @revenues.
+  /// No description provided for @incomes.
   ///
   /// In en, this message translates to:
-  /// **'REVENUES'**
-  String get revenues;
+  /// **'Incomes'**
+  String get incomes;
 
   /// No description provided for @addAccount.
   ///
@@ -247,6 +253,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirmed'**
   String get confirmed;
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknown;
 }
 
 class _AppLocalizationsDelegate

@@ -21,10 +21,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yesterday => 'Yesterday';
 
   @override
-  String get expenses => 'EXPENSES';
+  String get tomorrow => 'Tomorrow';
 
   @override
-  String get revenues => 'REVENUES';
+  String get expenses => 'Expenses';
+
+  @override
+  String get incomes => 'Incomes';
 
   @override
   String get addAccount => 'Add Account';
@@ -82,4 +85,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirmed => 'Confirmed';
+
+  @override
+  String get unknown => 'Unknown';
 }

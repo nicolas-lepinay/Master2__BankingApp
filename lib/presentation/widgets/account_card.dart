@@ -89,7 +89,7 @@ class AccountCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('REVENUS', style: AppTextStyles.sectionHeader),
+                    Text(l10n.incomes, style: AppTextStyles.sectionHeader),
                     const SizedBox(height: 4),
                     Text(
                       AppFormatters.formatAmount(

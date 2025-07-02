@@ -27,6 +27,7 @@ class TransactionItem extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Icône de catégorie (carré blanc pour l'instant)
             Container(
@@ -84,11 +85,7 @@ class TransactionItem extends StatelessWidget {
                     isDebit ? -transaction.amount : transaction.amount,
                     transaction.currency,
                   ),
-                  style: AppTextStyles.transactionAmount.copyWith(
-                    color: isDebit
-                        ? AppColors.debitColor
-                        : AppColors.creditColor,
-                  ),
+                  style: AppTextStyles.transactionAmount,
                 ),
 
                 const SizedBox(height: 2),
@@ -99,7 +96,11 @@ class TransactionItem extends StatelessWidget {
                     transactionWithBalance.balanceAfter,
                     transaction.currency,
                   ),
-                  style: AppTextStyles.transactionBalance,
+                  style: AppTextStyles.transactionBalance.copyWith(
+                    color: transactionWithBalance.balanceAfter < 0
+                        ? AppColors.debitColor
+                        : AppColors.creditColor,
+                  ),
                 ),
               ],
             ),

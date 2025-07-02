@@ -27,7 +27,7 @@ class TransactionsList extends StatelessWidget {
     }
 
     // Grouper les transactions par date
-    final groupedTransactions = _groupTransactionsByDate(transactions);
+    final groupedTransactions = _groupTransactionsByDate(transactions, context);
 
     return ListView.builder(
       shrinkWrap: true,
@@ -70,6 +70,7 @@ class TransactionsList extends StatelessWidget {
 
   List<TransactionGroup> _groupTransactionsByDate(
     List<TransactionWithBalance> transactions,
+    BuildContext context,
   ) {
     final Map<String, List<TransactionWithBalance>> grouped = {};
 
@@ -88,7 +89,7 @@ class TransactionsList extends StatelessWidget {
 
     for (final entry in grouped.entries) {
       final date = grouped[entry.key]!.first.transaction.date;
-      final dateLabel = AppFormatters.formatDate(date);
+      final dateLabel = AppFormatters.formatDate(date, context);
 
       result.add(
         TransactionGroup(

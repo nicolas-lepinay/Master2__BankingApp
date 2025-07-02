@@ -4,6 +4,8 @@ import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/providers/navigation_provider.dart';
 import 'package:bankapp/presentation/widgets/account_card.dart';
 import 'package:bankapp/presentation/widgets/transactions_list.dart';
+import 'package:bankapp/presentation/widgets/add_account_bottom_sheet.dart';
+import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
@@ -67,6 +69,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       if (index == accounts.length) {
                         return _buildAddAccountPage();
                       }
+
                       // Pages de comptes
                       final account = accounts[index];
                       return _buildAccountPage(account);
@@ -198,18 +201,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showAddAccountBottomSheet() {
-    // Pour l'instant, on affiche juste un message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Bottom sheet d\'ajout de compte - À implémenter'),
-      ),
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const AddAccountBottomSheet(),
     );
   }
 
   void _navigateToTransactionDetail(Transaction transaction) {
-    // Pour l'instant, on affiche juste un message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Détail de la transaction: ${transaction.title}')),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) =>
+            TransactionDetailScreen(transactionId: transaction.id),
+      ),
     );
   }
 }

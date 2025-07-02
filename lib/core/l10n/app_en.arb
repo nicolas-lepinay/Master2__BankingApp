@@ -3,8 +3,9 @@
   "loading": "Loading...",
   "today": "Today",
   "yesterday": "Yesterday",
-  "expenses": "EXPENSES",
-  "revenues": "REVENUES",
+  "tomorrow": "Tomorrow",
+  "expenses": "Expenses",
+  "incomes": "Incomes",
   "addAccount": "Add Account",
   "accountName": "Account Name",
   "initialBalance": "Initial Balance",
@@ -23,5 +24,6 @@
   "credit": "Credit",
   "status": "Status",
   "pending": "Pending",
-  "confirmed": "Confirmed"
+  "confirmed": "Confirmed",
+  "unknown": "Unknown"
 }

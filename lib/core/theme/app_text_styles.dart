@@ -96,15 +96,14 @@ class AppTextStyles {
 
   static const TextStyle transactionAmount = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: FontWeight.bold,
   );
 
   static const TextStyle transactionBalance = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: FontWeight.w500,
-    color: AppColors.balanceColor,
   );
 
   static const TextStyle transactionTitle = TextStyle(
@@ -122,7 +121,7 @@ class AppTextStyles {
 
   static const TextStyle dateHeader = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 14,
+    fontSize: 20,
     fontWeight: FontWeight.w600,
     color: AppColors.textSecondary,
   );

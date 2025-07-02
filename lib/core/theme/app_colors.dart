@@ -7,20 +7,29 @@ class AppColors {
   static const Color secondary = Color(0xFF26C6DA);
   static const Color accent = Color(0xFF00ACC1);
 
-  // Card colors (like in your mockup)
+  // Greyscale
+  static const Color darkest = Color(0xFF232339);
+  static const Color darker = Color(0xFF2E2E48);
+  static const Color dark = Color(0xFF47516B);
+  static const Color neutral = Color(0xFF79819A);
+  static const Color light = Color(0xFFACB1C3);
+  static const Color lighter = Color(0xFFD9DFE8);
+  static const Color lightest = Color(0xFFE2E6EE);
+  static const Color white = Color(0xFFFFFFFF);
+
+  // Card colors
   static const Color cardDark = Color(0xFF2C2C54);
   static const Color cardLight = Color(0xFFFFFFFF);
 
   // Text colors
-  static const Color textPrimary = Color(0xFF212121);
-  static const Color textSecondary = Color(0xFF757575);
-  static const Color textLight = Color(0xFFFFFFFF);
-  static const Color textDark = Color(0xFF212121);
+  static const Color textPrimary = darkest;
+  static const Color textSecondary = neutral;
+  static const Color textLight = white;
+  static const Color textDark = darkest;
 
   // Transaction colors
-  static const Color creditColor = Color(0xFF4CAF50); // Green for income
-  static const Color debitColor = Color(0xFF212121); // Black for expenses
-  static const Color balanceColor = Color(0xFF26C6DA); // Blue/cyan for balance
+  static const Color creditColor = Color(0xFF249689);
+  static const Color debitColor = Color(0xFFEF4444);
 
   // Status colors
   static const Color success = Color(0xFF4CAF50);
@@ -29,8 +38,8 @@ class AppColors {
   static const Color info = Color(0xFF2196F3);
 
   // Background colors
-  static const Color backgroundLight = Color(0xFFF5F5F5);
-  static const Color backgroundDark = Color(0xFF121212);
+  static const Color backgroundLight = Color(0xFFEFF0F2);
+  static const Color backgroundDark = darker;
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color surfaceDark = Color(0xFF1E1E1E);
 

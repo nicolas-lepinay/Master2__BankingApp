@@ -3,8 +3,9 @@
   "loading": "Chargement...",
   "today": "Aujourd'hui",
   "yesterday": "Hier",
-  "expenses": "DÉPENSES",
-  "revenues": "REVENUS",
+  "tomorrow": "Demain",
+  "expenses": "Dépenses",
+  "incomes": "Revenus",
   "addAccount": "Ajouter un compte",
   "accountName": "Nom du compte",
   "initialBalance": "Solde initial",
@@ -23,5 +24,6 @@
   "credit": "Crédit",
   "status": "Statut",
   "pending": "En attente",
-  "confirmed": "Confirmé"
+  "confirmed": "Confirmé",
+  "unknown": "Inconnu"
 }

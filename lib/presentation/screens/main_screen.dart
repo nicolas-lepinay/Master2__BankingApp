@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/providers/navigation_provider.dart';
 import 'package:bankapp/presentation/screens/home_screen.dart';
+import 'package:bankapp/presentation/widgets/add_transaction_bottom_sheet.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 
@@ -67,11 +68,11 @@ class MainScreen extends ConsumerWidget {
   }
 
   void _showAddTransactionScreen(BuildContext context) {
-    // Pour l'instant, on affiche juste un message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Écran d\'ajout de transaction - À implémenter'),
-      ),
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const AddTransactionBottomSheet(),
     );
   }
 }

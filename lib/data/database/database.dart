@@ -205,7 +205,11 @@ class AppDatabase extends _$AppDatabase {
         currency: const Value('EUR'),
         amount: const Value(30.0),
         title: const Value('Abonnement Spotify'),
-        date: Value(DateTime.now().subtract(const Duration(days: 1))),
+        date: Value(
+          DateTime.now()
+              .subtract(const Duration(days: 1))
+              .subtract(const Duration(minutes: 1)),
+        ),
         status: const Value(1),
       ),
     );
