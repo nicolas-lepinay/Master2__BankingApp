@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/providers/navigation_provider.dart';
 import 'package:bankapp/presentation/screens/home_screen.dart';
+import 'package:bankapp/presentation/screens/settings_screen.dart';
 import 'package:bankapp/presentation/widgets/add_transaction_bottom_sheet.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
@@ -22,7 +23,7 @@ class MainScreen extends ConsumerWidget {
           HomeScreen(),
           // Autres écrans seront ajoutés plus tard
           Center(child: Text('Statistiques')),
-          Center(child: Text('Paramètres')),
+          SettingsScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

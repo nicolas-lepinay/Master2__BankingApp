@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:bankapp/core/theme/app_theme.dart';
 import 'package:bankapp/presentation/providers/theme_provider.dart'
     as theme_provider;
+import 'package:bankapp/presentation/providers/settings_provider.dart';
 import 'package:bankapp/presentation/screens/splash_screen.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 
@@ -17,6 +18,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(theme_provider.themeProvider);
+    final selectedLanguage = ref.watch(languageProvider);
 
     return MaterialApp(
       title: 'Bank App',
@@ -29,6 +31,9 @@ class MyApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('en'), Locale('fr')],
+
+      // Use selected language or system default
+      locale: selectedLanguage.locale,
 
       // Theme
       theme: AppTheme.lightTheme,
