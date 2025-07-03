@@ -118,37 +118,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
         return accountSummaryAsync.when(
           data: (accountSummary) {
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Carte du compte
-                  AccountCard(accountSummary: accountSummary),
+            return Column(
+              children: [
+                // Carte du compte - FIXE en haut
+                AccountCard(accountSummary: accountSummary),
 
-                  const SizedBox(height: AppConstants.largePadding),
+                const SizedBox(height: AppConstants.largePadding),
 
-                  // Liste des transactions
-                  transactionsAsync.when(
+                // Liste des transactions - SCROLLABLE
+                Expanded(
+                  child: transactionsAsync.when(
                     data: (transactions) {
                       return TransactionsList(
                         transactions: transactions,
                         onTransactionTap: (transaction) {
                           _navigateToTransactionDetail(transaction);
                         },
+                        scrollToToday: true,
                       );
                     },
-                    loading: () => const Padding(
-                      padding: EdgeInsets.all(AppConstants.largePadding),
-                      child: CircularProgressIndicator(),
-                    ),
-                    error: (error, stack) => Padding(
-                      padding: const EdgeInsets.all(AppConstants.largePadding),
-                      child: Text('Erreur: $error'),
-                    ),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, stack) =>
+                        Center(child: Text('Erreur: $error')),
                   ),
-
-                  const SizedBox(height: 100), // Espace pour la bottom nav
-                ],
-              ),
+                ),
+              ],
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
