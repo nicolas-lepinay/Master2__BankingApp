@@ -10,12 +10,14 @@ class TransactionsList extends StatefulWidget {
   final List<TransactionWithBalance> transactions;
   final Function(Transaction)? onTransactionTap;
   final bool scrollToToday;
+  final String? accountCurrency; // Nouvelle propriété
 
   const TransactionsList({
     super.key,
     required this.transactions,
     this.onTransactionTap,
     this.scrollToToday = false,
+    this.accountCurrency,
   });
 
   @override
@@ -25,6 +27,7 @@ class TransactionsList extends StatefulWidget {
 class _TransactionsListState extends State<TransactionsList> {
   final ScrollController _scrollController = ScrollController();
   final Set<String> _expandedDates = <String>{}; // Stocke les dates étendues
+  bool _hasScrolledToToday = false; // Flag pour éviter les scrolls répétés
 
   @override
   void dispose() {
@@ -37,7 +40,9 @@ class _TransactionsListState extends State<TransactionsList> {
     super.didUpdateWidget(oldWidget);
 
     // Si les transactions ont changé et qu'on doit scroller vers aujourd'hui
+    // ET qu'on ne l'a pas encore fait
     if (widget.scrollToToday &&
+        !_hasScrolledToToday &&
         widget.transactions != oldWidget.transactions &&
         widget.transactions.isNotEmpty) {
       _scrollToTodayAfterBuild();
@@ -47,6 +52,7 @@ class _TransactionsListState extends State<TransactionsList> {
   void _scrollToTodayAfterBuild() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToToday();
+      _hasScrolledToToday = true; // Marquer comme fait
     });
   }
 
@@ -133,19 +139,28 @@ class _TransactionsListState extends State<TransactionsList> {
         totalRevenues += amount;
       }
     }
-
     return {'expenses': totalExpenses, 'revenues': totalRevenues};
   }
 
   // Formater le montant net
-  String _formatNetAmount(Map<String, double> dayTotals) {
+  String _formatNetAmount(
+    Map<String, double> dayTotals,
+    List<TransactionWithBalance> dayTransactions,
+  ) {
     final totalExpenses = dayTotals['expenses'] ?? 0.0;
     final totalRevenues = dayTotals['revenues'] ?? 0.0;
     final netAmount = totalRevenues - totalExpenses;
 
+    // Priorité : devise du compte > devise de la première transaction > EUR par défaut
+    final currency =
+        widget.accountCurrency ??
+        (dayTransactions.isNotEmpty
+            ? dayTransactions.first.transaction.currency
+            : 'EUR');
+
     return AppFormatters.formatAmount(
       netAmount,
-      'EUR',
+      currency,
       showSign: true,
       context: context,
     );
@@ -169,7 +184,8 @@ class _TransactionsListState extends State<TransactionsList> {
     );
 
     // Scroller vers aujourd'hui après la construction si nécessaire
-    if (widget.scrollToToday) {
+    // ET seulement si on ne l'a pas encore fait
+    if (widget.scrollToToday && !_hasScrolledToToday) {
       _scrollToTodayAfterBuild();
     }
 
@@ -193,6 +209,7 @@ class _TransactionsListState extends State<TransactionsList> {
               dateKey,
               isExpanded,
               dayTotals,
+              group.transactions, // Passer les transactions du groupe
             ),
             // Liste des transactions pour cette date
             ...group.transactions.map((transactionWithBalance) {
@@ -218,6 +235,7 @@ class _TransactionsListState extends State<TransactionsList> {
     String dateKey,
     bool isExpanded,
     Map<String, double> dayTotals,
+    List<TransactionWithBalance> dayTransactions, // Nouveau paramètre
   ) {
     return GestureDetector(
       onTap: () => _toggleDateExpansion(dateKey),
@@ -249,7 +267,7 @@ class _TransactionsListState extends State<TransactionsList> {
                 curve: Curves.easeInOut,
                 opacity: isExpanded ? 1.0 : 0.0,
                 child: Text(
-                  _formatNetAmount(dayTotals),
+                  _formatNetAmount(dayTotals, dayTransactions),
                   style: AppTextStyles.bodyLarge.copyWith(
                     color: AppColors.neutral,
                   ),

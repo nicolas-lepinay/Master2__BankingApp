@@ -82,6 +82,260 @@ class AppFormatters {
   }
 
   // Helper method to format date with proper order and ordinales for each language
+  static String _formatCurrencyWithLocaleRules(
+    double amount,
+    String currency,
+    String languageCode,
+    String localeString,
+  ) {
+    final symbol = AppConstants.currencySymbols[currency] ?? currency;
+
+    try {
+      final formatter = NumberFormat('#,##0.00', localeString);
+      final formattedNumber = formatter.format(amount.abs());
+
+      switch (languageCode) {
+        case 'en':
+          // English: $10.50, £15.75
+          return amount >= 0
+              ? '$symbol$formattedNumber'
+              : '-$symbol$formattedNumber';
+
+        case 'fr':
+          // French: 10,50€, 15,75€
+          return amount >= 0
+              ? '$formattedNumber$symbol'
+              : '-$formattedNumber$symbol';
+
+        case 'es':
+          // Spanish: 10,50€, $15,75
+          if (currency == 'EUR') {
+            return amount >= 0
+                ? '$formattedNumber$symbol'
+                : '-$formattedNumber$symbol';
+          } else {
+            return amount >= 0
+                ? '$symbol$formattedNumber'
+                : '-$symbol$formattedNumber';
+          }
+
+        case 'it':
+          // Italian: 10,50€, $15,75
+          if (currency == 'EUR') {
+            return amount >= 0
+                ? '$formattedNumber$symbol'
+                : '-$formattedNumber$symbol';
+          } else {
+            return amount >= 0
+                ? '$symbol$formattedNumber'
+                : '-$symbol$formattedNumber';
+          }
+
+        case 'de':
+          // German: 10,50€, $15,75
+          if (currency == 'EUR') {
+            return amount >= 0
+                ? '$formattedNumber$symbol'
+                : '-$formattedNumber$symbol';
+          } else {
+            return amount >= 0
+                ? '$symbol$formattedNumber'
+                : '-$symbol$formattedNumber';
+          }
+
+        case 'pt':
+          // Portuguese: R$ 10,50, $15,75
+          if (currency == 'BRL') {
+            return amount >= 0
+                ? '$symbol $formattedNumber'
+                : '-$symbol $formattedNumber';
+          } else if (currency == 'EUR') {
+            return amount >= 0
+                ? '$formattedNumber$symbol'
+                : '-$formattedNumber$symbol';
+          } else {
+            return amount >= 0
+                ? '$symbol$formattedNumber'
+                : '-$symbol$formattedNumber';
+          }
+
+        case 'ja':
+          // Japanese: ¥1,050, $10.50
+          if (currency == 'JPY') {
+            // Yen doesn't use decimals
+            final yenFormatter = NumberFormat('#,##0', localeString);
+            final yenFormatted = yenFormatter.format(amount.abs());
+            return amount >= 0
+                ? '$symbol$yenFormatted'
+                : '-$symbol$yenFormatted';
+          } else {
+            return amount >= 0
+                ? '$symbol$formattedNumber'
+                : '-$symbol$formattedNumber';
+          }
+
+        case 'ko':
+          // Korean: ₩1,050, $10.50
+          if (currency == 'KRW') {
+            // Won doesn't use decimals
+            final wonFormatter = NumberFormat('#,##0', localeString);
+            final wonFormatted = wonFormatter.format(amount.abs());
+            return amount >= 0
+                ? '$symbol$wonFormatted'
+                : '-$symbol$wonFormatted';
+          } else {
+            return amount >= 0
+                ? '$symbol$formattedNumber'
+                : '-$symbol$formattedNumber';
+          }
+
+        case 'zh':
+          // Chinese: ¥10.50, $15.75
+          return amount >= 0
+              ? '$symbol$formattedNumber'
+              : '-$symbol$formattedNumber';
+
+        case 'ar':
+          // Arabic: 10.50 ر.س, $15.75
+          if (currency == 'SAR') {
+            return amount >= 0
+                ? '$formattedNumber $symbol'
+                : '-$formattedNumber $symbol';
+          } else {
+            return amount >= 0
+                ? '$symbol$formattedNumber'
+                : '-$symbol$formattedNumber';
+          }
+
+        case 'ru':
+          // Russian: 10,50₽, $15.75
+          if (currency == 'RUB') {
+            return amount >= 0
+                ? '$formattedNumber$symbol'
+                : '-$formattedNumber$symbol';
+          } else {
+            return amount >= 0
+                ? '$symbol$formattedNumber'
+                : '-$symbol$formattedNumber';
+          }
+
+        default:
+          // Fallback: use English format
+          return amount >= 0
+              ? '$symbol$formattedNumber'
+              : '-$symbol$formattedNumber';
+      }
+    } catch (e) {
+      // Fallback if locale not supported
+      final basicFormatter = NumberFormat('#,##0.00');
+      final basicFormatted = basicFormatter.format(amount.abs());
+      return amount >= 0 ? '$symbol$basicFormatted' : '-$symbol$basicFormatted';
+    }
+  }
+
+  // Helper method to format amount with sign and proper locale rules
+  static String _formatAmountWithSign(
+    double amount,
+    String currency,
+    String languageCode,
+    String localeString,
+    bool showSign,
+  ) {
+    final symbol = AppConstants.currencySymbols[currency] ?? currency;
+
+    try {
+      final formatter = NumberFormat('#,##0.00', localeString);
+      final formattedNumber = formatter.format(amount.abs());
+
+      String result;
+
+      switch (languageCode) {
+        case 'en':
+          // English: +$10.50, -$15.75
+          result = '$symbol$formattedNumber';
+          break;
+
+        case 'fr':
+        case 'es':
+        case 'it':
+        case 'de':
+          // French/Spanish/Italian/German: +10,50€, -15,75€
+          if (currency == 'EUR') {
+            result = '$formattedNumber$symbol';
+          } else {
+            result = '$symbol$formattedNumber';
+          }
+          break;
+
+        case 'pt':
+          // Portuguese: +R$ 10,50, -$15,75
+          if (currency == 'BRL') {
+            result = '$symbol $formattedNumber';
+          } else if (currency == 'EUR') {
+            result = '$formattedNumber$symbol';
+          } else {
+            result = '$symbol$formattedNumber';
+          }
+          break;
+
+        case 'ja':
+          // Japanese: +¥1,050, +$10.50
+          if (currency == 'JPY') {
+            final yenFormatter = NumberFormat('#,##0', localeString);
+            final yenFormatted = yenFormatter.format(amount.abs());
+            result = '$symbol$yenFormatted';
+          } else {
+            result = '$symbol$formattedNumber';
+          }
+          break;
+
+        case 'ko':
+          // Korean: +₩1,050, +$10.50
+          if (currency == 'KRW') {
+            final wonFormatter = NumberFormat('#,##0', localeString);
+            final wonFormatted = wonFormatter.format(amount.abs());
+            result = '$symbol$wonFormatted';
+          } else {
+            result = '$symbol$formattedNumber';
+          }
+          break;
+
+        case 'zh':
+        case 'ar':
+        case 'ru':
+          // Default format for these languages
+          result = currency == 'RUB'
+              ? '$formattedNumber$symbol'
+              : '$symbol$formattedNumber';
+          break;
+
+        default:
+          // Fallback: English format
+          result = '$symbol$formattedNumber';
+          break;
+      }
+
+      if (showSign) {
+        final sign = amount >= 0 ? '+' : '-';
+        return '$sign$result';
+      } else {
+        return amount >= 0 ? result : '-$result';
+      }
+    } catch (e) {
+      // Fallback if locale not supported
+      final basicFormatter = NumberFormat('#,##0.00');
+      final basicFormatted = basicFormatter.format(amount.abs());
+      final result = '$symbol$basicFormatted';
+
+      if (showSign) {
+        final sign = amount >= 0 ? '+' : '-';
+        return '$sign$result';
+      } else {
+        return amount >= 0 ? result : '-$result';
+      }
+    }
+  }
+
   static String _formatDateWithLocaleRules(
     DateTime date,
     String languageCode,
@@ -96,7 +350,7 @@ class AppFormatters {
           // English: "July 1st", "July 2nd", "July 3rd", "July 4th"
           final monthFormatter = DateFormat('MMMM', localeString);
           final monthName = monthFormatter.format(date);
-          return '$monthName, $day$ordinalSuffix';
+          return '$monthName $day$ordinalSuffix';
 
         case 'fr':
           // French: "1er juillet", "2 juillet", "3 juillet"
@@ -173,65 +427,87 @@ class AppFormatters {
     String currency, [
     BuildContext? context,
   ]) {
-    final symbol = AppConstants.currencySymbols[currency] ?? currency;
-
     // Use context locale if available, otherwise default to fr_FR
     String localeString = 'fr_FR';
+    String languageCode = 'fr';
+
     if (context != null) {
       final currentLocale = Localizations.localeOf(context);
       localeString = _getLocaleString(currentLocale);
+      languageCode = currentLocale.languageCode;
     }
 
     try {
-      final formatter = NumberFormat('#,##0.00', localeString);
-      return '${formatter.format(amount)}$symbol';
+      // Use NumberFormat.currency which handles locale-specific formatting automatically
+      final formatter = NumberFormat.currency(
+        locale: localeString,
+        symbol: AppConstants.currencySymbols[currency] ?? currency,
+        decimalDigits: _getDecimalDigits(currency),
+      );
+      return formatter.format(amount);
     } catch (e) {
-      // Fallback to basic formatting if locale not supported
-      final formatter = NumberFormat('#,##0.00');
-      return '${formatter.format(amount)}$symbol';
+      // Fallback to custom formatting
+      return _formatCurrencyWithLocaleRules(
+        amount,
+        currency,
+        languageCode,
+        localeString,
+      );
     }
   }
 
   static String formatAmount(
     double amount,
     String currency, {
-    bool showSign = false,
+    bool showSign = true,
     BuildContext? context,
   }) {
-    final symbol = AppConstants.currencySymbols[currency] ?? currency;
-
     // Use context locale if available, otherwise default to fr_FR
     String localeString = 'fr_FR';
+    String languageCode = 'fr';
+
     if (context != null) {
       final currentLocale = Localizations.localeOf(context);
       localeString = _getLocaleString(currentLocale);
+      languageCode = currentLocale.languageCode;
     }
 
     try {
-      final formatter = NumberFormat('#,##0.00', localeString);
+      // Use NumberFormat.currency for consistent formatting
+      final formatter = NumberFormat.currency(
+        locale: localeString,
+        symbol: AppConstants.currencySymbols[currency] ?? currency,
+        decimalDigits: _getDecimalDigits(currency),
+      );
+
       final formattedAmount = formatter.format(amount.abs());
 
       if (showSign) {
         final sign = amount >= 0 ? '+' : '-';
-        return '$sign$formattedAmount$symbol';
+        return '$sign$formattedAmount';
+      } else {
+        return amount >= 0 ? formattedAmount : '-$formattedAmount';
       }
-
-      return amount >= 0
-          ? '$formattedAmount$symbol'
-          : '-$formattedAmount$symbol';
     } catch (e) {
-      // Fallback to basic formatting if locale not supported
-      final formatter = NumberFormat('#,##0.00');
-      final formattedAmount = formatter.format(amount.abs());
+      // Fallback to custom formatting
+      return _formatAmountWithSign(
+        amount,
+        currency,
+        languageCode,
+        localeString,
+        showSign,
+      );
+    }
+  }
 
-      if (showSign) {
-        final sign = amount >= 0 ? '+' : '-';
-        return '$sign$formattedAmount$symbol';
-      }
-
-      return amount >= 0
-          ? '$formattedAmount$symbol'
-          : '-$formattedAmount$symbol';
+  // Helper method to get decimal digits for different currencies
+  static int _getDecimalDigits(String currency) {
+    switch (currency) {
+      case 'JPY':
+      case 'KRW':
+        return 0; // No decimal places for Yen and Won
+      default:
+        return 2; // Most currencies use 2 decimal places
     }
   }
 
@@ -249,7 +525,7 @@ class AppFormatters {
     } else if (dateOnly == yesterday) {
       return l10n.yesterday;
     } else if (dateOnly == tomorrow) {
-      return l10n.tomorrow;
+      return 'Tomorrow'; // Add this to l10n if needed
     } else {
       // Use current context locale with proper formatting rules
       final currentLocale = Localizations.localeOf(context);
@@ -257,6 +533,28 @@ class AppFormatters {
       final languageCode = currentLocale.languageCode;
 
       return _formatDateWithLocaleRules(date, languageCode, localeString);
+    }
+  }
+
+  // Alternative method without context for simple formatting
+  static String formatDateSimple(DateTime date, {String? localeString}) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final dateOnly = DateTime(date.year, date.month, date.day);
+
+    if (dateOnly == today) {
+      return localeString?.startsWith('fr') == true ? 'Aujourd\'hui' : 'Today';
+    } else if (dateOnly == yesterday) {
+      return localeString?.startsWith('fr') == true ? 'Hier' : 'Yesterday';
+    } else {
+      // Extract language code from locale string
+      final languageCode = localeString?.split('_').first ?? 'en';
+      return _formatDateWithLocaleRules(
+        date,
+        languageCode,
+        localeString ?? 'en_US',
+      );
     }
   }
 

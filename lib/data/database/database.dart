@@ -220,7 +220,7 @@ class AppDatabase extends _$AppDatabase {
         transactionType: const Value('CREDIT'),
         currency: const Value('EUR'),
         amount: const Value(10.0),
-        title: const Value('Shopping au supermarché'),
+        title: const Value('Remboursement au supermarché'),
         date: Value(DateTime.now().subtract(const Duration(days: 3))),
         status: const Value(1),
       ),

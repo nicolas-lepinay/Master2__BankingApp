@@ -134,7 +134,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         onTransactionTap: (transaction) {
                           _navigateToTransactionDetail(transaction);
                         },
-                        scrollToToday: true,
+                        scrollToToday: true, // Nouveau paramètre
                       );
                     },
                     loading: () =>

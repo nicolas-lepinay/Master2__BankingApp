@@ -27,7 +27,6 @@ class TransactionItem extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Icône de catégorie (carré blanc pour l'instant)
             Container(
@@ -84,6 +83,7 @@ class TransactionItem extends StatelessWidget {
                   AppFormatters.formatAmount(
                     isDebit ? -transaction.amount : transaction.amount,
                     transaction.currency,
+                    context: context,
                   ),
                   style: AppTextStyles.transactionAmount,
                 ),
@@ -95,6 +95,7 @@ class TransactionItem extends StatelessWidget {
                   AppFormatters.formatCurrency(
                     transactionWithBalance.balanceAfter,
                     transaction.currency,
+                    context,
                   ),
                   style: AppTextStyles.transactionBalance.copyWith(
                     color: transactionWithBalance.balanceAfter < 0

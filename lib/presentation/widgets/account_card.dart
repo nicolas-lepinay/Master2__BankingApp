@@ -4,7 +4,6 @@ import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
 
 class AccountCard extends StatelessWidget {
   final AccountSummary accountSummary;
@@ -13,8 +12,6 @@ class AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return Container(
       margin: const EdgeInsets.symmetric(
         horizontal: AppConstants.defaultPadding,
@@ -44,6 +41,7 @@ class AccountCard extends StatelessWidget {
             AppFormatters.formatCurrency(
               accountSummary.currentBalance,
               accountSummary.account.currency,
+              context,
             ),
             style: AppTextStyles.accountBalance,
           ),
@@ -58,13 +56,14 @@ class AccountCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.expenses, style: AppTextStyles.sectionHeader),
+                    Text('DÉPENSES', style: AppTextStyles.sectionHeader),
                     const SizedBox(height: 4),
                     Text(
                       AppFormatters.formatAmount(
                         -accountSummary.totalExpenses,
                         accountSummary.account.currency,
                         showSign: true,
+                        context: context,
                       ),
                       style: AppTextStyles.h6.copyWith(
                         color: AppColors.textLight,
@@ -89,13 +88,14 @@ class AccountCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.incomes, style: AppTextStyles.sectionHeader),
+                    Text('REVENUS', style: AppTextStyles.sectionHeader),
                     const SizedBox(height: 4),
                     Text(
                       AppFormatters.formatAmount(
                         accountSummary.totalRevenues,
                         accountSummary.account.currency,
                         showSign: true,
+                        context: context,
                       ),
                       style: AppTextStyles.h6.copyWith(
                         color: AppColors.textLight,
