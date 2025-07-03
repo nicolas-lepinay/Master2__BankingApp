@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bankapp/data/database/database.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
+import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/presentation/widgets/transaction_item.dart';
@@ -23,6 +24,7 @@ class TransactionsList extends StatefulWidget {
 
 class _TransactionsListState extends State<TransactionsList> {
   final ScrollController _scrollController = ScrollController();
+  final Set<String> _expandedDates = <String>{}; // Stocke les dates étendues
 
   @override
   void dispose() {
@@ -104,6 +106,37 @@ class _TransactionsListState extends State<TransactionsList> {
     }
   }
 
+  void _toggleDateExpansion(String dateKey) {
+    setState(() {
+      if (_expandedDates.contains(dateKey)) {
+        _expandedDates.remove(dateKey);
+      } else {
+        _expandedDates.add(dateKey);
+      }
+    });
+  }
+
+  // Calculer les totaux pour une date donnée
+  Map<String, double> _calculateDayTotals(
+    List<TransactionWithBalance> dayTransactions,
+  ) {
+    double totalExpenses = 0.0;
+    double totalRevenues = 0.0;
+
+    for (final transactionWithBalance in dayTransactions) {
+      final transaction = transactionWithBalance.transaction;
+      final amount = transaction.amount;
+
+      if (transaction.transactionType == AppConstants.transactionTypeDebit) {
+        totalExpenses += amount;
+      } else {
+        totalRevenues += amount;
+      }
+    }
+
+    return {'expenses': totalExpenses, 'revenues': totalRevenues};
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.transactions.isEmpty) {
@@ -132,21 +165,21 @@ class _TransactionsListState extends State<TransactionsList> {
       itemCount: groupedTransactions.length,
       itemBuilder: (context, index) {
         final group = groupedTransactions[index];
+        final dateKey =
+            '${group.date.year}-${group.date.month}-${group.date.day}';
+        final isExpanded = _expandedDates.contains(dateKey);
+        final dayTotals = _calculateDayTotals(group.transactions);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // En-tête de date
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppConstants.defaultPadding,
-                vertical: AppConstants.smallPadding,
-              ),
-              child: Center(
-                child: Text(group.dateLabel, style: AppTextStyles.dateHeader),
-              ),
+            // En-tête de date animé
+            _buildAnimatedDateHeader(
+              group.dateLabel,
+              dateKey,
+              isExpanded,
+              dayTotals,
             ),
-
             // Liste des transactions pour cette date
             ...group.transactions.map((transactionWithBalance) {
               return TransactionItem(
@@ -159,10 +192,71 @@ class _TransactionsListState extends State<TransactionsList> {
               );
             }).toList(),
 
-            const SizedBox(height: AppConstants.smallPadding),
+            const SizedBox(height: AppConstants.defaultPadding),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildAnimatedDateHeader(
+    String dateLabel,
+    String dateKey,
+    bool isExpanded,
+    Map<String, double> dayTotals,
+  ) {
+    return GestureDetector(
+      onTap: () => _toggleDateExpansion(dateKey),
+      child: Container(
+        margin: const EdgeInsets.symmetric(
+          horizontal: AppConstants.defaultPadding,
+          vertical: AppConstants.smallPadding,
+        ),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 1000),
+          curve: Curves.easeInOut,
+          child: isExpanded
+              ? _buildExpandedHeader(dateLabel, dayTotals)
+              : _buildCollapsedHeader(dateLabel),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCollapsedHeader(String dateLabel) {
+    return Center(
+      child: AnimatedDefaultTextStyle(
+        duration: const Duration(milliseconds: 1000),
+        style: AppTextStyles.dateHeader,
+        child: Text(dateLabel),
+      ),
+    );
+  }
+
+  Widget _buildExpandedHeader(String dateLabel, Map<String, double> dayTotals) {
+    final totalExpenses = dayTotals['expenses'] ?? 0.0;
+    final totalRevenues = dayTotals['revenues'] ?? 0.0;
+    final netAmount = totalRevenues - totalExpenses;
+
+    return AnimatedDefaultTextStyle(
+      duration: const Duration(milliseconds: 1000),
+      style: AppTextStyles.dateHeader,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(dateLabel),
+          // Solde net du jour
+          Text(
+            AppFormatters.formatAmount(
+              netAmount,
+              'EUR', // Vous pouvez passer la devise du compte ici
+              showSign: true,
+              context: context,
+            ),
+            style: AppTextStyles.bodyLarge,
+          ),
+        ],
+      ),
     );
   }
 
