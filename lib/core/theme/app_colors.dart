@@ -23,7 +23,7 @@ class AppColors {
 
   // Text colors
   static const Color textPrimary = darkest;
-  static const Color textSecondary = neutral;
+  static const Color textSecondary = neutral; // Grey caption
   static const Color textLight = white;
   static const Color textDark = darkest;
 

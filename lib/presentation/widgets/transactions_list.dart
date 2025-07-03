@@ -137,6 +137,20 @@ class _TransactionsListState extends State<TransactionsList> {
     return {'expenses': totalExpenses, 'revenues': totalRevenues};
   }
 
+  // Formater le montant net
+  String _formatNetAmount(Map<String, double> dayTotals) {
+    final totalExpenses = dayTotals['expenses'] ?? 0.0;
+    final totalRevenues = dayTotals['revenues'] ?? 0.0;
+    final netAmount = totalRevenues - totalExpenses;
+
+    return AppFormatters.formatAmount(
+      netAmount,
+      'EUR',
+      showSign: true,
+      context: context,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.transactions.isEmpty) {
@@ -173,7 +187,7 @@ class _TransactionsListState extends State<TransactionsList> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // En-tête de date animé
+            // En-tête de date animé avec glissement
             _buildAnimatedDateHeader(
               group.dateLabel,
               dateKey,
@@ -212,50 +226,38 @@ class _TransactionsListState extends State<TransactionsList> {
           horizontal: AppConstants.defaultPadding,
           vertical: AppConstants.smallPadding,
         ),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 1000),
-          curve: Curves.easeInOut,
-          child: isExpanded
-              ? _buildExpandedHeader(dateLabel, dayTotals)
-              : _buildCollapsedHeader(dateLabel),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCollapsedHeader(String dateLabel) {
-    return Center(
-      child: AnimatedDefaultTextStyle(
-        duration: const Duration(milliseconds: 1000),
-        style: AppTextStyles.dateHeader,
-        child: Text(dateLabel),
-      ),
-    );
-  }
-
-  Widget _buildExpandedHeader(String dateLabel, Map<String, double> dayTotals) {
-    final totalExpenses = dayTotals['expenses'] ?? 0.0;
-    final totalRevenues = dayTotals['revenues'] ?? 0.0;
-    final netAmount = totalRevenues - totalExpenses;
-
-    return AnimatedDefaultTextStyle(
-      duration: const Duration(milliseconds: 1000),
-      style: AppTextStyles.dateHeader,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(dateLabel),
-          // Solde net du jour
-          Text(
-            AppFormatters.formatAmount(
-              netAmount,
-              'EUR', // Vous pouvez passer la devise du compte ici
-              showSign: true,
-              context: context,
+        height: 30, // Hauteur fixe pour éviter les sauts
+        child: Stack(
+          children: [
+            // Date - Animation de glissement du centre vers la gauche
+            AnimatedAlign(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              alignment: isExpanded ? Alignment.centerLeft : Alignment.center,
+              child: Text(dateLabel, style: AppTextStyles.dateHeader),
             ),
-            style: AppTextStyles.bodyLarge,
-          ),
-        ],
+
+            // Total - Animation d'apparition depuis la droite
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              right: isExpanded ? 0 : -200, // -200 pour cacher complètement
+              top: 0,
+              bottom: 0,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                opacity: isExpanded ? 1.0 : 0.0,
+                child: Text(
+                  _formatNetAmount(dayTotals),
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.neutral,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

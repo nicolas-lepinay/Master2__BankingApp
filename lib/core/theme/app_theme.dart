@@ -19,8 +19,8 @@ class AppTheme {
         error: AppColors.error,
         onPrimary: AppColors.textLight,
         onSecondary: AppColors.textLight,
-        onSurface: AppColors.textPrimary,
-        onBackground: AppColors.textPrimary,
+        onSurface: AppColors.textPrimary, // Texte noir
+        onBackground: AppColors.textPrimary, // Texte noire
         onError: AppColors.textLight,
       ),
 
@@ -119,8 +119,8 @@ class AppTheme {
         error: AppColors.error,
         onPrimary: AppColors.textLight,
         onSecondary: AppColors.textDark,
-        onSurface: AppColors.textLight,
-        onBackground: AppColors.textLight,
+        onSurface: AppColors.textLight, // Texte blanc
+        onBackground: AppColors.textLight, // Text blanc
         onError: AppColors.textLight,
       ),
 
