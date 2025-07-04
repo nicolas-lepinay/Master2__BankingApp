@@ -25,6 +25,8 @@ class _AddTransactionBottomSheetState
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _commentController = TextEditingController();
+  final _counterpartyController =
+      TextEditingController(); // Nouveau contrôleur pour le tiers
 
   String _transactionType = AppConstants.transactionTypeDebit;
   String _selectedCurrency = 'EUR';
@@ -43,6 +45,7 @@ class _AddTransactionBottomSheetState
     _titleController.dispose();
     _amountController.dispose();
     _commentController.dispose();
+    _counterpartyController.dispose(); // Disposer du nouveau contrôleur
     super.dispose();
   }
 
@@ -137,6 +140,19 @@ class _AddTransactionBottomSheetState
                     },
                     loading: () => const CircularProgressIndicator(),
                     error: (error, stack) => Text('Erreur: $error'),
+                  ),
+
+                  const SizedBox(height: AppConstants.defaultPadding),
+
+                  // Tiers
+                  TextFormField(
+                    controller: _counterpartyController,
+                    decoration: InputDecoration(
+                      labelText: l10n.counterparty,
+                      hintText: 'Ex: Netflix, Apple, Intermarché...',
+                      suffixIcon: const Icon(Icons.business),
+                    ),
+                    textCapitalization: TextCapitalization.words,
                   ),
 
                   const SizedBox(height: AppConstants.defaultPadding),
@@ -354,6 +370,9 @@ class _AddTransactionBottomSheetState
         comment: _commentController.text.trim().isEmpty
             ? null
             : _commentController.text.trim(),
+        counterpartyName: _counterpartyController.text.trim().isEmpty
+            ? null
+            : _counterpartyController.text.trim(), // Nouveau paramètre
         date: _selectedDate,
         status: 1, // Confirmé par défaut
       );

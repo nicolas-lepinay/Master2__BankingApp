@@ -25,6 +25,7 @@ class _EditTransactionBottomSheetState
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _commentController = TextEditingController();
+  final _counterpartyController = TextEditingController(); // Nouveau contrôleur
 
   String _transactionType = AppConstants.transactionTypeDebit;
   String _selectedCurrency = 'EUR';
@@ -39,15 +40,23 @@ class _EditTransactionBottomSheetState
     _titleController.dispose();
     _amountController.dispose();
     _commentController.dispose();
+    _counterpartyController.dispose(); // Disposer du nouveau contrôleur
     super.dispose();
   }
 
-  void _initializeFromTransaction(Transaction transaction) {
+  void _initializeFromTransaction(
+    TransactionWithCounterparty transactionWithCounterparty,
+  ) {
     if (_isInitialized) return;
+
+    final transaction = transactionWithCounterparty.transaction;
+    final counterparty = transactionWithCounterparty.counterparty;
 
     _titleController.text = transaction.title ?? '';
     _amountController.text = transaction.amount.toString();
     _commentController.text = transaction.comment ?? '';
+    _counterpartyController.text =
+        counterparty?.name ?? ''; // Initialiser avec le nom du tiers
     _transactionType = transaction.transactionType;
     _selectedCurrency = transaction.currency;
     _selectedAccountId = transaction.accountId;
@@ -59,14 +68,18 @@ class _EditTransactionBottomSheetState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final transactionAsync = ref.watch(
-      transactionProvider(widget.transactionId),
+    final transactionWithCounterpartyAsync = ref.watch(
+      transactionWithCounterpartyProvider(widget.transactionId),
     );
     final accountsAsync = ref.watch(accountsProvider);
 
-    return transactionAsync.when(
-      data: (transaction) {
-        _initializeFromTransaction(transaction);
+    return transactionWithCounterpartyAsync.when(
+      data: (transactionWithCounterparty) {
+        if (transactionWithCounterparty == null) {
+          return const Center(child: Text('Transaction non trouvée'));
+        }
+
+        _initializeFromTransaction(transactionWithCounterparty);
 
         return Container(
           padding: EdgeInsets.only(
@@ -151,6 +164,19 @@ class _EditTransactionBottomSheetState
                         },
                         loading: () => const CircularProgressIndicator(),
                         error: (error, stack) => Text('Erreur: $error'),
+                      ),
+
+                      const SizedBox(height: AppConstants.defaultPadding),
+
+                      // Tiers
+                      TextFormField(
+                        controller: _counterpartyController,
+                        decoration: InputDecoration(
+                          labelText: l10n.counterparty,
+                          hintText: 'Ex: Netflix, Apple, Intermarché...',
+                          suffixIcon: const Icon(Icons.business),
+                        ),
+                        textCapitalization: TextCapitalization.words,
                       ),
 
                       const SizedBox(height: AppConstants.defaultPadding),
@@ -409,6 +435,9 @@ class _EditTransactionBottomSheetState
         comment: _commentController.text.trim().isEmpty
             ? null
             : _commentController.text.trim(),
+        counterpartyName: _counterpartyController.text.trim().isEmpty
+            ? null
+            : _counterpartyController.text.trim(), // Nouveau paramètre
         date: _selectedDate,
         status: _status,
       );

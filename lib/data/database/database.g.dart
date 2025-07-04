@@ -63,6 +63,15 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _iconMeta = const VerificationMeta('icon');
+  @override
+  late final GeneratedColumn<String> icon = GeneratedColumn<String>(
+    'icon',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -70,6 +79,7 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
     currency,
     initialBalance,
     creationDate,
+    icon,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -124,6 +134,12 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
     } else if (isInserting) {
       context.missing(_creationDateMeta);
     }
+    if (data.containsKey('icon')) {
+      context.handle(
+        _iconMeta,
+        icon.isAcceptableOrUnknown(data['icon']!, _iconMeta),
+      );
+    }
     return context;
   }
 
@@ -153,6 +169,10 @@ class $AccountsTable extends Accounts with TableInfo<$AccountsTable, Account> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}creation_date'],
       )!,
+      icon: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon'],
+      ),
     );
   }
 
@@ -168,12 +188,14 @@ class Account extends DataClass implements Insertable<Account> {
   final String currency;
   final double initialBalance;
   final DateTime creationDate;
+  final String? icon;
   const Account({
     required this.id,
     required this.name,
     required this.currency,
     required this.initialBalance,
     required this.creationDate,
+    this.icon,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -183,6 +205,9 @@ class Account extends DataClass implements Insertable<Account> {
     map['currency'] = Variable<String>(currency);
     map['initial_balance'] = Variable<double>(initialBalance);
     map['creation_date'] = Variable<DateTime>(creationDate);
+    if (!nullToAbsent || icon != null) {
+      map['icon'] = Variable<String>(icon);
+    }
     return map;
   }
 
@@ -193,6 +218,7 @@ class Account extends DataClass implements Insertable<Account> {
       currency: Value(currency),
       initialBalance: Value(initialBalance),
       creationDate: Value(creationDate),
+      icon: icon == null && nullToAbsent ? const Value.absent() : Value(icon),
     );
   }
 
@@ -207,6 +233,7 @@ class Account extends DataClass implements Insertable<Account> {
       currency: serializer.fromJson<String>(json['currency']),
       initialBalance: serializer.fromJson<double>(json['initialBalance']),
       creationDate: serializer.fromJson<DateTime>(json['creationDate']),
+      icon: serializer.fromJson<String?>(json['icon']),
     );
   }
   @override
@@ -218,6 +245,7 @@ class Account extends DataClass implements Insertable<Account> {
       'currency': serializer.toJson<String>(currency),
       'initialBalance': serializer.toJson<double>(initialBalance),
       'creationDate': serializer.toJson<DateTime>(creationDate),
+      'icon': serializer.toJson<String?>(icon),
     };
   }
 
@@ -227,12 +255,14 @@ class Account extends DataClass implements Insertable<Account> {
     String? currency,
     double? initialBalance,
     DateTime? creationDate,
+    Value<String?> icon = const Value.absent(),
   }) => Account(
     id: id ?? this.id,
     name: name ?? this.name,
     currency: currency ?? this.currency,
     initialBalance: initialBalance ?? this.initialBalance,
     creationDate: creationDate ?? this.creationDate,
+    icon: icon.present ? icon.value : this.icon,
   );
   Account copyWithCompanion(AccountsCompanion data) {
     return Account(
@@ -245,6 +275,7 @@ class Account extends DataClass implements Insertable<Account> {
       creationDate: data.creationDate.present
           ? data.creationDate.value
           : this.creationDate,
+      icon: data.icon.present ? data.icon.value : this.icon,
     );
   }
 
@@ -255,14 +286,15 @@ class Account extends DataClass implements Insertable<Account> {
           ..write('name: $name, ')
           ..write('currency: $currency, ')
           ..write('initialBalance: $initialBalance, ')
-          ..write('creationDate: $creationDate')
+          ..write('creationDate: $creationDate, ')
+          ..write('icon: $icon')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, name, currency, initialBalance, creationDate);
+      Object.hash(id, name, currency, initialBalance, creationDate, icon);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -271,7 +303,8 @@ class Account extends DataClass implements Insertable<Account> {
           other.name == this.name &&
           other.currency == this.currency &&
           other.initialBalance == this.initialBalance &&
-          other.creationDate == this.creationDate);
+          other.creationDate == this.creationDate &&
+          other.icon == this.icon);
 }
 
 class AccountsCompanion extends UpdateCompanion<Account> {
@@ -280,12 +313,14 @@ class AccountsCompanion extends UpdateCompanion<Account> {
   final Value<String> currency;
   final Value<double> initialBalance;
   final Value<DateTime> creationDate;
+  final Value<String?> icon;
   const AccountsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.currency = const Value.absent(),
     this.initialBalance = const Value.absent(),
     this.creationDate = const Value.absent(),
+    this.icon = const Value.absent(),
   });
   AccountsCompanion.insert({
     this.id = const Value.absent(),
@@ -293,6 +328,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     required String currency,
     required double initialBalance,
     required DateTime creationDate,
+    this.icon = const Value.absent(),
   }) : name = Value(name),
        currency = Value(currency),
        initialBalance = Value(initialBalance),
@@ -303,6 +339,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     Expression<String>? currency,
     Expression<double>? initialBalance,
     Expression<DateTime>? creationDate,
+    Expression<String>? icon,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -310,6 +347,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
       if (currency != null) 'currency': currency,
       if (initialBalance != null) 'initial_balance': initialBalance,
       if (creationDate != null) 'creation_date': creationDate,
+      if (icon != null) 'icon': icon,
     });
   }
 
@@ -319,6 +357,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     Value<String>? currency,
     Value<double>? initialBalance,
     Value<DateTime>? creationDate,
+    Value<String?>? icon,
   }) {
     return AccountsCompanion(
       id: id ?? this.id,
@@ -326,6 +365,7 @@ class AccountsCompanion extends UpdateCompanion<Account> {
       currency: currency ?? this.currency,
       initialBalance: initialBalance ?? this.initialBalance,
       creationDate: creationDate ?? this.creationDate,
+      icon: icon ?? this.icon,
     );
   }
 
@@ -347,6 +387,9 @@ class AccountsCompanion extends UpdateCompanion<Account> {
     if (creationDate.present) {
       map['creation_date'] = Variable<DateTime>(creationDate.value);
     }
+    if (icon.present) {
+      map['icon'] = Variable<String>(icon.value);
+    }
     return map;
   }
 
@@ -357,7 +400,8 @@ class AccountsCompanion extends UpdateCompanion<Account> {
           ..write('name: $name, ')
           ..write('currency: $currency, ')
           ..write('initialBalance: $initialBalance, ')
-          ..write('creationDate: $creationDate')
+          ..write('creationDate: $creationDate, ')
+          ..write('icon: $icon')
           ..write(')'))
         .toString();
   }
@@ -735,8 +779,17 @@ class $CounterpartiesTable extends Counterparties
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
   );
+  static const VerificationMeta _iconMeta = const VerificationMeta('icon');
   @override
-  List<GeneratedColumn> get $columns => [id, name];
+  late final GeneratedColumn<String> icon = GeneratedColumn<String>(
+    'icon',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, icon];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -760,6 +813,12 @@ class $CounterpartiesTable extends Counterparties
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
+    if (data.containsKey('icon')) {
+      context.handle(
+        _iconMeta,
+        icon.isAcceptableOrUnknown(data['icon']!, _iconMeta),
+      );
+    }
     return context;
   }
 
@@ -777,6 +836,10 @@ class $CounterpartiesTable extends Counterparties
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
+      icon: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon'],
+      ),
     );
   }
 
@@ -789,17 +852,25 @@ class $CounterpartiesTable extends Counterparties
 class Counterparty extends DataClass implements Insertable<Counterparty> {
   final int id;
   final String name;
-  const Counterparty({required this.id, required this.name});
+  final String? icon;
+  const Counterparty({required this.id, required this.name, this.icon});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
+    if (!nullToAbsent || icon != null) {
+      map['icon'] = Variable<String>(icon);
+    }
     return map;
   }
 
   CounterpartiesCompanion toCompanion(bool nullToAbsent) {
-    return CounterpartiesCompanion(id: Value(id), name: Value(name));
+    return CounterpartiesCompanion(
+      id: Value(id),
+      name: Value(name),
+      icon: icon == null && nullToAbsent ? const Value.absent() : Value(icon),
+    );
   }
 
   factory Counterparty.fromJson(
@@ -810,6 +881,7 @@ class Counterparty extends DataClass implements Insertable<Counterparty> {
     return Counterparty(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
+      icon: serializer.fromJson<String?>(json['icon']),
     );
   }
   @override
@@ -818,15 +890,24 @@ class Counterparty extends DataClass implements Insertable<Counterparty> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
+      'icon': serializer.toJson<String?>(icon),
     };
   }
 
-  Counterparty copyWith({int? id, String? name}) =>
-      Counterparty(id: id ?? this.id, name: name ?? this.name);
+  Counterparty copyWith({
+    int? id,
+    String? name,
+    Value<String?> icon = const Value.absent(),
+  }) => Counterparty(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    icon: icon.present ? icon.value : this.icon,
+  );
   Counterparty copyWithCompanion(CounterpartiesCompanion data) {
     return Counterparty(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
+      icon: data.icon.present ? data.icon.value : this.icon,
     );
   }
 
@@ -834,42 +915,59 @@ class Counterparty extends DataClass implements Insertable<Counterparty> {
   String toString() {
     return (StringBuffer('Counterparty(')
           ..write('id: $id, ')
-          ..write('name: $name')
+          ..write('name: $name, ')
+          ..write('icon: $icon')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name);
+  int get hashCode => Object.hash(id, name, icon);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Counterparty && other.id == this.id && other.name == this.name);
+      (other is Counterparty &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.icon == this.icon);
 }
 
 class CounterpartiesCompanion extends UpdateCompanion<Counterparty> {
   final Value<int> id;
   final Value<String> name;
+  final Value<String?> icon;
   const CounterpartiesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.icon = const Value.absent(),
   });
   CounterpartiesCompanion.insert({
     this.id = const Value.absent(),
     required String name,
+    this.icon = const Value.absent(),
   }) : name = Value(name);
   static Insertable<Counterparty> custom({
     Expression<int>? id,
     Expression<String>? name,
+    Expression<String>? icon,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
+      if (icon != null) 'icon': icon,
     });
   }
 
-  CounterpartiesCompanion copyWith({Value<int>? id, Value<String>? name}) {
-    return CounterpartiesCompanion(id: id ?? this.id, name: name ?? this.name);
+  CounterpartiesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String?>? icon,
+  }) {
+    return CounterpartiesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      icon: icon ?? this.icon,
+    );
   }
 
   @override
@@ -881,6 +979,9 @@ class CounterpartiesCompanion extends UpdateCompanion<Counterparty> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
+    if (icon.present) {
+      map['icon'] = Variable<String>(icon.value);
+    }
     return map;
   }
 
@@ -888,7 +989,8 @@ class CounterpartiesCompanion extends UpdateCompanion<Counterparty> {
   String toString() {
     return (StringBuffer('CounterpartiesCompanion(')
           ..write('id: $id, ')
-          ..write('name: $name')
+          ..write('name: $name, ')
+          ..write('icon: $icon')
           ..write(')'))
         .toString();
   }
@@ -1815,6 +1917,7 @@ typedef $$AccountsTableCreateCompanionBuilder =
       required String currency,
       required double initialBalance,
       required DateTime creationDate,
+      Value<String?> icon,
     });
 typedef $$AccountsTableUpdateCompanionBuilder =
     AccountsCompanion Function({
@@ -1823,6 +1926,7 @@ typedef $$AccountsTableUpdateCompanionBuilder =
       Value<String> currency,
       Value<double> initialBalance,
       Value<DateTime> creationDate,
+      Value<String?> icon,
     });
 
 final class $$AccountsTableReferences
@@ -1879,6 +1983,11 @@ class $$AccountsTableFilterComposer
 
   ColumnFilters<DateTime> get creationDate => $composableBuilder(
     column: $table.creationDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get icon => $composableBuilder(
+    column: $table.icon,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1941,6 +2050,11 @@ class $$AccountsTableOrderingComposer
     column: $table.creationDate,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AccountsTableAnnotationComposer
@@ -1970,6 +2084,9 @@ class $$AccountsTableAnnotationComposer
     column: $table.creationDate,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get icon =>
+      $composableBuilder(column: $table.icon, builder: (column) => column);
 
   Expression<T> transactionsRefs<T extends Object>(
     Expression<T> Function($$TransactionsTableAnnotationComposer a) f,
@@ -2030,12 +2147,14 @@ class $$AccountsTableTableManager
                 Value<String> currency = const Value.absent(),
                 Value<double> initialBalance = const Value.absent(),
                 Value<DateTime> creationDate = const Value.absent(),
+                Value<String?> icon = const Value.absent(),
               }) => AccountsCompanion(
                 id: id,
                 name: name,
                 currency: currency,
                 initialBalance: initialBalance,
                 creationDate: creationDate,
+                icon: icon,
               ),
           createCompanionCallback:
               ({
@@ -2044,12 +2163,14 @@ class $$AccountsTableTableManager
                 required String currency,
                 required double initialBalance,
                 required DateTime creationDate,
+                Value<String?> icon = const Value.absent(),
               }) => AccountsCompanion.insert(
                 id: id,
                 name: name,
                 currency: currency,
                 initialBalance: initialBalance,
                 creationDate: creationDate,
+                icon: icon,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -2420,9 +2541,17 @@ typedef $$CategoriesTableProcessedTableManager =
       PrefetchHooks Function({bool parentId})
     >;
 typedef $$CounterpartiesTableCreateCompanionBuilder =
-    CounterpartiesCompanion Function({Value<int> id, required String name});
+    CounterpartiesCompanion Function({
+      Value<int> id,
+      required String name,
+      Value<String?> icon,
+    });
 typedef $$CounterpartiesTableUpdateCompanionBuilder =
-    CounterpartiesCompanion Function({Value<int> id, Value<String> name});
+    CounterpartiesCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String?> icon,
+    });
 
 final class $$CounterpartiesTableReferences
     extends BaseReferences<_$AppDatabase, $CounterpartiesTable, Counterparty> {
@@ -2473,6 +2602,11 @@ class $$CounterpartiesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> transactionsRefs(
     Expression<bool> Function($$TransactionsTableFilterComposer f) f,
   ) {
@@ -2517,6 +2651,11 @@ class $$CounterpartiesTableOrderingComposer
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CounterpartiesTableAnnotationComposer
@@ -2533,6 +2672,9 @@ class $$CounterpartiesTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get icon =>
+      $composableBuilder(column: $table.icon, builder: (column) => column);
 
   Expression<T> transactionsRefs<T extends Object>(
     Expression<T> Function($$TransactionsTableAnnotationComposer a) f,
@@ -2592,10 +2734,18 @@ class $$CounterpartiesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
-              }) => CounterpartiesCompanion(id: id, name: name),
+                Value<String?> icon = const Value.absent(),
+              }) => CounterpartiesCompanion(id: id, name: name, icon: icon),
           createCompanionCallback:
-              ({Value<int> id = const Value.absent(), required String name}) =>
-                  CounterpartiesCompanion.insert(id: id, name: name),
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                Value<String?> icon = const Value.absent(),
+              }) => CounterpartiesCompanion.insert(
+                id: id,
+                name: name,
+                icon: icon,
+              ),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (

@@ -80,10 +80,19 @@ class TransactionActions {
     String? title,
     String? comment,
     DateTime? date,
-    int? counterpartyId,
+    String? counterpartyName, // Nouveau paramètre pour le nom du tiers
     int? category1Id,
     int status = 1,
   }) async {
+    int? counterpartyId;
+
+    // Si un nom de tiers est fourni, trouver ou créer le tiers
+    if (counterpartyName != null && counterpartyName.trim().isNotEmpty) {
+      counterpartyId = await _database.findOrCreateCounterparty(
+        counterpartyName,
+      );
+    }
+
     await _database
         .into(_database.transactions)
         .insert(
@@ -115,10 +124,19 @@ class TransactionActions {
     String? title,
     String? comment,
     DateTime? date,
-    int? counterpartyId,
+    String? counterpartyName, // Nouveau paramètre pour le nom du tiers
     int? category1Id,
     int? status,
   }) async {
+    int? counterpartyId;
+
+    // Si un nom de tiers est fourni, trouver ou créer le tiers
+    if (counterpartyName != null && counterpartyName.trim().isNotEmpty) {
+      counterpartyId = await _database.findOrCreateCounterparty(
+        counterpartyName,
+      );
+    }
+
     await (_database.update(
       _database.transactions,
     )..where((t) => t.id.equals(id))).write(

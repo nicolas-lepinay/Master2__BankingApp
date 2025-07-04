@@ -484,9 +484,9 @@ class AppFormatters {
 
       if (showSign) {
         final sign = amount >= 0 ? '+' : '-';
-        return '$sign$formattedAmount';
+        return '$sign $formattedAmount';
       } else {
-        return amount >= 0 ? formattedAmount : '-$formattedAmount';
+        return amount >= 0 ? formattedAmount : '- $formattedAmount';
       }
     } catch (e) {
       // Fallback to custom formatting
@@ -525,7 +525,7 @@ class AppFormatters {
     } else if (dateOnly == yesterday) {
       return l10n.yesterday;
     } else if (dateOnly == tomorrow) {
-      return 'Tomorrow'; // Add this to l10n if needed
+      return l10n.tomorrow;
     } else {
       // Use current context locale with proper formatting rules
       final currentLocale = Localizations.localeOf(context);
