@@ -78,6 +78,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get credit => 'Crédit';
 
   @override
+  String get expectedBalance => 'Solde attendu';
+
+  @override
+  String get actualBalance => 'Solde réel';
+
+  @override
   String get status => 'Statut';
 
   @override

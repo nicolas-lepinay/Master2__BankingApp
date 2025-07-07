@@ -22,6 +22,8 @@
   "counterparty": "Counterparty",
   "debit": "Debit",
   "credit": "Credit",
+  "expectedBalance": "Expected Balance",
+  "actualBalance": "Actual Balance",
   "status": "Status",
   "pending": "Pending",
   "confirmed": "Confirmed",

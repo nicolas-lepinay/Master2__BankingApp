@@ -1,3 +1,4 @@
+import 'package:bankapp/presentation/widgets/dashed_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
@@ -72,7 +73,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   animation: _containerAnimation,
                   builder: (context, child) {
                     // Calculer le décalage vertical basé sur l'animation
-                    final verticalOffset = _containerAnimation.value * 100;
+                    final verticalOffset = _containerAnimation.value;
 
                     return Transform.translate(
                       offset: Offset(0, verticalOffset),
@@ -210,7 +211,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 // Position normale : couvre partiellement les cartes
                 // Position expanded : descend pour révéler les cartes complètes
                 final bottomPosition =
-                    _containerAnimation.value * 120; // Descendre de 120 pixels
+                    _containerAnimation.value + 20; // Descendre de 120 pixels
 
                 return Positioned(
                   left: 0,
@@ -367,35 +368,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Widget _buildAddAccountButton(BuildContext context, AppLocalizations l10n) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      child: GestureDetector(
+      child: DashedButtonWidget(
         onTap: () {
           // TODO: Ouvrir l'écran d'ajout de compte
         },
-        child: Container(
-          height: 60,
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            border: Border.all(
-              color: AppColors.containerDarkGray,
-              width: 2,
-              style: BorderStyle.solid,
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.add, color: AppColors.containerDarkGray, size: 24),
-              const SizedBox(width: 12),
-              Text(
-                l10n.addAccount,
-                style: AppTextStyles.buttonText.copyWith(
-                  color: AppColors.containerDarkGray,
-                ),
-              ),
-            ],
-          ),
-        ),
+        icon: Icons.add,
+        text: l10n.addAccount,
       ),
     );
   }

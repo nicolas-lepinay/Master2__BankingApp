@@ -21,8 +21,8 @@ class AppTextStyles {
   // Card account name avec Outfit
   static const TextStyle cardAccountName = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 18,
-    fontWeight: FontWeight.w600,
+    fontSize: 20,
+    fontWeight: FontWeight.w300,
     color: AppColors.textLight,
   );
 
@@ -38,7 +38,7 @@ class AppTextStyles {
   // Card balance amount avec Overpass Mono
   static const TextStyle cardBalanceAmount = TextStyle(
     fontFamily: overpassMonoFontFamily,
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: FontWeight.bold,
     color: AppColors.textLight,
   );

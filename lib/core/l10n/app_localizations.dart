@@ -236,6 +236,18 @@ abstract class AppLocalizations {
   /// **'Credit'**
   String get credit;
 
+  /// No description provided for @expectedBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected Balance'**
+  String get expectedBalance;
+
+  /// No description provided for @actualBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual Balance'**
+  String get actualBalance;
+
   /// No description provided for @status.
   ///
   /// In en, this message translates to:

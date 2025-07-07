@@ -1,3 +1,4 @@
+import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:bankapp/data/database/database.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
@@ -37,16 +38,17 @@ class _BankCardWidgetState extends State<BankCardWidget> {
   }
 
   String _formatBalanceDisplay(double amount) {
+    String formattedAmount = AppFormatters.formatAmountClean(
+      amount,
+      widget.accountSummary.account.currency,
+      showSign: false,
+      context: context,
+    );
     if (_isBalanceVisible) {
-      return AppFormatters.formatAmountClean(
-        amount,
-        widget.accountSummary.account.currency,
-        showSign: false,
-        context: context,
-      );
+      return formattedAmount;
     } else {
       // Masquer avec des points
-      return '••••••';
+      return '•' * formattedAmount.length;
     }
   }
 
@@ -75,7 +77,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
           // Contenu de la carte avec padding et intrinsicHeight
           IntrinsicHeight(
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize:
@@ -116,7 +118,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
 
                   // Solde attendu
                   Text(
-                    'SOLDE ATTENDU',
+                    AppLocalizations.of(context)!.expectedBalance.toUpperCase(),
                     style: AppTextStyles.cardBalanceLabel.copyWith(
                       color: AppColors.white.withOpacity(0.6),
                     ),
@@ -162,7 +164,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
 
                   // Solde réel (toujours présent, mais peut être caché par le container noir)
                   Text(
-                    'SOLDE RÉEL',
+                    AppLocalizations.of(context)!.actualBalance.toUpperCase(),
                     style: AppTextStyles.cardBalanceLabel.copyWith(
                       color: AppColors.white.withOpacity(0.6),
                     ),

@@ -22,6 +22,8 @@
   "counterparty": "Tiers",
   "debit": "Débit",
   "credit": "Crédit",
+  "expectedBalance": "Solde attendu",
+  "actualBalance": "Solde réel",
   "status": "Statut",
   "pending": "En attente",
   "confirmed": "Confirmé",
