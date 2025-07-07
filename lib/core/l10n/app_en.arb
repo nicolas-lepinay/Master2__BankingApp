@@ -6,7 +6,7 @@
   "tomorrow": "Tomorrow",
   "expenses": "Expenses",
   "incomes": "Incomes",
-  "addAccount": "Add Account",
+  "addAccount": "Add a new account",
   "accountName": "Account Name",
   "initialBalance": "Initial Balance",
   "currency": "Currency",
@@ -25,5 +25,6 @@
   "status": "Status",
   "pending": "Pending",
   "confirmed": "Confirmed",
-  "unknown": "Unknown"
+  "unknown": "Unknown",
+  "hello": "Hello"
 }

@@ -6,7 +6,7 @@
   "tomorrow": "Demain",
   "expenses": "Dépenses",
   "incomes": "Revenus",
-  "addAccount": "Ajouter un compte",
+  "addAccount": "Ajouter un nouveau compte",
   "accountName": "Nom du compte",
   "initialBalance": "Solde initial",
   "currency": "Devise",
@@ -25,5 +25,6 @@
   "status": "Statut",
   "pending": "En attente",
   "confirmed": "Confirmé",
-  "unknown": "Inconnu"
+  "unknown": "Inconnu",
+  "hello": "Salut"
 }

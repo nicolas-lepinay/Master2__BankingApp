@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
-import 'package:bankapp/presentation/providers/navigation_provider.dart';
-import 'package:bankapp/presentation/widgets/account_card.dart';
-import 'package:bankapp/presentation/widgets/transactions_list.dart';
-import 'package:bankapp/presentation/widgets/add_account_bottom_sheet.dart';
-import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
+import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
+import 'package:bankapp/presentation/widgets/cards_swiper_widget.dart';
+import 'package:bankapp/presentation/widgets/bank_card_widget.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/core/utils/card_color_utils.dart';
 import 'package:bankapp/data/database/database.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -19,143 +18,317 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
-  late PageController _pageController;
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with TickerProviderStateMixin {
+  bool _shouldPlayCardAnimation = false;
+  late AnimationController _containerAnimationController;
+  late Animation<double> _containerAnimation;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+
+    // Animation controller pour le container noir
+    _containerAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    _containerAnimation = CurvedAnimation(
+      parent: _containerAnimationController,
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _containerAnimationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final accountsAsync = ref.watch(accountsProvider);
-    final currentPageIndex = ref.watch(pageViewProvider);
     final l10n = AppLocalizations.of(context)!;
+    final currentUserAsync = ref.watch(currentUserProvider);
+    final accountsAsync = ref.watch(accountsProvider);
+    final selectedCardIndex = ref.watch(selectedCardProvider);
+    final isCardsExpanded = ref.watch(cardsExpandedProvider);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      body: accountsAsync.when(
-        data: (accounts) {
-          final totalPages = accounts.length + 1; // +1 pour la page d'ajout
-
-          return SafeArea(
-            child: Column(
+      backgroundColor: AppColors.containerLightGray,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Contenu principal avec header et cartes
+            Column(
               children: [
-                const SizedBox(height: AppConstants.defaultPadding),
+                // Header avec menu hamburger, message de bienvenue et menu more
+                _buildHeader(context, l10n, currentUserAsync),
 
-                // Indicateurs de pages (dots)
-                _buildPageIndicators(totalPages, currentPageIndex),
+                const SizedBox(height: 40),
 
-                const SizedBox(height: AppConstants.largePadding),
+                // Card Swiper (maintenant avec animation)
+                AnimatedBuilder(
+                  animation: _containerAnimation,
+                  builder: (context, child) {
+                    // Calculer le décalage vertical basé sur l'animation
+                    final verticalOffset = _containerAnimation.value * 100;
 
-                // PageView avec les comptes
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    onPageChanged: (index) {
-                      ref.read(pageViewProvider.notifier).setPageIndex(index);
-                    },
-                    itemCount: totalPages,
-                    itemBuilder: (context, index) {
-                      // Dernière page = page d'ajout de compte
-                      if (index == accounts.length) {
-                        return _buildAddAccountPage();
-                      }
+                    return Transform.translate(
+                      offset: Offset(0, verticalOffset),
+                      child: accountsAsync.when(
+                        data: (accounts) {
+                          if (accounts.isEmpty) {
+                            return _buildEmptyState(context, l10n);
+                          }
 
-                      // Pages de comptes
-                      final account = accounts[index];
-                      return _buildAccountPage(account);
-                    },
-                  ),
+                          return Column(
+                            children: [
+                              // Card Swiper Widget avec hauteur adaptative
+                              CardsSwiperWidget<Account>(
+                                cardData: accounts,
+                                onCardChange: (index) {
+                                  // Mettre à jour la carte sélectionnée
+                                  final accountIndex = accounts.indexWhere(
+                                    (account) =>
+                                        account.id == accounts[index].id,
+                                  );
+                                  if (accountIndex != -1) {
+                                    ref
+                                        .read(selectedCardProvider.notifier)
+                                        .setSelectedCard(accountIndex);
+                                  }
+                                },
+                                shouldStartCardCollectionAnimation:
+                                    _shouldPlayCardAnimation,
+                                onCardCollectionAnimationComplete: (value) {
+                                  setState(() {
+                                    _shouldPlayCardAnimation = value;
+                                  });
+                                },
+                                cardBuilder: (context, accountIndex, visibleIndex) {
+                                  if (accountIndex < 0 ||
+                                      accountIndex >= accounts.length) {
+                                    return const SizedBox.shrink();
+                                  }
+
+                                  final account = accounts[accountIndex];
+                                  return Consumer(
+                                    builder: (context, ref, child) {
+                                      final accountSummaryAsync = ref.watch(
+                                        accountSummaryProvider(account.id),
+                                      );
+
+                                      return accountSummaryAsync.when(
+                                        data: (accountSummary) {
+                                          return BankCardWidget(
+                                            accountSummary: accountSummary,
+                                            allAccounts:
+                                                accounts, // Passer tous les comptes
+                                          );
+                                        },
+                                        loading: () => _buildLoadingCard(
+                                          account.id,
+                                          accounts,
+                                        ),
+                                        error: (error, stack) =>
+                                            _buildErrorCard(
+                                              account.id,
+                                              accounts,
+                                            ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+
+                              const SizedBox(height: 20),
+
+                              // Bouton temporaire pour tester l'animation du container
+                              Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    if (_containerAnimationController
+                                        .isCompleted) {
+                                      _containerAnimationController.reverse();
+                                      ref
+                                          .read(cardsExpandedProvider.notifier)
+                                          .setExpanded(false);
+                                    } else {
+                                      _containerAnimationController.forward();
+                                      ref
+                                          .read(cardsExpandedProvider.notifier)
+                                          .setExpanded(true);
+                                    }
+                                  },
+                                  child: Text(
+                                    isCardsExpanded
+                                        ? 'Remonter le container'
+                                        : 'Descendre le container',
+                                  ),
+                                ),
+                              ),
+
+                              // Bouton "Ajouter un compte" en mode expanded
+                              if (isCardsExpanded) ...[
+                                const SizedBox(height: 20),
+                                _buildAddAccountButton(context, l10n),
+                              ],
+                            ],
+                          );
+                        },
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (error, stack) => Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.error_outline,
+                                size: 48,
+                                color: Colors.red,
+                              ),
+                              const SizedBox(height: 16),
+                              Text('Erreur: $error'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Erreur: $error')),
+
+            // Container noir positionné en bas avec animation
+            AnimatedBuilder(
+              animation: _containerAnimation,
+              builder: (context, child) {
+                // Position normale : couvre partiellement les cartes
+                // Position expanded : descend pour révéler les cartes complètes
+                final bottomPosition =
+                    _containerAnimation.value * 120; // Descendre de 120 pixels
+
+                return Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: -bottomPosition,
+                  height:
+                      MediaQuery.of(context).size.height *
+                      0.6, // 60% de la hauteur de l'écran
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: AppColors.containerBlack,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(32),
+                      ),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Container noir\n(Étape suivante)',
+                        style: TextStyle(color: AppColors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildPageIndicators(int totalPages, int currentPage) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(totalPages, (index) {
-        final isActive = index == currentPage;
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isActive
-                ? AppColors.primary
-                : AppColors.textSecondary.withOpacity(0.3),
-          ),
-        );
-      }),
-    );
-  }
-
-  Widget _buildAccountPage(Account account) {
-    return Consumer(
-      builder: (context, ref, child) {
-        final accountSummaryAsync = ref.watch(
-          accountSummaryProvider(account.id),
-        );
-        final transactionsAsync = ref.watch(
-          transactionsWithBalanceProvider(account.id),
-        );
-
-        return accountSummaryAsync.when(
-          data: (accountSummary) {
-            return Column(
-              children: [
-                // Carte du compte - FIXE en haut
-                AccountCard(accountSummary: accountSummary),
-
-                const SizedBox(height: AppConstants.largePadding),
-
-                // Liste des transactions - SCROLLABLE
-                Expanded(
-                  child: transactionsAsync.when(
-                    data: (transactions) {
-                      return TransactionsList(
-                        transactions: transactions,
-                        onTransactionTap: (transaction) {
-                          _navigateToTransactionDetail(transaction);
-                        },
-                        scrollToToday: true, // Nouveau paramètre
-                      );
-                    },
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) =>
-                        Center(child: Text('Erreur: $error')),
+  Widget _buildHeader(
+    BuildContext context,
+    AppLocalizations l10n,
+    AsyncValue<User> currentUserAsync,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        children: [
+          // Menu hamburger
+          GestureDetector(
+            onTap: () {
+              // TODO: Ouvrir le menu latéral
+            },
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
                   ),
+                ],
+              ),
+              child: const Icon(
+                Icons.menu,
+                color: AppColors.textDark,
+                size: 20,
+              ),
+            ),
+          ),
+
+          // Message de bienvenue (centré)
+          Expanded(
+            child: Center(
+              child: currentUserAsync.when(
+                data: (user) => Text(
+                  '${l10n.hello}, ${user.name}',
+                  style: AppTextStyles.welcomeMessage,
                 ),
-              ],
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(child: Text('Erreur: $error')),
-        );
-      },
+                loading: () => Text(
+                  '${l10n.hello}...',
+                  style: AppTextStyles.welcomeMessage,
+                ),
+                error: (error, stack) =>
+                    Text(l10n.hello, style: AppTextStyles.welcomeMessage),
+              ),
+            ),
+          ),
+
+          // Menu more (3 points)
+          GestureDetector(
+            onTap: () {
+              // TODO: Ouvrir le menu contextuel
+            },
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.more_vert,
+                color: AppColors.textDark,
+                size: 20,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildAddAccountPage() {
-    final l10n = AppLocalizations.of(context)!;
-
+  Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -169,13 +342,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             child: const Icon(Icons.add, size: 40, color: AppColors.primary),
           ),
-
           const SizedBox(height: AppConstants.defaultPadding),
-
           Text(l10n.addAccount, style: AppTextStyles.h5),
-
           const SizedBox(height: AppConstants.smallPadding),
-
           Text(
             'Appuyez pour créer un nouveau compte',
             style: AppTextStyles.bodyMedium.copyWith(
@@ -183,11 +352,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             textAlign: TextAlign.center,
           ),
-
           const SizedBox(height: AppConstants.largePadding),
-
           ElevatedButton(
-            onPressed: _showAddAccountBottomSheet,
+            onPressed: () {
+              // TODO: Ouvrir l'écran d'ajout de compte
+            },
             child: Text(l10n.addAccount),
           ),
         ],
@@ -195,20 +364,74 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void _showAddAccountBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const AddAccountBottomSheet(),
+  Widget _buildAddAccountButton(BuildContext context, AppLocalizations l10n) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      child: GestureDetector(
+        onTap: () {
+          // TODO: Ouvrir l'écran d'ajout de compte
+        },
+        child: Container(
+          height: 60,
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            border: Border.all(
+              color: AppColors.containerDarkGray,
+              width: 2,
+              style: BorderStyle.solid,
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.add, color: AppColors.containerDarkGray, size: 24),
+              const SizedBox(width: 12),
+              Text(
+                l10n.addAccount,
+                style: AppTextStyles.buttonText.copyWith(
+                  color: AppColors.containerDarkGray,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
-  void _navigateToTransactionDetail(Transaction transaction) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) =>
-            TransactionDetailScreen(transactionId: transaction.id),
+  Widget _buildLoadingCard(int accountId, List<Account> allAccounts) {
+    // Utiliser l'utilitaire pour obtenir la couleur correcte
+    final cardColor = CardColorUtils.getCardColorById(accountId, allAccounts);
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(60), // Padding pour une taille minimale
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(32),
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(color: AppColors.white),
+      ),
+    );
+  }
+
+  Widget _buildErrorCard(int accountId, List<Account> allAccounts) {
+    // Utiliser l'utilitaire pour obtenir la couleur correcte
+    final cardColor = CardColorUtils.getCardColorById(accountId, allAccounts);
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(60), // Padding pour une taille minimale
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(32),
+      ),
+      child: const Center(
+        child: Icon(Icons.error_outline, color: AppColors.white, size: 48),
       ),
     );
   }

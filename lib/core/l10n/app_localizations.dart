@@ -143,7 +143,7 @@ abstract class AppLocalizations {
   /// No description provided for @addAccount.
   ///
   /// In en, this message translates to:
-  /// **'Add Account'**
+  /// **'Add a new account'**
   String get addAccount;
 
   /// No description provided for @accountName.
@@ -259,6 +259,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown'**
   String get unknown;
+
+  /// No description provided for @hello.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello'**
+  String get hello;
 }
 
 class _AppLocalizationsDelegate

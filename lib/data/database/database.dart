@@ -7,13 +7,19 @@ import 'package:path/path.dart' as p;
 part 'database.g.dart';
 
 // Tables
+class Users extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  DateTimeColumn get creationDate => dateTime()();
+}
+
 class Accounts extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
   TextColumn get currency => text()();
   RealColumn get initialBalance => real()();
   DateTimeColumn get creationDate => dateTime()();
-  TextColumn get icon => text().nullable()(); // Nouvelle colonne icon
+  TextColumn get icon => text().nullable()();
 }
 
 class Categories extends Table {
@@ -27,7 +33,7 @@ class Categories extends Table {
 class Counterparties extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().unique()();
-  TextColumn get icon => text().nullable()(); // Nouvelle colonne icon
+  TextColumn get icon => text().nullable()();
 }
 
 class Transactions extends Table {
@@ -53,12 +59,46 @@ class Transactions extends Table {
   IntColumn get status => integer()(); // 0 = pending, 1 = confirmed
 }
 
-@DriftDatabase(tables: [Accounts, Categories, Counterparties, Transactions])
+// Nouvelle table pour les transactions suivies
+class FollowedTransactions extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get transactionId => integer().references(Transactions, #id)();
+  DateTimeColumn get followedDate => dateTime()();
+}
+
+@DriftDatabase(
+  tables: [
+    Users,
+    Accounts,
+    Categories,
+    Counterparties,
+    Transactions,
+    FollowedTransactions,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1; // Incrémenter pour forcer une migration
+  int get schemaVersion => 1; // Increment version for new tables
+
+  // Helper method to get the current user
+  Future<User> getCurrentUser() async {
+    final userList = await select(users).get();
+    if (userList.isNotEmpty) {
+      return userList.first;
+    }
+
+    // Create default user if none exists
+    final userId = await into(users).insert(
+      UsersCompanion(
+        name: const Value('Nicolas'),
+        creationDate: Value(DateTime.now()),
+      ),
+    );
+
+    return await (select(users)..where((u) => u.id.equals(userId))).getSingle();
+  }
 
   // Helper method to get account balance at a specific date
   Future<double> getAccountBalanceAtDate(int accountId, DateTime date) async {
@@ -71,6 +111,31 @@ class AppDatabase extends _$AppDatabase {
         (t) =>
             t.accountId.equals(accountId) & t.date.isSmallerOrEqualValue(date),
       )
+      ..orderBy([(t) => OrderingTerm.asc(t.date)]);
+
+    final transactionsList = await transactionsQuery.get();
+
+    double balance = account.initialBalance;
+    for (final transaction in transactionsList) {
+      final amount = transaction.amountConverted ?? transaction.amount;
+      if (transaction.transactionType == 'DEBIT') {
+        balance -= amount;
+      } else {
+        balance += amount;
+      }
+    }
+
+    return balance;
+  }
+
+  // Get confirmed balance (status = 1 only)
+  Future<double> getAccountConfirmedBalance(int accountId) async {
+    final account = await (select(
+      accounts,
+    )..where((a) => a.id.equals(accountId))).getSingle();
+
+    final transactionsQuery = select(transactions)
+      ..where((t) => t.accountId.equals(accountId) & t.status.equals(1))
       ..orderBy([(t) => OrderingTerm.asc(t.date)]);
 
     final transactionsList = await transactionsQuery.get();
@@ -151,41 +216,64 @@ class AppDatabase extends _$AppDatabase {
     final currentBalance =
         account.initialBalance + totalRevenues - totalExpenses;
 
+    // Get confirmed balance
+    final confirmedBalance = await getAccountConfirmedBalance(accountId);
+
     return AccountSummary(
       account: account,
       currentBalance: currentBalance,
+      confirmedBalance: confirmedBalance,
       totalExpenses: totalExpenses,
       totalRevenues: totalRevenues,
     );
   }
 
+  // Methods for followed transactions
+  Future<void> addFollowedTransaction(int transactionId) async {
+    await into(followedTransactions).insert(
+      FollowedTransactionsCompanion(
+        transactionId: Value(transactionId),
+        followedDate: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> removeFollowedTransaction(int transactionId) async {
+    await (delete(
+      followedTransactions,
+    )..where((ft) => ft.transactionId.equals(transactionId))).go();
+  }
+
+  Future<List<Transaction>> getFollowedTransactions() async {
+    final query = select(transactions).join([
+      innerJoin(
+        followedTransactions,
+        followedTransactions.transactionId.equalsExp(transactions.id),
+      ),
+    ])..orderBy([OrderingTerm.desc(followedTransactions.followedDate)]);
+
+    final result = await query.get();
+    return result.map((row) => row.readTable(transactions)).toList();
+  }
+
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
-      print('🔧 Creating database from scratch');
       await m.createAll();
-      await _insertInitialData(); // Maintenant ça inclut TOUT
+      await _insertInitialData();
     },
-    onUpgrade: (Migrator m, int from, int to) async {
-      print('🔧 Migrating database from version $from to $to');
-      // Si on passe de la version 1 à 2, on ajoute les nouvelles transactions
-      if (from == 1 && to == 2) {
-        await _addNewTestTransactions();
-      }
-      // Si on passe de la version 2 à 3, on ajoute les transactions futures
-      if (from == 2 && to == 3) {
-        await _addFutureTestTransactions();
-      }
-      // Si on passe de la version 3 à 4, on ajoute les colonnes icon et les tiers
-      if (from <= 3 && to >= 4) {
-        await m.addColumn(accounts, accounts.icon);
-        await m.addColumn(counterparties, counterparties.icon);
-        await _addInitialCounterparties();
-      }
-    },
+    onUpgrade: (Migrator m, int from, int to) async {},
   );
 
   Future<void> _insertInitialData() async {
+    // Insert default user
+    await into(users).insert(
+      UsersCompanion(
+        name: const Value('Nicolas'),
+        creationDate: Value(DateTime.now()),
+      ),
+    );
+
     // Insert test accounts
     await into(accounts).insert(
       AccountsCompanion(
@@ -243,7 +331,7 @@ class AppDatabase extends _$AppDatabase {
 
     // Insert all test transactions
     // Transaction 1: Netflix (with counterparty)
-    await into(transactions).insert(
+    final netflixTransactionId = await into(transactions).insert(
       TransactionsCompanion(
         accountId: const Value(1),
         counterpartyId: const Value(1), // Netflix
@@ -265,7 +353,11 @@ class AppDatabase extends _$AppDatabase {
         currency: const Value('EUR'),
         amount: const Value(30.0),
         title: const Value('Abonnement Spotify'),
-        date: Value(DateTime.now().subtract(const Duration(days: 1))),
+        date: Value(
+          DateTime.now()
+              .subtract(const Duration(days: 1))
+              .subtract(const Duration(seconds: 1)),
+        ),
         status: const Value(1),
       ),
     );
@@ -309,98 +401,12 @@ class AppDatabase extends _$AppDatabase {
         status: const Value(0), // En attente
       ),
     );
-  }
 
-  Future<void> _addNewTestTransactions() async {
-    // Ajouter les nouvelles transactions de test
-    await into(transactions).insert(
-      TransactionsCompanion(
-        accountId: const Value(1),
-        transactionType: const Value('DEBIT'),
-        currency: const Value('EUR'),
-        amount: const Value(30.0),
-        title: const Value('Abonnement Spotify'),
-        date: Value(DateTime.now().subtract(const Duration(days: 1))),
-        status: const Value(1),
-      ),
-    );
-
-    await into(transactions).insert(
-      TransactionsCompanion(
-        accountId: const Value(1),
-        transactionType: const Value('CREDIT'),
-        currency: const Value('EUR'),
-        amount: const Value(10.0),
-        title: const Value('Remboursement'),
-        date: Value(DateTime.now().subtract(const Duration(days: 3))),
-        status: const Value(1),
-      ),
-    );
-  }
-
-  Future<void> _addFutureTestTransactions() async {
-    // Ajouter quelques transactions futures pour tester le scroll
-    await into(transactions).insert(
-      TransactionsCompanion(
-        accountId: const Value(1),
-        transactionType: const Value('DEBIT'),
-        currency: const Value('EUR'),
-        amount: const Value(50.0),
-        title: const Value('Facture électricité (programmée)'),
-        date: Value(DateTime.now().add(const Duration(days: 5))),
-        status: const Value(0), // En attente
-      ),
-    );
-
-    await into(transactions).insert(
-      TransactionsCompanion(
-        accountId: const Value(1),
-        transactionType: const Value('CREDIT'),
-        currency: const Value('EUR'),
-        amount: const Value(2500.0),
-        title: const Value('Salaire (programmé)'),
-        date: Value(DateTime.now().add(const Duration(days: 10))),
-        status: const Value(0), // En attente
-      ),
-    );
-  }
-
-  Future<void> _addInitialCounterparties() async {
-    // Ajouter quelques tiers initiaux
-    await into(counterparties).insert(
-      CounterpartiesCompanion(
-        name: const Value('Netflix'),
-        icon: const Value(
-          'tv',
-        ), // Nom d'icône (à adapter selon le système d'icônes choisi)
-      ),
-    );
-
-    await into(counterparties).insert(
-      CounterpartiesCompanion(
-        name: const Value('Apple'),
-        icon: const Value('phone_iphone'),
-      ),
-    );
-
-    await into(counterparties).insert(
-      CounterpartiesCompanion(
-        name: const Value('Intermarché'),
-        icon: const Value('shopping_cart'),
-      ),
-    );
-
-    await into(counterparties).insert(
-      CounterpartiesCompanion(
-        name: const Value('Total Énergies'),
-        icon: const Value('local_gas_station'),
-      ),
-    );
-
-    await into(counterparties).insert(
-      CounterpartiesCompanion(
-        name: const Value('Spotify'),
-        icon: const Value('music_note'),
+    // Add Netflix transaction to followed transactions
+    await into(followedTransactions).insert(
+      FollowedTransactionsCompanion(
+        transactionId: Value(netflixTransactionId),
+        followedDate: Value(DateTime.now()),
       ),
     );
   }
@@ -494,12 +500,15 @@ class TransactionWithCounterparty {
 class AccountSummary {
   final Account account;
   final double currentBalance;
+  final double
+  confirmedBalance; // Nouveau: solde des transactions confirmées uniquement
   final double totalExpenses;
   final double totalRevenues;
 
   AccountSummary({
     required this.account,
     required this.currentBalance,
+    required this.confirmedBalance,
     required this.totalExpenses,
     required this.totalRevenues,
   });

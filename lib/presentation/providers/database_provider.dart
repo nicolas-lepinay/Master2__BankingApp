@@ -7,6 +7,12 @@ final databaseProvider = Provider<AppDatabase>((ref) {
   return AppDatabase();
 });
 
+// Provider pour l'utilisateur actuel
+final currentUserProvider = FutureProvider<User>((ref) async {
+  final database = ref.read(databaseProvider);
+  return database.getCurrentUser();
+});
+
 // Provider pour les comptes
 final accountsProvider = FutureProvider<List<Account>>((ref) async {
   final database = ref.read(databaseProvider);
@@ -83,4 +89,12 @@ final transactionWithCounterpartyProvider =
 final counterpartiesProvider = FutureProvider<List<Counterparty>>((ref) async {
   final database = ref.read(databaseProvider);
   return database.select(database.counterparties).get();
+});
+
+// Provider pour les transactions suivies
+final followedTransactionsProvider = FutureProvider<List<Transaction>>((
+  ref,
+) async {
+  final database = ref.read(databaseProvider);
+  return database.getFollowedTransactions();
 });

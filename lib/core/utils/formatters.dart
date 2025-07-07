@@ -427,9 +427,9 @@ class AppFormatters {
     String currency, [
     BuildContext? context,
   ]) {
-    // Use context locale if available, otherwise default to fr_FR
-    String localeString = 'fr_FR';
-    String languageCode = 'fr';
+    // Use context locale if available, otherwise default to en_US
+    String localeString = 'en_US';
+    String languageCode = 'en';
 
     if (context != null) {
       final currentLocale = Localizations.localeOf(context);
@@ -462,9 +462,9 @@ class AppFormatters {
     bool showSign = true,
     BuildContext? context,
   }) {
-    // Use context locale if available, otherwise default to fr_FR
-    String localeString = 'fr_FR';
-    String languageCode = 'fr';
+    // Use context locale if available, otherwise default to en_US
+    String localeString = 'en_US';
+    String languageCode = 'en';
 
     if (context != null) {
       final currentLocale = Localizations.localeOf(context);
@@ -487,6 +487,55 @@ class AppFormatters {
         return '$sign $formattedAmount';
       } else {
         return amount >= 0 ? formattedAmount : '- $formattedAmount';
+      }
+    } catch (e) {
+      // Fallback to custom formatting
+      return _formatAmountWithSign(
+        amount,
+        currency,
+        languageCode,
+        localeString,
+        showSign,
+      );
+    }
+  }
+
+  // New method to format amounts without decimals when they are whole numbers
+  static String formatAmountClean(
+    double amount,
+    String currency, {
+    bool showSign = true,
+    BuildContext? context,
+  }) {
+    // Use context locale if available, otherwise default to en_US
+    String localeString = 'en_US';
+    String languageCode = 'en';
+
+    if (context != null) {
+      final currentLocale = Localizations.localeOf(context);
+      localeString = _getLocaleString(currentLocale);
+      languageCode = currentLocale.languageCode;
+    }
+
+    try {
+      // Check if amount is a whole number
+      bool isWholeNumber = amount == amount.roundToDouble();
+      int decimalDigits = isWholeNumber ? 0 : _getDecimalDigits(currency);
+
+      // Use NumberFormat.currency for consistent formatting
+      final formatter = NumberFormat.currency(
+        locale: localeString,
+        symbol: AppConstants.currencySymbols[currency] ?? currency,
+        decimalDigits: decimalDigits,
+      );
+
+      final formattedAmount = formatter.format(amount.abs());
+
+      if (showSign) {
+        final sign = amount >= 0 ? '+' : '-';
+        return '$sign$formattedAmount';
+      } else {
+        return amount >= 0 ? formattedAmount : '-$formattedAmount';
       }
     } catch (e) {
       // Fallback to custom formatting

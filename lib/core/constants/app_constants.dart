@@ -37,7 +37,7 @@ class AppConstants {
   static const String databaseName = 'bankapp.db';
 
   // UI Constants
-  static const double cardBorderRadius = 16.0;
+  static const double cardBorderRadius = 32.0;
   static const double defaultPadding = 16.0;
   static const double smallPadding = 8.0;
   static const double largePadding = 24.0;

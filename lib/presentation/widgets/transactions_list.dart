@@ -93,7 +93,7 @@ class _TransactionsListState extends State<TransactionsList> {
 
     for (int i = 0; i < closestIndex; i++) {
       final group = groupedTransactions[i];
-      targetOffset += 40; // Header de date
+      targetOffset += 50; // Header de date
       targetOffset +=
           group.transactions.length * 80; // Environ 80px par transaction
       targetOffset += 8; // Spacing entre les groupes

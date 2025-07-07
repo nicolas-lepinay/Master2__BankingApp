@@ -30,7 +30,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get incomes => 'Incomes';
 
   @override
-  String get addAccount => 'Add Account';
+  String get addAccount => 'Add a new account';
 
   @override
   String get accountName => 'Account Name';
@@ -88,4 +88,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unknown => 'Unknown';
+
+  @override
+  String get hello => 'Hello';
 }
