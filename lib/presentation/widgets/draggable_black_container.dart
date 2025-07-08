@@ -23,7 +23,7 @@ class DraggableBlackContainer extends ConsumerStatefulWidget {
 class _DraggableBlackContainerState
     extends ConsumerState<DraggableBlackContainer> {
   late DraggableScrollableController _dragController;
-  double _currentExtent = 0.4; // Position initiale : 40% de l'écran
+  double _currentExtent = 0.67; // Position initiale : 40% de l'écran
 
   @override
   void initState() {
@@ -59,11 +59,11 @@ class _DraggableBlackContainerState
 
     return DraggableScrollableSheet(
       controller: _dragController,
-      initialChildSize: 0.7, // 40% de l'écran initialement
+      initialChildSize: 0.67, // 40% de l'écran initialement
       minChildSize: 0.15, // Minimum 25% (environ 300px sur un écran standard)
-      maxChildSize: 0.85, // Maximum 85% de l'écran
+      maxChildSize: 0.84, // Maximum 85% de l'écran
       snap: true,
-      snapSizes: const [0.15, 0.7, 0.85], // Points d'accroche
+      snapSizes: const [0.15, 0.67, 0.84], // Points d'accroche
       builder: (context, scrollController) {
         return Container(
           decoration: const BoxDecoration(

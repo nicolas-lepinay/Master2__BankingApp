@@ -26,7 +26,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   bool _shouldPlayCardAnimation = false;
   late AnimationController _containerAnimationController;
   late Animation<double> _containerAnimation;
-  double _containerExtent = 0.4; // Position actuelle du container draggable
+  double _containerExtent = 0.67; // Position actuelle du container draggable
 
   @override
   void initState() {
