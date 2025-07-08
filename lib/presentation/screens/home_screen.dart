@@ -1,10 +1,12 @@
-import 'package:bankapp/presentation/widgets/dashed_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
 import 'package:bankapp/presentation/widgets/cards_swiper_widget.dart';
 import 'package:bankapp/presentation/widgets/bank_card_widget.dart';
+import 'package:bankapp/presentation/widgets/dashed_button.dart';
+import 'package:bankapp/presentation/widgets/add_account_bottom_sheet.dart';
+import 'package:bankapp/presentation/widgets/draggable_black_container.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
@@ -24,15 +26,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   bool _shouldPlayCardAnimation = false;
   late AnimationController _containerAnimationController;
   late Animation<double> _containerAnimation;
-  double? _balanceBottomPosition; // Position Y du bas du solde
+  double _containerExtent = 0.4; // Position actuelle du container draggable
 
   @override
   void initState() {
     super.initState();
 
-    // Animation controller pour le container noir
+    // Animation controller pour synchroniser les cartes avec le container
     _containerAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     );
 
@@ -46,6 +48,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void dispose() {
     _containerAnimationController.dispose();
     super.dispose();
+  }
+
+  // Callback appelé quand le container draggable bouge
+  void _onContainerDragUpdate(double extent) {
+    setState(() {
+      _containerExtent = extent;
+    });
+
+    // Calculer la position d'animation basée sur l'extent du container
+    // extent 0.4 (position normale) = animation à 0.0
+    // extent 0.25 (position basse) = animation à 1.0
+    final animationValue = ((0.4 - extent) / (0.4 - 0.25)).clamp(0.0, 1.0);
+    _containerAnimationController.animateTo(animationValue);
+
+    // Mettre à jour le provider pour la synchronisation
+    final isExpanded = extent <= 0.3; // Considéré comme expanded si < 30%
+    ref.read(cardsExpandedProvider.notifier).setExpanded(isExpanded);
   }
 
   @override
@@ -64,18 +83,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             // Contenu principal avec header et cartes
             Column(
               children: [
-                //Container(color: Colors.cyanAccent, height: 247.33, width: double.infinity),
                 // Header avec menu hamburger, message de bienvenue et menu more
                 _buildHeader(context, l10n, currentUserAsync),
 
                 const SizedBox(height: 40),
 
-                // Card Swiper (maintenant avec animation)
+                // Card Swiper avec animation synchronisée
                 AnimatedBuilder(
                   animation: _containerAnimation,
                   builder: (context, child) {
                     // Calculer le décalage vertical basé sur l'animation
-                    final verticalOffset = _containerAnimation.value;
+                    // Plus le container descend, plus les cartes descendent aussi
+                    final verticalOffset = _containerAnimation.value * 80;
 
                     return Transform.translate(
                       offset: Offset(0, verticalOffset),
@@ -87,7 +106,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
                           return Column(
                             children: [
-                              // Card Swiper Widget avec hauteur adaptative
+                              // Card Swiper Widget
                               CardsSwiperWidget<Account>(
                                 cardData: accounts,
                                 onCardChange: (index) {
@@ -109,84 +128,77 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                     _shouldPlayCardAnimation = value;
                                   });
                                 },
-                                cardBuilder: (context, accountIndex, visibleIndex) {
-                                  if (accountIndex < 0 ||
-                                      accountIndex >= accounts.length) {
-                                    return const SizedBox.shrink();
-                                  }
+                                cardBuilder:
+                                    (context, accountIndex, visibleIndex) {
+                                      if (accountIndex < 0 ||
+                                          accountIndex >= accounts.length) {
+                                        return const SizedBox.shrink();
+                                      }
 
-                                  final account = accounts[accountIndex];
-                                  return Consumer(
-                                    builder: (context, ref, child) {
-                                      final accountSummaryAsync = ref.watch(
-                                        accountSummaryProvider(account.id),
-                                      );
-
-                                      return accountSummaryAsync.when(
-                                        data: (accountSummary) {
-                                          return BankCardWidget(
-                                            accountSummary: accountSummary,
-                                            allAccounts:
-                                                accounts, // Passer tous les comptes
-                                            onBalancePositionChanged:
-                                                (position) {
-                                                  setState(() {
-                                                    _balanceBottomPosition =
-                                                        position;
-                                                  });
-                                                },
+                                      final account = accounts[accountIndex];
+                                      return Consumer(
+                                        builder: (context, ref, child) {
+                                          final accountSummaryAsync = ref.watch(
+                                            accountSummaryProvider(account.id),
                                           );
-                                        },
-                                        loading: () => _buildLoadingCard(
-                                          account.id,
-                                          accounts,
-                                        ),
-                                        error: (error, stack) =>
-                                            _buildErrorCard(
+
+                                          return accountSummaryAsync.when(
+                                            data: (accountSummary) {
+                                              return BankCardWidget(
+                                                accountSummary: accountSummary,
+                                                allAccounts: accounts,
+                                              );
+                                            },
+                                            loading: () => _buildLoadingCard(
                                               account.id,
                                               accounts,
                                             ),
+                                            error: (error, stack) =>
+                                                _buildErrorCard(
+                                                  account.id,
+                                                  accounts,
+                                                ),
+                                          );
+                                        },
                                       );
                                     },
-                                  );
+                              ),
+
+                              // Bouton "Ajouter un compte" visible quand expanded
+                              AnimatedBuilder(
+                                animation: _containerAnimation,
+                                builder: (context, child) {
+                                  // Calculer l'opacité et l'échelle du bouton
+                                  final opacity = _containerAnimation.value;
+                                  final scale =
+                                      0.8 + (_containerAnimation.value * 0.2);
+
+                                  return opacity > 0.1
+                                      ? Opacity(
+                                          opacity: opacity,
+                                          child: Transform.scale(
+                                            scale: scale,
+                                            child: Container(
+                                              margin: const EdgeInsets.only(
+                                                top: 20,
+                                                left: 20,
+                                                right: 20,
+                                              ),
+                                              child: DashedButton(
+                                                text: l10n.addAccount,
+                                                icon: Icons.add,
+                                                onTap: () {
+                                                  _showAddAccountBottomSheet(
+                                                    context,
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      : const SizedBox.shrink();
                                 },
                               ),
-
-                              const SizedBox(height: 20),
-
-                              // Bouton temporaire pour tester l'animation du container
-                              Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                ),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    if (_containerAnimationController
-                                        .isCompleted) {
-                                      _containerAnimationController.reverse();
-                                      ref
-                                          .read(cardsExpandedProvider.notifier)
-                                          .setExpanded(false);
-                                    } else {
-                                      _containerAnimationController.forward();
-                                      ref
-                                          .read(cardsExpandedProvider.notifier)
-                                          .setExpanded(true);
-                                    }
-                                  },
-                                  child: Text(
-                                    isCardsExpanded
-                                        ? 'Remonter le container'
-                                        : 'Descendre le container',
-                                  ),
-                                ),
-                              ),
-
-                              // Bouton "Ajouter un compte" en mode expanded
-                              if (isCardsExpanded) ...[
-                                const SizedBox(height: 20),
-                                _buildAddAccountButton(context, l10n),
-                              ],
                             ],
                           );
                         },
@@ -213,47 +225,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ],
             ),
 
-            // Container noir positionné en bas avec animation
-            AnimatedBuilder(
-              animation: _containerAnimation,
-              builder: (context, child) {
-                // Calculer la position dynamiquement basée sur la position du solde
-                final screenHeight = MediaQuery.of(context).size.height;
-                double containerTop;
-
-                if (_balanceBottomPosition != null) {
-                  // Position normale : juste en dessous du solde avec un petit offset
-                  // Réduire l'offset pour le Samsung Galaxy Z Flip 6
-                  final normalTop = _balanceBottomPosition! + 0;
-                  // Position expanded : descendre pour révéler les cartes complètes
-                  final expandedOffset = _containerAnimation.value * 100;
-                  containerTop = normalTop + expandedOffset;
-                } else {
-                  // Fallback si la position n'est pas encore mesurée
-                  containerTop =
-                      screenHeight * 0.4 + (_containerAnimation.value * 100);
-                }
-
-                return Positioned(
-                  left: 0,
-                  right: 0,
-                  top: containerTop,
-                  bottom: 0,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: AppColors.containerBlack,
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(32),
-                      ),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'Container noir\n(Étape suivante)',
-                        style: TextStyle(color: AppColors.white),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
+            // Container noir draggable
+            DraggableBlackContainer(
+              onDragUpdate: _onContainerDragUpdate,
+              onStatisticsPressed: () {
+                // TODO: Navigation vers les statistiques
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Statistiques - À implémenter')),
                 );
               },
             ),
@@ -375,7 +353,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           const SizedBox(height: AppConstants.largePadding),
           ElevatedButton(
             onPressed: () {
-              // TODO: Ouvrir l'écran d'ajout de compte
+              _showAddAccountBottomSheet(context);
             },
             child: Text(l10n.addAccount),
           ),
@@ -384,27 +362,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildAddAccountButton(BuildContext context, AppLocalizations l10n) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      child: DashedButtonWidget(
-        onTap: () {
-          // TODO: Ouvrir l'écran d'ajout de compte
-        },
-        icon: Icons.add,
-        text: l10n.addAccount,
-      ),
+  void _showAddAccountBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const AddAccountBottomSheet(),
     );
   }
 
   Widget _buildLoadingCard(int accountId, List<Account> allAccounts) {
-    // Utiliser l'utilitaire pour obtenir la couleur correcte
     final cardColor = CardColorUtils.getCardColorById(accountId, allAccounts);
 
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(60), // Padding pour une taille minimale
+      padding: const EdgeInsets.all(60),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(32),
@@ -416,13 +389,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _buildErrorCard(int accountId, List<Account> allAccounts) {
-    // Utiliser l'utilitaire pour obtenir la couleur correcte
     final cardColor = CardColorUtils.getCardColorById(accountId, allAccounts);
 
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(60), // Padding pour une taille minimale
+      padding: const EdgeInsets.all(60),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(32),

@@ -105,7 +105,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
           // Contenu de la carte avec padding et intrinsicHeight
           IntrinsicHeight(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize:
@@ -118,10 +118,13 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                         child: Text(
                           widget.accountSummary.account.name,
                           style: AppTextStyles.cardAccountName,
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+
+                      if (widget.accountSummary.account.icon != null)
+                        SizedBox(width: 30),
 
                       // Icône du compte (optionnelle)
                       if (widget.accountSummary.account.icon != null)
@@ -189,7 +192,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                     ],
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
 
                   // Solde réel (toujours présent, mais peut être caché par le container noir)
                   Text(

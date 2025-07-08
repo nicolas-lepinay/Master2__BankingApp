@@ -21,7 +21,7 @@ class AppTextStyles {
   // Card account name avec Outfit
   static const TextStyle cardAccountName = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: FontWeight.w300,
     color: AppColors.textLight,
   );
@@ -29,7 +29,7 @@ class AppTextStyles {
   // Card balance label
   static const TextStyle cardBalanceLabel = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: FontWeight.w500,
     color: AppColors.textLight,
     letterSpacing: 1.2,
@@ -38,7 +38,7 @@ class AppTextStyles {
   // Card balance amount avec Overpass Mono
   static const TextStyle cardBalanceAmount = TextStyle(
     fontFamily: overpassMonoFontFamily,
-    fontSize: 30,
+    fontSize: 26,
     fontWeight: FontWeight.bold,
     color: AppColors.textLight,
   );
@@ -46,7 +46,7 @@ class AppTextStyles {
   // Card balance real amount (smaller)
   static const TextStyle cardBalanceRealAmount = TextStyle(
     fontFamily: overpassMonoFontFamily,
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: FontWeight.w600,
     color: AppColors.textLight,
   );
