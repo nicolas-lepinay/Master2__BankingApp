@@ -24,6 +24,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   bool _shouldPlayCardAnimation = false;
   late AnimationController _containerAnimationController;
   late Animation<double> _containerAnimation;
+  double? _balanceBottomPosition; // Position Y du bas du solde
 
   @override
   void initState() {
@@ -63,6 +64,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             // Contenu principal avec header et cartes
             Column(
               children: [
+                //Container(color: Colors.cyanAccent, height: 247.33, width: double.infinity),
                 // Header avec menu hamburger, message de bienvenue et menu more
                 _buildHeader(context, l10n, currentUserAsync),
 
@@ -126,6 +128,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                             accountSummary: accountSummary,
                                             allAccounts:
                                                 accounts, // Passer tous les comptes
+                                            onBalancePositionChanged:
+                                                (position) {
+                                                  setState(() {
+                                                    _balanceBottomPosition =
+                                                        position;
+                                                  });
+                                                },
                                           );
                                         },
                                         loading: () => _buildLoadingCard(
@@ -208,18 +217,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             AnimatedBuilder(
               animation: _containerAnimation,
               builder: (context, child) {
-                // Position normale : couvre partiellement les cartes
-                // Position expanded : descend pour révéler les cartes complètes
-                final bottomPosition =
-                    _containerAnimation.value + 20; // Descendre de 120 pixels
+                // Calculer la position dynamiquement basée sur la position du solde
+                final screenHeight = MediaQuery.of(context).size.height;
+                double containerTop;
+
+                if (_balanceBottomPosition != null) {
+                  // Position normale : juste en dessous du solde avec un petit offset
+                  // Réduire l'offset pour le Samsung Galaxy Z Flip 6
+                  final normalTop = _balanceBottomPosition! + 0;
+                  // Position expanded : descendre pour révéler les cartes complètes
+                  final expandedOffset = _containerAnimation.value * 100;
+                  containerTop = normalTop + expandedOffset;
+                } else {
+                  // Fallback si la position n'est pas encore mesurée
+                  containerTop =
+                      screenHeight * 0.4 + (_containerAnimation.value * 100);
+                }
 
                 return Positioned(
                   left: 0,
                   right: 0,
-                  bottom: -bottomPosition,
-                  height:
-                      MediaQuery.of(context).size.height *
-                      0.6, // 60% de la hauteur de l'écran
+                  top: containerTop,
+                  bottom: 0,
                   child: Container(
                     decoration: const BoxDecoration(
                       color: AppColors.containerBlack,

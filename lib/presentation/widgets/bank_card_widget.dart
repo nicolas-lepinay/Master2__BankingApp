@@ -10,11 +10,14 @@ import 'package:bankapp/core/utils/card_color_utils.dart';
 class BankCardWidget extends StatefulWidget {
   final AccountSummary accountSummary;
   final List<Account> allAccounts; // Nécessaire pour déterminer la couleur
+  final Function(double)?
+  onBalancePositionChanged; // Callback pour la position Y du solde
 
   const BankCardWidget({
     super.key,
     required this.accountSummary,
     required this.allAccounts,
+    this.onBalancePositionChanged,
   });
 
   @override
@@ -23,6 +26,10 @@ class BankCardWidget extends StatefulWidget {
 
 class _BankCardWidgetState extends State<BankCardWidget> {
   bool _isBalanceVisible = true; // Par défaut, le solde est visible
+  final GlobalKey _balanceKey =
+      GlobalKey(); // Clé pour mesurer la position du solde
+  bool _positionAlreadyMeasured =
+      false; // Flag pour s'assurer que la position n'est mesurée qu'une fois
 
   Color get cardColor {
     return CardColorUtils.getCardColor(
@@ -52,8 +59,29 @@ class _BankCardWidgetState extends State<BankCardWidget> {
     }
   }
 
+  void _measureBalancePosition() {
+    // Ne mesurer qu'une seule fois au chargement initial
+    if (_positionAlreadyMeasured) return;
+
+    final RenderBox? renderBox =
+        _balanceKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      final position = renderBox.localToGlobal(Offset.zero);
+      final bottomOfBalance = position.dy + (renderBox.size.height / 3);
+
+      // Appeler le callback avec la position Y du bas du solde
+      widget.onBalancePositionChanged?.call(bottomOfBalance);
+      // Marquer comme déjà mesuré
+      _positionAlreadyMeasured = true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Mesurer la position du solde après le build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _measureBalancePosition();
+    });
     return Container(
       width: double.infinity,
       // Supprimer la hauteur fixe pour que la carte s'adapte à son contenu
@@ -128,6 +156,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
 
                   // Montant du solde attendu avec toggle visibility
                   Row(
+                    key: _balanceKey, // Ajouter la clé pour mesurer la position
                     children: [
                       Expanded(
                         child: Text(
