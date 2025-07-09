@@ -21,8 +21,7 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen>
-    with TickerProviderStateMixin {
+class _HomeScreenState extends ConsumerState<HomeScreen> with TickerProviderStateMixin {
   bool _shouldPlayCardAnimation = false;
   late AnimationController _containerAnimationController;
   late Animation<double> _containerAnimation;
@@ -57,9 +56,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     });
 
     // Calculer la position d'animation basée sur l'extent du container
-    // extent 0.4 (position normale) = animation à 0.0
-    // extent 0.25 (position basse) = animation à 1.0
-    final animationValue = ((0.4 - extent) / (0.4 - 0.25)).clamp(0.0, 1.0);
+    // Utiliser des valeurs dynamiques au lieu de valeurs codées en dur
+    final minThreshold = 0.25; // Seuil minimum pour l'animation
+    final normalPosition = 0.65; // Position normale (peut être ajustée dynamiquement)
+    final animationValue = ((normalPosition - extent) / (normalPosition - minThreshold)).clamp(
+      0.0,
+      1.0,
+    );
     _containerAnimationController.animateTo(animationValue);
 
     // Mettre à jour le provider pour la synchronisation
@@ -112,8 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 onCardChange: (index) {
                                   // Mettre à jour la carte sélectionnée
                                   final accountIndex = accounts.indexWhere(
-                                    (account) =>
-                                        account.id == accounts[index].id,
+                                    (account) => account.id == accounts[index].id,
                                   );
                                   if (accountIndex != -1) {
                                     ref
@@ -121,47 +123,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                         .setSelectedCard(accountIndex);
                                   }
                                 },
-                                shouldStartCardCollectionAnimation:
-                                    _shouldPlayCardAnimation,
+                                shouldStartCardCollectionAnimation: _shouldPlayCardAnimation,
                                 onCardCollectionAnimationComplete: (value) {
                                   setState(() {
                                     _shouldPlayCardAnimation = value;
                                   });
                                 },
-                                cardBuilder:
-                                    (context, accountIndex, visibleIndex) {
-                                      if (accountIndex < 0 ||
-                                          accountIndex >= accounts.length) {
-                                        return const SizedBox.shrink();
-                                      }
+                                cardBuilder: (context, accountIndex, visibleIndex) {
+                                  if (accountIndex < 0 || accountIndex >= accounts.length) {
+                                    return const SizedBox.shrink();
+                                  }
 
-                                      final account = accounts[accountIndex];
-                                      return Consumer(
-                                        builder: (context, ref, child) {
-                                          final accountSummaryAsync = ref.watch(
-                                            accountSummaryProvider(account.id),
-                                          );
+                                  final account = accounts[accountIndex];
+                                  return Consumer(
+                                    builder: (context, ref, child) {
+                                      final accountSummaryAsync = ref.watch(
+                                        accountSummaryProvider(account.id),
+                                      );
 
-                                          return accountSummaryAsync.when(
-                                            data: (accountSummary) {
-                                              return BankCardWidget(
-                                                accountSummary: accountSummary,
-                                                allAccounts: accounts,
-                                              );
-                                            },
-                                            loading: () => _buildLoadingCard(
-                                              account.id,
-                                              accounts,
-                                            ),
-                                            error: (error, stack) =>
-                                                _buildErrorCard(
-                                                  account.id,
-                                                  accounts,
-                                                ),
+                                      return accountSummaryAsync.when(
+                                        data: (accountSummary) {
+                                          return BankCardWidget(
+                                            accountSummary: accountSummary,
+                                            allAccounts: accounts,
                                           );
                                         },
+                                        loading: () => _buildLoadingCard(account.id, accounts),
+                                        error: (error, stack) =>
+                                            _buildErrorCard(account.id, accounts),
                                       );
                                     },
+                                  );
+                                },
                               ),
 
                               // Bouton "Ajouter un compte" visible quand expanded
@@ -170,8 +163,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 builder: (context, child) {
                                   // Calculer l'opacité et l'échelle du bouton
                                   final opacity = _containerAnimation.value;
-                                  final scale =
-                                      0.8 + (_containerAnimation.value * 0.2);
+                                  final scale = 0.8 + (_containerAnimation.value * 0.2);
 
                                   return opacity > 0.1
                                       ? Opacity(
@@ -180,17 +172,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                             scale: scale,
                                             child: Container(
                                               margin: const EdgeInsets.only(
-                                                top: 20,
-                                                left: 20,
-                                                right: 20,
+                                                top: 50,
+                                                left: 25,
+                                                right: 25,
                                               ),
                                               child: DashedButton(
                                                 text: l10n.addAccount,
                                                 icon: Icons.add,
                                                 onTap: () {
-                                                  _showAddAccountBottomSheet(
-                                                    context,
-                                                  );
+                                                  _showAddAccountBottomSheet(context);
                                                 },
                                               ),
                                             ),
@@ -202,17 +192,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             ],
                           );
                         },
-                        loading: () =>
-                            const Center(child: CircularProgressIndicator()),
+                        loading: () => const Center(child: CircularProgressIndicator()),
                         error: (error, stack) => Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(
-                                Icons.error_outline,
-                                size: 48,
-                                color: Colors.red,
-                              ),
+                              const Icon(Icons.error_outline, size: 48, color: Colors.red),
                               const SizedBox(height: 16),
                               Text('Erreur: $error'),
                             ],
@@ -230,9 +215,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               onDragUpdate: _onContainerDragUpdate,
               onStatisticsPressed: () {
                 // TODO: Navigation vers les statistiques
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Statistiques - À implémenter')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Statistiques - À implémenter')));
               },
             ),
           ],
@@ -263,17 +248,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.menu,
-                color: AppColors.textDark,
-                size: 20,
-              ),
+              child: const Icon(Icons.menu, color: AppColors.textDark, size: 20),
             ),
           ),
 
@@ -281,16 +262,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           Expanded(
             child: Center(
               child: currentUserAsync.when(
-                data: (user) => Text(
-                  '${l10n.hello}, ${user.name}',
-                  style: AppTextStyles.welcomeMessage,
-                ),
-                loading: () => Text(
-                  '${l10n.hello}...',
-                  style: AppTextStyles.welcomeMessage,
-                ),
-                error: (error, stack) =>
-                    Text(l10n.hello, style: AppTextStyles.welcomeMessage),
+                data: (user) =>
+                    Text('${l10n.hello}, ${user.name}', style: AppTextStyles.welcomeMessage),
+                loading: () => Text('${l10n.hello}...', style: AppTextStyles.welcomeMessage),
+                error: (error, stack) => Text(l10n.hello, style: AppTextStyles.welcomeMessage),
               ),
             ),
           ),
@@ -308,17 +283,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.more_vert,
-                color: AppColors.textDark,
-                size: 20,
-              ),
+              child: const Icon(Icons.more_vert, color: AppColors.textDark, size: 20),
             ),
           ),
         ],
@@ -335,7 +306,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.add, size: 40, color: AppColors.primary),
@@ -345,9 +316,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           const SizedBox(height: AppConstants.smallPadding),
           Text(
             'Appuyez pour créer un nouveau compte',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
-            ),
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppConstants.largePadding),
@@ -378,13 +347,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(60),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(32),
-      ),
-      child: const Center(
-        child: CircularProgressIndicator(color: AppColors.white),
-      ),
+      decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(32)),
+      child: const Center(child: CircularProgressIndicator(color: AppColors.white)),
     );
   }
 
@@ -395,13 +359,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(60),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(32),
-      ),
-      child: const Center(
-        child: Icon(Icons.error_outline, color: AppColors.white, size: 48),
-      ),
+      decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(32)),
+      child: const Center(child: Icon(Icons.error_outline, color: AppColors.white, size: 48)),
     );
   }
 }

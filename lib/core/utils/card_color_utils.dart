@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:bankapp/data/database/database.dart';
+import 'package:bankapp/core/theme/app_colors.dart';
 
 class CardColorUtils {
   // Liste des couleurs dans l'ordre souhaité
-  static const List<Color> cardColors = [
-    Color(0xFF443EE3), // Violet
-    Color(0xFFFE68E8), // Rose
-    Color(0xFFAFFF59), // Vert fluo
-    Color(0xFFEB6B25), // Orange
-    Color(0xFF7952FC), // Violet clair
-    Color(0xFFE33E62), // Rouge/Rose foncé
+  static List<Color> cardColors = [
+    AppColors.cardPurple, // Violet
+    AppColors.cardPink, // Rose
+    AppColors.cardGreen, // Vert fluo
+    AppColors.cardOrange, // Orange
+    AppColors.cardPurple2, // Violet clair
+    AppColors.cardRed, // Rouge/Rose foncé
   ];
 
   /// Retourne la couleur d'une carte basée sur la liste des comptes

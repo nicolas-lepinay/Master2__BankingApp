@@ -12,6 +12,9 @@ class AppColors {
   static const Color cardPurple = Color(0xFF443EE3);
   static const Color cardPink = Color(0xFFFE68E8);
   static const Color cardGreen = Color(0xFFAFFF59);
+  static const Color cardOrange = Color(0xFFEB6B25);
+  static const Color cardPurple2 = Color(0xFF7952FC);
+  static const Color cardRed = Color(0xFFE33E62);
 
   // Container colors
   static const Color containerBlack = Color(0xFF0E0E0C);

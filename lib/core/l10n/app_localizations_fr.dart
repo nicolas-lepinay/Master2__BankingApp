@@ -30,7 +30,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get incomes => 'Revenus';
 
   @override
-  String get addAccount => 'Ajouter un nouveau compte';
+  String get addAccount => 'Ajouter un compte';
 
   @override
   String get accountName => 'Nom du compte';

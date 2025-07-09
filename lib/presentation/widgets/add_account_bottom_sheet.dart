@@ -10,8 +10,7 @@ class AddAccountBottomSheet extends ConsumerStatefulWidget {
   const AddAccountBottomSheet({super.key});
 
   @override
-  ConsumerState<AddAccountBottomSheet> createState() =>
-      _AddAccountBottomSheetState();
+  ConsumerState<AddAccountBottomSheet> createState() => _AddAccountBottomSheetState();
 }
 
 class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
@@ -38,9 +37,7 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
         left: AppConstants.defaultPadding,
         right: AppConstants.defaultPadding,
         top: AppConstants.defaultPadding,
-        bottom:
-            MediaQuery.of(context).viewInsets.bottom +
-            AppConstants.defaultPadding,
+        bottom: MediaQuery.of(context).viewInsets.bottom + AppConstants.defaultPadding,
       ),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -58,7 +55,7 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -67,11 +64,7 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
           const SizedBox(height: AppConstants.defaultPadding),
 
           // Titre
-          Text(
-            l10n.addAccount,
-            style: AppTextStyles.h5,
-            textAlign: TextAlign.center,
-          ),
+          Text(l10n.addAccount, style: AppTextStyles.h5, textAlign: TextAlign.center),
 
           const SizedBox(height: AppConstants.largePadding),
 
@@ -105,14 +98,8 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
                     hintText: '0.00',
                     suffixText: AppConstants.currencySymbols[_selectedCurrency],
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d*\.?\d{0,2}'),
-                    ),
-                  ],
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}'))],
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Le solde initial est requis';
@@ -132,12 +119,8 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
                   value: _selectedCurrency,
                   decoration: InputDecoration(labelText: l10n.currency),
                   items: AppConstants.supportedCurrencies.map((currency) {
-                    final symbol =
-                        AppConstants.currencySymbols[currency] ?? currency;
-                    return DropdownMenuItem(
-                      value: currency,
-                      child: Text('$currency ($symbol)'),
-                    );
+                    final symbol = AppConstants.currencySymbols[currency] ?? currency;
+                    return DropdownMenuItem(value: currency, child: Text('$currency ($symbol)'));
                   }).toList(),
                   onChanged: (value) {
                     if (value != null) {
@@ -155,9 +138,7 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: _isLoading
-                            ? null
-                            : () => Navigator.of(context).pop(),
+                        onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
                         child: Text(l10n.cancel),
                       ),
                     ),
@@ -171,9 +152,7 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
+                                child: CircularProgressIndicator(strokeWidth: 2),
                               )
                             : Text(l10n.save),
                       ),
@@ -207,10 +186,7 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Compte créé avec succès'),
-            backgroundColor: Colors.green,
-          ),
+          const SnackBar(content: Text('Compte créé avec succès'), backgroundColor: Colors.green),
         );
       }
     } catch (e) {

@@ -38,8 +38,9 @@ class AppConstants {
 
   // UI Constants
   static const double cardBorderRadius = 32.0;
-  static const double defaultPadding = 16.0;
   static const double smallPadding = 8.0;
+  static const double defaultPadding = 16.0;
+  static const double mediumPadding = 20.0;
   static const double largePadding = 24.0;
 
   // Animation durations

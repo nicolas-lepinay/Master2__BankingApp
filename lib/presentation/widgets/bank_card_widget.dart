@@ -91,7 +91,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -117,7 +117,9 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                       Expanded(
                         child: Text(
                           widget.accountSummary.account.name,
-                          style: AppTextStyles.cardAccountName,
+                          style: cardColor == AppColors.cardGreen
+                              ? AppTextStyles.cardAccountNameDark
+                              : AppTextStyles.cardAccountName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -132,13 +134,17 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: AppColors.white.withOpacity(0.2),
+                            color: cardColor == AppColors.cardGreen
+                                ? AppColors.darkest.withValues(alpha: 0.2)
+                                : AppColors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
                             Icons
                                 .account_balance, // Remplacer par l'icône du compte
-                            color: AppColors.white,
+                            color: cardColor == AppColors.cardGreen
+                                ? AppColors.darkest
+                                : AppColors.white,
                             size: 20,
                           ),
                         ),
@@ -151,7 +157,9 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                   Text(
                     AppLocalizations.of(context)!.expectedBalance.toUpperCase(),
                     style: AppTextStyles.cardBalanceLabel.copyWith(
-                      color: AppColors.white.withOpacity(0.6),
+                      color: cardColor == AppColors.cardGreen
+                          ? AppColors.darkest.withValues(alpha: 0.6)
+                          : AppColors.white.withValues(alpha: 0.6),
                     ),
                   ),
 
@@ -166,7 +174,9 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                           _formatBalanceDisplay(
                             widget.accountSummary.currentBalance,
                           ),
-                          style: AppTextStyles.cardBalanceAmount,
+                          style: cardColor == AppColors.cardGreen
+                              ? AppTextStyles.cardBalanceAmountDark
+                              : AppTextStyles.cardBalanceAmount,
                         ),
                       ),
 
@@ -177,14 +187,18 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: AppColors.white.withOpacity(0.1),
+                            color: cardColor == AppColors.cardGreen
+                                ? AppColors.darkest.withValues(alpha: 0.1)
+                                : AppColors.white.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Icon(
                             _isBalanceVisible
                                 ? Icons.visibility
                                 : Icons.visibility_off,
-                            color: AppColors.white,
+                            color: cardColor == AppColors.cardGreen
+                                ? AppColors.darkest
+                                : AppColors.white,
                             size: 20,
                           ),
                         ),
@@ -198,7 +212,9 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                   Text(
                     AppLocalizations.of(context)!.actualBalance.toUpperCase(),
                     style: AppTextStyles.cardBalanceLabel.copyWith(
-                      color: AppColors.white.withOpacity(0.6),
+                      color: cardColor == AppColors.cardGreen
+                          ? AppColors.darkest.withValues(alpha: 0.6)
+                          : AppColors.white.withValues(alpha: 0.6),
                     ),
                   ),
 
@@ -208,7 +224,9 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                     _formatBalanceDisplay(
                       widget.accountSummary.confirmedBalance,
                     ),
-                    style: AppTextStyles.cardBalanceRealAmount,
+                    style: cardColor == AppColors.cardGreen
+                        ? AppTextStyles.cardBalanceRealAmountDark
+                        : AppTextStyles.cardBalanceRealAmount,
                   ),
                 ],
               ),
@@ -225,10 +243,10 @@ class DotPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.white.withOpacity(0.1)
+      ..color = AppColors.white.withValues(alpha: 0.09)
       ..style = PaintingStyle.fill;
 
-    const double dotSize = 2.0;
+    const double dotSize = 1.7;
     const double spacing = 20.0;
 
     // Dessiner une grille de points

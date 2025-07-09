@@ -58,8 +58,7 @@ class TransactionDetailScreen extends ConsumerWidget {
         ],
       ),
       body: transactionAsync.when(
-        data: (transaction) =>
-            _buildTransactionDetail(context, ref, transaction),
+        data: (transaction) => _buildTransactionDetail(context, ref, transaction),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Column(
@@ -80,14 +79,9 @@ class TransactionDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTransactionDetail(
-    BuildContext context,
-    WidgetRef ref,
-    Transaction transaction,
-  ) {
+  Widget _buildTransactionDetail(BuildContext context, WidgetRef ref, Transaction transaction) {
     final l10n = AppLocalizations.of(context)!;
-    final isDebit =
-        transaction.transactionType == AppConstants.transactionTypeDebit;
+    final isDebit = transaction.transactionType == AppConstants.transactionTypeDebit;
 
     // Récupérer les informations du compte
     final accountAsync = ref.watch(accountsProvider);
@@ -123,11 +117,7 @@ class TransactionDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAmountCard(
-    BuildContext context,
-    Transaction transaction,
-    bool isDebit,
-  ) {
+  Widget _buildAmountCard(BuildContext context, Transaction transaction, bool isDebit) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.largePadding),
@@ -139,8 +129,8 @@ class TransactionDetailScreen extends ConsumerWidget {
               height: 60,
               decoration: BoxDecoration(
                 color: isDebit
-                    ? AppColors.error.withOpacity(0.1)
-                    : AppColors.success.withOpacity(0.1),
+                    ? AppColors.error.withValues(alpha: 0.1)
+                    : AppColors.success.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -177,9 +167,7 @@ class TransactionDetailScreen extends ConsumerWidget {
               const SizedBox(height: AppConstants.smallPadding),
               Text(
                 transaction.comment!,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -205,18 +193,11 @@ class TransactionDetailScreen extends ConsumerWidget {
 
             const SizedBox(height: AppConstants.defaultPadding),
 
-            _buildDetailRow(
-              'Compte',
-              account?.name ?? 'Compte inconnu',
-              Icons.account_balance,
-            ),
+            _buildDetailRow('Compte', account?.name ?? 'Compte inconnu', Icons.account_balance),
 
             _buildDetailRow(
               'Type',
-              AppFormatters.getTransactionTypeLabel(
-                transaction.transactionType,
-                context,
-              ),
+              AppFormatters.getTransactionTypeLabel(transaction.transactionType, context),
               Icons.swap_vert,
             ),
 
@@ -226,22 +207,13 @@ class TransactionDetailScreen extends ConsumerWidget {
               Icons.calendar_today,
             ),
 
-            _buildDetailRow(
-              l10n.currency,
-              transaction.currency,
-              Icons.monetization_on,
-            ),
+            _buildDetailRow(l10n.currency, transaction.currency, Icons.monetization_on),
 
             _buildDetailRow(
               l10n.status,
-              AppFormatters.getTransactionStatusLabel(
-                transaction.status,
-                context,
-              ),
+              AppFormatters.getTransactionStatusLabel(transaction.status, context),
               Icons.info_outline,
-              valueColor: transaction.status == 1
-                  ? AppColors.success
-                  : AppColors.warning,
+              valueColor: transaction.status == 1 ? AppColors.success : AppColors.warning,
             ),
           ],
         ),
@@ -249,11 +221,7 @@ class TransactionDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTechnicalCard(
-    BuildContext context,
-    AppLocalizations l10n,
-    Transaction transaction,
-  ) {
+  Widget _buildTechnicalCard(BuildContext context, AppLocalizations l10n, Transaction transaction) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.defaultPadding),
@@ -279,19 +247,11 @@ class TransactionDetailScreen extends ConsumerWidget {
             ],
 
             if (transaction.counterpartyId != null) ...[
-              _buildDetailRow(
-                'ID Tiers',
-                '#${transaction.counterpartyId}',
-                Icons.business,
-              ),
+              _buildDetailRow('ID Tiers', '#${transaction.counterpartyId}', Icons.business),
             ],
 
             if (transaction.category1Id != null) ...[
-              _buildDetailRow(
-                'ID Catégorie',
-                '#${transaction.category1Id}',
-                Icons.category,
-              ),
+              _buildDetailRow('ID Catégorie', '#${transaction.category1Id}', Icons.category),
             ],
           ],
         ),
@@ -299,12 +259,7 @@ class TransactionDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDetailRow(
-    String label,
-    String value,
-    IconData icon, {
-    Color? valueColor,
-  }) {
+  Widget _buildDetailRow(String label, String value, IconData icon, {Color? valueColor}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppConstants.smallPadding),
       child: Row(
@@ -317,9 +272,7 @@ class TransactionDetailScreen extends ConsumerWidget {
               children: [
                 Text(
                   label,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -342,16 +295,11 @@ class TransactionDetailScreen extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) =>
-          EditTransactionBottomSheet(transactionId: transactionId),
+      builder: (context) => EditTransactionBottomSheet(transactionId: transactionId),
     );
   }
 
-  void _handleMenuAction(
-    BuildContext context,
-    WidgetRef ref,
-    String action,
-  ) async {
+  void _handleMenuAction(BuildContext context, WidgetRef ref, String action) async {
     switch (action) {
       case 'toggle_status':
         await _toggleTransactionStatus(context, ref);
@@ -362,20 +310,12 @@ class TransactionDetailScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _toggleTransactionStatus(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
+  Future<void> _toggleTransactionStatus(BuildContext context, WidgetRef ref) async {
     try {
       final transactionActions = ref.read(transactionActionsProvider);
-      final transaction = await ref.read(
-        transactionProvider(transactionId).future,
-      );
+      final transaction = await ref.read(transactionProvider(transactionId).future);
 
-      await transactionActions.toggleTransactionStatus(
-        transactionId,
-        transaction.accountId,
-      );
+      await transactionActions.toggleTransactionStatus(transactionId, transaction.accountId);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -387,9 +327,9 @@ class TransactionDetailScreen extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red));
       }
     }
   }
@@ -420,22 +360,14 @@ class TransactionDetailScreen extends ConsumerWidget {
     if (confirmed == true) {
       try {
         final transactionActions = ref.read(transactionActionsProvider);
-        final transaction = await ref.read(
-          transactionProvider(transactionId).future,
-        );
+        final transaction = await ref.read(transactionProvider(transactionId).future);
 
-        await transactionActions.deleteTransaction(
-          transactionId,
-          transaction.accountId,
-        );
+        await transactionActions.deleteTransaction(transactionId, transaction.accountId);
 
         if (context.mounted) {
           Navigator.of(context).pop(); // Retour à l'écran précédent
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Transaction supprimée'),
-              backgroundColor: Colors.green,
-            ),
+            const SnackBar(content: Text('Transaction supprimée'), backgroundColor: Colors.green),
           );
         }
       } catch (e) {

@@ -26,6 +26,11 @@ class AppTextStyles {
     color: AppColors.textLight,
   );
 
+  // Card account name avec Outfit (Dark)
+  static TextStyle cardAccountNameDark = cardAccountName.copyWith(
+    color: AppColors.textDark,
+  );
+
   // Card balance label
   static const TextStyle cardBalanceLabel = TextStyle(
     fontFamily: defaultFontFamily,
@@ -43,12 +48,22 @@ class AppTextStyles {
     color: AppColors.textLight,
   );
 
+  // Card balance amount avec Overpass Mono (Dark)
+  static TextStyle cardBalanceAmountDark = cardBalanceAmount.copyWith(
+    color: AppColors.textDark,
+  );
+
   // Card balance real amount (smaller)
   static const TextStyle cardBalanceRealAmount = TextStyle(
     fontFamily: overpassMonoFontFamily,
     fontSize: 20,
     fontWeight: FontWeight.w600,
     color: AppColors.textLight,
+  );
+
+  // Card balance real amount (smaller) (Dark)
+  static TextStyle cardBalanceRealAmountDark = cardBalanceRealAmount.copyWith(
+    color: AppColors.textDark,
   );
 
   // Section headers avec Playfair
@@ -264,8 +279,8 @@ class AppTextStyles {
 
   static const TextStyle buttonText = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 16,
-    fontWeight: FontWeight.w600,
+    fontSize: 20,
+    fontWeight: FontWeight.w300,
   );
 
   static const TextStyle buttonTextSmall = TextStyle(

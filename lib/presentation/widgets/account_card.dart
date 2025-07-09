@@ -13,16 +13,14 @@ class AccountCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppConstants.defaultPadding,
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding),
       padding: const EdgeInsets.all(AppConstants.largePadding),
       decoration: BoxDecoration(
         color: AppColors.cardDark,
         borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -65,9 +63,7 @@ class AccountCard extends StatelessWidget {
                         showSign: true,
                         context: context,
                       ),
-                      style: AppTextStyles.h6.copyWith(
-                        color: AppColors.textLight,
-                      ),
+                      style: AppTextStyles.h6.copyWith(color: AppColors.textLight),
                     ),
                   ],
                 ),
@@ -77,10 +73,8 @@ class AccountCard extends StatelessWidget {
               Container(
                 width: 1,
                 height: 40,
-                color: AppColors.textLight.withOpacity(0.3),
-                margin: const EdgeInsets.symmetric(
-                  horizontal: AppConstants.defaultPadding,
-                ),
+                color: AppColors.textLight.withValues(alpha: 0.3),
+                margin: const EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding),
               ),
 
               // Revenus
@@ -97,9 +91,7 @@ class AccountCard extends StatelessWidget {
                         showSign: true,
                         context: context,
                       ),
-                      style: AppTextStyles.h6.copyWith(
-                        color: AppColors.textLight,
-                      ),
+                      style: AppTextStyles.h6.copyWith(color: AppColors.textLight),
                     ),
                   ],
                 ),

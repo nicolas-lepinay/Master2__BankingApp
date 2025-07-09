@@ -15,12 +15,10 @@ class EditTransactionBottomSheet extends ConsumerStatefulWidget {
   const EditTransactionBottomSheet({super.key, required this.transactionId});
 
   @override
-  ConsumerState<EditTransactionBottomSheet> createState() =>
-      _EditTransactionBottomSheetState();
+  ConsumerState<EditTransactionBottomSheet> createState() => _EditTransactionBottomSheetState();
 }
 
-class _EditTransactionBottomSheetState
-    extends ConsumerState<EditTransactionBottomSheet> {
+class _EditTransactionBottomSheetState extends ConsumerState<EditTransactionBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
@@ -44,9 +42,7 @@ class _EditTransactionBottomSheetState
     super.dispose();
   }
 
-  void _initializeFromTransaction(
-    TransactionWithCounterparty transactionWithCounterparty,
-  ) {
+  void _initializeFromTransaction(TransactionWithCounterparty transactionWithCounterparty) {
     if (_isInitialized) return;
 
     final transaction = transactionWithCounterparty.transaction;
@@ -55,8 +51,7 @@ class _EditTransactionBottomSheetState
     _titleController.text = transaction.title ?? '';
     _amountController.text = transaction.amount.toString();
     _commentController.text = transaction.comment ?? '';
-    _counterpartyController.text =
-        counterparty?.name ?? ''; // Initialiser avec le nom du tiers
+    _counterpartyController.text = counterparty?.name ?? ''; // Initialiser avec le nom du tiers
     _transactionType = transaction.transactionType;
     _selectedCurrency = transaction.currency;
     _selectedAccountId = transaction.accountId;
@@ -86,9 +81,7 @@ class _EditTransactionBottomSheetState
             left: AppConstants.defaultPadding,
             right: AppConstants.defaultPadding,
             top: AppConstants.defaultPadding,
-            bottom:
-                MediaQuery.of(context).viewInsets.bottom +
-                AppConstants.defaultPadding,
+            bottom: MediaQuery.of(context).viewInsets.bottom + AppConstants.defaultPadding,
           ),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
@@ -106,9 +99,7 @@ class _EditTransactionBottomSheetState
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withOpacity(0.3),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -117,11 +108,7 @@ class _EditTransactionBottomSheetState
               const SizedBox(height: AppConstants.defaultPadding),
 
               // Titre
-              Text(
-                'Modifier la transaction',
-                style: AppTextStyles.h5,
-                textAlign: TextAlign.center,
-              ),
+              Text('Modifier la transaction', style: AppTextStyles.h5, textAlign: TextAlign.center),
 
               const SizedBox(height: AppConstants.largePadding),
 
@@ -140,14 +127,9 @@ class _EditTransactionBottomSheetState
 
                           return DropdownButtonFormField<int>(
                             value: _selectedAccountId,
-                            decoration: const InputDecoration(
-                              labelText: 'Compte',
-                            ),
+                            decoration: const InputDecoration(labelText: 'Compte'),
                             items: accounts.map((account) {
-                              return DropdownMenuItem(
-                                value: account.id,
-                                child: Text(account.name),
-                              );
+                              return DropdownMenuItem(value: account.id, child: Text(account.name));
                             }).toList(),
                             onChanged: (value) {
                               setState(() {
@@ -239,16 +221,11 @@ class _EditTransactionBottomSheetState
                         decoration: InputDecoration(
                           labelText: l10n.amount,
                           hintText: '0.00',
-                          suffixText:
-                              AppConstants.currencySymbols[_selectedCurrency],
+                          suffixText: AppConstants.currencySymbols[_selectedCurrency],
                         ),
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d*\.?\d{0,2}'),
-                          ),
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
                         ],
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
@@ -269,9 +246,7 @@ class _EditTransactionBottomSheetState
                         value: _selectedCurrency,
                         decoration: InputDecoration(labelText: l10n.currency),
                         items: AppConstants.supportedCurrencies.map((currency) {
-                          final symbol =
-                              AppConstants.currencySymbols[currency] ??
-                              currency;
+                          final symbol = AppConstants.currencySymbols[currency] ?? currency;
                           return DropdownMenuItem(
                             value: currency,
                             child: Text('$currency ($symbol)'),
@@ -296,12 +271,7 @@ class _EditTransactionBottomSheetState
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                AppFormatters.formatDateShort(
-                                  _selectedDate,
-                                  context,
-                                ),
-                              ),
+                              Text(AppFormatters.formatDateShort(_selectedDate, context)),
                               const Icon(Icons.calendar_today),
                             ],
                           ),
@@ -362,9 +332,7 @@ class _EditTransactionBottomSheetState
                         children: [
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: _isLoading
-                                  ? null
-                                  : () => Navigator.of(context).pop(),
+                              onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
                               child: Text(l10n.cancel),
                             ),
                           ),
@@ -378,9 +346,7 @@ class _EditTransactionBottomSheetState
                                   ? const SizedBox(
                                       width: 20,
                                       height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
+                                      child: CircularProgressIndicator(strokeWidth: 2),
                                     )
                                   : Text(l10n.save),
                             ),
@@ -432,9 +398,7 @@ class _EditTransactionBottomSheetState
         currency: _selectedCurrency,
         amount: double.parse(_amountController.text),
         title: _titleController.text.trim(),
-        comment: _commentController.text.trim().isEmpty
-            ? null
-            : _commentController.text.trim(),
+        comment: _commentController.text.trim().isEmpty ? null : _commentController.text.trim(),
         counterpartyName: _counterpartyController.text.trim().isEmpty
             ? null
             : _counterpartyController.text.trim(), // Nouveau paramètre

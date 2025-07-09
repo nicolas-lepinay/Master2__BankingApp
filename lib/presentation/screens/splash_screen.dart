@@ -28,9 +28,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     await ref.read(accountsProvider.future);
 
     if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainScreen()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (context) => const MainScreen()));
     }
   }
 
@@ -52,20 +52,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 color: AppColors.textLight,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Icon(
-                Icons.account_balance,
-                size: 40,
-                color: AppColors.primary,
-              ),
+              child: const Icon(Icons.account_balance, size: 40, color: AppColors.primary),
             ),
 
             const SizedBox(height: 32),
 
             // Nom de l'app
-            Text(
-              l10n.appTitle,
-              style: AppTextStyles.h2.copyWith(color: AppColors.textLight),
-            ),
+            Text(l10n.appTitle, style: AppTextStyles.h2.copyWith(color: AppColors.textLight)),
 
             const SizedBox(height: 48),
 
@@ -79,7 +72,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             Text(
               l10n.loading,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textLight.withOpacity(0.8),
+                color: AppColors.textLight.withValues(alpha: 0.8),
               ),
             ),
           ],

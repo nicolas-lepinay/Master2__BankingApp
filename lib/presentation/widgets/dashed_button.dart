@@ -19,14 +19,14 @@ class DashedButton extends StatelessWidget {
     super.key,
     this.text,
     this.icon,
-    this.dashColor = AppColors.containerDarkGray,
+    this.dashColor = AppColors.dark,
     this.onTap,
     this.width,
     this.height = 60,
-    this.borderRadius = 16,
-    this.dashWidth = 8,
-    this.dashSpace = 4,
-    this.strokeWidth = 2,
+    this.borderRadius = 22,
+    this.dashWidth = 7,
+    this.dashSpace = 6,
+    this.strokeWidth = 1.7,
   });
 
   @override
@@ -35,7 +35,7 @@ class DashedButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: width,
-        height: height,
+        //height: height,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(borderRadius),
         ),
@@ -49,8 +49,8 @@ class DashedButton extends StatelessWidget {
           ),
           child: Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.defaultPadding,
-              vertical: AppConstants.defaultPadding,
+              horizontal: AppConstants.largePadding,
+              vertical: AppConstants.mediumPadding,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -62,13 +62,13 @@ class DashedButton extends StatelessWidget {
                       style: AppTextStyles.buttonText.copyWith(
                         color: dashColor,
                       ),
-                      textAlign: TextAlign.center,
+                      textAlign: TextAlign.start,
                     ),
                   ),
                 ],
                 if (icon != null) ...[
                   if (text != null) const SizedBox(width: 12),
-                  Icon(icon, color: dashColor, size: 24),
+                  Icon(icon, color: dashColor, size: 26),
                 ],
               ],
             ),
