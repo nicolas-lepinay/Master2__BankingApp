@@ -59,33 +59,12 @@ class _BankCardWidgetState extends State<BankCardWidget> {
     }
   }
 
-  void _measureBalancePosition() {
-    // Ne mesurer qu'une seule fois au chargement initial
-    if (_positionAlreadyMeasured) return;
-
-    final RenderBox? renderBox =
-        _balanceKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      final position = renderBox.localToGlobal(Offset.zero);
-      final bottomOfBalance = position.dy + (renderBox.size.height / 3);
-
-      // Appeler le callback avec la position Y du bas du solde
-      widget.onBalancePositionChanged?.call(bottomOfBalance);
-      // Marquer comme déjà mesuré
-      _positionAlreadyMeasured = true;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Mesurer la position du solde après le build
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _measureBalancePosition();
-    });
     return Container(
       width: double.infinity,
       // Supprimer la hauteur fixe pour que la carte s'adapte à son contenu
-      margin: const EdgeInsets.symmetric(horizontal: 20),
+      margin: const EdgeInsets.symmetric(horizontal: 30),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(32),

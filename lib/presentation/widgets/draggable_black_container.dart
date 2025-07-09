@@ -5,6 +5,12 @@ import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/utils/draggable_snap_sizer.dart';
+import 'package:bankapp/presentation/providers/database_provider.dart';
+import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
+import 'package:bankapp/presentation/widgets/perspective_list_view.dart';
+import 'package:bankapp/presentation/widgets/perspective_transaction_item.dart';
+import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
+import 'package:bankapp/data/database/database.dart';
 import 'dart:async';
 
 class DraggableBlackContainer extends ConsumerStatefulWidget {
@@ -20,10 +26,12 @@ class DraggableBlackContainer extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<DraggableBlackContainer> createState() => _DraggableBlackContainerState();
+  ConsumerState<DraggableBlackContainer> createState() =>
+      _DraggableBlackContainerState();
 }
 
-class _DraggableBlackContainerState extends ConsumerState<DraggableBlackContainer>
+class _DraggableBlackContainerState
+    extends ConsumerState<DraggableBlackContainer>
     with TickerProviderStateMixin {
   late DraggableScrollableController _dragController;
   late AnimationController _snapAnimationController;
@@ -126,10 +134,13 @@ class _DraggableBlackContainerState extends ConsumerState<DraggableBlackContaine
   }
 
   void _animateToBreakpoint(double targetBreakpoint) {
-    _snapAnimation = Tween<double>(
-      begin: _currentExtent,
-      end: targetBreakpoint,
-    ).animate(CurvedAnimation(parent: _snapAnimationController, curve: Curves.easeInOut));
+    _snapAnimation = Tween<double>(begin: _currentExtent, end: targetBreakpoint)
+        .animate(
+          CurvedAnimation(
+            parent: _snapAnimationController,
+            curve: Curves.easeInOut,
+          ),
+        );
 
     _snapAnimation.addListener(() {
       if (_dragController.isAttached) {
@@ -176,7 +187,7 @@ class _DraggableBlackContainerState extends ConsumerState<DraggableBlackContaine
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.3),
+                    color: AppColors.white.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -185,7 +196,10 @@ class _DraggableBlackContainerState extends ConsumerState<DraggableBlackContaine
                 Expanded(
                   child: ListView(
                     controller: scrollController,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                     children: [
                       // Bouton Statistiques
                       _buildStatisticsButton(l10n),
@@ -240,7 +254,11 @@ class _DraggableBlackContainerState extends ConsumerState<DraggableBlackContaine
               style: AppTextStyles.statisticsButtonText,
             ),
             const SizedBox(width: 12),
-            const Icon(Icons.arrow_forward, color: AppColors.textLight, size: 20),
+            const Icon(
+              Icons.arrow_forward,
+              color: AppColors.textLight,
+              size: 20,
+            ),
           ],
         ),
       ),
@@ -262,7 +280,7 @@ class _DraggableBlackContainerState extends ConsumerState<DraggableBlackContaine
           child: Text(
             'Voir tout', // TODO: Ajouter à l10n
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textLight.withValues(alpha: 0.8),
+              color: AppColors.textLight.withOpacity(0.8),
             ),
           ),
         ),
@@ -271,25 +289,201 @@ class _DraggableBlackContainerState extends ConsumerState<DraggableBlackContaine
   }
 
   Widget _buildTransactionsContainer() {
+    final selectedCardIndex = ref.watch(selectedCardProvider);
+    final accountsAsync = ref.watch(accountsProvider);
+
+    // Configuration centralisée de la liste perspective
+    const int perspectiveVisualizedItems = 3; // Nombre d'items visibles
+    const double perspectiveItemExtent = 100.0; // Hauteur de chaque item
+    const double perspectiveMinScale = 0.85; // Échelle des items arrière
+    const double containerHeight = 250.0; // Hauteur du container rose
+
+    return accountsAsync.when(
+      data: (accounts) {
+        if (accounts.isEmpty) {
+          return _buildEmptyTransactionsContainer(containerHeight);
+        }
+
+        // Récupérer le compte sélectionné
+        final selectedAccount = selectedCardIndex < accounts.length
+            ? accounts[selectedCardIndex]
+            : accounts.first;
+
+        // Récupérer les transactions avec leurs tiers pour le compte sélectionné
+        final transactionsAsync = ref.watch(
+          transactionsWithCounterpartyProvider(selectedAccount.id),
+        );
+
+        return transactionsAsync.when(
+          data: (transactions) {
+            if (transactions.isEmpty) {
+              return _buildEmptyTransactionsContainer(containerHeight);
+            }
+
+            // Filtrer et limiter les transactions (par exemple, les 20 plus récentes)
+            final limitedTransactions = transactions.take(20).toList();
+
+            return Container(
+              height:
+                  containerHeight, // Hauteur fixe pour la liste avec perspective
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.gradientPinkStart, // #FE68E8
+                    AppColors.gradientPinkEnd, // #FBA9ED
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: PerspectiveListView(
+                  visualizedItems:
+                      perspectiveVisualizedItems, // Utilise la variable
+                  itemExtent: perspectiveItemExtent, // Utilise la variable
+                  minScale:
+                      perspectiveMinScale, // Nouveau paramètre personnalisé
+                  initialIndex: _findTodayTransactionIndex(limitedTransactions),
+                  padding: const EdgeInsets.only(top: 20, bottom: 20),
+                  onTapFrontItem: (index) {
+                    if (index != null && index < limitedTransactions.length) {
+                      _navigateToTransactionDetail(
+                        limitedTransactions[index].transaction,
+                      );
+                    }
+                  },
+                  onChangeFrontItem: (index) {
+                    // Callback quand la transaction au premier plan change
+                  },
+                  children: limitedTransactions.map((
+                    transactionWithCounterparty,
+                  ) {
+                    return PerspectiveTransactionItem(
+                      transactionWithCounterparty: transactionWithCounterparty,
+                      onTap: () => _navigateToTransactionDetail(
+                        transactionWithCounterparty.transaction,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            );
+          },
+          loading: () => _buildLoadingTransactionsContainer(containerHeight),
+          error: (error, stack) =>
+              _buildErrorTransactionsContainer(containerHeight),
+        );
+      },
+      loading: () => _buildLoadingTransactionsContainer(containerHeight),
+      error: (error, stack) =>
+          _buildErrorTransactionsContainer(containerHeight),
+    );
+  }
+
+  Widget _buildEmptyTransactionsContainer(double containerHeight) {
     return Container(
-      height: 300, // Hauteur fixe pour la liste avec perspective
+      height: containerHeight,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            AppColors.gradientPinkStart, // #FE68E8
-            AppColors.gradientPinkEnd, // #FBA9ED
-          ],
+          colors: [AppColors.gradientPinkStart, AppColors.gradientPinkEnd],
         ),
         borderRadius: BorderRadius.circular(24),
       ),
       child: const Center(
         child: Text(
-          'PerspectiveListView\n(Étape 5)',
-          style: TextStyle(color: AppColors.textDark, fontSize: 16, fontWeight: FontWeight.w600),
+          'Aucune transaction',
+          style: TextStyle(
+            color: AppColors.textDark,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
           textAlign: TextAlign.center,
         ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingTransactionsContainer(double containerHeight) {
+    return Container(
+      height: containerHeight,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.gradientPinkStart, AppColors.gradientPinkEnd],
+        ),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(color: AppColors.textDark),
+      ),
+    );
+  }
+
+  Widget _buildErrorTransactionsContainer(double containerHeight) {
+    return Container(
+      height: containerHeight,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.gradientPinkStart, AppColors.gradientPinkEnd],
+        ),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: const Center(
+        child: Text(
+          'Erreur de chargement',
+          style: TextStyle(
+            color: AppColors.textDark,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  /// Trouve l'index de la transaction la plus proche d'aujourd'hui
+  int _findTodayTransactionIndex(
+    List<TransactionWithCounterparty> transactions,
+  ) {
+    if (transactions.isEmpty) return 0;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    int closestIndex = 0;
+    Duration smallestDifference = Duration.zero;
+
+    for (int i = 0; i < transactions.length; i++) {
+      final transactionDate = transactions[i].transaction.date;
+      final transactionDateOnly = DateTime(
+        transactionDate.year,
+        transactionDate.month,
+        transactionDate.day,
+      );
+      final difference = today.difference(transactionDateOnly).abs();
+
+      if (i == 0 || difference < smallestDifference) {
+        smallestDifference = difference;
+        closestIndex = i;
+      }
+    }
+
+    return closestIndex;
+  }
+
+  void _navigateToTransactionDetail(Transaction transaction) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) =>
+            TransactionDetailScreen(transactionId: transaction.id),
       ),
     );
   }
@@ -309,7 +503,7 @@ class _DraggableBlackContainerState extends ConsumerState<DraggableBlackContaine
           child: Text(
             'Voir tout', // TODO: Ajouter à l10n
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textLight.withValues(alpha: 0.8),
+              color: AppColors.textLight.withOpacity(0.8),
             ),
           ),
         ),
@@ -327,10 +521,25 @@ class _DraggableBlackContainerState extends ConsumerState<DraggableBlackContaine
       child: const Center(
         child: Text(
           'Carousel Transactions Suivies\n(Étape 6)',
-          style: TextStyle(color: AppColors.textLight, fontSize: 14, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            color: AppColors.textLight,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
           textAlign: TextAlign.center,
         ),
       ),
     );
   }
+
+  /// Provider pour récupérer les transactions avec tiers pour un compte donné
+  /// (Utilise une méthode existante de la base de données)
+  static final transactionsWithCounterpartyProvider =
+      FutureProvider.family<List<TransactionWithCounterparty>, int>((
+        ref,
+        accountId,
+      ) async {
+        final database = ref.read(databaseProvider);
+        return database.getTransactionsWithCounterparty(accountId);
+      });
 }
