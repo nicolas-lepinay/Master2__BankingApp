@@ -91,8 +91,34 @@ final counterpartiesProvider = FutureProvider<List<Counterparty>>((ref) async {
   return database.select(database.counterparties).get();
 });
 
-// Provider pour les transactions suivies
-final followedTransactionsProvider = FutureProvider<List<Transaction>>((
+// =====================================================
+// PROVIDERS POUR LES TRANSACTIONS SUIVIES
+// =====================================================
+
+/// Provider pour récupérer toutes les transactions suivies avec leurs détails
+final followedTransactionsProvider =
+    FutureProvider<List<TransactionWithCounterparty>>((ref) async {
+      final database = ref.read(databaseProvider);
+      return database.getFollowedTransactionsWithDetails();
+    });
+
+/// Provider pour récupérer seulement les IDs des transactions suivies
+final followedTransactionIdsProvider = FutureProvider<List<int>>((ref) async {
+  final database = ref.read(databaseProvider);
+  return database.getFollowedTransactionIds();
+});
+
+/// Provider pour vérifier si une transaction spécifique est suivie
+final isTransactionFollowedProvider = FutureProvider.family<bool, int>((
+  ref,
+  transactionId,
+) async {
+  final database = ref.read(databaseProvider);
+  return database.isTransactionFollowed(transactionId);
+});
+
+/// Provider pour les transactions suivies (entités Transaction simples)
+final followedTransactionsSimpleProvider = FutureProvider<List<Transaction>>((
   ref,
 ) async {
   final database = ref.read(databaseProvider);

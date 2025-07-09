@@ -59,7 +59,7 @@ class Transactions extends Table {
   IntColumn get status => integer()(); // 0 = pending, 1 = confirmed
 }
 
-// Nouvelle table pour les transactions suivies
+// Table pour les transactions suivies
 class FollowedTransactions extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get transactionId => integer().references(Transactions, #id)();
@@ -80,7 +80,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1; // Increment version for new tables
+  int get schemaVersion => 1;
 
   // Helper method to get the current user
   Future<User> getCurrentUser() async {
@@ -228,8 +228,31 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  // Methods for followed transactions
+  // =====================================================
+  // MÉTHODES POUR LES TRANSACTIONS SUIVIES
+  // =====================================================
+
+  /// Ajouter une transaction aux transactions suivies
   Future<void> addFollowedTransaction(int transactionId) async {
+    // Vérifier que la transaction existe
+    final transaction = await (select(
+      transactions,
+    )..where((t) => t.id.equals(transactionId))).getSingleOrNull();
+
+    if (transaction == null) {
+      throw ArgumentError('Transaction avec ID $transactionId non trouvée');
+    }
+
+    // Vérifier si elle n'est pas déjà suivie
+    final existingFollow = await (select(
+      followedTransactions,
+    )..where((ft) => ft.transactionId.equals(transactionId))).getSingleOrNull();
+
+    if (existingFollow != null) {
+      throw StateError('Transaction déjà suivie');
+    }
+
+    // Ajouter aux transactions suivies
     await into(followedTransactions).insert(
       FollowedTransactionsCompanion(
         transactionId: Value(transactionId),
@@ -238,12 +261,79 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  /// Retirer une transaction des transactions suivies
   Future<void> removeFollowedTransaction(int transactionId) async {
-    await (delete(
+    final deletedCount = await (delete(
       followedTransactions,
     )..where((ft) => ft.transactionId.equals(transactionId))).go();
+
+    if (deletedCount == 0) {
+      throw StateError('Transaction non trouvée dans les suivies');
+    }
   }
 
+  /// Basculer le statut de suivi d'une transaction
+  Future<bool> toggleFollowedTransaction(int transactionId) async {
+    final existingFollow = await (select(
+      followedTransactions,
+    )..where((ft) => ft.transactionId.equals(transactionId))).getSingleOrNull();
+
+    if (existingFollow != null) {
+      // Retirer du suivi
+      await removeFollowedTransaction(transactionId);
+      return false; // Plus suivie
+    } else {
+      // Ajouter au suivi
+      await addFollowedTransaction(transactionId);
+      return true; // Maintenant suivie
+    }
+  }
+
+  /// Vérifier si une transaction est suivie
+  Future<bool> isTransactionFollowed(int transactionId) async {
+    final existingFollow = await (select(
+      followedTransactions,
+    )..where((ft) => ft.transactionId.equals(transactionId))).getSingleOrNull();
+
+    return existingFollow != null;
+  }
+
+  /// Récupérer les transactions suivies avec leurs détails
+  Future<List<TransactionWithCounterparty>>
+  getFollowedTransactionsWithDetails() async {
+    final query = select(transactions).join([
+      innerJoin(
+        followedTransactions,
+        followedTransactions.transactionId.equalsExp(transactions.id),
+      ),
+      leftOuterJoin(
+        counterparties,
+        counterparties.id.equalsExp(transactions.counterpartyId),
+      ),
+    ])..orderBy([OrderingTerm.desc(followedTransactions.followedDate)]);
+
+    final result = await query.get();
+
+    return result.map((row) {
+      final transaction = row.readTable(transactions);
+      final counterparty = row.readTableOrNull(counterparties);
+      return TransactionWithCounterparty(
+        transaction: transaction,
+        counterparty: counterparty,
+      );
+    }).toList();
+  }
+
+  /// Récupérer seulement les IDs des transactions suivies
+  Future<List<int>> getFollowedTransactionIds() async {
+    final query = select(followedTransactions)
+      ..orderBy([(ft) => OrderingTerm.desc(ft.followedDate)]);
+
+    final result = await query.get();
+    return result.map((ft) => ft.transactionId).toList();
+  }
+
+  /// Récupérer les transactions suivies (entités Transaction simples)
   Future<List<Transaction>> getFollowedTransactions() async {
     final query = select(transactions).join([
       innerJoin(
