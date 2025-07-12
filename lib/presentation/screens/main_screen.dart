@@ -4,7 +4,7 @@ import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/providers/navigation_provider.dart';
 import 'package:bankapp/presentation/screens/home_screen.dart';
 import 'package:bankapp/presentation/screens/settings_screen.dart';
-import 'package:bankapp/presentation/widgets/add_transaction_bottom_sheet.dart';
+import 'package:bankapp/presentation/widgets/floating_navbar.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 
@@ -16,64 +16,49 @@ class MainScreen extends ConsumerWidget {
     final currentIndex = ref.watch(navigationProvider);
     final l10n = AppLocalizations.of(context)!;
 
+    // Déterminer si le fond est sombre pour adapter la navbar
+    bool isDarkBackground = _isDarkBackground(currentIndex);
+
     return Scaffold(
-      body: IndexedStack(
-        index: currentIndex,
-        children: const [
-          HomeScreen(),
-          // Autres écrans seront ajoutés plus tard
-          Center(child: Text('Statistiques')),
-          SettingsScreen(),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: (index) {
-          // Le bouton central (index 1) ouvre l'écran d'ajout de transaction
-          if (index == 1) {
-            _showAddTransactionScreen(context);
-          } else {
-            // Ajuster l'index pour ignorer le bouton central
-            final adjustedIndex = index > 1 ? index - 1 : index;
-            ref.read(navigationProvider.notifier).setIndex(adjustedIndex);
-          }
-        },
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
-            label: 'Accueil',
+      body: Stack(
+        children: [
+          // Contenu principal
+          IndexedStack(
+            index: currentIndex,
+            children: const [
+              HomeScreen(), // Index 0 - Home
+              Center(child: Text('Menu/Tiers')), // Index 1 - Menu/Tiers
+              Center(child: Text('Statistiques')), // Index 2 - Statistiques
+              SettingsScreen(), // Index 3 - Paramètres
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.add, color: AppColors.textLight),
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.bar_chart),
-            label: 'Stats',
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.settings),
-            label: 'Paramètres',
+
+          // Navbar flottante
+          FloatingNavbar(
+            currentIndex: currentIndex,
+            isDarkBackground: isDarkBackground,
+            onTap: (index) {
+              ref.read(navigationProvider.notifier).setIndex(index);
+            },
           ),
         ],
       ),
     );
   }
 
-  void _showAddTransactionScreen(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const AddTransactionBottomSheet(),
-    );
+  /// Détermine si le fond de l'écran actuel est sombre
+  bool _isDarkBackground(int screenIndex) {
+    switch (screenIndex) {
+      case 0: // Home Screen
+        return true; // DraggableBlackContainer = fond sombre
+      case 1: // Menu/Tiers
+        return false; // Présumé fond clair
+      case 2: // Statistiques
+        return false; // Présumé fond clair
+      case 3: // Paramètres
+        return false; // Fond clair (SettingsScreen)
+      default:
+        return true;
+    }
   }
 }

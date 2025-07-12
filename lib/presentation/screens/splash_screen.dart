@@ -21,16 +21,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    // Simuler un délai de chargement minimum
-    await Future.delayed(const Duration(seconds: 3));
-
     // Initialiser la base de données en chargeant les comptes
     await ref.read(accountsProvider.future);
 
+    // Simuler un délai de chargement minimum
+    await Future.delayed(const Duration(seconds: 3));
+
     if (mounted) {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (context) => const MainScreen()));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainScreen()),
+      );
     }
   }
 
@@ -52,13 +52,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 color: AppColors.textLight,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Icon(Icons.account_balance, size: 40, color: AppColors.primary),
+              child: const Icon(
+                Icons.account_balance,
+                size: 40,
+                color: AppColors.primary,
+              ),
             ),
 
             const SizedBox(height: 32),
 
             // Nom de l'app
-            Text(l10n.appTitle, style: AppTextStyles.h2.copyWith(color: AppColors.textLight)),
+            Text(
+              l10n.appTitle,
+              style: AppTextStyles.h2.copyWith(color: AppColors.textLight),
+            ),
 
             const SizedBox(height: 48),
 

@@ -11,19 +11,26 @@ import 'package:bankapp/data/database/database.dart';
 
 class AddTransactionBottomSheet extends ConsumerStatefulWidget {
   final int? accountId;
+  final String? preselectedTransactionType; // Nouveau paramètre
 
-  const AddTransactionBottomSheet({super.key, this.accountId});
+  const AddTransactionBottomSheet({
+    super.key,
+    this.accountId,
+    this.preselectedTransactionType,
+  });
 
   @override
-  ConsumerState<AddTransactionBottomSheet> createState() => _AddTransactionBottomSheetState();
+  ConsumerState<AddTransactionBottomSheet> createState() =>
+      _AddTransactionBottomSheetState();
 }
 
-class _AddTransactionBottomSheetState extends ConsumerState<AddTransactionBottomSheet> {
+class _AddTransactionBottomSheetState
+    extends ConsumerState<AddTransactionBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _commentController = TextEditingController();
-  final _counterpartyController = TextEditingController(); // Nouveau contrôleur pour le tiers
+  final _counterpartyController = TextEditingController();
 
   String _transactionType = AppConstants.transactionTypeDebit;
   String _selectedCurrency = 'EUR';
@@ -35,6 +42,11 @@ class _AddTransactionBottomSheetState extends ConsumerState<AddTransactionBottom
   void initState() {
     super.initState();
     _selectedAccountId = widget.accountId;
+
+    // Nouveau : initialiser le type de transaction si présélectionné
+    if (widget.preselectedTransactionType != null) {
+      _transactionType = widget.preselectedTransactionType!;
+    }
   }
 
   @override
@@ -42,7 +54,7 @@ class _AddTransactionBottomSheetState extends ConsumerState<AddTransactionBottom
     _titleController.dispose();
     _amountController.dispose();
     _commentController.dispose();
-    _counterpartyController.dispose(); // Disposer du nouveau contrôleur
+    _counterpartyController.dispose();
     super.dispose();
   }
 
@@ -56,7 +68,9 @@ class _AddTransactionBottomSheetState extends ConsumerState<AddTransactionBottom
         left: AppConstants.defaultPadding,
         right: AppConstants.defaultPadding,
         top: AppConstants.defaultPadding,
-        bottom: MediaQuery.of(context).viewInsets.bottom + AppConstants.defaultPadding,
+        bottom:
+            MediaQuery.of(context).viewInsets.bottom +
+            AppConstants.defaultPadding,
       ),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -74,7 +88,7 @@ class _AddTransactionBottomSheetState extends ConsumerState<AddTransactionBottom
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -83,7 +97,11 @@ class _AddTransactionBottomSheetState extends ConsumerState<AddTransactionBottom
           const SizedBox(height: AppConstants.defaultPadding),
 
           // Titre
-          Text(l10n.addTransaction, style: AppTextStyles.h5, textAlign: TextAlign.center),
+          Text(
+            l10n.addTransaction,
+            style: AppTextStyles.h5,
+            textAlign: TextAlign.center,
+          ),
 
           const SizedBox(height: AppConstants.largePadding),
 
@@ -104,14 +122,19 @@ class _AddTransactionBottomSheetState extends ConsumerState<AddTransactionBottom
                         value: _selectedAccountId,
                         decoration: const InputDecoration(labelText: 'Compte'),
                         items: accounts.map((account) {
-                          return DropdownMenuItem(value: account.id, child: Text(account.name));
+                          return DropdownMenuItem(
+                            value: account.id,
+                            child: Text(account.name),
+                          );
                         }).toList(),
                         onChanged: (value) {
                           setState(() {
                             _selectedAccountId = value;
                             // Mettre à jour la devise par défaut
                             if (value != null) {
-                              final selectedAccount = accounts.firstWhere((a) => a.id == value);
+                              final selectedAccount = accounts.firstWhere(
+                                (a) => a.id == value,
+                              );
                               _selectedCurrency = selectedAccount.currency;
                             }
                           });
@@ -143,40 +166,73 @@ class _AddTransactionBottomSheetState extends ConsumerState<AddTransactionBottom
 
                   const SizedBox(height: AppConstants.defaultPadding),
 
-                  // Type de transaction
-                  DropdownButtonFormField<String>(
-                    value: _transactionType,
-                    decoration: const InputDecoration(labelText: 'Type'),
-                    items: [
-                      DropdownMenuItem(
-                        value: AppConstants.transactionTypeDebit,
-                        child: Text(
-                          AppFormatters.getTransactionTypeLabel(
-                            AppConstants.transactionTypeDebit,
-                            context,
+                  // Type de transaction (seulement si pas présélectionné)
+                  if (widget.preselectedTransactionType == null) ...[
+                    DropdownButtonFormField<String>(
+                      value: _transactionType,
+                      decoration: const InputDecoration(labelText: 'Type'),
+                      items: [
+                        DropdownMenuItem(
+                          value: AppConstants.transactionTypeDebit,
+                          child: Text(
+                            AppFormatters.getTransactionTypeLabel(
+                              AppConstants.transactionTypeDebit,
+                              context,
+                            ),
                           ),
                         ),
-                      ),
-                      DropdownMenuItem(
-                        value: AppConstants.transactionTypeCredit,
-                        child: Text(
-                          AppFormatters.getTransactionTypeLabel(
-                            AppConstants.transactionTypeCredit,
-                            context,
+                        DropdownMenuItem(
+                          value: AppConstants.transactionTypeCredit,
+                          child: Text(
+                            AppFormatters.getTransactionTypeLabel(
+                              AppConstants.transactionTypeCredit,
+                              context,
+                            ),
                           ),
                         ),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _transactionType = value;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: AppConstants.defaultPadding),
+                  ] else ...[
+                    // Afficher le type présélectionné de manière non-éditable
+                    InputDecorator(
+                      decoration: const InputDecoration(labelText: 'Type'),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _transactionType ==
+                                    AppConstants.transactionTypeDebit
+                                ? Icons.remove_circle_outline
+                                : Icons.add_circle_outline,
+                            color:
+                                _transactionType ==
+                                    AppConstants.transactionTypeDebit
+                                ? Colors.red
+                                : Colors.green,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            AppFormatters.getTransactionTypeLabel(
+                              _transactionType,
+                              context,
+                            ),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          _transactionType = value;
-                        });
-                      }
-                    },
-                  ),
-
-                  const SizedBox(height: AppConstants.defaultPadding),
+                    ),
+                    const SizedBox(height: AppConstants.defaultPadding),
+                  ],
 
                   // Titre
                   TextFormField(
@@ -201,10 +257,17 @@ class _AddTransactionBottomSheetState extends ConsumerState<AddTransactionBottom
                     decoration: InputDecoration(
                       labelText: l10n.amount,
                       hintText: '0.00',
-                      suffixText: AppConstants.currencySymbols[_selectedCurrency],
+                      suffixText:
+                          AppConstants.currencySymbols[_selectedCurrency],
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}'))],
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d*\.?\d{0,2}'),
+                      ),
+                    ],
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Le montant est requis';
@@ -224,8 +287,12 @@ class _AddTransactionBottomSheetState extends ConsumerState<AddTransactionBottom
                     value: _selectedCurrency,
                     decoration: InputDecoration(labelText: l10n.currency),
                     items: AppConstants.supportedCurrencies.map((currency) {
-                      final symbol = AppConstants.currencySymbols[currency] ?? currency;
-                      return DropdownMenuItem(value: currency, child: Text('$currency ($symbol)'));
+                      final symbol =
+                          AppConstants.currencySymbols[currency] ?? currency;
+                      return DropdownMenuItem(
+                        value: currency,
+                        child: Text('$currency ($symbol)'),
+                      );
                     }).toList(),
                     onChanged: (value) {
                       if (value != null) {
@@ -246,7 +313,12 @@ class _AddTransactionBottomSheetState extends ConsumerState<AddTransactionBottom
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(AppFormatters.formatDateShort(_selectedDate, context)),
+                          Text(
+                            AppFormatters.formatDateShort(
+                              _selectedDate,
+                              context,
+                            ),
+                          ),
                           const Icon(Icons.calendar_today),
                         ],
                       ),
@@ -272,7 +344,9 @@ class _AddTransactionBottomSheetState extends ConsumerState<AddTransactionBottom
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                          onPressed: _isLoading
+                              ? null
+                              : () => Navigator.of(context).pop(),
                           child: Text(l10n.cancel),
                         ),
                       ),
@@ -286,7 +360,9 @@ class _AddTransactionBottomSheetState extends ConsumerState<AddTransactionBottom
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 )
                               : Text(l10n.save),
                         ),
@@ -333,10 +409,12 @@ class _AddTransactionBottomSheetState extends ConsumerState<AddTransactionBottom
         currency: _selectedCurrency,
         amount: double.parse(_amountController.text),
         title: _titleController.text.trim(),
-        comment: _commentController.text.trim().isEmpty ? null : _commentController.text.trim(),
+        comment: _commentController.text.trim().isEmpty
+            ? null
+            : _commentController.text.trim(),
         counterpartyName: _counterpartyController.text.trim().isEmpty
             ? null
-            : _counterpartyController.text.trim(), // Nouveau paramètre
+            : _counterpartyController.text.trim(),
         date: _selectedDate,
         status: 1, // Confirmé par défaut
       );

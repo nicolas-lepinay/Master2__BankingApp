@@ -114,7 +114,7 @@ class AppTextStyles {
   // Transaction amount for perspective list
   static const TextStyle transactionAmountPerspective = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: FontWeight.w600,
     color: AppColors.textDark,
   );

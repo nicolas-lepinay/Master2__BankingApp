@@ -13,9 +13,6 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  # UI
-  cupertino_icons: ^1.0.8
-
   # State management
   flutter_riverpod: ^2.6.1
 
@@ -27,6 +24,11 @@ dependencies:
 
   # Utilities
   intl: ^0.20.2
+
+  # UI
+  cupertino_icons: ^1.0.8
+  animate_gradient: ^0.0.3
+  flutter_svg: ^2.2.0
 
 dev_dependencies:
   flutter_test:
@@ -42,7 +44,7 @@ flutter:
   # Assets
   assets:
     - assets/images/
-
+    - assets/icons/system/
   # Custom fonts
   fonts:
     - family: Pacifico

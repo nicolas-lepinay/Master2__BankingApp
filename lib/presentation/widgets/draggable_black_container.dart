@@ -1,3 +1,5 @@
+import 'package:animate_gradient/animate_gradient.dart';
+import 'package:bankapp/presentation/widgets/astroid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
@@ -9,6 +11,7 @@ import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
 import 'package:bankapp/presentation/widgets/perspective_list_view.dart';
 import 'package:bankapp/presentation/widgets/perspective_transaction_item.dart';
+import 'package:bankapp/presentation/widgets/followed_transactions_carousel.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
 import 'package:bankapp/data/database/database.dart';
 import 'dart:async';
@@ -296,12 +299,12 @@ class _DraggableBlackContainerState
     const int perspectiveVisualizedItems = 3; // Nombre d'items visibles
     const double perspectiveItemExtent = 100.0; // Hauteur de chaque item
     const double perspectiveMinScale = 0.85; // Échelle des items arrière
-    const double containerHeight = 250.0; // Hauteur du container rose
+    const double containerHeight = 260.0; // Hauteur du container rose
 
     return accountsAsync.when(
       data: (accounts) {
         if (accounts.isEmpty) {
-          return _buildEmptyTransactionsContainer(containerHeight);
+          return _buildEmptyTransactionsContainer();
         }
 
         // Récupérer le compte sélectionné
@@ -309,23 +312,22 @@ class _DraggableBlackContainerState
             ? accounts[selectedCardIndex]
             : accounts.first;
 
-        // Récupérer les transactions avec leurs tiers pour le compte sélectionné
+        // Récupérer les transactions centrées autour d'aujourd'hui pour le compte sélectionné
         final transactionsAsync = ref.watch(
-          transactionsWithCounterpartyProvider(selectedAccount.id),
+          transactionsAroundTodayProvider(selectedAccount.id),
         );
 
         return transactionsAsync.when(
           data: (transactions) {
             if (transactions.isEmpty) {
-              return _buildEmptyTransactionsContainer(containerHeight);
+              return _buildEmptyTransactionsContainer();
             }
 
-            // Filtrer et limiter les transactions (par exemple, les 20 plus récentes)
-            final limitedTransactions = transactions.take(20).toList();
+            // Les transactions sont déjà limitées à 50 (25 passées + 25 futures)
+            // et centrées autour d'aujourd'hui par la méthode de base de données
 
             return Container(
-              height:
-                  containerHeight, // Hauteur fixe pour la liste avec perspective
+              height: 300, // Hauteur fixe pour la liste avec perspective
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   begin: Alignment.topCenter,
@@ -345,21 +347,19 @@ class _DraggableBlackContainerState
                   itemExtent: perspectiveItemExtent, // Utilise la variable
                   minScale:
                       perspectiveMinScale, // Nouveau paramètre personnalisé
-                  initialIndex: _findTodayTransactionIndex(limitedTransactions),
+                  initialIndex: _findTodayTransactionIndex(transactions),
                   padding: const EdgeInsets.only(top: 20, bottom: 20),
                   onTapFrontItem: (index) {
-                    if (index != null && index < limitedTransactions.length) {
+                    if (index != null && index < transactions.length) {
                       _navigateToTransactionDetail(
-                        limitedTransactions[index].transaction,
+                        transactions[index].transaction,
                       );
                     }
                   },
                   onChangeFrontItem: (index) {
                     // Callback quand la transaction au premier plan change
                   },
-                  children: limitedTransactions.map((
-                    transactionWithCounterparty,
-                  ) {
+                  children: transactions.map((transactionWithCounterparty) {
                     return PerspectiveTransactionItem(
                       transactionWithCounterparty: transactionWithCounterparty,
                       onTap: () => _navigateToTransactionDetail(
@@ -371,18 +371,18 @@ class _DraggableBlackContainerState
               ),
             );
           },
-          loading: () => _buildLoadingTransactionsContainer(containerHeight),
-          error: (error, stack) =>
-              _buildErrorTransactionsContainer(containerHeight),
+          loading: () => _buildLoadingTransactionsContainer(),
+          error: (error, stack) => _buildErrorTransactionsContainer(),
         );
       },
-      loading: () => _buildLoadingTransactionsContainer(containerHeight),
-      error: (error, stack) =>
-          _buildErrorTransactionsContainer(containerHeight),
+      loading: () => _buildLoadingTransactionsContainer(),
+      error: (error, stack) => _buildErrorTransactionsContainer(),
     );
   }
 
-  Widget _buildEmptyTransactionsContainer(double containerHeight) {
+  Widget _buildEmptyTransactionsContainer() {
+    const double containerHeight = 260.0; // Hauteur du container rose
+
     return Container(
       height: containerHeight,
       decoration: BoxDecoration(
@@ -407,9 +407,9 @@ class _DraggableBlackContainerState
     );
   }
 
-  Widget _buildLoadingTransactionsContainer(double containerHeight) {
+  Widget _buildLoadingTransactionsContainer() {
     return Container(
-      height: containerHeight,
+      height: 300,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
@@ -424,9 +424,9 @@ class _DraggableBlackContainerState
     );
   }
 
-  Widget _buildErrorTransactionsContainer(double containerHeight) {
+  Widget _buildErrorTransactionsContainer() {
     return Container(
-      height: containerHeight,
+      height: 300,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
@@ -512,34 +512,29 @@ class _DraggableBlackContainerState
   }
 
   Widget _buildFollowedTransactionsCarousel() {
-    return Container(
-      height: 80,
-      decoration: BoxDecoration(
-        color: AppColors.containerDarkGray,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: const Center(
-        child: Text(
-          'Carousel Transactions Suivies\n(Étape 6)',
-          style: TextStyle(
-            color: AppColors.textLight,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+    return FollowedTransactionsCarousel(
+      onSeeAllPressed: () {
+        // TODO: Navigation vers la liste complète des transactions suivies
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Voir toutes les transactions suivies - À implémenter',
+            ),
+            backgroundColor: Colors.blue,
           ),
-          textAlign: TextAlign.center,
-        ),
-      ),
+        );
+      },
     );
   }
 
-  /// Provider pour récupérer les transactions avec tiers pour un compte donné
-  /// (Utilise une méthode existante de la base de données)
-  static final transactionsWithCounterpartyProvider =
+  /// Provider pour récupérer les transactions centrées autour d'aujourd'hui
+  /// (Utilise la nouvelle méthode de la base de données)
+  static final transactionsAroundTodayProvider =
       FutureProvider.family<List<TransactionWithCounterparty>, int>((
         ref,
         accountId,
       ) async {
         final database = ref.read(databaseProvider);
-        return database.getTransactionsWithCounterparty(accountId);
+        return database.getTransactionsAroundToday(accountId);
       });
 }

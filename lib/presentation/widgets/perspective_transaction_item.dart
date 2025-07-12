@@ -42,6 +42,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
           ],
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Icône du tiers/catégorie dans un cercle
             Container(
@@ -83,14 +84,12 @@ class PerspectiveTransactionItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
 
-                  const SizedBox(height: 2), // Réduire l'espacement
+                  const SizedBox(height: 2),
                   // Date de la transaction
                   Text(
                     AppFormatters.formatDate(transaction.date, context),
                     style: AppTextStyles.transactionCategoryPerspective
-                        .copyWith(
-                          fontSize: 12, // Réduire la taille
-                        ),
+                        .copyWith(fontSize: 12),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -98,7 +97,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(width: 12), // Réduire l'espacement
+            const SizedBox(width: 12),
             // Montant de la transaction
             Text(
               AppFormatters.formatAmountClean(
@@ -107,10 +106,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
                 showSign: true,
                 context: context,
               ),
-              style: AppTextStyles.transactionAmountPerspective.copyWith(
-                color: isDebit ? AppColors.debitBlack : AppColors.creditGreen,
-                fontSize: 15, // Réduire légèrement la taille
-              ),
+              style: AppTextStyles.transactionAmountPerspective,
             ),
           ],
         ),

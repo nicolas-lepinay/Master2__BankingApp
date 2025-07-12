@@ -91,10 +91,6 @@ final counterpartiesProvider = FutureProvider<List<Counterparty>>((ref) async {
   return database.select(database.counterparties).get();
 });
 
-// =====================================================
-// PROVIDERS POUR LES TRANSACTIONS SUIVIES
-// =====================================================
-
 /// Provider pour récupérer toutes les transactions suivies avec leurs détails
 final followedTransactionsProvider =
     FutureProvider<List<TransactionWithCounterparty>>((ref) async {
@@ -124,3 +120,13 @@ final followedTransactionsSimpleProvider = FutureProvider<List<Transaction>>((
   final database = ref.read(databaseProvider);
   return database.getFollowedTransactions();
 });
+
+/// Provider pour récupérer les transactions centrées autour d'aujourd'hui
+final transactionsAroundTodayProvider =
+    FutureProvider.family<List<TransactionWithCounterparty>, int>((
+      ref,
+      accountId,
+    ) async {
+      final database = ref.read(databaseProvider);
+      return database.getTransactionsAroundToday(accountId);
+    });

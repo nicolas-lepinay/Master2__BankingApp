@@ -346,6 +346,10 @@ class AppDatabase extends _$AppDatabase {
     return result.map((row) => row.readTable(transactions)).toList();
   }
 
+  // =====================================================
+  // MÉTHODES EXISTANTES MAINTENUES
+  // =====================================================
+
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -435,7 +439,7 @@ class AppDatabase extends _$AppDatabase {
     );
 
     // Transaction 2: Spotify (with counterparty)
-    await into(transactions).insert(
+    final spotifyTransactionId = await into(transactions).insert(
       TransactionsCompanion(
         accountId: const Value(1),
         counterpartyId: const Value(5), // Spotify
@@ -453,7 +457,7 @@ class AppDatabase extends _$AppDatabase {
     );
 
     // Transaction 3: Remboursement (no counterparty)
-    await into(transactions).insert(
+    final refundTransactionId = await into(transactions).insert(
       TransactionsCompanion(
         accountId: const Value(1),
         transactionType: const Value('CREDIT'),
@@ -492,11 +496,25 @@ class AppDatabase extends _$AppDatabase {
       ),
     );
 
-    // Add Netflix transaction to followed transactions
+    // Add transactions to followed transactions
     await into(followedTransactions).insert(
       FollowedTransactionsCompanion(
         transactionId: Value(netflixTransactionId),
         followedDate: Value(DateTime.now()),
+      ),
+    );
+
+    await into(followedTransactions).insert(
+      FollowedTransactionsCompanion(
+        transactionId: Value(spotifyTransactionId),
+        followedDate: Value(DateTime.now().add(const Duration(days: 1))),
+      ),
+    );
+
+    await into(followedTransactions).insert(
+      FollowedTransactionsCompanion(
+        transactionId: Value(refundTransactionId),
+        followedDate: Value(DateTime.now().add(const Duration(days: 3))),
       ),
     );
   }
@@ -566,6 +584,86 @@ class AppDatabase extends _$AppDatabase {
         counterparty: counterparty,
       );
     }).toList();
+  }
+
+  /// Récupérer les transactions centrées autour d'aujourd'hui pour la liste perspective
+  /// Récupère jusqu'à 25 transactions passées et 25 transactions futures/présentes
+  Future<List<TransactionWithCounterparty>> getTransactionsAroundToday(
+    int accountId, {
+    int pastLimit = 25,
+    int futureLimit = 25,
+  }) async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // Requête pour les transactions passées (date < aujourd'hui)
+    final pastTransactionsQuery =
+        select(transactions).join([
+            leftOuterJoin(
+              counterparties,
+              counterparties.id.equalsExp(transactions.counterpartyId),
+            ),
+          ])
+          ..where(
+            transactions.accountId.equals(accountId) &
+                transactions.date.isSmallerThanValue(today),
+          )
+          ..orderBy([
+            OrderingTerm.desc(transactions.date),
+            OrderingTerm.desc(transactions.id),
+          ])
+          ..limit(pastLimit);
+
+    // Requête pour les transactions présentes/futures (date >= aujourd'hui)
+    final futurePresentTransactionsQuery =
+        select(transactions).join([
+            leftOuterJoin(
+              counterparties,
+              counterparties.id.equalsExp(transactions.counterpartyId),
+            ),
+          ])
+          ..where(
+            transactions.accountId.equals(accountId) &
+                transactions.date.isBiggerOrEqualValue(today),
+          )
+          ..orderBy([
+            OrderingTerm.asc(transactions.date),
+            OrderingTerm.asc(transactions.id),
+          ])
+          ..limit(futureLimit);
+
+    // Exécuter les deux requêtes
+    final pastResults = await pastTransactionsQuery.get();
+    final futurePresentResults = await futurePresentTransactionsQuery.get();
+
+    // Convertir en TransactionWithCounterparty
+    final pastTransactions = pastResults.map((row) {
+      final transaction = row.readTable(transactions);
+      final counterparty = row.readTableOrNull(counterparties);
+      return TransactionWithCounterparty(
+        transaction: transaction,
+        counterparty: counterparty,
+      );
+    }).toList();
+
+    final futurePresentTransactions = futurePresentResults.map((row) {
+      final transaction = row.readTable(transactions);
+      final counterparty = row.readTableOrNull(counterparties);
+      return TransactionWithCounterparty(
+        transaction: transaction,
+        counterparty: counterparty,
+      );
+    }).toList();
+
+    // Combiner et trier par date (plus récent en premier)
+    final allTransactions = [...pastTransactions, ...futurePresentTransactions];
+
+    // Trier par date décroissante
+    allTransactions.sort(
+      (a, b) => b.transaction.date.compareTo(a.transaction.date),
+    );
+
+    return allTransactions;
   }
 }
 
