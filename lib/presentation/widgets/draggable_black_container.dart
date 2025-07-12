@@ -190,7 +190,7 @@ class _DraggableBlackContainerState
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.white.withOpacity(0.3),
+                    color: AppColors.white.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -283,7 +283,7 @@ class _DraggableBlackContainerState
           child: Text(
             'Voir tout', // TODO: Ajouter à l10n
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textLight.withOpacity(0.8),
+              color: AppColors.textLight.withValues(alpha: 0.8),
             ),
           ),
         ),
@@ -503,7 +503,7 @@ class _DraggableBlackContainerState
           child: Text(
             'Voir tout', // TODO: Ajouter à l10n
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textLight.withOpacity(0.8),
+              color: AppColors.textLight.withValues(alpha: 0.8),
             ),
           ),
         ),

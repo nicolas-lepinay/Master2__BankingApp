@@ -158,7 +158,10 @@ class _FollowedTransactionsCarouselState
         decoration: BoxDecoration(
           color: AppColors.containerDarkGray,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.white.withOpacity(0.1), width: 1),
+          border: Border.all(
+            color: AppColors.white.withValues(alpha: 0.1),
+            width: 1,
+          ),
         ),
         child: const Center(
           child: Text(

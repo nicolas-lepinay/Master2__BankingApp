@@ -35,7 +35,10 @@ class FollowedTransactionItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.containerDarkGray,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.white.withOpacity(0.1), width: 1),
+        border: Border.all(
+          color: AppColors.white.withValues(alpha: 0.1),
+          width: 1,
+        ),
       ),
       child: GestureDetector(
         onTap: onTap,
@@ -49,7 +52,7 @@ class FollowedTransactionItem extends StatelessWidget {
                 width: 32, // Réduire la taille
                 height: 32,
                 decoration: BoxDecoration(
-                  color: AppColors.white.withOpacity(0.1),
+                  color: AppColors.white.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

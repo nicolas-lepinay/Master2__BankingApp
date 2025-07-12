@@ -95,8 +95,8 @@ class PerspectiveListViewState extends State<PerspectiveListView> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        widget.backItemsShadowColor.withOpacity(.8),
-                        widget.backItemsShadowColor.withOpacity(0),
+                        widget.backItemsShadowColor.withValues(alpha: .8),
+                        widget.backItemsShadowColor.withValues(alpha: 0),
                       ],
                     ),
                   ),

@@ -131,7 +131,7 @@ class _FloatingNavbarState extends State<FloatingNavbar>
     final activeIconColor = widget.isDarkBackground
         ? AppColors.textDark
         : AppColors.textLight;
-    final inactiveIconColor = activeIconColor.withOpacity(0.3);
+    final inactiveIconColor = activeIconColor.withValues(alpha: 0.3);
 
     return Positioned(
       bottom: 50,
@@ -142,6 +142,7 @@ class _FloatingNavbarState extends State<FloatingNavbar>
         children: [
           // Boutons animés (-) et (+) avec AnimateGradient
           if (_isExpanded) ...[
+            /*
             // Bouton (-) pour débit - centré à gauche
             Positioned(
               bottom: 90, // Au-dessus de la navbar
@@ -257,6 +258,7 @@ class _FloatingNavbarState extends State<FloatingNavbar>
                 },
               ),
             ),
+            */
           ],
 
           // Navbar principale
@@ -267,7 +269,7 @@ class _FloatingNavbarState extends State<FloatingNavbar>
               borderRadius: BorderRadius.circular(35),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 4),
                 ),
