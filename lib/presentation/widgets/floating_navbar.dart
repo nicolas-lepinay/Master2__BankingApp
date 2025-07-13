@@ -132,7 +132,7 @@ class _FloatingNavbarState extends State<FloatingNavbar>
     final activeIconColor = widget.isDarkBackground
         ? AppColors.textDark
         : AppColors.textLight;
-    final inactiveIconColor = activeIconColor.withOpacity(0.3);
+    final inactiveIconColor = activeIconColor.withValues(alpha: 0.3);
 
     return Positioned(
       bottom: 80.h,
@@ -270,7 +270,7 @@ class _FloatingNavbarState extends State<FloatingNavbar>
               borderRadius: BorderRadius.circular(50.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 20.r,
                   offset: Offset(0, 4.h),
                 ),

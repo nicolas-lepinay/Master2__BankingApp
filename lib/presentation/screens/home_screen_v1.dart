@@ -98,7 +98,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           height: 8.h,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isActive ? AppColors.primary : AppColors.textSecondary.withOpacity(0.3),
+            color: isActive
+                ? AppColors.primary
+                : AppColors.textSecondary.withValues(alpha: 0.3),
           ),
         );
       }),
@@ -108,8 +110,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildAccountPage(Account account) {
     return Consumer(
       builder: (context, ref, child) {
-        final accountSummaryAsync = ref.watch(accountSummaryProvider(account.id));
-        final transactionsAsync = ref.watch(transactionsWithBalanceProvider(account.id));
+        final accountSummaryAsync = ref.watch(
+          accountSummaryProvider(account.id),
+        );
+        final transactionsAsync = ref.watch(
+          transactionsWithBalanceProvider(account.id),
+        );
 
         return accountSummaryAsync.when(
           data: (accountSummary) {
@@ -132,8 +138,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         scrollToToday: true, // Nouveau paramètre
                       );
                     },
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => Center(child: Text('Erreur: $error')),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, stack) =>
+                        Center(child: Text('Erreur: $error')),
                   ),
                 ),
               ],
@@ -157,7 +165,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             width: 80.w,
             height: 80.h,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.add, size: 40.sp, color: AppColors.primary),
@@ -171,13 +179,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
           Text(
             'Appuyez pour créer un nouveau compte',
-            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
 
           SizedBox(height: AppConstants.largePadding.h),
 
-          ElevatedButton(onPressed: _showAddAccountBottomSheet, child: Text(l10n.addAccount)),
+          ElevatedButton(
+            onPressed: _showAddAccountBottomSheet,
+            child: Text(l10n.addAccount),
+          ),
         ],
       ),
     );
@@ -195,7 +208,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _navigateToTransactionDetail(Transaction transaction) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => TransactionDetailScreen(transactionId: transaction.id),
+        builder: (context) =>
+            TransactionDetailScreen(transactionId: transaction.id),
       ),
     );
   }

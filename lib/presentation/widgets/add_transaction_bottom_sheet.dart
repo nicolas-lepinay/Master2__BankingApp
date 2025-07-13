@@ -91,7 +91,7 @@ class _AddTransactionBottomSheetState
               decoration: BoxDecoration(
                 color: Theme.of(
                   context,
-                ).colorScheme.onSurface.withOpacity(0.3),
+                ).colorScheme.onSurface.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),

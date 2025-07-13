@@ -80,7 +80,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             Text(
               l10n.loading,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textLight.withOpacity(0.8),
+                color: AppColors.textLight.withValues(alpha: 0.8),
               ),
             ),
           ],

@@ -173,7 +173,7 @@ class _FollowedTransactionsCarouselState
           color: AppColors.containerDarkGray,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: AppColors.white.withOpacity(0.1),
+            color: AppColors.white.withValues(alpha: 0.1),
             width: 1.w,
           ),
         ),

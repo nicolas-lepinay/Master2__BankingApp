@@ -21,7 +21,7 @@ class AccountCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10.r,
             offset: Offset(0, 4.h),
           ),
@@ -64,7 +64,9 @@ class AccountCard extends StatelessWidget {
                         showSign: true,
                         context: context,
                       ),
-                      style: AppTextStyles.h6.copyWith(color: AppColors.textLight),
+                      style: AppTextStyles.h6.copyWith(
+                        color: AppColors.textLight,
+                      ),
                     ),
                   ],
                 ),
@@ -74,8 +76,10 @@ class AccountCard extends StatelessWidget {
               Container(
                 width: 1.w,
                 height: 40.h,
-                color: AppColors.textLight.withOpacity(0.3),
-                margin: EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding.w),
+                color: AppColors.textLight.withValues(alpha: 0.3),
+                margin: EdgeInsets.symmetric(
+                  horizontal: AppConstants.defaultPadding.w,
+                ),
               ),
 
               // Revenus
@@ -92,7 +96,9 @@ class AccountCard extends StatelessWidget {
                         showSign: true,
                         context: context,
                       ),
-                      style: AppTextStyles.h6.copyWith(color: AppColors.textLight),
+                      style: AppTextStyles.h6.copyWith(
+                        color: AppColors.textLight,
+                      ),
                     ),
                   ],
                 ),

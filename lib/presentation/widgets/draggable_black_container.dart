@@ -85,7 +85,7 @@ class _DraggableBlackContainerState
                 width: 30,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.white.withOpacity(0.3),
+                  color: AppColors.white.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),

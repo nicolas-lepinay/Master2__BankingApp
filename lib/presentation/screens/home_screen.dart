@@ -288,7 +288,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10.r,
                     offset: Offset(0, 2.h),
                   ),
@@ -331,7 +331,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10.r,
                     offset: Offset(0, 2.h),
                   ),
@@ -359,7 +359,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             width: 80.w,
             height: 80.h,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.add, size: 40.sp, color: AppColors.primary),

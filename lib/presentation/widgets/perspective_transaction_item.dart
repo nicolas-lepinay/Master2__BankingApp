@@ -36,7 +36,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(28.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 10.r,
               offset: Offset(0, -3.r), // Ombre vers le haut
             ),
@@ -54,7 +54,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 4.r,
                     offset: Offset(0, 2.h),
                   ),

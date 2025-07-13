@@ -71,7 +71,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
         borderRadius: BorderRadius.circular(32.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 20.r,
             offset: Offset(0, 8.h),
           ),
@@ -115,8 +115,8 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                           height: 40.h,
                           decoration: BoxDecoration(
                             color: cardColor == AppColors.cardGreen
-                                ? AppColors.darkest.withOpacity(0.2)
-                                : AppColors.white.withOpacity(0.2),
+                                ? AppColors.darkest.withValues(alpha: 0.2)
+                                : AppColors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8.r),
                           ),
                           child: Icon(
@@ -138,8 +138,8 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                     AppLocalizations.of(context)!.expectedBalance.toUpperCase(),
                     style: AppTextStyles.cardBalanceLabel.copyWith(
                       color: cardColor == AppColors.cardGreen
-                          ? AppColors.darkest.withOpacity(0.6)
-                          : AppColors.white.withOpacity(0.6),
+                          ? AppColors.darkest.withValues(alpha: 0.6)
+                          : AppColors.white.withValues(alpha: 0.6),
                     ),
                   ),
 
@@ -168,8 +168,8 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                           height: 40.h,
                           decoration: BoxDecoration(
                             color: cardColor == AppColors.cardGreen
-                                ? AppColors.darkest.withOpacity(0.1)
-                                : AppColors.white.withOpacity(0.1),
+                                ? AppColors.darkest.withValues(alpha: 0.1)
+                                : AppColors.white.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20.r),
                           ),
                           child: Icon(
@@ -193,8 +193,8 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                     AppLocalizations.of(context)!.actualBalance.toUpperCase(),
                     style: AppTextStyles.cardBalanceLabel.copyWith(
                       color: cardColor == AppColors.cardGreen
-                          ? AppColors.darkest.withOpacity(0.6)
-                          : AppColors.white.withOpacity(0.6),
+                          ? AppColors.darkest.withValues(alpha: 0.6)
+                          : AppColors.white.withValues(alpha: 0.6),
                     ),
                   ),
 
@@ -223,7 +223,7 @@ class DotPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.white.withOpacity(0.09)
+      ..color = AppColors.white.withValues(alpha: 0.09)
       ..style = PaintingStyle.fill;
 
     final double dotSize = 1.7.r;
