@@ -36,9 +36,9 @@ class PerspectiveTransactionItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(28.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+              color: AppColors.gradientPinkStart.withValues(alpha: 0.35),
               blurRadius: 10.r,
-              offset: Offset(0, -3.r), // Ombre vers le haut
+              offset: Offset(0, -8.0.r), // Ombre vers le haut
             ),
           ],
         ),
@@ -47,8 +47,8 @@ class PerspectiveTransactionItem extends StatelessWidget {
           children: [
             // Icône du tiers/catégorie dans un cercle
             Container(
-              width: 44.w,
-              height: 44.w,
+              width: 38.w,
+              height: 38.w,
               decoration: BoxDecoration(
                 color: AppColors.white,
                 shape: BoxShape.circle,
@@ -67,7 +67,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
               ),
             ),
 
-            SizedBox(width: AppConstants.defaultPadding.r),
+            SizedBox(width: AppConstants.largePadding.r),
             // Informations de la transaction
             Expanded(
               child: Column(
@@ -77,9 +77,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
                   // Nom du tiers ou titre de la transaction
                   Text(
                     _getTransactionDisplayName(transaction, counterparty),
-                    style: AppTextStyles.transactionNamePerspective.copyWith(
-                      fontSize: 15.sp,
-                    ),
+                    style: AppTextStyles.transactionNamePerspective,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

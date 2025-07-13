@@ -374,7 +374,7 @@ class AppDatabase extends _$AppDatabase {
         name: const Value('CIC Compte courant'),
         currency: const Value('EUR'),
         initialBalance: const Value(500.0),
-        creationDate: Value(DateTime.now().subtract(const Duration(days: 30))),
+        creationDate: Value(DateTime.now().subtract(const Duration(days: 10))),
       ),
     );
 
@@ -383,7 +383,25 @@ class AppDatabase extends _$AppDatabase {
         name: const Value('CIC Livret A'),
         currency: const Value('EUR'),
         initialBalance: const Value(25000.0),
-        creationDate: Value(DateTime.now().subtract(const Duration(days: 5))),
+        creationDate: Value(DateTime.now().subtract(const Duration(days: 9))),
+      ),
+    );
+
+    await into(accounts).insert(
+      AccountsCompanion(
+        name: const Value('Revolut'),
+        currency: const Value('USD'),
+        initialBalance: const Value(300.0),
+        creationDate: Value(DateTime.now().subtract(const Duration(days: 8))),
+      ),
+    );
+
+    await into(accounts).insert(
+      AccountsCompanion(
+        name: const Value('Liquides'),
+        currency: const Value('EUR'),
+        initialBalance: const Value(120.0),
+        creationDate: Value(DateTime.now().subtract(const Duration(days: 7))),
       ),
     );
 

@@ -175,7 +175,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
           Text(l10n.addAccount, style: AppTextStyles.h5),
 
-          SizedBox(height: AppConstants.smallPadding.h),
+          SizedBox(height: AppConstants.verySmallPadding.h),
 
           Text(
             'Appuyez pour créer un nouveau compte',

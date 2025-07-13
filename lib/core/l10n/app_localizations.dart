@@ -277,6 +277,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hello'**
   String get hello;
+
+  /// No description provided for @transactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactions;
+
+  /// No description provided for @seeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get seeAll;
+
+  /// No description provided for @followedTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmarked Transactions'**
+  String get followedTransactions;
+
+  /// No description provided for @statistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get statistics;
+
+  /// No description provided for @noAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'No account available'**
+  String get noAccount;
+
+  /// No description provided for @noTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'No transaction'**
+  String get noTransactions;
+
+  /// No description provided for @loadingError.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading error'**
+  String get loadingError;
+
+  /// No description provided for @searchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount, a name, etc.'**
+  String get searchPlaceholder;
 }
 
 class _AppLocalizationsDelegate

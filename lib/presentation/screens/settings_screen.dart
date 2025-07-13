@@ -89,7 +89,7 @@ class SettingsScreen extends ConsumerWidget {
     return Padding(
       padding: EdgeInsets.only(
         left: AppConstants.defaultPadding.w,
-        bottom: AppConstants.smallPadding.h,
+        bottom: AppConstants.verySmallPadding.h,
       ),
       child: Text(
         title,
@@ -247,12 +247,12 @@ class SettingsScreen extends ConsumerWidget {
         ),
         SizedBox(height: 16.h),
         const Text(
-          'Fonctionnalités:\n' + 
-          '• Gestion des comptes\n' + 
-          '• Suivi des transactions\n' + 
-          '• Calcul automatique des soldes\n' + 
-          '• Interface multilingue\n' + 
-          '• Thème clair/sombre',
+          'Fonctionnalités:\n' +
+              '• Gestion des comptes\n' +
+              '• Suivi des transactions\n' +
+              '• Calcul automatique des soldes\n' +
+              '• Interface multilingue\n' +
+              '• Thème clair/sombre',
         ),
       ],
     );

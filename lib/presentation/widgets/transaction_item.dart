@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bankapp/data/database/database.dart';
+import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
@@ -26,16 +27,17 @@ class TransactionItem extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(8.r),
       child: Padding(
-        padding: EdgeInsets.all(AppConstants.defaultPadding.r),
+        padding: EdgeInsets.symmetric(vertical: AppConstants.smallPadding.r),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Icône de catégorie (carré blanc pour l'instant)
             Container(
               width: 50.w,
-              height: 50.h,
+              height: 50.w,
               decoration: BoxDecoration(
                 color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(50.r),
               ),
               child: Icon(
                 _getTransactionIcon(transaction.title),
@@ -59,11 +61,19 @@ class TransactionItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
 
+                  SizedBox(height: 2.h),
+
                   // Commentaire
                   if (transaction.comment?.isNotEmpty == true) ...[
-                    SizedBox(height: 2.h),
                     Text(
                       transaction.comment!,
+                      style: AppTextStyles.transactionDescription,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ] else ...[
+                    Text(
+                      "Catégorie...",
                       style: AppTextStyles.transactionDescription,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -81,15 +91,19 @@ class TransactionItem extends StatelessWidget {
               children: [
                 // Montant de la transaction
                 Text(
-                  AppFormatters.formatAmount(
+                  AppFormatters.formatAmountClean(
                     isDebit ? -transaction.amount : transaction.amount,
                     transaction.currency,
                     context: context,
                   ),
-                  style: AppTextStyles.transactionAmount,
+                  style: AppTextStyles.transactionAmount.copyWith(
+                    color: isDebit
+                        ? AppColors.textPrimary
+                        : AppColors.creditTransaction,
+                  ),
                 ),
 
-                SizedBox(height: 2.h),
+                // SizedBox(height: 1.h),
 
                 // Solde après transaction
                 Text(
@@ -100,8 +114,8 @@ class TransactionItem extends StatelessWidget {
                   ),
                   style: AppTextStyles.transactionBalance.copyWith(
                     color: transactionWithBalance.balanceAfter < 0
-                        ? AppColors.debitColor
-                        : AppColors.creditColor,
+                        ? AppColors.negativeBalance
+                        : AppColors.neutral,
                   ),
                 ),
               ],

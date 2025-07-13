@@ -91,7 +91,7 @@ class AppTextStyles {
 
   static const TextStyle sectionHeaderMediumDark = TextStyle(
     fontFamily: playfairFontFamily,
-    fontSize: 20,
+    fontSize: 26,
     fontWeight: FontWeight.w600,
     color: AppColors.textDark,
   );
@@ -114,7 +114,7 @@ class AppTextStyles {
   // Transaction amount for perspective list
   static const TextStyle transactionAmountPerspective = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: FontWeight.w600,
     color: AppColors.textDark,
   );
@@ -246,8 +246,8 @@ class AppTextStyles {
 
   static const TextStyle transactionAmount = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 16,
-    fontWeight: FontWeight.bold,
+    fontSize: 20,
+    fontWeight: FontWeight.w500,
   );
 
   static const TextStyle transactionBalance = TextStyle(
@@ -261,6 +261,7 @@ class AppTextStyles {
     fontFamily: defaultFontFamily,
     fontSize: 16,
     fontWeight: FontWeight.w500,
+    color: AppColors.textDark,
   );
 
   static const TextStyle transactionDescription = TextStyle(
@@ -274,7 +275,7 @@ class AppTextStyles {
     fontFamily: defaultFontFamily,
     fontSize: 14,
     fontWeight: FontWeight.w600,
-    color: AppColors.textSecondary,
+    //color: AppColors.textSecondary,
   );
 
   static const TextStyle buttonText = TextStyle(

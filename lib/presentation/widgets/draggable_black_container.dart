@@ -9,6 +9,7 @@ import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
 import 'package:bankapp/presentation/widgets/perspective_list_view.dart';
 import 'package:bankapp/presentation/widgets/perspective_transaction_item.dart';
 import 'package:bankapp/presentation/widgets/followed_transactions_carousel.dart';
+import 'package:bankapp/presentation/widgets/full_transactions_bottom_sheet.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
 import 'package:bankapp/data/database/database.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -159,25 +160,23 @@ class _DraggableBlackContainerState
   }
 
   Widget _buildTransactionsHeader(AppLocalizations l10n) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Transactions', // TODO: Ajouter à l10n
-          style: AppTextStyles.sectionHeader,
-        ),
-        GestureDetector(
-          onTap: () {
-            // TODO: Action "Voir tout" transactions
-          },
-          child: Text(
+    return GestureDetector(
+      onTap: _showFullTransactionsBottomSheet,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Transactions', // TODO: Ajouter à l10n
+            style: AppTextStyles.sectionHeader,
+          ),
+          Text(
             'Voir tout', // TODO: Ajouter à l10n
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textLight.withValues(alpha: 0.8),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -216,47 +215,51 @@ class _DraggableBlackContainerState
             // Les transactions sont déjà limitées à 50 (25 passées + 25 futures)
             // et centrées autour d'aujourd'hui par la méthode de base de données
 
-            return Container(
-              height: containerHeight.h,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.gradientPinkStart, // #FE68E8
-                    AppColors.gradientPinkEnd, // #FBA9ED
-                  ],
+            return GestureDetector(
+              onTap: _showFullTransactionsBottomSheet,
+              child: Container(
+                height: containerHeight.h,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppColors.gradientPinkStart, // #FE68E8
+                      AppColors.gradientPinkEnd, // #FBA9ED
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(28.r),
                 ),
-                borderRadius: BorderRadius.circular(28.r),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(28.r),
-                child: PerspectiveListView(
-                  visualizedItems:
-                      perspectiveVisualizedItems, // Utilise la variable
-                  itemExtent: perspectiveItemExtent.h, // Utilise la variable
-                  minScale:
-                      perspectiveMinScale, // Nouveau paramètre personnalisé
-                  initialIndex: _findTodayTransactionIndex(transactions),
-                  padding: EdgeInsets.only(top: 20.r, bottom: 20.r),
-                  onTapFrontItem: (index) {
-                    if (index != null && index < transactions.length) {
-                      _navigateToTransactionDetail(
-                        transactions[index].transaction,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28.r),
+                  child: PerspectiveListView(
+                    visualizedItems:
+                        perspectiveVisualizedItems, // Utilise la variable
+                    itemExtent: perspectiveItemExtent.h, // Utilise la variable
+                    minScale:
+                        perspectiveMinScale, // Nouveau paramètre personnalisé
+                    initialIndex: _findTodayTransactionIndex(transactions),
+                    padding: EdgeInsets.only(top: 20.r, bottom: 20.r),
+                    onTapFrontItem: (index) {
+                      if (index != null && index < transactions.length) {
+                        _navigateToTransactionDetail(
+                          transactions[index].transaction,
+                        );
+                      }
+                    },
+                    onChangeFrontItem: (index) {
+                      // Callback quand la transaction au premier plan change
+                    },
+                    children: transactions.map((transactionWithCounterparty) {
+                      return PerspectiveTransactionItem(
+                        transactionWithCounterparty:
+                            transactionWithCounterparty,
+                        onTap: () => _navigateToTransactionDetail(
+                          transactionWithCounterparty.transaction,
+                        ),
                       );
-                    }
-                  },
-                  onChangeFrontItem: (index) {
-                    // Callback quand la transaction au premier plan change
-                  },
-                  children: transactions.map((transactionWithCounterparty) {
-                    return PerspectiveTransactionItem(
-                      transactionWithCounterparty: transactionWithCounterparty,
-                      onTap: () => _navigateToTransactionDetail(
-                        transactionWithCounterparty.transaction,
-                      ),
-                    );
-                  }).toList(),
+                    }).toList(),
+                  ),
                 ),
               ),
             );
@@ -371,6 +374,17 @@ class _DraggableBlackContainerState
     }
 
     return closestIndex;
+  }
+
+  void _showFullTransactionsBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: true,
+      enableDrag: true,
+      builder: (context) => const FullTransactionsBottomSheet(),
+    );
   }
 
   void _navigateToTransactionDetail(Transaction transaction) {

@@ -164,7 +164,7 @@ class TransactionDetailScreen extends ConsumerWidget {
               ),
             ),
 
-            const SizedBox(height: AppConstants.smallPadding),
+            const SizedBox(height: AppConstants.verySmallPadding),
 
             // Titre
             Text(
@@ -174,7 +174,7 @@ class TransactionDetailScreen extends ConsumerWidget {
             ),
 
             if (transaction.comment?.isNotEmpty == true) ...[
-              const SizedBox(height: AppConstants.smallPadding),
+              const SizedBox(height: AppConstants.verySmallPadding),
               Text(
                 transaction.comment!,
                 style: AppTextStyles.bodyMedium.copyWith(
@@ -306,7 +306,9 @@ class TransactionDetailScreen extends ConsumerWidget {
     Color? valueColor,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppConstants.smallPadding),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppConstants.verySmallPadding,
+      ),
       child: Row(
         children: [
           Icon(icon, size: 20, color: AppColors.textSecondary),

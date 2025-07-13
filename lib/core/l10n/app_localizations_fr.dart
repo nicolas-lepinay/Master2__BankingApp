@@ -97,4 +97,28 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hello => 'Salut';
+
+  @override
+  String get transactions => 'Transactions';
+
+  @override
+  String get seeAll => 'Voir tout';
+
+  @override
+  String get followedTransactions => 'Transactions suivies';
+
+  @override
+  String get statistics => 'Statistiques';
+
+  @override
+  String get noAccount => 'Aucun compte disponible';
+
+  @override
+  String get noTransactions => 'Aucune transaction';
+
+  @override
+  String get loadingError => 'Erreur de chargement';
+
+  @override
+  String get searchPlaceholder => 'Saisir un montant, un nom, etc.';
 }

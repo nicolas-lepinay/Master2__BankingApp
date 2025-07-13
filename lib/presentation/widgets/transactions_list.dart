@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:bankapp/data/database/database.dart';
+import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/utils/formatters.dart';
-import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/presentation/widgets/transaction_item.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -27,7 +27,7 @@ class TransactionsList extends StatefulWidget {
 
 class _TransactionsListState extends State<TransactionsList> {
   final ScrollController _scrollController = ScrollController();
-  final Set<String> _expandedDates = <String>{}; // Stocke les dates étendues
+  bool _areHeadersExpanded = true; // Tous les headers sont expanded par défaut
   bool _hasScrolledToToday = false; // Flag pour éviter les scrolls répétés
 
   @override
@@ -113,13 +113,9 @@ class _TransactionsListState extends State<TransactionsList> {
     }
   }
 
-  void _toggleDateExpansion(String dateKey) {
+  void _toggleAllHeaders() {
     setState(() {
-      if (_expandedDates.contains(dateKey)) {
-        _expandedDates.remove(dateKey);
-      } else {
-        _expandedDates.add(dateKey);
-      }
+      _areHeadersExpanded = !_areHeadersExpanded;
     });
   }
 
@@ -159,7 +155,7 @@ class _TransactionsListState extends State<TransactionsList> {
             ? dayTransactions.first.transaction.currency
             : 'EUR');
 
-    return AppFormatters.formatAmount(
+    return AppFormatters.formatAmountClean(
       netAmount,
       currency,
       showSign: true,
@@ -196,9 +192,6 @@ class _TransactionsListState extends State<TransactionsList> {
       itemCount: groupedTransactions.length,
       itemBuilder: (context, index) {
         final group = groupedTransactions[index];
-        final dateKey =
-            '${group.date.year}-${group.date.month}-${group.date.day}';
-        final isExpanded = _expandedDates.contains(dateKey);
         final dayTotals = _calculateDayTotals(group.transactions);
 
         return Column(
@@ -207,11 +200,11 @@ class _TransactionsListState extends State<TransactionsList> {
             // En-tête de date animé avec glissement
             _buildAnimatedDateHeader(
               group.dateLabel,
-              dateKey,
-              isExpanded,
+              _areHeadersExpanded, // Utiliser l'état global
               dayTotals,
               group.transactions, // Passer les transactions du groupe
             ),
+            SizedBox(height: AppConstants.verySmallPadding.h / 4),
             // Liste des transactions pour cette date
             ...group.transactions.map((transactionWithBalance) {
               return TransactionItem(
@@ -223,8 +216,7 @@ class _TransactionsListState extends State<TransactionsList> {
                     : null,
               );
             }).toList(),
-
-            SizedBox(height: AppConstants.defaultPadding.h),
+            SizedBox(height: AppConstants.largePadding.h),
           ],
         );
       },
@@ -233,19 +225,14 @@ class _TransactionsListState extends State<TransactionsList> {
 
   Widget _buildAnimatedDateHeader(
     String dateLabel,
-    String dateKey,
     bool isExpanded,
     Map<String, double> dayTotals,
     List<TransactionWithBalance> dayTransactions, // Nouveau paramètre
   ) {
     return GestureDetector(
-      onTap: () => _toggleDateExpansion(dateKey),
-      child: Container(
-        margin: EdgeInsets.symmetric(
-          horizontal: AppConstants.defaultPadding.w,
-          vertical: AppConstants.smallPadding.h,
-        ),
-        height: 30.h, // Hauteur fixe pour éviter les sauts
+      onTap: _toggleAllHeaders, // Toggle tous les headers
+      child: SizedBox(
+        //height: 30.h, // Hauteur fixe pour éviter les sauts
         child: Stack(
           children: [
             // Date - Animation de glissement du centre vers la gauche
@@ -253,14 +240,17 @@ class _TransactionsListState extends State<TransactionsList> {
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
               alignment: isExpanded ? Alignment.centerLeft : Alignment.center,
-              child: Text(dateLabel, style: AppTextStyles.dateHeader),
+              child: Text(
+                dateLabel.toUpperCase(),
+                style: AppTextStyles.dateHeader,
+              ),
             ),
 
             // Total - Animation d'apparition depuis la droite
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
-              right: isExpanded ? 0 : -200.w, // -200 pour cacher complètement
+              right: isExpanded ? 0 : -100.w, // -100 pour cacher complètement
               top: 0,
               bottom: 0,
               child: AnimatedOpacity(
@@ -269,7 +259,7 @@ class _TransactionsListState extends State<TransactionsList> {
                 opacity: isExpanded ? 1.0 : 0.0,
                 child: Text(
                   _formatNetAmount(dayTotals, dayTransactions),
-                  style: AppTextStyles.bodyLarge.copyWith(
+                  style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.neutral,
                   ),
                 ),

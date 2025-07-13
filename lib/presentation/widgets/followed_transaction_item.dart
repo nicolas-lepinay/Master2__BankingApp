@@ -36,9 +36,9 @@ class FollowedTransactionItem extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding.r),
       decoration: BoxDecoration(
         color: AppColors.containerDarkGray,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(24.r),
         border: Border.all(
-          color: AppColors.white.withValues(alpha: 0.1),
+          color: AppColors.white.withValues(alpha: 0.0),
           width: 1.w,
         ),
       ),

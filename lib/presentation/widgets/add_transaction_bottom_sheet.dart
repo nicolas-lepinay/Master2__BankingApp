@@ -12,13 +12,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AddTransactionBottomSheet extends ConsumerStatefulWidget {
   final int? accountId;
-  final String? preselectedTransactionType; // Nouveau paramètre
 
-  const AddTransactionBottomSheet({
-    super.key,
-    this.accountId,
-    this.preselectedTransactionType,
-  });
+  const AddTransactionBottomSheet({super.key, this.accountId});
 
   @override
   ConsumerState<AddTransactionBottomSheet> createState() =>
@@ -43,11 +38,6 @@ class _AddTransactionBottomSheetState
   void initState() {
     super.initState();
     _selectedAccountId = widget.accountId;
-
-    // Nouveau : initialiser le type de transaction si présélectionné
-    if (widget.preselectedTransactionType != null) {
-      _transactionType = widget.preselectedTransactionType!;
-    }
   }
 
   @override
@@ -169,73 +159,38 @@ class _AddTransactionBottomSheetState
 
                   SizedBox(height: AppConstants.defaultPadding.h),
 
-                  // Type de transaction (seulement si pas présélectionné)
-                  if (widget.preselectedTransactionType == null) ...[
-                    DropdownButtonFormField<String>(
-                      value: _transactionType,
-                      decoration: const InputDecoration(labelText: 'Type'),
-                      items: [
-                        DropdownMenuItem(
-                          value: AppConstants.transactionTypeDebit,
-                          child: Text(
-                            AppFormatters.getTransactionTypeLabel(
-                              AppConstants.transactionTypeDebit,
-                              context,
-                            ),
+                  DropdownButtonFormField<String>(
+                    value: _transactionType,
+                    decoration: const InputDecoration(labelText: 'Type'),
+                    items: [
+                      DropdownMenuItem(
+                        value: AppConstants.transactionTypeDebit,
+                        child: Text(
+                          AppFormatters.getTransactionTypeLabel(
+                            AppConstants.transactionTypeDebit,
+                            context,
                           ),
                         ),
-                        DropdownMenuItem(
-                          value: AppConstants.transactionTypeCredit,
-                          child: Text(
-                            AppFormatters.getTransactionTypeLabel(
-                              AppConstants.transactionTypeCredit,
-                              context,
-                            ),
-                          ),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _transactionType = value;
-                          });
-                        }
-                      },
-                    ),
-                    SizedBox(height: AppConstants.defaultPadding.h),
-                  ] else ...[
-                    // Afficher le type présélectionné de manière non-éditable
-                    InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Type'),
-                      child: Row(
-                        children: [
-                          Icon(
-                            _transactionType ==
-                                    AppConstants.transactionTypeDebit
-                                ? Icons.remove_circle_outline
-                                : Icons.add_circle_outline,
-                            color:
-                                _transactionType ==
-                                    AppConstants.transactionTypeDebit
-                                ? Colors.red
-                                : Colors.green,
-                          ),
-                          SizedBox(width: 8.w),
-                          Text(
-                            AppFormatters.getTransactionTypeLabel(
-                              _transactionType,
-                              context,
-                            ),
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
                       ),
-                    ),
-                    SizedBox(height: AppConstants.defaultPadding.h),
-                  ],
+                      DropdownMenuItem(
+                        value: AppConstants.transactionTypeCredit,
+                        child: Text(
+                          AppFormatters.getTransactionTypeLabel(
+                            AppConstants.transactionTypeCredit,
+                            context,
+                          ),
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _transactionType = value;
+                        });
+                      }
+                    },
+                  ),
+                  SizedBox(height: AppConstants.defaultPadding.h),
 
                   // Titre
                   TextFormField(

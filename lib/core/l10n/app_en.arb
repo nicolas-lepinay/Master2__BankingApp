@@ -28,5 +28,13 @@
   "pending": "Pending",
   "confirmed": "Confirmed",
   "unknown": "Unknown",
-  "hello": "Hello"
+  "hello": "Hello",
+   "transactions": "Transactions",
+    "seeAll": "See all",
+    "followedTransactions": "Bookmarked Transactions",
+    "statistics": "Statistics",
+    "noAccount": "No account available",
+    "noTransactions": "No transaction",
+    "loadingError": "Loading error",
+    "searchPlaceholder": "Enter an amount, a name, etc."
 }

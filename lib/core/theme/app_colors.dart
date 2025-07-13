@@ -30,28 +30,32 @@ class AppColors {
   static const Color textDark = Color(0xFF212121);
 
   // Transaction colors
-  static const Color creditGreen = Color(0xFF28A13A); // Vert pour les crédits
-  static const Color debitBlack = Color(0xFF212121); // Noir pour les débits
-  static const Color balanceRed = Color(0xFFC42F43); // Rouge pour solde négatif
-  static const Color balanceGray = Color(0xFF79819A); // Gris pour solde positif
+  static const Color creditTransaction = Color(
+    0xFF28A13A,
+  ); // Vert pour les crédits
+  static const Color negativeBalance = Color(
+    0xFFC42F43,
+  ); // Rouge pour solde négatif
 
   // Gradient colors for transaction list
   static const Color gradientPinkStart = Color(0xFFFE68E8);
   static const Color gradientPinkEnd = Color(0xFFFBA9ED);
 
   // Transaction item background
-  static const Color transactionItemBg = Color(0xFFFFCDF8);
+  static const Color transactionItemBg = Color(0xFFFFC4F9);
 
   // Legacy colors (V1 compatibility)
   static const Color cardDark = Color(0xFF2C2C54);
   static const Color cardLight = Color(0xFFFFFFFF);
   static const Color creditColor = Color(0xFF4CAF50);
-  static const Color debitColor = Color(0xFF212121);
+  static const Color debitColor = Color(0xFFC42F43);
   static const Color balanceColor = Color(0xFF26C6DA);
+
   static const Color success = Color(0xFF4CAF50);
   static const Color warning = Color(0xFFFFC107);
   static const Color error = Color(0xFFF44336);
   static const Color info = Color(0xFF2196F3);
+
   static const Color backgroundLight = Color(0xFFF5F5F5);
   static const Color backgroundDark = Color(0xFF121212);
   static const Color surfaceLight = Color(0xFFFFFFFF);

@@ -347,10 +347,11 @@ class AppFormatters {
     try {
       switch (languageCode) {
         case 'en':
-          // English: "July 1st", "July 2nd", "July 3rd", "July 4th"
+          // English: "July 1st", "July 2nd", "July 3rd", "July 4"
           final monthFormatter = DateFormat('MMMM', localeString);
           final monthName = monthFormatter.format(date);
-          return '$monthName $day$ordinalSuffix';
+          //return '$monthName $day$ordinalSuffix';
+          return day <= 3 ? '$monthName $day$ordinalSuffix' : '$monthName $day';
 
         case 'fr':
           // French: "1er juillet", "2 juillet", "3 juillet"
