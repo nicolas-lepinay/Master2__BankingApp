@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:bankapp/data/database/database.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
+import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/utils/formatters.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class FollowedTransactionItem extends StatelessWidget {
   final TransactionWithCounterparty transactionWithCounterparty;
   final VoidCallback? onTap;
-  final VoidCallback? onStarTap;
+  final VoidCallback? onIconTap;
   final double? width;
   final Widget? slideAnimation;
 
@@ -16,8 +18,8 @@ class FollowedTransactionItem extends StatelessWidget {
     super.key,
     required this.transactionWithCounterparty,
     this.onTap,
-    this.onStarTap,
-    this.width = 250,
+    this.onIconTap,
+    this.width = 320,
     this.slideAnimation,
   });
 
@@ -29,102 +31,101 @@ class FollowedTransactionItem extends StatelessWidget {
         transaction.transactionType == AppConstants.transactionTypeDebit;
 
     final content = Container(
-      width: width,
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(12),
+      width: width != null ? width?.w : width,
+      margin: EdgeInsets.only(right: 18.r),
+      padding: EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding.r),
       decoration: BoxDecoration(
         color: AppColors.containerDarkGray,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.white.withValues(alpha: 0.1),
-          width: 1,
-        ),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.white.withOpacity(0.1), width: 1.w),
       ),
       child: GestureDetector(
         onTap: onTap,
-        child: IntrinsicHeight(
-          // Permet au widget de prendre la hauteur nécessaire
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Icône du tiers/catégorie dans un cercle
-              Container(
-                width: 32, // Réduire la taille
-                height: 32,
-                decoration: BoxDecoration(
-                  color: AppColors.white.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  _getTransactionIcon(transaction, counterparty),
-                  color: AppColors.textLight,
-                  size: 16, // Réduire la taille de l'icône
-                ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Icône du tiers/catégorie dans un cercle
+            Container(
+              width: 32.w,
+              height: 32.h,
+              decoration: BoxDecoration(
+                color: AppColors.white.withOpacity(0.1),
+                shape: BoxShape.circle,
               ),
+              child: Icon(
+                _getTransactionIcon(transaction, counterparty),
+                color: AppColors.textLight,
+                size: 16.sp, // Réduire la taille de l'icône
+              ),
+            ),
 
-              const SizedBox(width: 8), // Réduire l'espacement
-              // Informations de la transaction
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize:
-                      MainAxisSize.min, // Important : ajuster au contenu
-                  children: [
-                    // Nom du tiers ou titre
-                    Text(
-                      _getTransactionDisplayName(transaction, counterparty),
-                      style: AppTextStyles.followedTransactionName.copyWith(
-                        fontSize: 12, // Réduire la taille
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+            SizedBox(width: AppConstants.defaultPadding.r),
+            // Informations de la transaction
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize:
+                    MainAxisSize.min, // Important : ajuster au contenu
+                children: [
+                  // Nom du tiers ou titre
+                  Text(
+                    _getTransactionDisplayName(transaction, counterparty),
+                    style: AppTextStyles.followedTransactionName.copyWith(
+                      fontSize: 15.sp,
                     ),
-
-                    const SizedBox(height: 1), // Réduire l'espacement
-                    // Date
-                    Text(
-                      AppFormatters.formatDate(transaction.date, context),
-                      style: AppTextStyles.followedTransactionDate.copyWith(
-                        color: AppColors.textGray,
-                        fontSize: 10, // Réduire la taille
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 6), // Réduire l'espacement
-              // Montant
-              Text(
-                AppFormatters.formatAmountClean(
-                  isDebit ? -transaction.amount : transaction.amount,
-                  transaction.currency,
-                  showSign: false,
-                  context: context,
-                ),
-                style: AppTextStyles.followedTransactionAmount.copyWith(
-                  fontSize: 11, // Réduire la taille
-                ),
-              ),
-
-              const SizedBox(width: 6), // Réduire l'espacement
-              // Étoile (bouton pour retirer du suivi)
-              GestureDetector(
-                onTap: onStarTap,
-                child: Container(
-                  padding: const EdgeInsets.all(2), // Réduire le padding
-                  child: const Icon(
-                    Icons.star,
-                    color: AppColors.textLight,
-                    size: 14, // Réduire la taille
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
+
+                  SizedBox(height: 2.h),
+                  // Date
+                  Text(
+                    AppFormatters.formatDate(
+                      transaction.date,
+                      context,
+                    ).toUpperCase(),
+                    style: AppTextStyles.followedTransactionDate.copyWith(
+                      color: AppColors.neutral,
+                      fontSize: 12.sp,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(width: AppConstants.defaultPadding.r),
+            // Montant
+            Text(
+              AppFormatters.formatAmountClean(
+                isDebit ? -transaction.amount : transaction.amount,
+                transaction.currency,
+                showSign: false,
+                context: context,
+              ),
+              style: AppTextStyles.followedTransactionAmount.copyWith(
+                fontSize: 16.sp,
+              ),
+            ),
+
+            SizedBox(
+              width: AppConstants.defaultPadding.r,
+            ), // Réduire l'espacement
+            // Étoile (bouton pour retirer du suivi)
+            GestureDetector(
+              onTap: onIconTap,
+              child: Container(
+                padding: EdgeInsets.all(2.r), // Réduire le padding
+                child: Icon(
+                  Icons.bookmark,
+                  color: AppColors.textLight,
+                  size: 22.sp, // Réduire la taille
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bankapp/data/database/database.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
+import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/widgets/followed_transaction_item.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class FollowedTransactionsCarousel extends ConsumerStatefulWidget {
   final VoidCallback? onSeeAllPressed;
@@ -50,17 +52,21 @@ class _FollowedTransactionsCarouselState
 
   Widget _buildEmptyState() {
     return Container(
-      height: 80,
+      height: 80.h,
+      margin: EdgeInsets.symmetric(
+        horizontal: AppConstants.veryLargePadding.r,
+        vertical: 8.h,
+      ),
       decoration: BoxDecoration(
         color: AppColors.containerDarkGray,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
       ),
-      child: const Center(
+      child: Center(
         child: Text(
           'Aucune transaction suivie',
           style: TextStyle(
             color: AppColors.textLight,
-            fontSize: 14,
+            fontSize: 18.sp,
             fontWeight: FontWeight.w500,
           ),
           textAlign: TextAlign.center,
@@ -71,15 +77,19 @@ class _FollowedTransactionsCarouselState
 
   Widget _buildLoadingState() {
     return Container(
-      height: 80,
+      height: 80.h,
+      margin: EdgeInsets.symmetric(
+        horizontal: AppConstants.veryLargePadding.r,
+        vertical: 8.h,
+      ),
       decoration: BoxDecoration(
         color: AppColors.containerDarkGray,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18.r),
       ),
-      child: const Center(
+      child: Center(
         child: CircularProgressIndicator(
           color: AppColors.textLight,
-          strokeWidth: 2,
+          strokeWidth: 2.w,
         ),
       ),
     );
@@ -87,17 +97,21 @@ class _FollowedTransactionsCarouselState
 
   Widget _buildErrorState() {
     return Container(
-      height: 80,
+      height: 80.h,
+      margin: EdgeInsets.symmetric(
+        horizontal: AppConstants.veryLargePadding.r,
+        vertical: 8.h,
+      ),
       decoration: BoxDecoration(
         color: AppColors.containerDarkGray,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18.r),
       ),
-      child: const Center(
+      child: Center(
         child: Text(
           'Erreur de chargement',
           style: TextStyle(
             color: AppColors.textLight,
-            fontSize: 14,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w500,
           ),
           textAlign: TextAlign.center,
@@ -115,12 +129,12 @@ class _FollowedTransactionsCarouselState
     _initializeAnimationControllers(displayTransactions.length);
 
     return SizedBox(
-      height: 80, // Hauteur minimale, mais peut s'étendre si nécessaire
+      height: 90.r, // Hauteur minimale, mais peut s'étendre si nécessaire
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
+        padding: EdgeInsets.symmetric(
+          horizontal: AppConstants.veryLargePadding.r,
+          vertical: 8.h,
         ), // Réduire le padding vertical
         itemCount: displayTransactions.length + (hasMore ? 1 : 0),
         itemBuilder: (context, index) {
@@ -138,7 +152,7 @@ class _FollowedTransactionsCarouselState
               onTap: () => _navigateToTransactionDetail(
                 transactionWithCounterparty.transaction,
               ),
-              onStarTap: () => _removeFromFollowed(
+              onIconTap: () => _removeFromFollowed(
                 transactionWithCounterparty.transaction.id,
                 index,
               ),
@@ -153,22 +167,22 @@ class _FollowedTransactionsCarouselState
     return GestureDetector(
       onTap: widget.onSeeAllPressed,
       child: Container(
-        width: 60,
-        margin: const EdgeInsets.only(right: 12),
+        width: 60.w,
+        margin: EdgeInsets.only(right: 12.w),
         decoration: BoxDecoration(
           color: AppColors.containerDarkGray,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: AppColors.white.withValues(alpha: 0.1),
-            width: 1,
+            color: AppColors.white.withOpacity(0.1),
+            width: 1.w,
           ),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
             '...',
             style: TextStyle(
               color: AppColors.textLight,
-              fontSize: 20,
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
             ),
           ),

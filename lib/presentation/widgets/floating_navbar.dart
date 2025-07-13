@@ -6,6 +6,7 @@ import 'package:bankapp/core/constants/gradient_colors.dart';
 import 'package:bankapp/presentation/widgets/astroid.dart';
 import 'package:bankapp/presentation/widgets/add_transaction_bottom_sheet.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class FloatingNavbar extends StatefulWidget {
   final int currentIndex;
@@ -131,12 +132,12 @@ class _FloatingNavbarState extends State<FloatingNavbar>
     final activeIconColor = widget.isDarkBackground
         ? AppColors.textDark
         : AppColors.textLight;
-    final inactiveIconColor = activeIconColor.withValues(alpha: 0.3);
+    final inactiveIconColor = activeIconColor.withOpacity(0.3);
 
     return Positioned(
-      bottom: 50,
-      left: 40,
-      right: 40,
+      bottom: 80.h,
+      left: 60.w,
+      right: 60.w,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -263,15 +264,15 @@ class _FloatingNavbarState extends State<FloatingNavbar>
 
           // Navbar principale
           Container(
-            height: 70,
+            height: 55,
             decoration: BoxDecoration(
               color: navbarColor,
-              borderRadius: BorderRadius.circular(35),
+              borderRadius: BorderRadius.circular(50.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20.r,
+                  offset: Offset(0, 4.h),
                 ),
               ],
             ),
@@ -302,11 +303,11 @@ class _FloatingNavbarState extends State<FloatingNavbar>
                   child: GestureDetector(
                     onTap: _toggleExpansion,
                     child: Container(
-                      width: 30,
-                      height: 30,
+                      width: 30.w,
+                      height: 30.w,
                       decoration: const BoxDecoration(shape: BoxShape.circle),
                       child: Astroid(
-                        size: 30,
+                        size: 30.w,
                         curvature: 0.25,
                         primaryColors: GradientColors.primaryColors,
                         secondaryColors: GradientColors.secondaryColors,
@@ -354,17 +355,17 @@ class _FloatingNavbarState extends State<FloatingNavbar>
         widget.onTap(index);
       },
       child: Container(
-        width: 50,
-        height: 50,
+        width: 50.w,
+        height: 50.w,
         decoration: BoxDecoration(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(25.r),
         ),
         child: Center(
           child: SvgPicture.asset(
             iconPath,
-            width: 24,
-            height: 24,
+            width: 26.sp,
+            height: 26.sp,
             colorFilter: ColorFilter.mode(
               isActive ? activeColor : inactiveColor,
               BlendMode.srcIn,

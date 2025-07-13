@@ -5,6 +5,7 @@ import 'package:bankapp/presentation/screens/main_screen.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -46,20 +47,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           children: [
             // Logo ou icône de l'app
             Container(
-              width: 80,
-              height: 80,
+              width: 80.w,
+              height: 80.w,
               decoration: BoxDecoration(
                 color: AppColors.textLight,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.account_balance,
-                size: 40,
+                size: 40.sp,
                 color: AppColors.primary,
               ),
             ),
 
-            const SizedBox(height: 32),
+            SizedBox(height: 32.h),
 
             // Nom de l'app
             Text(
@@ -67,19 +68,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               style: AppTextStyles.h2.copyWith(color: AppColors.textLight),
             ),
 
-            const SizedBox(height: 48),
+            SizedBox(height: 48.h),
 
             // Indicateur de chargement
             const CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(AppColors.textLight),
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             Text(
               l10n.loading,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textLight.withValues(alpha: 0.8),
+                color: AppColors.textLight.withOpacity(0.8),
               ),
             ),
           ],

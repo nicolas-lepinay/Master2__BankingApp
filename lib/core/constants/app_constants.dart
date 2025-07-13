@@ -42,6 +42,7 @@ class AppConstants {
   static const double defaultPadding = 16.0;
   static const double mediumPadding = 20.0;
   static const double largePadding = 24.0;
+  static const double veryLargePadding = 32.0;
 
   // Animation durations
   static const Duration shortAnimation = Duration(milliseconds: 200);

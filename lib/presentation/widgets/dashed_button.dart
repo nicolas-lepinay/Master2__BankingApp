@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DashedButton extends StatelessWidget {
   final String? text;
@@ -22,10 +23,10 @@ class DashedButton extends StatelessWidget {
     this.dashColor = AppColors.dark,
     this.onTap,
     this.width,
-    this.height = 60,
-    this.borderRadius = 22,
-    this.dashWidth = 7,
-    this.dashSpace = 6,
+    this.height = 60.0,
+    this.borderRadius = 22.0,
+    this.dashWidth = 7.0,
+    this.dashSpace = 6.0,
     this.strokeWidth = 1.7,
   });
 
@@ -37,20 +38,20 @@ class DashedButton extends StatelessWidget {
         width: width,
         //height: height,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(borderRadius),
+          borderRadius: BorderRadius.circular(borderRadius.r),
         ),
         child: CustomPaint(
           painter: DashedBorderPainter(
             color: dashColor,
-            strokeWidth: strokeWidth,
-            dashWidth: dashWidth,
-            dashSpace: dashSpace,
-            borderRadius: borderRadius,
+            strokeWidth: strokeWidth.w,
+            dashWidth: dashWidth.w,
+            dashSpace: dashSpace.w,
+            borderRadius: borderRadius.r,
           ),
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.largePadding,
-              vertical: AppConstants.mediumPadding,
+            padding: EdgeInsets.symmetric(
+              horizontal: AppConstants.largePadding.w,
+              vertical: AppConstants.mediumPadding.h,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -67,8 +68,8 @@ class DashedButton extends StatelessWidget {
                   ),
                 ],
                 if (icon != null) ...[
-                  if (text != null) const SizedBox(width: 12),
-                  Icon(icon, color: dashColor, size: 26),
+                  if (text != null) SizedBox(width: 12.w),
+                  Icon(icon, color: dashColor, size: 26.sp),
                 ],
               ],
             ),

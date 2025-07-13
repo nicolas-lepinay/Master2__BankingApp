@@ -7,6 +7,7 @@ import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -20,7 +21,7 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Paramètres')),
       body: ListView(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
+        padding: EdgeInsets.all(AppConstants.defaultPadding.r),
         children: [
           // Section Apparence
           _buildSectionHeader(context, 'Apparence'),
@@ -34,12 +35,12 @@ class SettingsScreen extends ConsumerWidget {
               ),
               title: const Text('Thème'),
               subtitle: Text(_getThemeLabel(currentTheme)),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              trailing: Icon(Icons.arrow_forward_ios, size: 16.sp),
               onTap: () => _showThemeSelector(context, ref, currentTheme),
             ),
           ),
 
-          const SizedBox(height: AppConstants.largePadding),
+          SizedBox(height: AppConstants.largePadding.h),
 
           // Section Langue
           _buildSectionHeader(context, 'Langue / Language'),
@@ -50,12 +51,12 @@ class SettingsScreen extends ConsumerWidget {
               leading: const Icon(Icons.language, color: AppColors.primary),
               title: const Text('Langue de l\'application'),
               subtitle: Text(currentLanguage.displayName),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              trailing: Icon(Icons.arrow_forward_ios, size: 16.sp),
               onTap: () => _showLanguageSelector(context, ref, currentLanguage),
             ),
           ),
 
-          const SizedBox(height: AppConstants.largePadding),
+          SizedBox(height: AppConstants.largePadding.h),
 
           // Section Application
           _buildSectionHeader(context, 'Application'),
@@ -75,7 +76,7 @@ class SettingsScreen extends ConsumerWidget {
               leading: const Icon(Icons.help_outline, color: AppColors.primary),
               title: const Text('À propos'),
               subtitle: const Text('Application de gestion bancaire'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              trailing: Icon(Icons.arrow_forward_ios, size: 16.sp),
               onTap: () => _showAboutDialog(context),
             ),
           ),
@@ -86,9 +87,9 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.only(
-        left: AppConstants.defaultPadding,
-        bottom: AppConstants.smallPadding,
+      padding: EdgeInsets.only(
+        left: AppConstants.defaultPadding.w,
+        bottom: AppConstants.smallPadding.h,
       ),
       child: Text(
         title,
@@ -127,21 +128,21 @@ class SettingsScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
+        padding: EdgeInsets.all(AppConstants.defaultPadding.r),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Choisir le thème', style: AppTextStyles.h6),
 
-            const SizedBox(height: AppConstants.defaultPadding),
+            SizedBox(height: AppConstants.defaultPadding.h),
 
             ...theme_provider.ThemeMode.values.map((theme) {
               return ListTile(
                 leading: Icon(_getThemeIcon(theme)),
                 title: Text(_getThemeLabel(theme)),
                 trailing: currentTheme == theme
-                    ? const Icon(Icons.check, color: AppColors.primary)
+                    ? Icon(Icons.check, color: AppColors.primary, size: 16.sp)
                     : null,
                 onTap: () {
                   ref
@@ -165,7 +166,7 @@ class SettingsScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
+        padding: EdgeInsets.all(AppConstants.defaultPadding.r),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,7 +176,7 @@ class SettingsScreen extends ConsumerWidget {
               style: AppTextStyles.h6,
             ),
 
-            const SizedBox(height: AppConstants.defaultPadding),
+            SizedBox(height: AppConstants.defaultPadding.h),
 
             ...AppLanguage.values.map((language) {
               return ListTile(
@@ -185,7 +186,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 title: Text(language.displayName),
                 trailing: currentLanguage == language
-                    ? const Icon(Icons.check, color: AppColors.primary)
+                    ? Icon(Icons.check, color: AppColors.primary, size: 16.sp)
                     : null,
                 onTap: () {
                   ref.read(languageProvider.notifier).setLanguage(language);
@@ -228,29 +229,29 @@ class SettingsScreen extends ConsumerWidget {
       applicationName: 'Bank App',
       applicationVersion: '1.0.0+1',
       applicationIcon: Container(
-        width: 60,
-        height: 60,
+        width: 60.w,
+        height: 60.h,
         decoration: BoxDecoration(
           color: AppColors.primary,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
         ),
-        child: const Icon(
+        child: Icon(
           Icons.account_balance,
           color: AppColors.textLight,
-          size: 30,
+          size: 30.sp,
         ),
       ),
       children: [
         const Text(
           'Application de gestion de transactions bancaires développée avec Flutter.',
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         const Text(
-          'Fonctionnalités:\n'
-          '• Gestion des comptes\n'
-          '• Suivi des transactions\n'
-          '• Calcul automatique des soldes\n'
-          '• Interface multilingue\n'
+          'Fonctionnalités:\n' + 
+          '• Gestion des comptes\n' + 
+          '• Suivi des transactions\n' + 
+          '• Calcul automatique des soldes\n' + 
+          '• Interface multilingue\n' + 
           '• Thème clair/sombre',
         ),
       ],

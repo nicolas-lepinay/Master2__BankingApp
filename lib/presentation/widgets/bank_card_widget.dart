@@ -6,6 +6,7 @@ import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/utils/card_color_utils.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class BankCardWidget extends StatefulWidget {
   final AccountSummary accountSummary;
@@ -64,15 +65,15 @@ class _BankCardWidgetState extends State<BankCardWidget> {
     return Container(
       width: double.infinity,
       // Supprimer la hauteur fixe pour que la carte s'adapte à son contenu
-      margin: const EdgeInsets.symmetric(horizontal: 30),
+      margin: EdgeInsets.symmetric(horizontal: 30.w),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(32.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 20.r,
+            offset: Offset(0, 8.h),
           ),
         ],
       ),
@@ -84,7 +85,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
           // Contenu de la carte avec padding et intrinsicHeight
           IntrinsicHeight(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+              padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 18.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize:
@@ -105,18 +106,18 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                       ),
 
                       if (widget.accountSummary.account.icon != null)
-                        SizedBox(width: 30),
+                        SizedBox(width: 30.w),
 
                       // Icône du compte (optionnelle)
                       if (widget.accountSummary.account.icon != null)
                         Container(
-                          width: 40,
-                          height: 40,
+                          width: 40.w,
+                          height: 40.h,
                           decoration: BoxDecoration(
                             color: cardColor == AppColors.cardGreen
-                                ? AppColors.darkest.withValues(alpha: 0.2)
-                                : AppColors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(8),
+                                ? AppColors.darkest.withOpacity(0.2)
+                                : AppColors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
                           child: Icon(
                             Icons
@@ -124,25 +125,25 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                             color: cardColor == AppColors.cardGreen
                                 ? AppColors.darkest
                                 : AppColors.white,
-                            size: 20,
+                            size: 20.sp,
                           ),
                         ),
                     ],
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
 
                   // Solde attendu
                   Text(
                     AppLocalizations.of(context)!.expectedBalance.toUpperCase(),
                     style: AppTextStyles.cardBalanceLabel.copyWith(
                       color: cardColor == AppColors.cardGreen
-                          ? AppColors.darkest.withValues(alpha: 0.6)
-                          : AppColors.white.withValues(alpha: 0.6),
+                          ? AppColors.darkest.withOpacity(0.6)
+                          : AppColors.white.withOpacity(0.6),
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8.h),
 
                   // Montant du solde attendu avec toggle visibility
                   Row(
@@ -163,13 +164,13 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                       GestureDetector(
                         onTap: _toggleBalanceVisibility,
                         child: Container(
-                          width: 40,
-                          height: 40,
+                          width: 40.w,
+                          height: 40.h,
                           decoration: BoxDecoration(
                             color: cardColor == AppColors.cardGreen
-                                ? AppColors.darkest.withValues(alpha: 0.1)
-                                : AppColors.white.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(20),
+                                ? AppColors.darkest.withOpacity(0.1)
+                                : AppColors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20.r),
                           ),
                           child: Icon(
                             _isBalanceVisible
@@ -178,26 +179,26 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                             color: cardColor == AppColors.cardGreen
                                 ? AppColors.darkest
                                 : AppColors.white,
-                            size: 20,
+                            size: 20.sp,
                           ),
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10.h),
 
                   // Solde réel (toujours présent, mais peut être caché par le container noir)
                   Text(
                     AppLocalizations.of(context)!.actualBalance.toUpperCase(),
                     style: AppTextStyles.cardBalanceLabel.copyWith(
                       color: cardColor == AppColors.cardGreen
-                          ? AppColors.darkest.withValues(alpha: 0.6)
-                          : AppColors.white.withValues(alpha: 0.6),
+                          ? AppColors.darkest.withOpacity(0.6)
+                          : AppColors.white.withOpacity(0.6),
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8.h),
 
                   Text(
                     _formatBalanceDisplay(
@@ -222,11 +223,11 @@ class DotPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.white.withValues(alpha: 0.09)
+      ..color = AppColors.white.withOpacity(0.09)
       ..style = PaintingStyle.fill;
 
-    const double dotSize = 1.7;
-    const double spacing = 20.0;
+    final double dotSize = 1.7.r;
+    final double spacing = 20.0.w;
 
     // Dessiner une grille de points
     for (double x = spacing; x < size.width; x += spacing) {

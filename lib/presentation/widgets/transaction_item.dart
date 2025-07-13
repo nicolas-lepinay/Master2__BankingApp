@@ -4,6 +4,7 @@ import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TransactionItem extends StatelessWidget {
   final TransactionWithBalance transactionWithBalance;
@@ -23,27 +24,27 @@ class TransactionItem extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(8.r),
       child: Padding(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
+        padding: EdgeInsets.all(AppConstants.defaultPadding.r),
         child: Row(
           children: [
             // Icône de catégorie (carré blanc pour l'instant)
             Container(
-              width: 50,
-              height: 50,
+              width: 50.w,
+              height: 50.h,
               decoration: BoxDecoration(
                 color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
               ),
               child: Icon(
                 _getTransactionIcon(transaction.title),
                 color: AppColors.textSecondary,
-                size: 24,
+                size: 24.sp,
               ),
             ),
 
-            const SizedBox(width: AppConstants.defaultPadding),
+            SizedBox(width: AppConstants.defaultPadding.w),
 
             // Informations de la transaction
             Expanded(
@@ -60,7 +61,7 @@ class TransactionItem extends StatelessWidget {
 
                   // Commentaire
                   if (transaction.comment?.isNotEmpty == true) ...[
-                    const SizedBox(height: 2),
+                    SizedBox(height: 2.h),
                     Text(
                       transaction.comment!,
                       style: AppTextStyles.transactionDescription,
@@ -72,7 +73,7 @@ class TransactionItem extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(width: AppConstants.defaultPadding),
+            SizedBox(width: AppConstants.defaultPadding.w),
 
             // Montant et solde
             Column(
@@ -88,7 +89,7 @@ class TransactionItem extends StatelessWidget {
                   style: AppTextStyles.transactionAmount,
                 ),
 
-                const SizedBox(height: 2),
+                SizedBox(height: 2.h),
 
                 // Solde après transaction
                 Text(

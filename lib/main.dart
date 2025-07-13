@@ -7,6 +7,7 @@ import 'package:bankapp/presentation/providers/theme_provider.dart'
 import 'package:bankapp/presentation/providers/settings_provider.dart';
 import 'package:bankapp/presentation/screens/splash_screen.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -20,31 +21,38 @@ class MyApp extends ConsumerWidget {
     final themeMode = ref.watch(theme_provider.themeProvider);
     final selectedLanguage = ref.watch(languageProvider);
 
-    return MaterialApp(
-      title: 'Bank App',
+    return ScreenUtilInit(
+      designSize: const Size(448.0, 997.34),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MaterialApp(
+          title: 'Bank App',
 
-      // Localizations
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [Locale('en'), Locale('fr')],
+          // Localizations
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en'), Locale('fr')],
 
-      // Use selected language or system default
-      locale: selectedLanguage.locale,
+          // Use selected language or system default
+          locale: selectedLanguage.locale,
 
-      // Theme
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: _getThemeMode(themeMode),
+          // Theme
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: _getThemeMode(themeMode),
 
-      // Disable debug banner
-      debugShowCheckedModeBanner: false,
+          // Disable debug banner
+          debugShowCheckedModeBanner: false,
 
-      // Home screen
-      home: const SplashScreen(),
+          // Home screen
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 

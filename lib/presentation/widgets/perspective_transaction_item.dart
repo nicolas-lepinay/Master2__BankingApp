@@ -4,6 +4,7 @@ import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PerspectiveTransactionItem extends StatelessWidget {
   final TransactionWithCounterparty transactionWithCounterparty;
@@ -25,19 +26,19 @@ class PerspectiveTransactionItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 4,
-        ), // Réduire margin verticale
-        padding: const EdgeInsets.all(12), // Réduire padding
+        margin: EdgeInsets.symmetric(
+          horizontal: AppConstants.mediumPadding.r,
+          vertical: 4.r,
+        ),
+        padding: EdgeInsets.symmetric(horizontal: AppConstants.largePadding.r),
         decoration: BoxDecoration(
-          color: AppColors.transactionItemBg, // #FFCDF8
-          borderRadius: BorderRadius.circular(28),
+          color: AppColors.transactionItemBg,
+          borderRadius: BorderRadius.circular(28.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 8,
-              offset: const Offset(0, -2), // Ombre vers le haut
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 10.r,
+              offset: Offset(0, -3.r), // Ombre vers le haut
             ),
           ],
         ),
@@ -46,50 +47,52 @@ class PerspectiveTransactionItem extends StatelessWidget {
           children: [
             // Icône du tiers/catégorie dans un cercle
             Container(
-              width: 44, // Réduire la taille
-              height: 44,
+              width: 44.w,
+              height: 44.w,
               decoration: BoxDecoration(
                 color: AppColors.white,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4.r,
+                    offset: Offset(0, 2.h),
                   ),
                 ],
               ),
               child: Icon(
                 _getTransactionIcon(transaction, counterparty),
                 color: AppColors.textDark,
-                size: 20, // Réduire la taille de l'icône
+                size: 20.sp, // Réduire la taille de l'icône
               ),
             ),
 
-            const SizedBox(width: 12), // Réduire l'espacement
+            SizedBox(width: AppConstants.defaultPadding.r),
             // Informations de la transaction
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize
-                    .min, // Important : ajuster la taille au contenu
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Nom du tiers ou titre de la transaction
                   Text(
                     _getTransactionDisplayName(transaction, counterparty),
                     style: AppTextStyles.transactionNamePerspective.copyWith(
-                      fontSize: 15, // Réduire légèrement la taille
+                      fontSize: 15.sp,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
 
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2.r),
                   // Date de la transaction
                   Text(
-                    AppFormatters.formatDate(transaction.date, context),
+                    AppFormatters.formatDate(
+                      transaction.date,
+                      context,
+                    ).toUpperCase(),
                     style: AppTextStyles.transactionCategoryPerspective
-                        .copyWith(fontSize: 12),
+                        .copyWith(fontSize: 12.sp),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -97,7 +100,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(width: 12),
+            SizedBox(width: AppConstants.defaultPadding.r),
             // Montant de la transaction
             Text(
               AppFormatters.formatAmountClean(

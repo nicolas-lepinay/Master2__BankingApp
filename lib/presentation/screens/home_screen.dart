@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
@@ -13,6 +14,7 @@ import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/utils/card_color_utils.dart';
 import 'package:bankapp/data/database/database.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -81,167 +83,183 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final selectedCardIndex = ref.watch(selectedCardProvider);
     final isCardsExpanded = ref.watch(cardsExpandedProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.containerLightGray,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Contenu principal avec header et cartes
-            Column(
-              children: [
-                // Header avec menu hamburger, message de bienvenue et menu more
-                _buildHeader(context, l10n, currentUserAsync),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.black,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.containerLightGray,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              // Contenu principal avec header et cartes
+              Column(
+                children: [
+                  // Header avec menu hamburger, message de bienvenue et menu more
+                  _buildHeader(context, l10n, currentUserAsync),
 
-                const SizedBox(height: 40),
+                  SizedBox(height: 40.h),
 
-                // Card Swiper avec animation synchronisée
-                AnimatedBuilder(
-                  animation: _containerAnimation,
-                  builder: (context, child) {
-                    // Calculer le décalage vertical basé sur l'animation
-                    // Plus le container descend, plus les cartes descendent aussi
-                    final verticalOffset = _containerAnimation.value * 80;
+                  // Card Swiper avec animation synchronisée
+                  AnimatedBuilder(
+                    animation: _containerAnimation,
+                    builder: (context, child) {
+                      // Calculer le décalage vertical basé sur l'animation
+                      // Plus le container descend, plus les cartes descendent aussi
+                      final verticalOffset = _containerAnimation.value * 80.h;
 
-                    return Transform.translate(
-                      offset: Offset(0, verticalOffset),
-                      child: accountsAsync.when(
-                        data: (accounts) {
-                          if (accounts.isEmpty) {
-                            return _buildEmptyState(context, l10n);
-                          }
+                      return Transform.translate(
+                        offset: Offset(0, verticalOffset),
+                        child: accountsAsync.when(
+                          data: (accounts) {
+                            if (accounts.isEmpty) {
+                              return _buildEmptyState(context, l10n);
+                            }
 
-                          return Column(
-                            children: [
-                              // Card Swiper Widget
-                              CardsSwiperWidget<Account>(
-                                cardData: accounts,
-                                onCardChange: (index) {
-                                  // Mettre à jour la carte sélectionnée
-                                  final accountIndex = accounts.indexWhere(
-                                    (account) =>
-                                        account.id == accounts[index].id,
-                                  );
-                                  if (accountIndex != -1) {
-                                    ref
-                                        .read(selectedCardProvider.notifier)
-                                        .setSelectedCard(accountIndex);
-                                  }
-                                },
-                                shouldStartCardCollectionAnimation:
-                                    _shouldPlayCardAnimation,
-                                onCardCollectionAnimationComplete: (value) {
-                                  setState(() {
-                                    _shouldPlayCardAnimation = value;
-                                  });
-                                },
-                                cardBuilder:
-                                    (context, accountIndex, visibleIndex) {
-                                      if (accountIndex < 0 ||
-                                          accountIndex >= accounts.length) {
-                                        return const SizedBox.shrink();
-                                      }
+                            return Column(
+                              children: [
+                                // Card Swiper Widget
+                                CardsSwiperWidget<Account>(
+                                  cardData: accounts,
+                                  onCardChange: (index) {
+                                    // Mettre à jour la carte sélectionnée
+                                    final accountIndex = accounts.indexWhere(
+                                      (account) =>
+                                          account.id == accounts[index].id,
+                                    );
+                                    if (accountIndex != -1) {
+                                      ref
+                                          .read(selectedCardProvider.notifier)
+                                          .setSelectedCard(accountIndex);
+                                    }
+                                  },
+                                  shouldStartCardCollectionAnimation:
+                                      _shouldPlayCardAnimation,
+                                  onCardCollectionAnimationComplete: (value) {
+                                    setState(() {
+                                      _shouldPlayCardAnimation = value;
+                                    });
+                                  },
+                                  cardBuilder:
+                                      (context, accountIndex, visibleIndex) {
+                                        if (accountIndex < 0 ||
+                                            accountIndex >= accounts.length) {
+                                          return const SizedBox.shrink();
+                                        }
 
-                                      final account = accounts[accountIndex];
-                                      return Consumer(
-                                        builder: (context, ref, child) {
-                                          final accountSummaryAsync = ref.watch(
-                                            accountSummaryProvider(account.id),
-                                          );
+                                        final account = accounts[accountIndex];
+                                        return Consumer(
+                                          builder: (context, ref, child) {
+                                            final accountSummaryAsync = ref
+                                                .watch(
+                                                  accountSummaryProvider(
+                                                    account.id,
+                                                  ),
+                                                );
 
-                                          return accountSummaryAsync.when(
-                                            data: (accountSummary) {
-                                              return BankCardWidget(
-                                                accountSummary: accountSummary,
-                                                allAccounts: accounts,
-                                              );
-                                            },
-                                            loading: () => _buildLoadingCard(
-                                              account.id,
-                                              accounts,
-                                            ),
-                                            error: (error, stack) =>
-                                                _buildErrorCard(
-                                                  account.id,
-                                                  accounts,
+                                            return accountSummaryAsync.when(
+                                              data: (accountSummary) {
+                                                return BankCardWidget(
+                                                  accountSummary:
+                                                      accountSummary,
+                                                  allAccounts: accounts,
+                                                );
+                                              },
+                                              loading: () => _buildLoadingCard(
+                                                account.id,
+                                                accounts,
+                                              ),
+                                              error: (error, stack) =>
+                                                  _buildErrorCard(
+                                                    account.id,
+                                                    accounts,
+                                                  ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                ),
+
+                                // Bouton "Ajouter un compte" visible quand expanded
+                                AnimatedBuilder(
+                                  animation: _containerAnimation,
+                                  builder: (context, child) {
+                                    // Calculer l'opacité et l'échelle du bouton
+                                    final opacity = _containerAnimation.value;
+                                    final scale =
+                                        0.8 + (_containerAnimation.value * 0.2);
+
+                                    return opacity > 0.1
+                                        ? Opacity(
+                                            opacity: opacity,
+                                            child: Transform.scale(
+                                              scale: scale,
+                                              child: Container(
+                                                margin: EdgeInsets.symmetric(
+                                                  vertical: 50.r,
+                                                  horizontal: AppConstants
+                                                      .veryLargePadding
+                                                      .r,
                                                 ),
-                                          );
-                                        },
-                                      );
-                                    },
-                              ),
-
-                              // Bouton "Ajouter un compte" visible quand expanded
-                              AnimatedBuilder(
-                                animation: _containerAnimation,
-                                builder: (context, child) {
-                                  // Calculer l'opacité et l'échelle du bouton
-                                  final opacity = _containerAnimation.value;
-                                  final scale =
-                                      0.8 + (_containerAnimation.value * 0.2);
-
-                                  return opacity > 0.1
-                                      ? Opacity(
-                                          opacity: opacity,
-                                          child: Transform.scale(
-                                            scale: scale,
-                                            child: Container(
-                                              margin: const EdgeInsets.only(
-                                                top: 50,
-                                                left: 25,
-                                                right: 25,
-                                              ),
-                                              child: DashedButton(
-                                                text: l10n.addAccount,
-                                                icon: Icons.add,
-                                                onTap: () {
-                                                  _showAddAccountBottomSheet(
-                                                    context,
-                                                  );
-                                                },
+                                                child: DashedButton(
+                                                  text: l10n.addAccount,
+                                                  icon: Icons.add,
+                                                  onTap: () {
+                                                    _showAddAccountBottomSheet(
+                                                      context,
+                                                    );
+                                                  },
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        )
-                                      : const SizedBox.shrink();
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                        loading: () =>
-                            const Center(child: CircularProgressIndicator()),
-                        error: (error, stack) => Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.error_outline,
-                                size: 48,
-                                color: Colors.red,
-                              ),
-                              const SizedBox(height: 16),
-                              Text('Erreur: $error'),
-                            ],
+                                          )
+                                        : const SizedBox.shrink();
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
+                          error: (error, stack) => Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  size: 48.sp,
+                                  color: Colors.red,
+                                ),
+                                SizedBox(height: 16.h),
+                                Text('Erreur: $error'),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+                      );
+                    },
+                  ),
+                ],
+              ),
 
-            // Container noir draggable
-            DraggableBlackContainer(
-              onDragUpdate: _onContainerDragUpdate,
-              onStatisticsPressed: () {
-                // TODO: Navigation vers les statistiques
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Statistiques - À implémenter')),
-                );
-              },
-            ),
-          ],
+              // Container noir draggable
+              DraggableBlackContainer(
+                onDragUpdate: _onContainerDragUpdate,
+                onStatisticsPressed: () {
+                  // TODO: Navigation vers les statistiques
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Statistiques - À implémenter'),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -253,7 +271,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     AsyncValue<User> currentUserAsync,
   ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: 20.r, vertical: 16.r),
       child: Row(
         children: [
           // Menu hamburger
@@ -262,24 +280,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               // TODO: Ouvrir le menu latéral
             },
             child: Container(
-              width: 44,
-              height: 44,
+              width: 44.w,
+              height: 44.w,
+              /*
               decoration: BoxDecoration(
                 color: AppColors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10.r,
+                    offset: Offset(0, 2.h),
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.menu,
-                color: AppColors.textDark,
-                size: 20,
-              ),
+              */
+              child: Icon(Icons.menu, color: AppColors.textDark, size: 24.sp),
             ),
           ),
 
@@ -307,23 +323,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               // TODO: Ouvrir le menu contextuel
             },
             child: Container(
-              width: 44,
-              height: 44,
+              width: 44.w,
+              height: 44.w,
+              /*
               decoration: BoxDecoration(
                 color: AppColors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10.r,
+                    offset: Offset(0, 2.h),
                   ),
                 ],
               ),
-              child: const Icon(
+              */
+              child: Icon(
                 Icons.more_vert,
                 color: AppColors.textDark,
-                size: 20,
+                size: 24.sp,
               ),
             ),
           ),
@@ -338,17 +356,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: 80.w,
+            height: 80.h,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.add, size: 40, color: AppColors.primary),
+            child: Icon(Icons.add, size: 40.sp, color: AppColors.primary),
           ),
-          const SizedBox(height: AppConstants.defaultPadding),
+          SizedBox(height: AppConstants.defaultPadding.h),
           Text(l10n.addAccount, style: AppTextStyles.h5),
-          const SizedBox(height: AppConstants.smallPadding),
+          SizedBox(height: AppConstants.smallPadding.h),
           Text(
             'Appuyez pour créer un nouveau compte',
             style: AppTextStyles.bodyMedium.copyWith(
@@ -356,7 +374,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppConstants.largePadding),
+          SizedBox(height: AppConstants.largePadding.h),
           ElevatedButton(
             onPressed: () {
               _showAddAccountBottomSheet(context);
@@ -382,11 +400,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(60),
+      margin: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.all(60.r),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(32.r),
       ),
       child: const Center(
         child: CircularProgressIndicator(color: AppColors.white),
@@ -399,14 +417,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(60),
+      margin: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.all(60.r),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(32.r),
       ),
-      child: const Center(
-        child: Icon(Icons.error_outline, color: AppColors.white, size: 48),
+      child: Center(
+        child: Icon(Icons.error_outline, color: AppColors.white, size: 48.sp),
       ),
     );
   }

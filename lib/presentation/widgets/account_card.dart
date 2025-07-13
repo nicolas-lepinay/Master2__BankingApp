@@ -4,6 +4,7 @@ import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AccountCard extends StatelessWidget {
   final AccountSummary accountSummary;
@@ -13,16 +14,16 @@ class AccountCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding),
-      padding: const EdgeInsets.all(AppConstants.largePadding),
+      margin: EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding.w),
+      padding: EdgeInsets.all(AppConstants.largePadding.r),
       decoration: BoxDecoration(
         color: AppColors.cardDark,
-        borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius),
+        borderRadius: BorderRadius.circular(AppConstants.cardBorderRadius.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10.r,
+            offset: Offset(0, 4.h),
           ),
         ],
       ),
@@ -32,7 +33,7 @@ class AccountCard extends StatelessWidget {
           // Nom du compte
           Text(accountSummary.account.name, style: AppTextStyles.accountName),
 
-          const SizedBox(height: AppConstants.defaultPadding),
+          SizedBox(height: AppConstants.defaultPadding.h),
 
           // Solde actuel
           Text(
@@ -44,7 +45,7 @@ class AccountCard extends StatelessWidget {
             style: AppTextStyles.accountBalance,
           ),
 
-          const SizedBox(height: AppConstants.largePadding),
+          SizedBox(height: AppConstants.largePadding.h),
 
           // Ligne avec dépenses et revenus
           Row(
@@ -55,7 +56,7 @@ class AccountCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Dépenses', style: AppTextStyles.sectionHeader),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Text(
                       AppFormatters.formatAmount(
                         -accountSummary.totalExpenses,
@@ -71,10 +72,10 @@ class AccountCard extends StatelessWidget {
 
               // Séparateur vertical
               Container(
-                width: 1,
-                height: 40,
-                color: AppColors.textLight.withValues(alpha: 0.3),
-                margin: const EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding),
+                width: 1.w,
+                height: 40.h,
+                color: AppColors.textLight.withOpacity(0.3),
+                margin: EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding.w),
               ),
 
               // Revenus
@@ -83,7 +84,7 @@ class AccountCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Revenus', style: AppTextStyles.sectionHeader),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Text(
                       AppFormatters.formatAmount(
                         accountSummary.totalRevenues,

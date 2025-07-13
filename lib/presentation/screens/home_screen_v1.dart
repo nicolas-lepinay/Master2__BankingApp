@@ -11,6 +11,7 @@ import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/data/database/database.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -49,12 +50,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           return SafeArea(
             child: Column(
               children: [
-                const SizedBox(height: AppConstants.defaultPadding),
+                SizedBox(height: AppConstants.defaultPadding.h),
 
                 // Indicateurs de pages (dots)
                 _buildPageIndicators(totalPages, currentPageIndex),
 
-                const SizedBox(height: AppConstants.largePadding),
+                SizedBox(height: AppConstants.largePadding.h),
 
                 // PageView avec les comptes
                 Expanded(
@@ -92,12 +93,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: List.generate(totalPages, (index) {
         final isActive = index == currentPage;
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: 8,
-          height: 8,
+          margin: EdgeInsets.symmetric(horizontal: 4.w),
+          width: 8.w,
+          height: 8.h,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isActive ? AppColors.primary : AppColors.textSecondary.withValues(alpha: 0.3),
+            color: isActive ? AppColors.primary : AppColors.textSecondary.withOpacity(0.3),
           ),
         );
       }),
@@ -117,7 +118,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 // Carte du compte - FIXE en haut
                 AccountCard(accountSummary: accountSummary),
 
-                const SizedBox(height: AppConstants.largePadding),
+                SizedBox(height: AppConstants.largePadding.h),
 
                 // Liste des transactions - SCROLLABLE
                 Expanded(
@@ -153,20 +154,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: 80.w,
+            height: 80.h,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.add, size: 40, color: AppColors.primary),
+            child: Icon(Icons.add, size: 40.sp, color: AppColors.primary),
           ),
 
-          const SizedBox(height: AppConstants.defaultPadding),
+          SizedBox(height: AppConstants.defaultPadding.h),
 
           Text(l10n.addAccount, style: AppTextStyles.h5),
 
-          const SizedBox(height: AppConstants.smallPadding),
+          SizedBox(height: AppConstants.smallPadding.h),
 
           Text(
             'Appuyez pour créer un nouveau compte',
@@ -174,7 +175,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             textAlign: TextAlign.center,
           ),
 
-          const SizedBox(height: AppConstants.largePadding),
+          SizedBox(height: AppConstants.largePadding.h),
 
           ElevatedButton(onPressed: _showAddAccountBottomSheet, child: Text(l10n.addAccount)),
         ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
 import 'dart:async';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CardsSwiperWidget<T> extends StatefulWidget {
   final List<T> cardData;

@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PerspectiveListView extends StatefulWidget {
   const PerspectiveListView({
@@ -95,8 +96,8 @@ class PerspectiveListViewState extends State<PerspectiveListView> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        widget.backItemsShadowColor.withValues(alpha: .8),
-                        widget.backItemsShadowColor.withValues(alpha: 0),
+                        widget.backItemsShadowColor.withOpacity(0.8),
+                        widget.backItemsShadowColor.withOpacity(0),
                       ],
                     ),
                   ),
@@ -202,7 +203,7 @@ class _PerspectiveItems extends StatelessWidget {
               _TransformedItem(
                 heightItem: heightItem,
                 factorChange: pagePercent,
-                translateY: height + 20,
+                translateY: height + 20.h,
                 endTranslateY: height - heightItem!,
                 child: children[currentIndex! + 1],
               )

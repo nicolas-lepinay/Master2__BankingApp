@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animate_gradient/animate_gradient.dart';
 import 'dart:math' as math;
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AdjustableStarPainter extends CustomPainter {
   final Color color;
@@ -89,7 +90,7 @@ class AdjustableStarWidget extends StatelessWidget {
 
   const AdjustableStarWidget({
     Key? key,
-    this.size = 100,
+    this.size = 100.0,
     this.color = Colors.black,
     this.curvature = 0.3,
     this.gradient,
@@ -98,7 +99,7 @@ class AdjustableStarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      size: Size(size, size),
+      size: Size(size.w, size.h),
       painter: AdjustableStarPainter(
         color: color,
         curvature: curvature,
@@ -120,7 +121,7 @@ class Astroid extends StatelessWidget {
 
   const Astroid({
     super.key,
-    this.size = 100,
+    this.size = 100.0,
     this.curvature = 0.25,
     this.primaryColors = const [Colors.pink, Colors.pinkAccent, Colors.white],
     this.secondaryColors = const [Colors.blue, Colors.blueAccent, Colors.white],
@@ -134,8 +135,8 @@ class Astroid extends StatelessWidget {
     return ClipPath(
       clipper: StarClipper(curvature: curvature),
       child: SizedBox(
-        width: size,
-        height: size,
+        width: size.w,
+        height: size.h,
         child: AnimateGradient(
           primaryColors: primaryColors,
           secondaryColors: secondaryColors,

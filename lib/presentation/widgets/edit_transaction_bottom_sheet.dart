@@ -8,6 +8,7 @@ import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/data/database/database.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class EditTransactionBottomSheet extends ConsumerStatefulWidget {
   final int transactionId;
@@ -78,15 +79,15 @@ class _EditTransactionBottomSheetState extends ConsumerState<EditTransactionBott
 
         return Container(
           padding: EdgeInsets.only(
-            left: AppConstants.defaultPadding,
-            right: AppConstants.defaultPadding,
-            top: AppConstants.defaultPadding,
-            bottom: MediaQuery.of(context).viewInsets.bottom + AppConstants.defaultPadding,
+            left: AppConstants.defaultPadding.w,
+            right: AppConstants.defaultPadding.w,
+            top: AppConstants.defaultPadding.h,
+            bottom: MediaQuery.of(context).viewInsets.bottom + AppConstants.defaultPadding.h,
           ),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppConstants.cardBorderRadius),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppConstants.cardBorderRadius.r),
             ),
           ),
           child: Column(
@@ -96,21 +97,21 @@ class _EditTransactionBottomSheetState extends ConsumerState<EditTransactionBott
               // Handle bar
               Center(
                 child: Container(
-                  width: 40,
-                  height: 4,
+                  width: 40.w,
+                  height: 4.h,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2.r),
                   ),
                 ),
               ),
 
-              const SizedBox(height: AppConstants.defaultPadding),
+              SizedBox(height: AppConstants.defaultPadding.h),
 
               // Titre
               Text('Modifier la transaction', style: AppTextStyles.h5, textAlign: TextAlign.center),
 
-              const SizedBox(height: AppConstants.largePadding),
+              SizedBox(height: AppConstants.largePadding.h),
 
               // Formulaire
               Form(
@@ -148,7 +149,7 @@ class _EditTransactionBottomSheetState extends ConsumerState<EditTransactionBott
                         error: (error, stack) => Text('Erreur: $error'),
                       ),
 
-                      const SizedBox(height: AppConstants.defaultPadding),
+                      SizedBox(height: AppConstants.defaultPadding.h),
 
                       // Tiers
                       TextFormField(
@@ -161,7 +162,7 @@ class _EditTransactionBottomSheetState extends ConsumerState<EditTransactionBott
                         textCapitalization: TextCapitalization.words,
                       ),
 
-                      const SizedBox(height: AppConstants.defaultPadding),
+                      SizedBox(height: AppConstants.defaultPadding.h),
 
                       // Type de transaction
                       DropdownButtonFormField<String>(
@@ -196,7 +197,7 @@ class _EditTransactionBottomSheetState extends ConsumerState<EditTransactionBott
                         },
                       ),
 
-                      const SizedBox(height: AppConstants.defaultPadding),
+                      SizedBox(height: AppConstants.defaultPadding.h),
 
                       // Titre
                       TextFormField(
@@ -213,7 +214,7 @@ class _EditTransactionBottomSheetState extends ConsumerState<EditTransactionBott
                         },
                       ),
 
-                      const SizedBox(height: AppConstants.defaultPadding),
+                      SizedBox(height: AppConstants.defaultPadding.h),
 
                       // Montant
                       TextFormField(
@@ -239,7 +240,7 @@ class _EditTransactionBottomSheetState extends ConsumerState<EditTransactionBott
                         },
                       ),
 
-                      const SizedBox(height: AppConstants.defaultPadding),
+                      SizedBox(height: AppConstants.defaultPadding.h),
 
                       // Devise
                       DropdownButtonFormField<String>(
@@ -261,7 +262,7 @@ class _EditTransactionBottomSheetState extends ConsumerState<EditTransactionBott
                         },
                       ),
 
-                      const SizedBox(height: AppConstants.defaultPadding),
+                      SizedBox(height: AppConstants.defaultPadding.h),
 
                       // Date
                       InkWell(
@@ -278,7 +279,7 @@ class _EditTransactionBottomSheetState extends ConsumerState<EditTransactionBott
                         ),
                       ),
 
-                      const SizedBox(height: AppConstants.defaultPadding),
+                      SizedBox(height: AppConstants.defaultPadding.h),
 
                       // Statut
                       DropdownButtonFormField<int>(
@@ -313,7 +314,7 @@ class _EditTransactionBottomSheetState extends ConsumerState<EditTransactionBott
                         },
                       ),
 
-                      const SizedBox(height: AppConstants.defaultPadding),
+                      SizedBox(height: AppConstants.defaultPadding.h),
 
                       // Commentaire
                       TextFormField(
@@ -325,7 +326,7 @@ class _EditTransactionBottomSheetState extends ConsumerState<EditTransactionBott
                         maxLines: 2,
                       ),
 
-                      const SizedBox(height: AppConstants.largePadding),
+                      SizedBox(height: AppConstants.largePadding.h),
 
                       // Boutons
                       Row(
@@ -337,16 +338,16 @@ class _EditTransactionBottomSheetState extends ConsumerState<EditTransactionBott
                             ),
                           ),
 
-                          const SizedBox(width: AppConstants.defaultPadding),
+                          SizedBox(width: AppConstants.defaultPadding.w),
 
                           Expanded(
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : _updateTransaction,
                               child: _isLoading
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                  ? SizedBox(
+                                      width: 20.w,
+                                      height: 20.h,
+                                      child: CircularProgressIndicator(strokeWidth: 2.w),
                                     )
                                   : Text(l10n.save),
                             ),

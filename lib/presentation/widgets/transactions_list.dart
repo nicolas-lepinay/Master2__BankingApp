@@ -5,6 +5,7 @@ import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/presentation/widgets/transaction_item.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TransactionsList extends StatefulWidget {
   final List<TransactionWithBalance> transactions;
@@ -93,10 +94,10 @@ class _TransactionsListState extends State<TransactionsList> {
 
     for (int i = 0; i < closestIndex; i++) {
       final group = groupedTransactions[i];
-      targetOffset += 50; // Header de date
+      targetOffset += 50.h; // Header de date
       targetOffset +=
-          group.transactions.length * 80; // Environ 80px par transaction
-      targetOffset += 8; // Spacing entre les groupes
+          group.transactions.length * 80.h; // Environ 80px par transaction
+      targetOffset += 8.h; // Spacing entre les groupes
     }
 
     // S'assurer que l'offset est dans les limites du scroll
@@ -169,9 +170,9 @@ class _TransactionsListState extends State<TransactionsList> {
   @override
   Widget build(BuildContext context) {
     if (widget.transactions.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(AppConstants.largePadding),
+          padding: EdgeInsets.all(AppConstants.largePadding.r),
           child: Text('Aucune transaction', style: AppTextStyles.bodyMedium),
         ),
       );
@@ -191,7 +192,7 @@ class _TransactionsListState extends State<TransactionsList> {
 
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.only(bottom: 100), // Espace pour la bottom nav
+      padding: EdgeInsets.only(bottom: 100.h), // Espace pour la bottom nav
       itemCount: groupedTransactions.length,
       itemBuilder: (context, index) {
         final group = groupedTransactions[index];
@@ -223,7 +224,7 @@ class _TransactionsListState extends State<TransactionsList> {
               );
             }).toList(),
 
-            const SizedBox(height: AppConstants.defaultPadding),
+            SizedBox(height: AppConstants.defaultPadding.h),
           ],
         );
       },
@@ -240,11 +241,11 @@ class _TransactionsListState extends State<TransactionsList> {
     return GestureDetector(
       onTap: () => _toggleDateExpansion(dateKey),
       child: Container(
-        margin: const EdgeInsets.symmetric(
-          horizontal: AppConstants.defaultPadding,
-          vertical: AppConstants.smallPadding,
+        margin: EdgeInsets.symmetric(
+          horizontal: AppConstants.defaultPadding.w,
+          vertical: AppConstants.smallPadding.h,
         ),
-        height: 30, // Hauteur fixe pour éviter les sauts
+        height: 30.h, // Hauteur fixe pour éviter les sauts
         child: Stack(
           children: [
             // Date - Animation de glissement du centre vers la gauche
@@ -259,7 +260,7 @@ class _TransactionsListState extends State<TransactionsList> {
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
-              right: isExpanded ? 0 : -200, // -200 pour cacher complètement
+              right: isExpanded ? 0 : -200.w, // -200 pour cacher complètement
               top: 0,
               bottom: 0,
               child: AnimatedOpacity(

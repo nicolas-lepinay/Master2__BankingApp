@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DashedButtonWidget extends StatelessWidget {
   final VoidCallback onTap;
@@ -21,17 +22,17 @@ class DashedButtonWidget extends StatelessWidget {
       child: CustomPaint(
         painter: DashedBorderPainter(),
         child: Container(
-          height: 60,
+          height: 60.h,
           decoration: BoxDecoration(
             color: Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null) ...[
-                Icon(icon, color: AppColors.containerDarkGray, size: 24),
-                const SizedBox(width: 12),
+                Icon(icon, color: AppColors.containerDarkGray, size: 24.sp),
+                SizedBox(width: 12.w),
               ],
               if (text != null)
                 Text(
@@ -53,17 +54,17 @@ class DashedBorderPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = AppColors.containerDarkGray
-      ..strokeWidth = 2
+      ..strokeWidth = 2.w
       ..style = PaintingStyle.stroke;
 
-    const dashWidth = 8.0;
-    const dashSpace = 4.0;
+    final double dashWidth = 8.0.w;
+    final double dashSpace = 4.0.w;
     double startX = 0;
 
     final path = Path()
       ..addRRect(RRect.fromRectAndRadius(
         Rect.fromLTWH(0, 0, size.width, size.height),
-        const Radius.circular(16),
+        Radius.circular(16.r),
       ));
 
     for (final metric in path.computeMetrics()) {
