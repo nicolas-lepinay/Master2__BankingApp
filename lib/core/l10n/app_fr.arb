@@ -35,6 +35,7 @@
   "statistics": "Statistiques",
   "noAccount": "Aucun compte disponible",
   "noTransactions": "Aucune transaction",
+  "startAddingTransactions": "Commence par ajouter ta première transaction",
   "loadingError": "Erreur de chargement",
   "amount": "Montant",
   "keyword": "Mot-clé",

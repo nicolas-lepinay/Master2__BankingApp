@@ -79,7 +79,7 @@ class _DraggableBlackContainerState
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: AppColors.containerBlack,
+            color: AppColors.surfaceBrightDark,
             borderRadius: BorderRadius.vertical(top: Radius.circular(38.r)),
           ),
           child: Column(
@@ -117,7 +117,7 @@ class _DraggableBlackContainerState
                           _buildTransactionsHeader(l10n),
                           SizedBox(height: 16.h),
                           // Container avec dégradé rose pour la liste des transactions
-                          _buildTransactionsContainer(),
+                          _buildTransactionsContainer(l10n),
                           SizedBox(height: 32.h),
                           // Header Transactions suivies + Voir tout
                           _buildFollowedTransactionsHeader(l10n),
@@ -184,7 +184,7 @@ class _DraggableBlackContainerState
     );
   }
 
-  Widget _buildTransactionsContainer() {
+  Widget _buildTransactionsContainer(AppLocalizations l10n) {
     final selectedCardIndex = ref.watch(selectedCardProvider);
     final accountsAsync = ref.watch(accountsProvider);
 
@@ -197,7 +197,10 @@ class _DraggableBlackContainerState
     return accountsAsync.when(
       data: (accounts) {
         if (accounts.isEmpty) {
-          return _buildEmptyTransactionsContainer();
+          return _buildEmptyTransactionsContainer(
+            onAddTransaction: _showAddTransactionBottomSheet,
+            l10n: l10n,
+          );
         }
 
         // Récupérer le compte sélectionné
@@ -215,6 +218,7 @@ class _DraggableBlackContainerState
             if (transactions.isEmpty) {
               return _buildEmptyTransactionsContainer(
                 onAddTransaction: _showAddTransactionBottomSheet,
+                l10n: l10n,
               );
             }
 
@@ -279,14 +283,20 @@ class _DraggableBlackContainerState
     );
   }
 
-  Widget _buildEmptyTransactionsContainer({VoidCallback? onAddTransaction}) {
-    const double containerHeight = 260.0; // Hauteur du container rose
+  Widget _buildEmptyTransactionsContainer({
+    required VoidCallback onAddTransaction,
+    required AppLocalizations l10n,
+  }) {
+    const double containerHeight = 260.0;
 
-    const int itemCount = 8;
+    // Nombre total d'éléments dans la ListView, y compris l'en-tête
+    const int headerItemCount = 1;
+    const int dashedButtonCount = 8;
+    const int totalItemCount = headerItemCount + dashedButtonCount;
     const double startOpacity = 1.0;
     const double endOpacity = 0.2;
 
-    return /*Container(
+    return Container(
       height: containerHeight.h,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -297,25 +307,88 @@ class _DraggableBlackContainerState
         borderRadius: BorderRadius.circular(28.r),
       ),
       child: ListView.builder(
-        padding: const EdgeInsets.all(AppConstants.veryLargePadding),
-        itemCount: 8,
+        controller: ScrollController(),
+        padding: EdgeInsets.only(
+          top: AppConstants.largePadding,
+          left: AppConstants.veryLargePadding,
+          right: AppConstants.veryLargePadding,
+        ),
+        itemCount: totalItemCount,
         itemBuilder: (BuildContext context, int index) {
-          final double factor = index / (itemCount - 1);
+          // Logique pour l'en-tête (icône et texte)
+          if (index == 0) {
+            return Column(
+              children: [
+                // Icône
+                Container(
+                  width: 60.w,
+                  height: 60.w,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceBrightLight.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.receipt_long_outlined,
+                    color: AppColors.textLight100,
+                    size: 28.sp,
+                  ),
+                ),
+
+                SizedBox(height: AppConstants.defaultPadding.r),
+
+                // Texte principal
+                Text(
+                  l10n.noTransactions,
+                  style: AppTextStyles.h5.copyWith(
+                    color: AppColors.textLight100,
+                    fontFamily: AppTextStyles.playfairFontFamily,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                SizedBox(height: AppConstants.verySmallPadding.r),
+
+                // Texte secondaire
+                Text(
+                  l10n.startAddingTransactions,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textLight100.withValues(alpha: 0.8),
+                    fontSize: 15.sp,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                SizedBox(height: AppConstants.largePadding.r),
+              ],
+            );
+          }
+
+          // Logique pour les DashedButtons
+          // L'index des boutons commence après l'en-tête
+          final int buttonIndex = index - headerItemCount;
+
+          // Calcul de l'opacité basé sur l'index du bouton
+          final double factor = buttonIndex / (dashedButtonCount - 1);
           final double opacity =
               startOpacity - (startOpacity - endOpacity) * factor;
+
           return Container(
             margin: EdgeInsets.only(bottom: AppConstants.veryLargePadding),
-            child: DashedButton(
-              text: "Ajouter une transaction",
-              icon: Icons.add,
-              fontSize: 18,
-              dashColor: Colors.white.withValues(alpha: opacity),
-              onTap: onAddTransaction,
+            child: Opacity(
+              opacity: opacity,
+              child: DashedButton(
+                text: l10n.addTransaction,
+                icon: Icons.add,
+                textStyle: AppTextStyles.buttonText.copyWith(fontSize: 18.sp),
+                dashColor: Colors.white,
+                onTap: onAddTransaction,
+              ),
             ),
           );
         },
       ),
-    )*/ Container(
+    ) /*Container(
       height: containerHeight.h,
       padding: EdgeInsets.symmetric(horizontal: AppConstants.veryLargePadding),
       decoration: BoxDecoration(
@@ -362,7 +435,7 @@ class _DraggableBlackContainerState
 
             // Texte secondaire
             Text(
-              'Ajouter votre première transaction',
+              'Commencez par ajouter votre première transaction',
               style: TextStyle(
                 color: AppColors.textLight100.withValues(alpha: 0.7),
                 fontSize: 14.sp,
@@ -391,7 +464,7 @@ class _DraggableBlackContainerState
           ],
         ),
       ),
-    );
+    )*/;
   }
 
   Widget _buildLoadingTransactionsContainer() {

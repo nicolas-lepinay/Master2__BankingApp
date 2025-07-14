@@ -48,7 +48,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
-  String get addTransaction => 'Add Transaction';
+  String get addTransaction => 'Add a transaction';
 
   @override
   String get transactionDetails => 'Transaction Details';
@@ -115,6 +115,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noTransactions => 'No transaction';
+
+  @override
+  String get startAddingTransactions =>
+      'Start by adding your first transaction';
 
   @override
   String get loadingError => 'Loading error';

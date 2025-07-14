@@ -99,11 +99,11 @@ class _FullTransactionsBottomSheetState
 
     return DraggableScrollableSheet(
       controller: _dragController,
-      initialChildSize: 0.86,
+      initialChildSize: 0.89,
       minChildSize: 0.0, // Permettre de fermer complètement
-      maxChildSize: 0.86,
+      maxChildSize: 0.89,
       snap: true,
-      snapSizes: const [0.72, 0.86],
+      snapSizes: const [0.72, 0.89],
       builder: (context, scrollController) {
         return GestureDetector(
           // Détecter les taps en dehors des TextFields

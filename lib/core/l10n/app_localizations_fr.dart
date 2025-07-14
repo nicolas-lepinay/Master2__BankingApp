@@ -117,6 +117,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noTransactions => 'Aucune transaction';
 
   @override
+  String get startAddingTransactions =>
+      'Commence par ajouter ta première transaction';
+
+  @override
   String get loadingError => 'Erreur de chargement';
 
   @override

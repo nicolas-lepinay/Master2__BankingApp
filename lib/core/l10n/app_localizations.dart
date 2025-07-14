@@ -179,7 +179,7 @@ abstract class AppLocalizations {
   /// No description provided for @addTransaction.
   ///
   /// In en, this message translates to:
-  /// **'Add Transaction'**
+  /// **'Add a transaction'**
   String get addTransaction;
 
   /// No description provided for @transactionDetails.
@@ -313,6 +313,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No transaction'**
   String get noTransactions;
+
+  /// No description provided for @startAddingTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Start by adding your first transaction'**
+  String get startAddingTransactions;
 
   /// No description provided for @loadingError.
   ///

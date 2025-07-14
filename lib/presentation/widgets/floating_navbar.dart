@@ -45,14 +45,14 @@ class FloatingNavbar extends ConsumerWidget {
     final activeIconColor = isDarkBackground
         ? AppColors.textDark100
         : AppColors.textLight100;
-    final inactiveIconColor = activeIconColor.withValues(alpha: 0.3);
+    final inactiveIconColor = activeIconColor.withValues(alpha: 0.2);
 
     return Positioned(
       bottom: 80.h,
-      left: 60.w,
-      right: 60.w,
+      left: 65.w,
+      right: 65.w,
       child: Container(
-        height: 55.h,
+        height: 55,
         decoration: BoxDecoration(
           color: navbarColor,
           borderRadius: BorderRadius.circular(50.r),
@@ -90,10 +90,10 @@ class FloatingNavbar extends ConsumerWidget {
               onTap: () => _showAddTransactionBottomSheet(context, ref),
               child: SizedBox(
                 width: 50.w,
-                height: 50.h,
+                height: 50.w,
                 child: Center(
                   child: Astroid(
-                    size: 30.w,
+                    size: 32,
                     curvature: 0.25,
                     primaryColors: GradientColors.primaryColors,
                     secondaryColors: GradientColors.secondaryColors,
@@ -137,12 +137,12 @@ class FloatingNavbar extends ConsumerWidget {
       onTap: () => onTap(index),
       child: SizedBox(
         width: 50.w,
-        height: 50.h,
+        height: 50.w,
         child: Center(
           child: SvgPicture.asset(
             iconPath,
-            width: 26.sp,
-            height: 26.sp,
+            width: 28.sp,
+            height: 28.sp,
             colorFilter: ColorFilter.mode(
               isActive ? activeColor : inactiveColor,
               BlendMode.srcIn,

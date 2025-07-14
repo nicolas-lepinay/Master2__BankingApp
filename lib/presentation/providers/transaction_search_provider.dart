@@ -63,7 +63,6 @@ class TransactionSearchNotifier extends StateNotifier<TransactionSearchState> {
       filteredTransactions: _originalTransactions,
       isSearchActive: false,
     );
-    debugPrint("=== CLEAR SEARCH");
   }
 
   // Effectuer la recherche combinée
