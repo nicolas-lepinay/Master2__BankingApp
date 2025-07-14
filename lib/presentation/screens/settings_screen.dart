@@ -237,7 +237,7 @@ class SettingsScreen extends ConsumerWidget {
         ),
         child: Icon(
           Icons.account_balance,
-          color: AppColors.textLight,
+          color: AppColors.onSurfaceDark,
           size: 30.sp,
         ),
       ),

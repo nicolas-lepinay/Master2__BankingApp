@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
@@ -69,11 +70,13 @@ class _FullTransactionsBottomSheetState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+
     final selectedCardIndex = ref.watch(selectedCardProvider);
     final accountsAsync = ref.watch(accountsProvider);
 
     return DraggableScrollableSheet(
-      //controller: _dragController,
+      controller: _dragController,
       initialChildSize: 0.86,
       minChildSize: 0.0, // Permettre de fermer complètement
       maxChildSize: 0.86,
@@ -85,7 +88,7 @@ class _FullTransactionsBottomSheetState
             horizontal: AppConstants.veryLargePadding.r,
           ),
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: appTheme.background2,
             borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
             boxShadow: [
               BoxShadow(
@@ -98,13 +101,19 @@ class _FullTransactionsBottomSheetState
           child: Column(
             children: [
               // Handle bar pour indiquer qu'on peut tirer
-              Container(
-                margin: EdgeInsets.only(top: 12.h, bottom: 8.h),
-                width: 30.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: AppColors.textSecondary.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2.r),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  margin: EdgeInsets.only(
+                    top: AppConstants.smallPadding.r,
+                    bottom: AppConstants.largePadding.r,
+                  ),
+                  width: 30.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: appTheme.text100!.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
                 ),
               ),
 
@@ -115,24 +124,18 @@ class _FullTransactionsBottomSheetState
                   // Titre "Transactions" avec police Playfair
                   Text(
                     'Transactions', // TODO: Ajouter à l10n
-                    style: AppTextStyles.sectionHeaderMediumDark,
+                    style: AppTextStyles.h2.copyWith(
+                      fontFamily: AppTextStyles.playfairFontFamily,
+                    ),
                   ),
 
                   // Icône loupe/fermer
                   GestureDetector(
                     onTap: _toggleSearch,
-                    child: Container(
-                      width: 40.w,
-                      height: 40.h,
-                      decoration: BoxDecoration(
-                        color: AppColors.containerLightGray,
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Icon(
-                        _isSearchVisible ? Icons.close : Icons.search,
-                        color: AppColors.textDark,
-                        size: 20.sp,
-                      ),
+                    child: Icon(
+                      _isSearchVisible ? Icons.close : Icons.search,
+                      //color: AppColors.textDark,
+                      size: 36.sp,
                     ),
                   ),
                 ],
@@ -144,47 +147,66 @@ class _FullTransactionsBottomSheetState
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
-                height: _isSearchVisible ? 60.h : 0,
+                height: _isSearchVisible ? 80.h : 0,
                 child: AnimatedOpacity(
                   duration: const Duration(milliseconds: 300),
                   opacity: _isSearchVisible ? 1.0 : 0.0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.containerLightGray,
-                      borderRadius: BorderRadius.circular(16.r),
+                  child: TextField(
+                    controller: _searchController,
+                    focusNode: _searchFocusNode,
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: appTheme.text3!,
+                      fontSize: 18,
                     ),
-                    child: TextField(
-                      controller: _searchController,
-                      focusNode: _searchFocusNode,
-                      decoration: InputDecoration(
-                        hintText:
-                            'Saisir un montant, un nom, etc.', // TODO: Ajouter à l10n
-                        hintStyle: AppTextStyles.searchPlaceholder,
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 20.w,
-                          vertical: 16.h,
+                    decoration: InputDecoration(
+                      hintText:
+                          'Saisir un montant, un nom', // TODO: Ajouter à l10n
+                      hintStyle: AppTextStyles.searchPlaceholder.copyWith(
+                        color: appTheme.text5!,
+                      ),
+                      filled: true,
+                      fillColor: appTheme.background3,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(22.r),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(22.r),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(22.r),
+                        borderSide: BorderSide(
+                          color: appTheme.text5!.withValues(alpha: 0.5),
+                          width: 2.0,
                         ),
-                        prefixIcon: Icon(
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: AppConstants.largePadding.r,
+                        vertical: AppConstants.mediumPadding.r,
+                      ),
+                      suffixIcon: Padding(
+                        padding: EdgeInsets.only(
+                          right: AppConstants.mediumPadding.r,
+                        ),
+                        child: Icon(
                           Icons.search,
-                          color: AppColors.textGray,
-                          size: 20.sp,
+                          color: appTheme.text5!.withValues(alpha: 0.5),
+                          size: 26.sp,
                         ),
                       ),
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.textDark,
-                      ),
-                      onChanged: (value) {
-                        // TODO: Implémenter la logique de recherche dans ÉTAPE 3
-                      },
                     ),
+                    onChanged: (value) {
+                      // TODO: Implémenter la logique de recherche dans ÉTAPE 3
+                    },
                   ),
                 ),
               ),
 
               // Espace entre barre de recherche et liste
-              if (_isSearchVisible)
-                SizedBox(height: AppConstants.largePadding.r),
+              _isSearchVisible
+                  ? SizedBox(height: AppConstants.largePadding.r)
+                  : SizedBox(height: AppConstants.defaultPadding.r),
 
               // Liste des transactions
               Expanded(

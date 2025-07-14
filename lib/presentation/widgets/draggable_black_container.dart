@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
@@ -136,25 +137,23 @@ class _DraggableBlackContainerState
   }
 
   Widget _buildStatisticsButton(AppLocalizations l10n) {
-    return GestureDetector(
-      onTap: widget.onStatisticsPressed,
-      child: Container(
-        height: 56.h,
-        decoration: BoxDecoration(
-          color: AppColors.containerDarkGray,
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Statistiques', // TODO: Ajouter à l10n
-              style: AppTextStyles.statisticsButtonText,
-            ),
-            SizedBox(width: 12.w),
-            Icon(Icons.arrow_forward, color: AppColors.textLight, size: 20.sp),
-          ],
-        ),
+    return ElevatedButton(
+      onPressed: widget.onStatisticsPressed,
+      style: ElevatedButton.styleFrom(
+        foregroundColor: AppColors.ultraLight,
+        backgroundColor: AppColors.buttonLight,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text("Statistiques"),
+          Icon(
+            CupertinoIcons.arrow_up_right,
+            color: AppColors.ultraLight,
+            size: 32.sp,
+          ),
+        ],
       ),
     );
   }
@@ -172,7 +171,7 @@ class _DraggableBlackContainerState
           Text(
             'Voir tout', // TODO: Ajouter à l10n
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textLight.withValues(alpha: 0.8),
+              color: AppColors.onSurfaceDark.withValues(alpha: 0.8),
             ),
           ),
         ],
@@ -290,7 +289,7 @@ class _DraggableBlackContainerState
         child: Text(
           'Aucune transaction',
           style: TextStyle(
-            color: AppColors.textDark,
+            color: AppColors.onSurfaceLight,
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
           ),
@@ -314,7 +313,7 @@ class _DraggableBlackContainerState
         borderRadius: BorderRadius.circular(28.r),
       ),
       child: const Center(
-        child: CircularProgressIndicator(color: AppColors.textDark),
+        child: CircularProgressIndicator(color: AppColors.onSurfaceLight),
       ),
     );
   }
@@ -336,7 +335,7 @@ class _DraggableBlackContainerState
         child: Text(
           'Erreur de chargement',
           style: TextStyle(
-            color: AppColors.textDark,
+            color: AppColors.onSurfaceLight,
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
           ),
@@ -411,7 +410,7 @@ class _DraggableBlackContainerState
           child: Text(
             'Voir tout', // TODO: Ajouter à l10n
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textLight.withValues(alpha: 0.8),
+              color: AppColors.onSurfaceDark.withValues(alpha: 0.8),
             ),
           ),
         ),

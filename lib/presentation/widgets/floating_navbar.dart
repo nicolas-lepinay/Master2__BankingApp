@@ -34,8 +34,8 @@ class FloatingNavbar extends StatelessWidget {
         ? AppColors.white
         : AppColors.containerBlack;
     final activeIconColor = isDarkBackground
-        ? AppColors.textDark
-        : AppColors.textLight;
+        ? AppColors.onSurfaceLight
+        : AppColors.onSurfaceDark;
     final inactiveIconColor = activeIconColor.withValues(alpha: 0.3);
 
     return Positioned(

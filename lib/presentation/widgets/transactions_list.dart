@@ -3,6 +3,7 @@ import 'package:bankapp/data/database/database.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
+import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/presentation/widgets/transaction_item.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -216,6 +217,7 @@ class _TransactionsListState extends State<TransactionsList> {
                     : null,
               );
             }).toList(),
+
             SizedBox(height: AppConstants.largePadding.h),
           ],
         );
@@ -242,7 +244,11 @@ class _TransactionsListState extends State<TransactionsList> {
               alignment: isExpanded ? Alignment.centerLeft : Alignment.center,
               child: Text(
                 dateLabel.toUpperCase(),
-                style: AppTextStyles.dateHeader,
+                style: AppTextStyles.dateHeader.copyWith(
+                  color: Theme.of(
+                    context,
+                  ).extension<AppColorsExtended>()!.text3,
+                ),
               ),
             ),
 
@@ -260,7 +266,9 @@ class _TransactionsListState extends State<TransactionsList> {
                 child: Text(
                   _formatNetAmount(dayTotals, dayTransactions),
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.neutral,
+                    color: Theme.of(
+                      context,
+                    ).extension<AppColorsExtended>()!.text4,
                   ),
                 ),
               ),

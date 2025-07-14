@@ -57,7 +57,7 @@ class FollowedTransactionItem extends StatelessWidget {
               ),
               child: Icon(
                 _getTransactionIcon(transaction, counterparty),
-                color: AppColors.textLight,
+                color: AppColors.onSurfaceDark,
                 size: 16.sp, // Réduire la taille de l'icône
               ),
             ),
@@ -123,7 +123,7 @@ class FollowedTransactionItem extends StatelessWidget {
                 padding: EdgeInsets.all(2.r), // Réduire le padding
                 child: Icon(
                   Icons.bookmark,
-                  color: AppColors.textLight,
+                  color: AppColors.onSurfaceDark,
                   size: 22.sp, // Réduire la taille
                 ),
               ),

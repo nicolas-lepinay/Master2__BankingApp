@@ -3,25 +3,26 @@ import 'package:flutter/services.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/theme/app_colors_extended.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
+      // Ajout de votre thème personnalisé
+      extensions: const <ThemeExtension<dynamic>>[AppColorsExtended.light],
 
       // Color scheme
-      colorScheme: const ColorScheme.light(
+      colorScheme: ColorScheme.light(
         primary: AppColors.primary,
         secondary: AppColors.secondary,
-        surface: AppColors.surfaceLight,
-        background: AppColors.backgroundLight,
         error: AppColors.error,
-        onPrimary: AppColors.textLight,
-        onSecondary: AppColors.textLight,
-        onSurface: AppColors.textPrimary, // Texte noir
-        onBackground: AppColors.textPrimary, // Texte noire
-        onError: AppColors.textLight,
+        onPrimary: AppColors.onSurfaceDark,
+        onSecondary: AppColors.onSurfaceLight,
+        onError: AppColors.onSurfaceDark,
+        surface: AppColorsExtended.light.background2!,
+        onSurface: AppColorsExtended.light.text100!,
       ),
 
       // App bar theme
@@ -41,12 +42,12 @@ class AppTheme {
             Radius.circular(AppConstants.cardBorderRadius),
           ),
         ),
-        color: AppColors.surfaceLight,
+        color: AppColors.backgroundLight1,
       ),
 
       // Bottom navigation bar theme
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.surfaceLight,
+        backgroundColor: AppColors.backgroundLight1,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textSecondary,
         type: BottomNavigationBarType.fixed,
@@ -68,19 +69,19 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         filled: true,
-        fillColor: AppColors.surfaceLight,
+        fillColor: AppColors.backgroundLight1,
       ),
 
       // Elevated button theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.textLight,
+          backgroundColor: AppColorsExtended.light.buttonBackground!,
+          foregroundColor: AppColors.ultraLight,
           textStyle: AppTextStyles.buttonText,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(24),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         ),
       ),
 
@@ -98,9 +99,9 @@ class AppTheme {
       ),
 
       // Floating action button theme
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textLight,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: AppColorsExtended.light.buttonBackground!,
+        foregroundColor: AppColors.ultraLight,
       ),
     );
   }
@@ -109,26 +110,25 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
+      extensions: const <ThemeExtension<dynamic>>[AppColorsExtended.dark],
 
       // Color scheme
-      colorScheme: const ColorScheme.dark(
+      colorScheme: ColorScheme.dark(
         primary: AppColors.primary,
         secondary: AppColors.secondary,
-        surface: AppColors.surfaceDark,
-        background: AppColors.backgroundDark,
         error: AppColors.error,
-        onPrimary: AppColors.textLight,
-        onSecondary: AppColors.textDark,
-        onSurface: AppColors.textLight, // Texte blanc
-        onBackground: AppColors.textLight, // Text blanc
-        onError: AppColors.textLight,
+        onPrimary: AppColors.onSurfaceDark,
+        onSecondary: AppColors.onSurfaceLight,
+        onError: AppColors.onSurfaceDark,
+        surface: AppColorsExtended.dark.background1!,
+        onSurface: AppColorsExtended.dark.text100!,
       ),
 
       // App bar theme
       appBarTheme: const AppBarTheme(
         elevation: 0,
         backgroundColor: AppColors.backgroundDark,
-        foregroundColor: AppColors.textLight,
+        foregroundColor: AppColors.onSurfaceDark,
         systemOverlayStyle: SystemUiOverlayStyle.light,
         titleTextStyle: AppTextStyles.h5,
       ),
@@ -141,12 +141,12 @@ class AppTheme {
             Radius.circular(AppConstants.cardBorderRadius),
           ),
         ),
-        color: AppColors.surfaceDark,
+        color: AppColors.backgroundDark1,
       ),
 
       // Bottom navigation bar theme
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.surfaceDark,
+        backgroundColor: AppColors.backgroundDark1,
         selectedItemColor: AppColors.secondary,
         unselectedItemColor: AppColors.textSecondary,
         type: BottomNavigationBarType.fixed,
@@ -168,19 +168,19 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.secondary, width: 2),
         ),
         filled: true,
-        fillColor: AppColors.surfaceDark,
+        fillColor: AppColors.backgroundDark1,
       ),
 
       // Elevated button theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.secondary,
-          foregroundColor: AppColors.textDark,
+          backgroundColor: AppColorsExtended.dark.buttonBackground!,
+          foregroundColor: AppColors.ultraDark,
           textStyle: AppTextStyles.buttonText,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(24),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         ),
       ),
 
@@ -198,9 +198,9 @@ class AppTheme {
       ),
 
       // Floating action button theme
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.secondary,
-        foregroundColor: AppColors.textDark,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: AppColorsExtended.dark.buttonBackground!,
+        foregroundColor: AppColors.ultraDark,
       ),
     );
   }

@@ -295,7 +295,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ],
               ),
               */
-              child: Icon(Icons.menu, color: AppColors.textDark, size: 24.sp),
+              child: Icon(
+                Icons.menu,
+                color: AppColors.onSurfaceLight,
+                size: 24.sp,
+              ),
             ),
           ),
 
@@ -340,7 +344,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               */
               child: Icon(
                 Icons.more_vert,
-                color: AppColors.textDark,
+                color: AppColors.onSurfaceLight,
                 size: 24.sp,
               ),
             ),

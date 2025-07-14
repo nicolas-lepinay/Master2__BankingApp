@@ -65,7 +65,7 @@ class _FollowedTransactionsCarouselState
         child: Text(
           'Aucune transaction suivie',
           style: TextStyle(
-            color: AppColors.textLight,
+            color: AppColors.onSurfaceDark,
             fontSize: 18.sp,
             fontWeight: FontWeight.w500,
           ),
@@ -88,7 +88,7 @@ class _FollowedTransactionsCarouselState
       ),
       child: Center(
         child: CircularProgressIndicator(
-          color: AppColors.textLight,
+          color: AppColors.onSurfaceDark,
           strokeWidth: 2.w,
         ),
       ),
@@ -110,7 +110,7 @@ class _FollowedTransactionsCarouselState
         child: Text(
           'Erreur de chargement',
           style: TextStyle(
-            color: AppColors.textLight,
+            color: AppColors.onSurfaceDark,
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
           ),
@@ -181,7 +181,7 @@ class _FollowedTransactionsCarouselState
           child: Text(
             '...',
             style: TextStyle(
-              color: AppColors.textLight,
+              color: AppColors.onSurfaceDark,
               fontSize: 20.sp,
               fontWeight: FontWeight.bold,
             ),

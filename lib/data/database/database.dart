@@ -451,7 +451,7 @@ class AppDatabase extends _$AppDatabase {
         currency: const Value('EUR'),
         amount: const Value(20.0),
         title: const Value('Abonnement Netflix'),
-        date: Value(DateTime.now().subtract(const Duration(days: 1))),
+        date: Value(DateTime.now().subtract(const Duration(days: 2))),
         status: const Value(1),
       ),
     );
@@ -468,7 +468,7 @@ class AppDatabase extends _$AppDatabase {
         date: Value(
           DateTime.now()
               .subtract(const Duration(days: 1))
-              .subtract(const Duration(seconds: 1)),
+              .subtract(const Duration(seconds: 10)),
         ),
         status: const Value(1),
       ),
@@ -482,7 +482,11 @@ class AppDatabase extends _$AppDatabase {
         currency: const Value('EUR'),
         amount: const Value(10.0),
         title: const Value('Remboursement'),
-        date: Value(DateTime.now().subtract(const Duration(days: 3))),
+        date: Value(
+          DateTime.now()
+              .subtract(const Duration(days: 1))
+              .subtract(const Duration(seconds: 20)),
+        ),
         status: const Value(1),
       ),
     );
@@ -491,12 +495,12 @@ class AppDatabase extends _$AppDatabase {
     await into(transactions).insert(
       TransactionsCompanion(
         accountId: const Value(1),
-        counterpartyId: const Value(4), // Total Énergies
+        counterpartyId: const Value(4),
         transactionType: const Value('DEBIT'),
         currency: const Value('EUR'),
         amount: const Value(50.0),
         title: const Value('Facture électricité (programmée)'),
-        date: Value(DateTime.now().add(const Duration(days: 5))),
+        date: Value(DateTime.now().add(const Duration(days: 3))),
         status: const Value(0), // En attente
       ),
     );
@@ -508,9 +512,26 @@ class AppDatabase extends _$AppDatabase {
         transactionType: const Value('CREDIT'),
         currency: const Value('EUR'),
         amount: const Value(2500.0),
-        title: const Value('Salaire (programmé)'),
-        date: Value(DateTime.now().add(const Duration(days: 10))),
-        status: const Value(0), // En attente
+        title: const Value('Salaire programmé'),
+        date: Value(
+          DateTime.now()
+              .add(const Duration(days: 3))
+              .add(const Duration(seconds: 10)),
+        ),
+        status: const Value(0),
+      ),
+    );
+
+    // Transaction 6:
+    await into(transactions).insert(
+      TransactionsCompanion(
+        accountId: const Value(1),
+        transactionType: const Value('DEBIT'),
+        currency: const Value('EUR'),
+        amount: const Value(800.55),
+        title: const Value('Airbnb'),
+        date: Value(DateTime.now()),
+        status: const Value(0),
       ),
     );
 

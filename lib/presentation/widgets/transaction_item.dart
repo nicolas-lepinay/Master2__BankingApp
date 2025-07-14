@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bankapp/data/database/database.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
+import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
@@ -19,6 +20,7 @@ class TransactionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
     final transaction = transactionWithBalance.transaction;
     final isDebit =
         transaction.transactionType == AppConstants.transactionTypeDebit;
@@ -36,7 +38,7 @@ class TransactionItem extends StatelessWidget {
               width: 50.w,
               height: 50.w,
               decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(50.r),
               ),
               child: Icon(
@@ -67,14 +69,18 @@ class TransactionItem extends StatelessWidget {
                   if (transaction.comment?.isNotEmpty == true) ...[
                     Text(
                       transaction.comment!,
-                      style: AppTextStyles.transactionDescription,
+                      style: AppTextStyles.transactionDescription.copyWith(
+                        color: appTheme.text4,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ] else ...[
                     Text(
                       "Catégorie...",
-                      style: AppTextStyles.transactionDescription,
+                      style: AppTextStyles.transactionDescription.copyWith(
+                        color: appTheme.text4,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -97,13 +103,9 @@ class TransactionItem extends StatelessWidget {
                     context: context,
                   ),
                   style: AppTextStyles.transactionAmount.copyWith(
-                    color: isDebit
-                        ? AppColors.textPrimary
-                        : AppColors.creditTransaction,
+                    color: isDebit ? appTheme.text100 : appTheme.textCredit,
                   ),
                 ),
-
-                // SizedBox(height: 1.h),
 
                 // Solde après transaction
                 Text(
@@ -114,8 +116,8 @@ class TransactionItem extends StatelessWidget {
                   ),
                   style: AppTextStyles.transactionBalance.copyWith(
                     color: transactionWithBalance.balanceAfter < 0
-                        ? AppColors.negativeBalance
-                        : AppColors.neutral,
+                        ? appTheme.textDebit
+                        : appTheme.text4,
                   ),
                 ),
               ],

@@ -65,7 +65,7 @@ class AccountCard extends StatelessWidget {
                         context: context,
                       ),
                       style: AppTextStyles.h6.copyWith(
-                        color: AppColors.textLight,
+                        color: AppColors.onSurfaceDark,
                       ),
                     ),
                   ],
@@ -76,7 +76,7 @@ class AccountCard extends StatelessWidget {
               Container(
                 width: 1.w,
                 height: 40.h,
-                color: AppColors.textLight.withValues(alpha: 0.3),
+                color: AppColors.onSurfaceDark.withValues(alpha: 0.3),
                 margin: EdgeInsets.symmetric(
                   horizontal: AppConstants.defaultPadding.w,
                 ),
@@ -97,7 +97,7 @@ class AccountCard extends StatelessWidget {
                         context: context,
                       ),
                       style: AppTextStyles.h6.copyWith(
-                        color: AppColors.textLight,
+                        color: AppColors.onSurfaceDark,
                       ),
                     ),
                   ],

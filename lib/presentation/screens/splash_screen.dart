@@ -50,7 +50,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               width: 80.w,
               height: 80.w,
               decoration: BoxDecoration(
-                color: AppColors.textLight,
+                color: AppColors.onSurfaceDark,
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: Icon(
@@ -65,14 +65,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             // Nom de l'app
             Text(
               l10n.appTitle,
-              style: AppTextStyles.h2.copyWith(color: AppColors.textLight),
+              style: AppTextStyles.h2.copyWith(color: AppColors.onSurfaceDark),
             ),
 
             SizedBox(height: 48.h),
 
             // Indicateur de chargement
             const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.textLight),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppColors.onSurfaceDark,
+              ),
             ),
 
             SizedBox(height: 16.h),
@@ -80,7 +82,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             Text(
               l10n.loading,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textLight.withValues(alpha: 0.8),
+                color: AppColors.onSurfaceDark.withValues(alpha: 0.8),
               ),
             ),
           ],

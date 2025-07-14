@@ -62,7 +62,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
               ),
               child: Icon(
                 _getTransactionIcon(transaction, counterparty),
-                color: AppColors.textDark,
+                color: AppColors.onSurfaceLight,
                 size: 20.sp, // Réduire la taille de l'icône
               ),
             ),
