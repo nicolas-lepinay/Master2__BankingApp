@@ -4,10 +4,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AppTextStyles {
   // Font families
-  static String defaultFontFamily = 'Outfit'; // Police primaire
-  static String pacificoFontFamily = 'Pacifico';
-  static String overpassMonoFontFamily = 'OverpassMono';
-  static String playfairFontFamily = 'Playfair';
+  static const String defaultFontFamily = 'Outfit'; // Police primaire
+  static const String pacificoFontFamily = 'Pacifico';
+  static const String overpassMonoFontFamily = 'OverpassMono';
+  static const String playfairFontFamily = 'Playfair';
 
   // V2 Design System Text Styles
 
@@ -259,9 +259,9 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
   );
 
-  static TextStyle buttonText = TextStyle(
+  static const TextStyle buttonText = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 22.sp,
+    fontSize: 22,
     fontWeight: FontWeight.w300,
   );
 

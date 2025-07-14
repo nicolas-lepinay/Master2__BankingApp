@@ -12,7 +12,9 @@ import 'package:bankapp/presentation/widgets/perspective_list_view.dart';
 import 'package:bankapp/presentation/widgets/perspective_transaction_item.dart';
 import 'package:bankapp/presentation/widgets/followed_transactions_carousel.dart';
 import 'package:bankapp/presentation/widgets/full_transactions_bottom_sheet.dart';
+import 'package:bankapp/presentation/widgets/add_transaction_bottom_sheet.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
+import 'package:bankapp/presentation/widgets/dashed_button.dart';
 import 'package:bankapp/data/database/database.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -166,13 +168,13 @@ class _DraggableBlackContainerState
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Transactions', // TODO: Ajouter à l10n
+            l10n.transactions,
             style: AppTextStyles.sectionHeader.copyWith(
               color: AppColors.textLight100,
             ),
           ),
           Text(
-            'Voir tout', // TODO: Ajouter à l10n
+            l10n.seeAll,
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textLight25,
             ),
@@ -211,7 +213,9 @@ class _DraggableBlackContainerState
         return transactionsAsync.when(
           data: (transactions) {
             if (transactions.isEmpty) {
-              return _buildEmptyTransactionsContainer();
+              return _buildEmptyTransactionsContainer(
+                onAddTransaction: _showAddTransactionBottomSheet,
+              );
             }
 
             // Les transactions sont déjà limitées à 50 (25 passées + 25 futures)
@@ -275,10 +279,14 @@ class _DraggableBlackContainerState
     );
   }
 
-  Widget _buildEmptyTransactionsContainer() {
+  Widget _buildEmptyTransactionsContainer({VoidCallback? onAddTransaction}) {
     const double containerHeight = 260.0; // Hauteur du container rose
 
-    return Container(
+    const int itemCount = 8;
+    const double startOpacity = 1.0;
+    const double endOpacity = 0.2;
+
+    return /*Container(
       height: containerHeight.h,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -288,15 +296,99 @@ class _DraggableBlackContainerState
         ),
         borderRadius: BorderRadius.circular(28.r),
       ),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(AppConstants.veryLargePadding),
+        itemCount: 8,
+        itemBuilder: (BuildContext context, int index) {
+          final double factor = index / (itemCount - 1);
+          final double opacity =
+              startOpacity - (startOpacity - endOpacity) * factor;
+          return Container(
+            margin: EdgeInsets.only(bottom: AppConstants.veryLargePadding),
+            child: DashedButton(
+              text: "Ajouter une transaction",
+              icon: Icons.add,
+              fontSize: 18,
+              dashColor: Colors.white.withValues(alpha: opacity),
+              onTap: onAddTransaction,
+            ),
+          );
+        },
+      ),
+    )*/ Container(
+      height: containerHeight.h,
+      padding: EdgeInsets.symmetric(horizontal: AppConstants.veryLargePadding),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.gradientPinkStart, AppColors.gradientPinkEnd],
+        ),
+        borderRadius: BorderRadius.circular(28.r),
+      ),
       child: Center(
-        child: Text(
-          'Aucune transaction',
-          style: TextStyle(
-            color: AppColors.onSurfaceLight,
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-          ),
-          textAlign: TextAlign.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Icône
+            Container(
+              width: 60.w,
+              height: 60.h,
+              decoration: BoxDecoration(
+                color: AppColors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.receipt_long_outlined,
+                color: AppColors.textLight100,
+                size: 28.sp,
+              ),
+            ),
+
+            SizedBox(height: 16.h),
+
+            // Texte principal
+            Text(
+              'Aucune transaction',
+              style: TextStyle(
+                color: AppColors.textLight100,
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            SizedBox(height: 8.h),
+
+            // Texte secondaire
+            Text(
+              'Ajouter votre première transaction',
+              style: TextStyle(
+                color: AppColors.textLight100.withValues(alpha: 0.7),
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w400,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            SizedBox(height: 20.h),
+
+            // Bouton "Ajouter une transaction"
+            if (onAddTransaction != null)
+              DashedButton(
+                text: "Ajouter une transaction".toUpperCase(),
+                icon: Icons.add,
+                textStyle: AppTextStyles.buttonText.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+                dashColor: Colors.white.withValues(alpha: 1),
+                verticalPadding: AppConstants.smallPadding,
+                horizontalPadding: AppConstants.defaultPadding,
+                borderRadius: 16,
+                onTap: onAddTransaction,
+              ),
+          ],
         ),
       ),
     );
@@ -387,12 +479,31 @@ class _DraggableBlackContainerState
       enableDrag: true,
       builder: (context) => const FullTransactionsBottomSheet(),
     ).then((_) {
-      // Reset de la recherche quand la BottomSheet se ferme
+      // Reset de la recherche quand la BottomSheet se ferme, après 1 seconde
       if (mounted) {
-        ref.read(transactionSearchProvider.notifier).clearSearch();
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          ref.read(transactionSearchProvider.notifier).clearSearch();
+        });
       }
     });
-    ;
+  }
+
+  void _showAddTransactionBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: true,
+      enableDrag: true,
+      builder: (context) => const AddTransactionBottomSheet(),
+    ).then((_) {
+      // Invalider les providers liés aux transactions après fermeture
+      if (mounted) {
+        ref.invalidate(accountSummaryProvider);
+        ref.invalidate(transactionsWithBalanceProvider);
+        ref.invalidate(transactionsAroundTodayProvider);
+      }
+    });
   }
 
   void _navigateToTransactionDetail(Transaction transaction) {
@@ -409,7 +520,7 @@ class _DraggableBlackContainerState
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Transactions suivies', // TODO: Ajouter à l10n
+          l10n.followedTransactions,
           style: AppTextStyles.sectionHeader.copyWith(
             color: AppColors.textLight100,
           ),
@@ -419,7 +530,7 @@ class _DraggableBlackContainerState
             // TODO: Action "Voir tout" transactions suivies
           },
           child: Text(
-            'Voir tout', // TODO: Ajouter à l10n
+            l10n.seeAll,
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textLight25,
             ),
@@ -444,15 +555,4 @@ class _DraggableBlackContainerState
       },
     );
   }
-
-  /// Provider pour récupérer les transactions centrées autour d'aujourd'hui
-  /// (Utilise la nouvelle méthode de la base de données)
-  static final transactionsAroundTodayProvider =
-      FutureProvider.family<List<TransactionWithCounterparty>, int>((
-        ref,
-        accountId,
-      ) async {
-        final database = ref.read(databaseProvider);
-        return database.getTransactionsAroundToday(accountId);
-      });
 }

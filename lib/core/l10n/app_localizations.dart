@@ -293,7 +293,7 @@ abstract class AppLocalizations {
   /// No description provided for @followedTransactions.
   ///
   /// In en, this message translates to:
-  /// **'Bookmarked Transactions'**
+  /// **'Bookmarks'**
   String get followedTransactions;
 
   /// No description provided for @statistics.

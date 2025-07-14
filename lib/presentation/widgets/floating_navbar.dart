@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/constants/gradient_colors.dart';
+import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/widgets/astroid.dart';
 import 'package:bankapp/presentation/widgets/add_transaction_bottom_sheet.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class FloatingNavbar extends StatelessWidget {
+class FloatingNavbar extends ConsumerWidget {
   final int currentIndex;
   final Function(int) onTap;
   final bool isDarkBackground; // true = fond foncé, false = fond clair
@@ -18,24 +20,31 @@ class FloatingNavbar extends StatelessWidget {
     this.isDarkBackground = true,
   });
 
-  void _showAddTransactionBottomSheet(BuildContext context) {
+  void _showAddTransactionBottomSheet(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const AddTransactionBottomSheet(),
-    );
+    ).then((_) {
+      // Invalider les providers liés aux transactions après fermeture
+      if (context.mounted) {
+        ref.invalidate(accountSummaryProvider);
+        ref.invalidate(transactionsWithBalanceProvider);
+        ref.invalidate(transactionsAroundTodayProvider);
+      }
+    });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Couleurs adaptatives selon le fond
     final navbarColor = isDarkBackground
-        ? AppColors.white
-        : AppColors.containerBlack;
+        ? AppColors.surfaceBrightLight
+        : AppColors.surfaceBrightDark;
     final activeIconColor = isDarkBackground
-        ? AppColors.onSurfaceLight
-        : AppColors.onSurfaceDark;
+        ? AppColors.textDark100
+        : AppColors.textLight100;
     final inactiveIconColor = activeIconColor.withValues(alpha: 0.3);
 
     return Positioned(
@@ -78,7 +87,7 @@ class FloatingNavbar extends StatelessWidget {
 
             // Icône centrale (Astroïde) - Déclencheur de la BottomSheet
             GestureDetector(
-              onTap: () => _showAddTransactionBottomSheet(context),
+              onTap: () => _showAddTransactionBottomSheet(context, ref),
               child: SizedBox(
                 width: 50.w,
                 height: 50.h,

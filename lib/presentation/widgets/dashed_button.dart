@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class DashedButton extends StatelessWidget {
   final String? text;
   final IconData? icon;
+  final TextStyle? textStyle;
   final Color dashColor;
   final VoidCallback? onTap;
   final double? width;
@@ -15,11 +16,14 @@ class DashedButton extends StatelessWidget {
   final double dashWidth;
   final double dashSpace;
   final double strokeWidth;
+  final double verticalPadding;
+  final double horizontalPadding;
 
   const DashedButton({
     super.key,
     this.text,
     this.icon,
+    this.textStyle = AppTextStyles.buttonText,
     this.dashColor = AppColors.defaultGray,
     this.onTap,
     this.width,
@@ -28,6 +32,8 @@ class DashedButton extends StatelessWidget {
     this.dashWidth = 7.0,
     this.dashSpace = 6.0,
     this.strokeWidth = 2.0,
+    this.verticalPadding = AppConstants.mediumPadding,
+    this.horizontalPadding = AppConstants.largePadding,
   });
 
   @override
@@ -49,8 +55,8 @@ class DashedButton extends StatelessWidget {
           ),
           child: Container(
             padding: EdgeInsets.symmetric(
-              horizontal: AppConstants.largePadding.w,
-              vertical: AppConstants.mediumPadding.h,
+              horizontal: horizontalPadding.w,
+              vertical: verticalPadding.h,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -61,6 +67,8 @@ class DashedButton extends StatelessWidget {
                       text!,
                       style: AppTextStyles.buttonText.copyWith(
                         color: dashColor,
+                        fontWeight: (textStyle?.fontWeight ?? FontWeight.w300),
+                        fontSize: (textStyle?.fontSize ?? 22).sp,
                       ),
                       textAlign: TextAlign.start,
                     ),
@@ -68,7 +76,11 @@ class DashedButton extends StatelessWidget {
                 ],
                 if (icon != null) ...[
                   if (text != null) SizedBox(width: 12.w),
-                  Icon(icon, color: dashColor, size: 30.sp),
+                  Icon(
+                    icon,
+                    color: dashColor,
+                    size: ((textStyle?.fontSize ?? 22) * 1.4).sp,
+                  ),
                 ],
               ],
             ),

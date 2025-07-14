@@ -72,6 +72,12 @@ class _FullTransactionsBottomSheetState
     ref.read(transactionSearchProvider.notifier).searchByKeyword(value);
   }
 
+  void _dismissKeyboard() {
+    FocusScope.of(context).unfocus();
+    // Alternativement, on peut aussi utiliser :
+    // FocusManager.instance.primaryFocus?.unfocus();
+  }
+
   void _navigateToTransactionDetail(Transaction transaction) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -99,189 +105,199 @@ class _FullTransactionsBottomSheetState
       snap: true,
       snapSizes: const [0.72, 0.86],
       builder: (context, scrollController) {
-        return Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppConstants.veryLargePadding.r,
-          ),
-          decoration: BoxDecoration(
-            color: appTheme.background2,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                blurRadius: 28.r,
-                offset: Offset(0, -4.h),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              // Handle bar
-              InkWell(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  width: double.infinity,
-                  //color: Colors.red,
-                  height: AppConstants.veryLargePadding * 2,
-                  alignment: Alignment.topCenter,
+        return GestureDetector(
+          // Détecter les taps en dehors des TextFields
+          onTap: _dismissKeyboard,
+          // Permettre aux enfants de recevoir les événements
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppConstants.veryLargePadding.r,
+            ),
+            decoration: BoxDecoration(
+              color: appTheme.background2,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                  blurRadius: 28.r,
+                  offset: Offset(0, -4.h),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Handle bar
+                InkWell(
+                  onTap: () => Navigator.pop(context),
                   child: Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      l10n.close.toUpperCase(),
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: appTheme.text4,
-                        letterSpacing: 1.1,
+                    width: double.infinity,
+                    //color: Colors.red,
+                    height: AppConstants.veryLargePadding * 2,
+                    alignment: Alignment.topCenter,
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                        l10n.close.toUpperCase(),
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: appTheme.text4,
+                          letterSpacing: 1.1,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
 
-              // Header avec titre et icône loupe
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Titre "Transactions" avec police Playfair
-                  Text(
-                    l10n.transactions,
-                    style: AppTextStyles.h2.copyWith(
-                      fontFamily: AppTextStyles.playfairFontFamily,
+                // Header avec titre et icône loupe
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Titre "Transactions" avec police Playfair
+                    Text(
+                      l10n.transactions,
+                      style: AppTextStyles.h2.copyWith(
+                        fontFamily: AppTextStyles.playfairFontFamily,
+                      ),
                     ),
-                  ),
 
-                  // Icône loupe/fermer
-                  GestureDetector(
-                    onTap: _toggleSearch,
-                    child: Icon(
-                      _isSearchVisible
-                          ? CupertinoIcons.xmark
-                          : CupertinoIcons.search,
-                      size: 30.sp,
+                    // Icône loupe/fermer
+                    GestureDetector(
+                      onTap: _toggleSearch,
+                      child: Icon(
+                        _isSearchVisible
+                            ? CupertinoIcons.xmark
+                            : CupertinoIcons.search,
+                        size: 30.sp,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
 
-              SizedBox(height: AppConstants.mediumPadding.r),
+                SizedBox(height: AppConstants.mediumPadding.r),
 
-              // Barre de recherche animée avec 2 champs
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                height: _isSearchVisible ? 80.h : 0,
-                child: AnimatedOpacity(
+                // Barre de recherche animée avec 2 champs
+                AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-                  opacity: _isSearchVisible ? 1.0 : 0.0,
-                  child: Row(
-                    children: [
-                      // Champ de recherche par montant (gauche)
-                      Expanded(
-                        child: HalfSearchField(
-                          controller: _amountController,
-                          focusNode: _amountFocusNode,
-                          hintText: l10n.amount.toUpperCase(),
-                          appTheme: appTheme,
-                          keyboardType: TextInputType.number,
-                          iconData: CupertinoIcons.money_dollar,
-                          shadowColor: isDarkMode
-                              ? null
-                              : AppColors.primaryGreen.withValues(alpha: 0.3),
-                          isLeftSide: true,
-                          onChanged: _onAmountSearchChanged,
+                  curve: Curves.easeInOut,
+                  height: _isSearchVisible ? 80.h : 0,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: _isSearchVisible ? 1.0 : 0.0,
+                    child: Row(
+                      children: [
+                        // Champ de recherche par montant (gauche)
+                        Expanded(
+                          child: HalfSearchField(
+                            controller: _amountController,
+                            focusNode: _amountFocusNode,
+                            hintText: l10n.amount.toUpperCase(),
+                            appTheme: appTheme,
+                            keyboardType: TextInputType.number,
+                            iconData: CupertinoIcons.money_dollar,
+                            shadowColor: isDarkMode
+                                ? null
+                                : AppColors.primaryGreen.withValues(alpha: 0.3),
+                            isLeftSide: true,
+                            onChanged: _onAmountSearchChanged,
+                          ),
                         ),
-                      ),
 
-                      // Champ de recherche par mot-clé (droite)
-                      Expanded(
-                        child: HalfSearchField(
-                          controller: _keywordController,
-                          focusNode: _keywordFocusNode,
-                          hintText: l10n.keyword.toUpperCase(),
-                          appTheme: appTheme,
-                          iconData: CupertinoIcons.textformat_alt,
-                          shadowColor: isDarkMode
-                              ? null
-                              : AppColors.primaryGreen.withValues(alpha: 0.3),
-                          onChanged: _onKeywordSearchChanged,
+                        // Champ de recherche par mot-clé (droite)
+                        Expanded(
+                          child: HalfSearchField(
+                            controller: _keywordController,
+                            focusNode: _keywordFocusNode,
+                            hintText: l10n.keyword.toUpperCase(),
+                            appTheme: appTheme,
+                            iconData: CupertinoIcons.textformat_alt,
+                            shadowColor: isDarkMode
+                                ? null
+                                : AppColors.primaryGreen.withValues(alpha: 0.3),
+                            onChanged: _onKeywordSearchChanged,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              // Espace entre barre de recherche et liste
-              _isSearchVisible
-                  ? SizedBox(height: AppConstants.largePadding.r)
-                  : SizedBox(height: AppConstants.defaultPadding.r),
+                // Espace entre barre de recherche et liste
+                _isSearchVisible
+                    ? SizedBox(height: AppConstants.largePadding.r)
+                    : SizedBox(height: AppConstants.defaultPadding.r),
 
-              // Liste des transactions
-              Expanded(
-                child: accountsAsync.when(
-                  data: (accounts) {
-                    if (accounts.isEmpty) {
-                      return _buildEmptyState(l10n);
-                    }
+                // Liste des transactions
+                Expanded(
+                  child: accountsAsync.when(
+                    data: (accounts) {
+                      if (accounts.isEmpty) {
+                        return _buildEmptyState(l10n);
+                      }
 
-                    // Récupérer le compte sélectionné
-                    final selectedAccount = selectedCardIndex < accounts.length
-                        ? accounts[selectedCardIndex]
-                        : accounts.first;
+                      // Récupérer le compte sélectionné
+                      final selectedAccount =
+                          selectedCardIndex < accounts.length
+                          ? accounts[selectedCardIndex]
+                          : accounts.first;
 
-                    // Récupérer les transactions avec solde pour le compte sélectionné
-                    final transactionsAsync = ref.watch(
-                      transactionsWithBalanceProvider(selectedAccount.id),
-                    );
+                      // Récupérer les transactions avec solde pour le compte sélectionné
+                      final transactionsAsync = ref.watch(
+                        transactionsWithBalanceProvider(selectedAccount.id),
+                      );
 
-                    return transactionsAsync.when(
-                      data: (transactions) {
-                        if (transactions.isEmpty) {
-                          return _buildEmptyTransactionsState(l10n);
-                        }
+                      return transactionsAsync.when(
+                        data: (transactions) {
+                          if (transactions.isEmpty) {
+                            return _buildEmptyTransactionsState(l10n);
+                          }
 
-                        // Initialiser le provider de recherche avec les transactions
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          ref
-                              .read(transactionSearchProvider.notifier)
-                              .setOriginalTransactions(transactions);
-                        });
+                          // Initialiser le provider de recherche avec les transactions
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            ref
+                                .read(transactionSearchProvider.notifier)
+                                .setOriginalTransactions(transactions);
+                          });
 
-                        // Écouter l'état de la recherche
-                        final searchState = ref.watch(
-                          transactionSearchProvider,
-                        );
-                        final transactionsToDisplay = searchState.isSearchActive
-                            ? searchState.filteredTransactions
-                            : transactions;
+                          // Écouter l'état de la recherche
+                          final searchState = ref.watch(
+                            transactionSearchProvider,
+                          );
+                          final transactionsToDisplay =
+                              searchState.isSearchActive
+                              ? searchState.filteredTransactions
+                              : transactions;
 
-                        if (transactionsToDisplay.isEmpty &&
-                            searchState.isSearchActive) {
-                          return _buildNoResultsState(l10n, appTheme);
-                        }
+                          if (transactionsToDisplay.isEmpty &&
+                              searchState.isSearchActive) {
+                            return _buildNoResultsState(l10n, appTheme);
+                          }
 
-                        return TransactionsList(
-                          transactions: transactionsToDisplay,
-                          onTransactionTap: _navigateToTransactionDetail,
-                          scrollToToday: !searchState
-                              .isSearchActive, // Pas de scroll auto si recherche active
-                          accountCurrency: selectedAccount.currency,
-                        );
-                      },
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
+                          return TransactionsList(
+                            transactions: transactionsToDisplay,
+                            onTransactionTap: _navigateToTransactionDetail,
+                            scrollToToday: !searchState
+                                .isSearchActive, // Pas de scroll auto si recherche active
+                            accountCurrency: selectedAccount.currency,
+                          );
+                        },
+                        loading: () => const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
                         ),
+                        error: (error, stack) => _buildErrorState(error),
+                      );
+                    },
+                    loading: () => const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
                       ),
-                      error: (error, stack) => _buildErrorState(error),
-                    );
-                  },
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
+                    ),
+                    error: (error, stack) => _buildErrorState(error),
                   ),
-                  error: (error, stack) => _buildErrorState(error),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

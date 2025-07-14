@@ -31,7 +31,7 @@
   "hello": "Hello",
    "transactions": "Transactions",
     "seeAll": "See all",
-    "followedTransactions": "Bookmarked Transactions",
+    "followedTransactions": "Bookmarks",
     "statistics": "Statistics",
     "noAccount": "No account available",
     "noTransactions": "No transaction",

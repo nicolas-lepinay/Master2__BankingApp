@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bankapp/data/database/database.dart';
 
@@ -62,6 +63,7 @@ class TransactionSearchNotifier extends StateNotifier<TransactionSearchState> {
       filteredTransactions: _originalTransactions,
       isSearchActive: false,
     );
+    debugPrint("=== CLEAR SEARCH");
   }
 
   // Effectuer la recherche combinée

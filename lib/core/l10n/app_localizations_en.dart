@@ -105,7 +105,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get seeAll => 'See all';
 
   @override
-  String get followedTransactions => 'Bookmarked Transactions';
+  String get followedTransactions => 'Bookmarks';
 
   @override
   String get statistics => 'Statistics';
