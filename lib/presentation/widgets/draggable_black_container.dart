@@ -7,6 +7,7 @@ import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
+import 'package:bankapp/presentation/providers/transaction_search_provider.dart';
 import 'package:bankapp/presentation/widgets/perspective_list_view.dart';
 import 'package:bankapp/presentation/widgets/perspective_transaction_item.dart';
 import 'package:bankapp/presentation/widgets/followed_transactions_carousel.dart';
@@ -125,7 +126,7 @@ class _DraggableBlackContainerState
                     // Carousel des transactions suivies
                     _buildFollowedTransactionsCarousel(),
                     // Espace pour la navigation bar
-                    SizedBox(height: 100.h),
+                    SizedBox(height: 150.h),
                   ],
                 ),
               ),
@@ -140,8 +141,8 @@ class _DraggableBlackContainerState
     return ElevatedButton(
       onPressed: widget.onStatisticsPressed,
       style: ElevatedButton.styleFrom(
-        foregroundColor: AppColors.ultraLight,
-        backgroundColor: AppColors.buttonLight,
+        foregroundColor: AppColors.textLight100,
+        backgroundColor: AppColors.surfaceDimDark,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.max,
@@ -150,7 +151,7 @@ class _DraggableBlackContainerState
           Text("Statistiques"),
           Icon(
             CupertinoIcons.arrow_up_right,
-            color: AppColors.ultraLight,
+            color: AppColors.textLight100,
             size: 32.sp,
           ),
         ],
@@ -166,12 +167,14 @@ class _DraggableBlackContainerState
         children: [
           Text(
             'Transactions', // TODO: Ajouter à l10n
-            style: AppTextStyles.sectionHeader,
+            style: AppTextStyles.sectionHeader.copyWith(
+              color: AppColors.textLight100,
+            ),
           ),
           Text(
             'Voir tout', // TODO: Ajouter à l10n
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.onSurfaceDark.withValues(alpha: 0.8),
+              color: AppColors.textLight25,
             ),
           ),
         ],
@@ -383,7 +386,13 @@ class _DraggableBlackContainerState
       isDismissible: true,
       enableDrag: true,
       builder: (context) => const FullTransactionsBottomSheet(),
-    );
+    ).then((_) {
+      // Reset de la recherche quand la BottomSheet se ferme
+      if (mounted) {
+        ref.read(transactionSearchProvider.notifier).clearSearch();
+      }
+    });
+    ;
   }
 
   void _navigateToTransactionDetail(Transaction transaction) {
@@ -401,7 +410,9 @@ class _DraggableBlackContainerState
       children: [
         Text(
           'Transactions suivies', // TODO: Ajouter à l10n
-          style: AppTextStyles.sectionHeader,
+          style: AppTextStyles.sectionHeader.copyWith(
+            color: AppColors.textLight100,
+          ),
         ),
         GestureDetector(
           onTap: () {
@@ -410,7 +421,7 @@ class _DraggableBlackContainerState
           child: Text(
             'Voir tout', // TODO: Ajouter à l10n
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.onSurfaceDark.withValues(alpha: 0.8),
+              color: AppColors.textLight25,
             ),
           ),
         ),

@@ -123,19 +123,18 @@ class _FollowedTransactionsCarouselState
   Widget _buildCarousel(List<TransactionWithCounterparty> transactions) {
     // Limiter à 5 transactions + gérer les points de suspension
     final displayTransactions = transactions.take(5).toList();
-    final hasMore = transactions.length > 5;
+    final hasMore = transactions.length >= 3;
 
     // Initialiser les controllers d'animation si nécessaire
     _initializeAnimationControllers(displayTransactions.length);
 
     return SizedBox(
-      height: 90.r, // Hauteur minimale, mais peut s'étendre si nécessaire
+      height: 80.h, // Hauteur minimale, mais peut s'étendre si nécessaire
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(
           horizontal: AppConstants.veryLargePadding.r,
-          vertical: 8.h,
-        ), // Réduire le padding vertical
+        ),
         itemCount: displayTransactions.length + (hasMore ? 1 : 0),
         itemBuilder: (context, index) {
           // Dernier item = points de suspension
@@ -164,27 +163,19 @@ class _FollowedTransactionsCarouselState
   }
 
   Widget _buildMoreIndicator() {
-    return GestureDetector(
+    return InkWell(
       onTap: widget.onSeeAllPressed,
       child: Container(
         width: 60.w,
-        margin: EdgeInsets.only(right: 12.w),
-        decoration: BoxDecoration(
-          color: AppColors.containerDarkGray,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: AppColors.white.withValues(alpha: 0.1),
-            width: 1.w,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            '...',
-            style: TextStyle(
-              color: AppColors.onSurfaceDark,
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-            ),
+        alignment: Alignment.topCenter,
+        padding: EdgeInsets.only(top: 10.0.r),
+        child: Text(
+          '...',
+          style: TextStyle(
+            color: AppColors.textLight50,
+            fontSize: 26.sp,
+            fontWeight: FontWeight.w300,
+            //fontWeight: FontWeight.bold,
           ),
         ),
       ),

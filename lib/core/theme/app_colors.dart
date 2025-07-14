@@ -2,25 +2,28 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // === 👑 BRAND COLORS ===
-  static const Color primary = cardPink;
-  static const Color primaryDark = cardPurple;
-  static const Color secondary = cardGreen;
-  static const Color accent = cardOrange;
+  static const Color primary = primaryBlue;
+  static const Color primaryDark = primaryBlue;
+  static const Color secondary = primaryGreen;
+  static const Color accent = primaryPink;
 
   // Card colors for stacked cards
-  static const Color cardPurple = Color(0xFF443EE3);
-  static const Color cardPink = Color(0xFFFE68E8);
-  static const Color cardGreen = Color(0xFFAFFF59);
-  static const Color cardOrange = Color(0xFFEB6B25);
-  static const Color cardPurple2 = Color(0xFF7952FC);
-  static const Color cardRed = Color(0xFFE33E62);
+  static const Color primaryBlue = Color(0xFF443EE3);
+  static const Color primaryPink = Color(0xFFFE68E8);
+  static const Color secondaryPink = Color(0xFFFBA9ED);
+  static const Color tertiaryPink = Color(0xFFFFC4F9);
+
+  static const Color primaryGreen = Color(0xFFAFFF59);
+  static const Color primaryOrange = Color(0xFFEB6B25);
+  static const Color primaryPurple = Color(0xFF7952FC);
+  static const Color primaryRed = Color(0xFFE33E62);
 
   // Gradient colors for Perspective Transaction List
-  static const Color gradientPinkStart = Color(0xFFFE68E8);
-  static const Color gradientPinkEnd = Color(0xFFFBA9ED);
+  static const Color gradientPinkStart = primaryPink;
+  static const Color gradientPinkEnd = secondaryPink;
 
   // Perspective Transaction item background
-  static const Color transactionItemBg = Color(0xFFFFC4F9);
+  static const Color transactionItemBg = tertiaryPink;
 
   // === ️✏️ TYPOGRAPHY ===
   static const Color onSurfaceLight = Color(0xFF212121);
@@ -62,10 +65,6 @@ class AppColors {
   static const Color textGray = Color(0xFF47516B);
   static const Color textDarkGray = Color(0xFF79819A);
 
-  // Legacy colors (V1 compatibility)
-  static const Color cardDark = Color(0xFF2C2C54);
-  static const Color cardLight = Color(0xFFFFFFFF);
-
   static const Color success = Color(0xFF4CAF50);
   static const Color warning = Color(0xFFFFC107);
   static const Color error = Color(0xFFF44336);
@@ -82,21 +81,24 @@ class AppColors {
 
   // Greyscale
   static const Color dark100 = Color(0xFF0E0E0C); // Backgrounds
-  static const Color dark87 = Color(0xFF18181D); // BottomSheets
+  static const Color dark87 = Color(0xFF18181D); // Bottom Sheets
+  static const Color dark81 = Color(0xFF1C1C21); // Text Field
   static const Color dark75 = Color(0xFF1F1F1F); // Buttons
   static const Color dark50 = Color(0xFF2E2E48);
   static const Color dark25 = Color(0xFF47516B);
+  static const Color dark12 = Color(0xFF616162);
   static const Color defaultGray = Color(0xFF79819A);
   static const Color light25 = Color(0xFFACB1C3);
   static const Color light50 = Color(0xFFD9DFE8);
   static const Color light75 = Color(0xFFE2E6EE);
   static const Color light87 = Color(0xFFF5F7FA); // Backgrounds, BottomSheets
-  static const Color light100 = Color(0xFFFFFFFF); // Backgrounds
+  static const Color light100 = Color(0xFFFAFBFD); // Backgrounds
 
   // Typography
   static const Color textDark100 = dark100;
   static const Color textDark50 = dark50;
   static const Color textDark25 = dark25;
+  static const Color textDark12 = dark12;
   static const Color textDefaultGray = defaultGray;
   static const Color textLight25 = light25;
   static const Color textLight50 = light50;
@@ -105,6 +107,7 @@ class AppColors {
   // Backgrounds
   static const Color surfaceBrightDark = dark100;
   static const Color surfaceDark = dark87;
+  static const Color surfaceDimDarker = dark81;
   static const Color surfaceDimDark = dark75;
 
   static const Color surfaceBrightLight = light100;

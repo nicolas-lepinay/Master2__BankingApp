@@ -29,12 +29,14 @@
   "confirmed": "Confirmé",
   "unknown": "Inconnu",
   "hello": "Salut",
-   "transactions": "Transactions",
-    "seeAll": "Voir tout",
-    "followedTransactions": "Transactions suivies",
-    "statistics": "Statistiques",
-    "noAccount": "Aucun compte disponible",
-    "noTransactions": "Aucune transaction",
-    "loadingError": "Erreur de chargement",
-    "searchPlaceholder": "Saisir un montant, un nom, etc."
+  "transactions": "Transactions",
+  "seeAll": "Voir tout",
+  "followedTransactions": "Transactions suivies",
+  "statistics": "Statistiques",
+  "noAccount": "Aucun compte disponible",
+  "noTransactions": "Aucune transaction",
+  "loadingError": "Erreur de chargement",
+  "amount": "Montant",
+  "keyword": "Mot-clé",
+  "close": "Fermer"
 }

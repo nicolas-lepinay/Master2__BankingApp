@@ -5,12 +5,12 @@ import 'package:bankapp/core/theme/app_colors.dart';
 class CardColorUtils {
   // Liste des couleurs dans l'ordre souhaité
   static List<Color> cardColors = [
-    AppColors.cardPurple, // Violet
-    AppColors.cardPink, // Rose
-    AppColors.cardGreen, // Vert fluo
-    AppColors.cardOrange, // Orange
-    AppColors.cardPurple2, // Violet clair
-    AppColors.cardRed, // Rouge/Rose foncé
+    AppColors.primaryBlue, // Violet
+    AppColors.primaryPink, // Rose
+    AppColors.primaryGreen, // Vert fluo
+    AppColors.primaryOrange, // Orange
+    AppColors.primaryPurple, // Violet clair
+    AppColors.primaryRed, // Rouge/Rose foncé
   ];
 
   /// Retourne la couleur d'une carte basée sur la liste des comptes

@@ -120,5 +120,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadingError => 'Loading error';
 
   @override
-  String get searchPlaceholder => 'Enter an amount, a name, etc.';
+  String get keyword => 'Keyword';
+
+  @override
+  String get close => 'Close';
 }

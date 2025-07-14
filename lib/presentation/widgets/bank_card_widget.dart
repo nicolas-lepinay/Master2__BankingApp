@@ -97,7 +97,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                       Expanded(
                         child: Text(
                           widget.accountSummary.account.name,
-                          style: cardColor == AppColors.cardGreen
+                          style: cardColor == AppColors.primaryGreen
                               ? AppTextStyles.cardAccountNameDark
                               : AppTextStyles.cardAccountName,
                           maxLines: 1,
@@ -114,7 +114,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                           width: 40.w,
                           height: 40.h,
                           decoration: BoxDecoration(
-                            color: cardColor == AppColors.cardGreen
+                            color: cardColor == AppColors.primaryGreen
                                 ? AppColors.darkest.withValues(alpha: 0.2)
                                 : AppColors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8.r),
@@ -122,7 +122,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                           child: Icon(
                             Icons
                                 .account_balance, // Remplacer par l'icône du compte
-                            color: cardColor == AppColors.cardGreen
+                            color: cardColor == AppColors.primaryGreen
                                 ? AppColors.darkest
                                 : AppColors.white,
                             size: 20.sp,
@@ -137,7 +137,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                   Text(
                     AppLocalizations.of(context)!.expectedBalance.toUpperCase(),
                     style: AppTextStyles.cardBalanceLabel.copyWith(
-                      color: cardColor == AppColors.cardGreen
+                      color: cardColor == AppColors.primaryGreen
                           ? AppColors.darkest.withValues(alpha: 0.6)
                           : AppColors.white.withValues(alpha: 0.6),
                     ),
@@ -154,7 +154,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                           _formatBalanceDisplay(
                             widget.accountSummary.currentBalance,
                           ),
-                          style: cardColor == AppColors.cardGreen
+                          style: cardColor == AppColors.primaryGreen
                               ? AppTextStyles.cardBalanceAmountDark
                               : AppTextStyles.cardBalanceAmount,
                         ),
@@ -167,7 +167,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                           width: 40.w,
                           height: 40.h,
                           decoration: BoxDecoration(
-                            color: cardColor == AppColors.cardGreen
+                            color: cardColor == AppColors.primaryGreen
                                 ? AppColors.darkest.withValues(alpha: 0.1)
                                 : AppColors.white.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20.r),
@@ -176,7 +176,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                             _isBalanceVisible
                                 ? Icons.visibility
                                 : Icons.visibility_off,
-                            color: cardColor == AppColors.cardGreen
+                            color: cardColor == AppColors.primaryGreen
                                 ? AppColors.darkest
                                 : AppColors.white,
                             size: 20.sp,
@@ -192,7 +192,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                   Text(
                     AppLocalizations.of(context)!.actualBalance.toUpperCase(),
                     style: AppTextStyles.cardBalanceLabel.copyWith(
-                      color: cardColor == AppColors.cardGreen
+                      color: cardColor == AppColors.primaryGreen
                           ? AppColors.darkest.withValues(alpha: 0.6)
                           : AppColors.white.withValues(alpha: 0.6),
                     ),
@@ -204,7 +204,7 @@ class _BankCardWidgetState extends State<BankCardWidget> {
                     _formatBalanceDisplay(
                       widget.accountSummary.confirmedBalance,
                     ),
-                    style: cardColor == AppColors.cardGreen
+                    style: cardColor == AppColors.primaryGreen
                         ? AppTextStyles.cardBalanceRealAmountDark
                         : AppTextStyles.cardBalanceRealAmount,
                   ),

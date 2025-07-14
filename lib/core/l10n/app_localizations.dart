@@ -320,11 +320,17 @@ abstract class AppLocalizations {
   /// **'Loading error'**
   String get loadingError;
 
-  /// No description provided for @searchPlaceholder.
+  /// No description provided for @keyword.
   ///
   /// In en, this message translates to:
-  /// **'Enter an amount, a name, etc.'**
-  String get searchPlaceholder;
+  /// **'Keyword'**
+  String get keyword;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
 }
 
 class _AppLocalizationsDelegate

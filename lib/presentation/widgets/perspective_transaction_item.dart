@@ -50,20 +50,20 @@ class PerspectiveTransactionItem extends StatelessWidget {
               width: 38.w,
               height: 38.w,
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.surfaceLight,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 4.r,
-                    offset: Offset(0, 2.h),
+                    color: AppColors.gradientPinkStart.withValues(alpha: 0.35),
+                    blurRadius: 6.r,
+                    offset: Offset(0, 4.r),
                   ),
                 ],
               ),
               child: Icon(
                 _getTransactionIcon(transaction, counterparty),
-                color: AppColors.onSurfaceLight,
-                size: 20.sp, // Réduire la taille de l'icône
+                color: AppColors.textDark25,
+                size: 22.sp, // Réduire la taille de l'icône
               ),
             ),
 
@@ -89,8 +89,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
                       transaction.date,
                       context,
                     ).toUpperCase(),
-                    style: AppTextStyles.transactionCategoryPerspective
-                        .copyWith(fontSize: 12.sp),
+                    style: AppTextStyles.transactionCategoryPerspective,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

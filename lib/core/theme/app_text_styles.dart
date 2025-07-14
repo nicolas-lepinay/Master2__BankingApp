@@ -1,297 +1,282 @@
 import 'package:flutter/material.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AppTextStyles {
   // Font families
-  static const String defaultFontFamily = 'Outfit'; // Police primaire
-  static const String pacificoFontFamily = 'Pacifico';
-  static const String overpassMonoFontFamily = 'OverpassMono';
-  static const String playfairFontFamily = 'Playfair';
+  static String defaultFontFamily = 'Outfit'; // Police primaire
+  static String pacificoFontFamily = 'Pacifico';
+  static String overpassMonoFontFamily = 'OverpassMono';
+  static String playfairFontFamily = 'Playfair';
 
   // V2 Design System Text Styles
 
   // Welcome message avec Pacifico
-  static const TextStyle welcomeMessage = TextStyle(
+  static TextStyle welcomeMessage = TextStyle(
     fontFamily: pacificoFontFamily,
-    fontSize: 20,
+    fontSize: 20.sp,
     fontWeight: FontWeight.normal,
-    color: AppColors.onSurfaceLight,
+    color: AppColors.textDark100,
   );
 
   // Card account name avec Outfit
-  static const TextStyle cardAccountName = TextStyle(
+  static TextStyle cardAccountName = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 18,
+    fontSize: 18.sp,
     fontWeight: FontWeight.w300,
-    color: AppColors.onSurfaceDark,
+    color: AppColors.textLight100,
   );
 
   // Card account name avec Outfit (Dark)
   static TextStyle cardAccountNameDark = cardAccountName.copyWith(
-    color: AppColors.onSurfaceLight,
+    color: AppColors.textDark100,
   );
 
   // Card balance label
-  static const TextStyle cardBalanceLabel = TextStyle(
+  static TextStyle cardBalanceLabel = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 10,
+    fontSize: 10.sp,
     fontWeight: FontWeight.w500,
-    color: AppColors.onSurfaceDark,
+    color: AppColors.textLight100,
     letterSpacing: 1.2,
   );
 
   // Card balance amount avec Overpass Mono
-  static const TextStyle cardBalanceAmount = TextStyle(
+  static TextStyle cardBalanceAmount = TextStyle(
     fontFamily: overpassMonoFontFamily,
-    fontSize: 26,
+    fontSize: 26.sp,
     fontWeight: FontWeight.bold,
-    color: AppColors.onSurfaceDark,
+    color: AppColors.textLight100,
   );
 
   // Card balance amount avec Overpass Mono (Dark)
   static TextStyle cardBalanceAmountDark = cardBalanceAmount.copyWith(
-    color: AppColors.onSurfaceLight,
+    color: AppColors.textDark100,
   );
 
   // Card balance real amount (smaller)
-  static const TextStyle cardBalanceRealAmount = TextStyle(
+  static TextStyle cardBalanceRealAmount = TextStyle(
     fontFamily: overpassMonoFontFamily,
-    fontSize: 20,
+    fontSize: 20.sp,
     fontWeight: FontWeight.w600,
-    color: AppColors.onSurfaceDark,
+    color: AppColors.textLight100,
   );
 
   // Card balance real amount (smaller) (Dark)
   static TextStyle cardBalanceRealAmountDark = cardBalanceRealAmount.copyWith(
-    color: AppColors.onSurfaceLight,
+    color: AppColors.textDark100,
   );
 
   // Section headers avec Playfair
-  static const TextStyle sectionHeader = TextStyle(
+  static TextStyle sectionHeader = TextStyle(
     fontFamily: playfairFontFamily,
-    fontSize: 24,
+    fontSize: 24.sp,
     fontWeight: FontWeight.w400,
-    color: AppColors.onSurfaceDark,
-  );
-
-  static const TextStyle sectionHeaderDark = TextStyle(
-    fontFamily: playfairFontFamily,
-    fontSize: 24,
-    fontWeight: FontWeight.w400,
-    color: AppColors.onSurfaceLight,
   );
 
   // Section headers medium
-  static const TextStyle sectionHeaderMedium = TextStyle(
+  static TextStyle sectionHeaderMedium = TextStyle(
     fontFamily: playfairFontFamily,
-    fontSize: 20,
+    fontSize: 20.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurfaceDark,
   );
 
-  static const TextStyle sectionHeaderMediumDark = TextStyle(
+  static TextStyle sectionHeaderMediumDark = TextStyle(
     fontFamily: playfairFontFamily,
-    fontSize: 26,
+    fontSize: 26.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurfaceLight,
   );
 
   // Transaction amounts (format spécial sans décimales si entier)
-  static const TextStyle transactionAmountLarge = TextStyle(
+  static TextStyle transactionAmountLarge = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 18,
+    fontSize: 18.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurfaceLight,
   );
 
-  static const TextStyle transactionAmountMedium = TextStyle(
+  static TextStyle transactionAmountMedium = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 16,
+    fontSize: 16.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurfaceLight,
   );
 
   // Transaction amount for perspective list
-  static const TextStyle transactionAmountPerspective = TextStyle(
+  static TextStyle transactionAmountPerspective = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 18,
+    fontSize: 18.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurfaceLight,
-  );
-
-  // Transaction balance in perspective list
-  static const TextStyle transactionBalancePerspective = TextStyle(
-    fontFamily: defaultFontFamily,
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    color: AppColors.textDarkGray,
   );
 
   // Transaction name/counterparty in perspective list
-  static const TextStyle transactionNamePerspective = TextStyle(
+  static TextStyle transactionNamePerspective = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 16,
+    fontSize: 16.sp,
     fontWeight: FontWeight.w600,
-    color: AppColors.onSurfaceLight,
+    color: AppColors.textDark50,
   );
 
   // Transaction category in perspective list
-  static const TextStyle transactionCategoryPerspective = TextStyle(
+  static TextStyle transactionCategoryPerspective = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 14,
+    fontSize: 12.sp,
     fontWeight: FontWeight.normal,
-    color: AppColors.textGray,
+    color: AppColors.textDark25,
   );
 
   // Followed transactions styles
-  static const TextStyle followedTransactionName = TextStyle(
+  static TextStyle followedTransactionName = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 14,
-    fontWeight: FontWeight.w600,
-    color: AppColors.onSurfaceDark,
+    fontSize: 16.sp,
+    fontWeight: FontWeight.w500,
+    color: AppColors.textLight100,
   );
 
-  static const TextStyle followedTransactionDate = TextStyle(
+  static TextStyle followedTransactionDate = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 12,
+    fontSize: 12.sp,
     fontWeight: FontWeight.normal,
-    color: AppColors.textGray,
   );
 
-  static const TextStyle followedTransactionAmount = TextStyle(
+  static TextStyle followedTransactionAmount = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 14,
+    fontSize: 18.sp,
     fontWeight: FontWeight.w600,
-    color: AppColors.onSurfaceDark,
+    color: AppColors.textLight100,
   );
 
-  static const TextStyle h1 = TextStyle(
+  static TextStyle h1 = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 32,
+    fontSize: 32.sp,
     fontWeight: FontWeight.w500,
     height: 1.2,
     letterSpacing: 1.5,
   );
 
-  static const TextStyle h2 = TextStyle(
+  static TextStyle h2 = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 28,
+    fontSize: 28.sp,
     fontWeight: FontWeight.w500,
     height: 1.2,
     letterSpacing: 1.5,
   );
 
-  static const TextStyle h3 = TextStyle(
+  static TextStyle h3 = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 24,
+    fontSize: 24.sp,
     fontWeight: FontWeight.w500,
     height: 1.3,
   );
 
-  static const TextStyle h4 = TextStyle(
+  static TextStyle h4 = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 20,
+    fontSize: 20.sp,
     fontWeight: FontWeight.w500,
     height: 1.3,
   );
 
-  static const TextStyle h5 = TextStyle(
+  static TextStyle h5 = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 18,
+    fontSize: 18.sp,
     fontWeight: FontWeight.w500,
     height: 1.4,
   );
 
-  static const TextStyle h6 = TextStyle(
+  static TextStyle h6 = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 16,
+    fontSize: 16.sp,
     fontWeight: FontWeight.w500,
     height: 1.4,
   );
 
-  static const TextStyle bodyLarge = TextStyle(
+  static TextStyle bodyLarge = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 16,
+    fontSize: 16.sp,
     fontWeight: FontWeight.normal,
     height: 1.5,
   );
 
-  static const TextStyle bodyMedium = TextStyle(
+  static TextStyle bodyMedium = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 14,
+    fontSize: 14.sp,
     fontWeight: FontWeight.normal,
     height: 1.5,
   );
 
-  static const TextStyle bodySmall = TextStyle(
+  static TextStyle bodySmall = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 12,
+    fontSize: 12.sp,
     fontWeight: FontWeight.normal,
     height: 1.4,
   );
 
   // Styles spécialisés V1 (mis à jour avec nouvelles polices)
-  static const TextStyle accountName = TextStyle(
+  static TextStyle accountName = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 18,
+    fontSize: 18.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurfaceDark,
   );
 
-  static const TextStyle accountBalance = TextStyle(
+  static TextStyle accountBalance = TextStyle(
     fontFamily: overpassMonoFontFamily,
-    fontSize: 32,
+    fontSize: 32.sp,
     fontWeight: FontWeight.bold,
     color: AppColors.onSurfaceDark,
   );
 
-  static const TextStyle transactionAmount = TextStyle(
+  static TextStyle transactionAmount = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 20,
+    fontSize: 20.sp,
     fontWeight: FontWeight.w500,
   );
 
-  static const TextStyle transactionBalance = TextStyle(
+  static TextStyle transactionBalance = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 14,
+    fontSize: 14.sp,
     fontWeight: FontWeight.w500,
   );
 
-  static const TextStyle transactionTitle = TextStyle(
+  static TextStyle transactionTitle = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 16,
+    fontSize: 16.sp,
     fontWeight: FontWeight.w500,
   );
 
-  static const TextStyle transactionDescription = TextStyle(
+  static TextStyle transactionDescription = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 14,
+    fontSize: 14.sp,
     fontWeight: FontWeight.normal,
   );
 
-  static const TextStyle dateHeader = TextStyle(
+  static TextStyle dateHeader = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 14,
+    fontSize: 14.sp,
     fontWeight: FontWeight.w600,
   );
 
-  static const TextStyle buttonText = TextStyle(
+  static TextStyle buttonText = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 22,
+    fontSize: 22.sp,
     fontWeight: FontWeight.w300,
   );
 
-  static const TextStyle buttonTextSmall = TextStyle(
+  static TextStyle buttonTextSmall = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 16,
+    fontSize: 16.sp,
     fontWeight: FontWeight.w300,
   );
 
   // Search bar placeholder text
-  static const TextStyle searchPlaceholder = TextStyle(
+  static TextStyle searchPlaceholder = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 18,
+    fontSize: 14.sp,
     fontWeight: FontWeight.normal,
-    height: 1.5,
+    letterSpacing: 1.4,
+    height: 1.2,
   );
 }

@@ -36,5 +36,7 @@
     "noAccount": "No account available",
     "noTransactions": "No transaction",
     "loadingError": "Loading error",
-    "searchPlaceholder": "Enter an amount, a name, etc."
+    "amount": "Amount",
+    "keyword": "Keyword",
+    "close": "Close"
 }

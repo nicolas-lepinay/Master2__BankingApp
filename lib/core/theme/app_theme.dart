@@ -9,10 +9,17 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: AppColorsExtended.light.text5!, // Cursor color
+        selectionHandleColor:
+            AppColorsExtended.light.text6!, // Selection handle color
+        selectionColor: AppColors.primaryGreen.withValues(
+          alpha: 0.5,
+        ), // Text selection color
+      ),
       brightness: Brightness.light,
       // Ajout de votre thème personnalisé
       extensions: const <ThemeExtension<dynamic>>[AppColorsExtended.light],
-
       // Color scheme
       colorScheme: ColorScheme.light(
         primary: AppColors.primary,
@@ -22,32 +29,32 @@ class AppTheme {
         onSecondary: AppColors.onSurfaceLight,
         onError: AppColors.onSurfaceDark,
         surface: AppColorsExtended.light.background2!,
-        onSurface: AppColorsExtended.light.text100!,
+        onSurface: AppColorsExtended.light.text1!,
       ),
 
       // App bar theme
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         elevation: 0,
-        backgroundColor: AppColors.backgroundLight,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColorsExtended.light.background2!,
+        foregroundColor: AppColorsExtended.light.text2!,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         titleTextStyle: AppTextStyles.h5,
       ),
 
       // Card theme
-      cardTheme: const CardThemeData(
+      cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(
             Radius.circular(AppConstants.cardBorderRadius),
           ),
         ),
-        color: AppColors.backgroundLight1,
+        color: AppColorsExtended.light.background1!,
       ),
 
       // Bottom navigation bar theme
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.backgroundLight1,
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: AppColorsExtended.light.background2!,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textSecondary,
         type: BottomNavigationBarType.fixed,
@@ -57,26 +64,26 @@ class AppTheme {
       // Input decoration theme
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderLight),
+          borderRadius: BorderRadius.circular(22),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderLight),
+          borderRadius: BorderRadius.circular(22),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderRadius: BorderRadius.circular(22),
+          borderSide: BorderSide.none,
         ),
         filled: true,
-        fillColor: AppColors.backgroundLight1,
+        fillColor: AppColorsExtended.light.background3!,
       ),
 
       // Elevated button theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColorsExtended.light.buttonBackground!,
-          foregroundColor: AppColors.ultraLight,
+          backgroundColor: AppColorsExtended.light.buttonBackground1!,
+          foregroundColor: AppColorsExtended.light.buttonForeground1!,
           textStyle: AppTextStyles.buttonText,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
@@ -86,7 +93,7 @@ class AppTheme {
       ),
 
       // Text theme
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         displayLarge: AppTextStyles.h1,
         displayMedium: AppTextStyles.h2,
         displaySmall: AppTextStyles.h3,
@@ -100,8 +107,8 @@ class AppTheme {
 
       // Floating action button theme
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: AppColorsExtended.light.buttonBackground!,
-        foregroundColor: AppColors.ultraLight,
+        backgroundColor: AppColorsExtended.light.buttonBackground1!,
+        foregroundColor: AppColorsExtended.light.buttonForeground1!,
       ),
     );
   }
@@ -110,8 +117,15 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: AppColorsExtended.light.text5!, // Cursor color
+        selectionHandleColor:
+            AppColorsExtended.light.text6!, // Selection handle color
+        selectionColor: AppColors.primaryGreen.withValues(
+          alpha: 0.5,
+        ), // Text selection color
+      ),
       extensions: const <ThemeExtension<dynamic>>[AppColorsExtended.dark],
-
       // Color scheme
       colorScheme: ColorScheme.dark(
         primary: AppColors.primary,
@@ -120,33 +134,33 @@ class AppTheme {
         onPrimary: AppColors.onSurfaceDark,
         onSecondary: AppColors.onSurfaceLight,
         onError: AppColors.onSurfaceDark,
-        surface: AppColorsExtended.dark.background1!,
-        onSurface: AppColorsExtended.dark.text100!,
+        surface: AppColorsExtended.dark.background2!,
+        onSurface: AppColorsExtended.dark.text1!,
       ),
 
       // App bar theme
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         elevation: 0,
-        backgroundColor: AppColors.backgroundDark,
-        foregroundColor: AppColors.onSurfaceDark,
+        backgroundColor: AppColorsExtended.dark.background2!,
+        foregroundColor: AppColorsExtended.dark.text2!,
         systemOverlayStyle: SystemUiOverlayStyle.light,
         titleTextStyle: AppTextStyles.h5,
       ),
 
       // Card theme
-      cardTheme: const CardThemeData(
+      cardTheme: CardThemeData(
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(
             Radius.circular(AppConstants.cardBorderRadius),
           ),
         ),
-        color: AppColors.backgroundDark1,
+        color: AppColorsExtended.dark.background1!,
       ),
 
       // Bottom navigation bar theme
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.backgroundDark1,
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: AppColorsExtended.dark.background2!,
         selectedItemColor: AppColors.secondary,
         unselectedItemColor: AppColors.textSecondary,
         type: BottomNavigationBarType.fixed,
@@ -156,26 +170,26 @@ class AppTheme {
       // Input decoration theme
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderDark),
+          borderRadius: BorderRadius.circular(22),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderDark),
+          borderRadius: BorderRadius.circular(22),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.secondary, width: 2),
+          borderRadius: BorderRadius.circular(22),
+          borderSide: BorderSide.none,
         ),
         filled: true,
-        fillColor: AppColors.backgroundDark1,
+        fillColor: AppColorsExtended.dark.background3!,
       ),
 
       // Elevated button theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColorsExtended.dark.buttonBackground!,
-          foregroundColor: AppColors.ultraDark,
+          backgroundColor: AppColorsExtended.dark.buttonBackground1!,
+          foregroundColor: AppColorsExtended.dark.buttonForeground1!,
           textStyle: AppTextStyles.buttonText,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
@@ -185,7 +199,7 @@ class AppTheme {
       ),
 
       // Text theme
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         displayLarge: AppTextStyles.h1,
         displayMedium: AppTextStyles.h2,
         displaySmall: AppTextStyles.h3,
@@ -199,8 +213,8 @@ class AppTheme {
 
       // Floating action button theme
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: AppColorsExtended.dark.buttonBackground!,
-        foregroundColor: AppColors.ultraDark,
+        backgroundColor: AppColorsExtended.dark.buttonBackground1!,
+        foregroundColor: AppColorsExtended.dark.buttonForeground1!,
       ),
     );
   }

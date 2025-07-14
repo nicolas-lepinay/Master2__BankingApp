@@ -38,12 +38,12 @@ class TransactionItem extends StatelessWidget {
               width: 50.w,
               height: 50.w,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: appTheme.background1,
                 borderRadius: BorderRadius.circular(50.r),
               ),
               child: Icon(
                 _getTransactionIcon(transaction.title),
-                color: AppColors.textSecondary,
+                color: appTheme.text3,
                 size: 24.sp,
               ),
             ),
@@ -103,7 +103,7 @@ class TransactionItem extends StatelessWidget {
                     context: context,
                   ),
                   style: AppTextStyles.transactionAmount.copyWith(
-                    color: isDebit ? appTheme.text100 : appTheme.textCredit,
+                    color: isDebit ? appTheme.text1 : appTheme.textCredit,
                   ),
                 ),
 

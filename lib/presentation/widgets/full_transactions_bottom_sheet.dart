@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
@@ -7,7 +8,9 @@ import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
+import 'package:bankapp/presentation/providers/transaction_search_provider.dart';
 import 'package:bankapp/presentation/widgets/transactions_list.dart';
+import 'package:bankapp/presentation/widgets/half_search_field.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
 import 'package:bankapp/data/database/database.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -26,8 +29,10 @@ class _FullTransactionsBottomSheetState
     extends ConsumerState<FullTransactionsBottomSheet> {
   late DraggableScrollableController _dragController;
   bool _isSearchVisible = false;
-  final TextEditingController _searchController = TextEditingController();
-  final FocusNode _searchFocusNode = FocusNode();
+  final TextEditingController _amountController = TextEditingController();
+  final FocusNode _amountFocusNode = FocusNode();
+  final TextEditingController _keywordController = TextEditingController();
+  final FocusNode _keywordFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -38,8 +43,10 @@ class _FullTransactionsBottomSheetState
   @override
   void dispose() {
     _dragController.dispose();
-    _searchController.dispose();
-    _searchFocusNode.dispose();
+    _amountController.dispose();
+    _amountFocusNode.dispose();
+    _keywordController.dispose();
+    _keywordFocusNode.dispose();
     super.dispose();
   }
 
@@ -47,15 +54,22 @@ class _FullTransactionsBottomSheetState
     setState(() {
       _isSearchVisible = !_isSearchVisible;
       if (!_isSearchVisible) {
-        _searchController.clear();
-        _searchFocusNode.unfocus();
-      } else {
-        // Focus sur la barre de recherche quand elle apparaît
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _searchFocusNode.requestFocus();
-        });
+        _amountController.clear();
+        _amountFocusNode.unfocus();
+        _keywordController.clear();
+        _keywordFocusNode.unfocus();
+        // Effacer la recherche quand on ferme la barre
+        ref.read(transactionSearchProvider.notifier).clearSearch();
       }
     });
+  }
+
+  void _onAmountSearchChanged(String value) {
+    ref.read(transactionSearchProvider.notifier).searchByAmount(value);
+  }
+
+  void _onKeywordSearchChanged(String value) {
+    ref.read(transactionSearchProvider.notifier).searchByKeyword(value);
   }
 
   void _navigateToTransactionDetail(Transaction transaction) {
@@ -71,6 +85,8 @@ class _FullTransactionsBottomSheetState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+    final Brightness brightness = Theme.of(context).brightness;
+    final bool isDarkMode = brightness == Brightness.dark;
 
     final selectedCardIndex = ref.watch(selectedCardProvider);
     final accountsAsync = ref.watch(accountsProvider);
@@ -92,27 +108,31 @@ class _FullTransactionsBottomSheetState
             borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 20.r,
+                color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                blurRadius: 28.r,
                 offset: Offset(0, -4.h),
               ),
             ],
           ),
           child: Column(
             children: [
-              // Handle bar pour indiquer qu'on peut tirer
-              GestureDetector(
+              // Handle bar
+              InkWell(
                 onTap: () => Navigator.pop(context),
                 child: Container(
-                  margin: EdgeInsets.only(
-                    top: AppConstants.smallPadding.r,
-                    bottom: AppConstants.largePadding.r,
-                  ),
-                  width: 30.w,
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: appTheme.text100!.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2.r),
+                  width: double.infinity,
+                  //color: Colors.red,
+                  height: AppConstants.veryLargePadding * 2,
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      l10n.close.toUpperCase(),
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: appTheme.text4,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -123,7 +143,7 @@ class _FullTransactionsBottomSheetState
                 children: [
                   // Titre "Transactions" avec police Playfair
                   Text(
-                    'Transactions', // TODO: Ajouter à l10n
+                    l10n.transactions,
                     style: AppTextStyles.h2.copyWith(
                       fontFamily: AppTextStyles.playfairFontFamily,
                     ),
@@ -133,9 +153,10 @@ class _FullTransactionsBottomSheetState
                   GestureDetector(
                     onTap: _toggleSearch,
                     child: Icon(
-                      _isSearchVisible ? Icons.close : Icons.search,
-                      //color: AppColors.textDark,
-                      size: 36.sp,
+                      _isSearchVisible
+                          ? CupertinoIcons.xmark
+                          : CupertinoIcons.search,
+                      size: 30.sp,
                     ),
                   ),
                 ],
@@ -143,7 +164,7 @@ class _FullTransactionsBottomSheetState
 
               SizedBox(height: AppConstants.mediumPadding.r),
 
-              // Barre de recherche animée
+              // Barre de recherche animée avec 2 champs
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
@@ -151,54 +172,40 @@ class _FullTransactionsBottomSheetState
                 child: AnimatedOpacity(
                   duration: const Duration(milliseconds: 300),
                   opacity: _isSearchVisible ? 1.0 : 0.0,
-                  child: TextField(
-                    controller: _searchController,
-                    focusNode: _searchFocusNode,
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      color: appTheme.text3!,
-                      fontSize: 18,
-                    ),
-                    decoration: InputDecoration(
-                      hintText:
-                          'Saisir un montant, un nom', // TODO: Ajouter à l10n
-                      hintStyle: AppTextStyles.searchPlaceholder.copyWith(
-                        color: appTheme.text5!,
-                      ),
-                      filled: true,
-                      fillColor: appTheme.background3,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(22.r),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(22.r),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(22.r),
-                        borderSide: BorderSide(
-                          color: appTheme.text5!.withValues(alpha: 0.5),
-                          width: 2.0,
+                  child: Row(
+                    children: [
+                      // Champ de recherche par montant (gauche)
+                      Expanded(
+                        child: HalfSearchField(
+                          controller: _amountController,
+                          focusNode: _amountFocusNode,
+                          hintText: l10n.amount.toUpperCase(),
+                          appTheme: appTheme,
+                          keyboardType: TextInputType.number,
+                          iconData: CupertinoIcons.money_dollar,
+                          shadowColor: isDarkMode
+                              ? null
+                              : AppColors.primaryGreen.withValues(alpha: 0.3),
+                          isLeftSide: true,
+                          onChanged: _onAmountSearchChanged,
                         ),
                       ),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: AppConstants.largePadding.r,
-                        vertical: AppConstants.mediumPadding.r,
-                      ),
-                      suffixIcon: Padding(
-                        padding: EdgeInsets.only(
-                          right: AppConstants.mediumPadding.r,
+
+                      // Champ de recherche par mot-clé (droite)
+                      Expanded(
+                        child: HalfSearchField(
+                          controller: _keywordController,
+                          focusNode: _keywordFocusNode,
+                          hintText: l10n.keyword.toUpperCase(),
+                          appTheme: appTheme,
+                          iconData: CupertinoIcons.textformat_alt,
+                          shadowColor: isDarkMode
+                              ? null
+                              : AppColors.primaryGreen.withValues(alpha: 0.3),
+                          onChanged: _onKeywordSearchChanged,
                         ),
-                        child: Icon(
-                          Icons.search,
-                          color: appTheme.text5!.withValues(alpha: 0.5),
-                          size: 26.sp,
-                        ),
                       ),
-                    ),
-                    onChanged: (value) {
-                      // TODO: Implémenter la logique de recherche dans ÉTAPE 3
-                    },
+                    ],
                   ),
                 ),
               ),
@@ -232,10 +239,31 @@ class _FullTransactionsBottomSheetState
                           return _buildEmptyTransactionsState(l10n);
                         }
 
+                        // Initialiser le provider de recherche avec les transactions
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          ref
+                              .read(transactionSearchProvider.notifier)
+                              .setOriginalTransactions(transactions);
+                        });
+
+                        // Écouter l'état de la recherche
+                        final searchState = ref.watch(
+                          transactionSearchProvider,
+                        );
+                        final transactionsToDisplay = searchState.isSearchActive
+                            ? searchState.filteredTransactions
+                            : transactions;
+
+                        if (transactionsToDisplay.isEmpty &&
+                            searchState.isSearchActive) {
+                          return _buildNoResultsState(l10n, appTheme);
+                        }
+
                         return TransactionsList(
-                          transactions: transactions,
+                          transactions: transactionsToDisplay,
                           onTransactionTap: _navigateToTransactionDetail,
-                          scrollToToday: true, // Auto-scroll vers aujourd'hui
+                          scrollToToday: !searchState
+                              .isSearchActive, // Pas de scroll auto si recherche active
                           accountCurrency: selectedAccount.currency,
                         );
                       },
@@ -257,6 +285,33 @@ class _FullTransactionsBottomSheetState
           ),
         );
       },
+    );
+  }
+
+  Widget _buildNoResultsState(
+    AppLocalizations l10n,
+    AppColorsExtended appTheme,
+  ) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: AppConstants.veryLargePadding.r),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Icon(Icons.search_off, size: 64.sp, color: appTheme.text6),
+          SizedBox(height: 16.h),
+          Text(
+            'Aucun résultat', // TODO: Ajouter à l10n
+            style: AppTextStyles.h5.copyWith(color: appTheme.text5),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            'Essayez de modifier vos critères de recherche', // TODO: Ajouter à l10n
+            style: AppTextStyles.bodyMedium.copyWith(color: appTheme.text5),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 

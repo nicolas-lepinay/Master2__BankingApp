@@ -120,5 +120,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get loadingError => 'Erreur de chargement';
 
   @override
-  String get searchPlaceholder => 'Saisir un montant, un nom, etc.';
+  String get keyword => 'Mot-clé';
+
+  @override
+  String get close => 'Fermer';
 }

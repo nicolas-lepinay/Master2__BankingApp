@@ -92,7 +92,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: AppColors.containerLightGray,
+        backgroundColor: AppColors.surfaceLight,
         body: SafeArea(
           child: Stack(
             children: [
@@ -279,25 +279,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             onTap: () {
               // TODO: Ouvrir le menu latéral
             },
-            child: Container(
+            child: SizedBox(
               width: 44.w,
               height: 44.w,
-              /*
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10.r,
-                    offset: Offset(0, 2.h),
-                  ),
-                ],
-              ),
-              */
               child: Icon(
                 Icons.menu,
-                color: AppColors.onSurfaceLight,
+                color: AppColors.textDark100,
                 size: 24.sp,
               ),
             ),
@@ -326,25 +313,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             onTap: () {
               // TODO: Ouvrir le menu contextuel
             },
-            child: Container(
+            child: SizedBox(
               width: 44.w,
               height: 44.w,
-              /*
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10.r,
-                    offset: Offset(0, 2.h),
-                  ),
-                ],
-              ),
-              */
               child: Icon(
                 Icons.more_vert,
-                color: AppColors.onSurfaceLight,
+                color: AppColors.textDark100,
                 size: 24.sp,
               ),
             ),

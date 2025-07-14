@@ -50,14 +50,14 @@ class FollowedTransactionItem extends StatelessWidget {
             // Icône du tiers/catégorie dans un cercle
             Container(
               width: 32.w,
-              height: 32.h,
+              height: 32.w,
               decoration: BoxDecoration(
-                color: AppColors.white.withValues(alpha: 0.1),
+                color: AppColors.surfaceLight.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 _getTransactionIcon(transaction, counterparty),
-                color: AppColors.onSurfaceDark,
+                color: AppColors.textLight100,
                 size: 16.sp, // Réduire la taille de l'icône
               ),
             ),
@@ -74,14 +74,12 @@ class FollowedTransactionItem extends StatelessWidget {
                   // Nom du tiers ou titre
                   Text(
                     _getTransactionDisplayName(transaction, counterparty),
-                    style: AppTextStyles.followedTransactionName.copyWith(
-                      fontSize: 15.sp,
-                    ),
+                    style: AppTextStyles.followedTransactionName.copyWith(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
 
-                  SizedBox(height: 2.h),
+                  SizedBox(height: 2.r),
                   // Date
                   Text(
                     AppFormatters.formatDate(
@@ -89,8 +87,7 @@ class FollowedTransactionItem extends StatelessWidget {
                       context,
                     ).toUpperCase(),
                     style: AppTextStyles.followedTransactionDate.copyWith(
-                      color: AppColors.neutral,
-                      fontSize: 12.sp,
+                      color: AppColors.textDefaultGray,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -109,13 +106,13 @@ class FollowedTransactionItem extends StatelessWidget {
                 context: context,
               ),
               style: AppTextStyles.followedTransactionAmount.copyWith(
-                fontSize: 16.sp,
+                color: isDebit
+                    ? AppColors.secondaryPink
+                    : AppColors.primaryGreen,
               ),
             ),
 
-            SizedBox(
-              width: AppConstants.defaultPadding.r,
-            ), // Réduire l'espacement
+            SizedBox(width: AppConstants.defaultPadding.r),
             // Étoile (bouton pour retirer du suivi)
             GestureDetector(
               onTap: onIconTap,
