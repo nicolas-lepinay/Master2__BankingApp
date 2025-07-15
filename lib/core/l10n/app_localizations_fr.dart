@@ -128,4 +128,82 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get close => 'Fermer';
+
+  @override
+  String get retry => 'Réessayer';
+
+  @override
+  String get searchTransactions => 'Rechercher des transactions';
+
+  @override
+  String get tapToCreateAccount => 'Appuyer pour créer un nouveau compte';
+
+  @override
+  String get error => 'Erreur';
+
+  @override
+  String get searchResults => 'Résultats de recherche';
+
+  @override
+  String get resultsFound => 'résultats trouvés';
+
+  @override
+  String get filtered => 'Filtré';
+
+  @override
+  String get enterSearchTerm => 'Saisir un terme de recherche';
+
+  @override
+  String get noResultsFound => 'Aucun résultat trouvé';
+
+  @override
+  String get searchTransactionsHint => 'Rechercher par titre, montant ou contrepartie';
+
+  @override
+  String get tryDifferentTerms => 'Essayer des termes différents';
+
+  @override
+  String get searchSuggestions => 'Suggestions de recherche';
+
+  @override
+  String get suggestions => 'Suggestions';
+
+  @override
+  String get recentSearches => 'Recherches récentes';
+
+  @override
+  String get noSuggestionsFound => 'Aucune suggestion trouvée';
+
+  @override
+  String get noRecentSearches => 'Aucune recherche récente';
+
+  @override
+  String get minAmount => 'Montant min';
+
+  @override
+  String get maxAmount => 'Montant max';
+
+  @override
+  String get selectPeriod => 'Sélectionner une période';
+
+  @override
+  String get filters => 'Filtres';
+
+  @override
+  String get clearAll => 'Tout effacer';
+
+  @override
+  String get balance => 'Solde';
+
+  @override
+  String get edit => 'Modifier';
+
+  @override
+  String get delete => 'Supprimer';
+
+  @override
+  String get completed => 'Terminé';
+
+  @override
+  String get cancelled => 'Annulé';
 }
