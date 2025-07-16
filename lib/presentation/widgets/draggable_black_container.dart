@@ -2,10 +2,11 @@ import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/data/database/app_database.dart';
+// import 'package:bankapp/data/database/app_database.dart'; // Supprimé avec MVVM
+import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
-import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/providers/transaction_search_provider.dart';
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
 import 'package:bankapp/presentation/widgets/add_transaction_bottom_sheet_mvvm.dart';
 import 'package:bankapp/presentation/widgets/dashed_button.dart';
@@ -18,7 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../data/database/models/transaction_models.dart';
+// import '../../data/database/models/transaction_models.dart'; // Supprimé avec MVVM
 
 class DraggableBlackContainer extends ConsumerStatefulWidget {
   final Function(double)? onDragUpdate;
@@ -188,7 +189,7 @@ class _DraggableBlackContainerState
 
   Widget _buildTransactionsContainer(AppLocalizations l10n) {
     final selectedCardIndex = ref.watch(selectedCardProvider);
-    final accountsAsync = ref.watch(accountsProvider);
+    final accounts = ref.watch(accountsProvider);
 
     // Configuration centralisée de la liste perspective
     const int perspectiveVisualizedItems = 3; // Nombre d'items visibles
@@ -196,92 +197,96 @@ class _DraggableBlackContainerState
     const double perspectiveMinScale = 0.85; // Échelle des items arrière
     const double containerHeight = 260.0; // Hauteur du container rose
 
-    return accountsAsync.when(
-      data: (accounts) {
-        if (accounts.isEmpty) {
-          return _buildEmptyTransactionsContainer(
-            onAddTransaction: _showAddTransactionBottomSheet,
-            l10n: l10n,
-          );
-        }
+    if (accounts.isEmpty) {
+      return _buildEmptyTransactionsContainer(
+        onAddTransaction: _showAddTransactionBottomSheet,
+        l10n: l10n,
+      );
+    }
 
-        // Récupérer le compte sélectionné
-        final selectedAccount = selectedCardIndex < accounts.length
-            ? accounts[selectedCardIndex]
-            : accounts.first;
+    // Récupérer le compte sélectionné
+    final selectedAccount = selectedCardIndex < accounts.length
+        ? accounts[selectedCardIndex]
+        : accounts.first;
 
-        // Récupérer les transactions centrées autour d'aujourd'hui pour le compte sélectionné
-        final transactionsAsync = ref.watch(
-          transactionsAroundTodayProvider(selectedAccount.id),
-        );
+    // Récupérer les transactions via TransactionViewModel (MVVM)
+    final transactionViewModel = ref.watch(transactionViewModelProvider);
+    final transactions = transactionViewModel.transactions;
 
-        return transactionsAsync.when(
-          data: (transactions) {
-            if (transactions.isEmpty) {
-              return _buildEmptyTransactionsContainer(
-                onAddTransaction: _showAddTransactionBottomSheet,
-                l10n: l10n,
+    // Vérifier si des transactions sont chargées pour ce compte
+    final bool hasTransactionsForAccount =
+        transactionViewModel.selectedAccountId == selectedAccount.id &&
+        transactions.isNotEmpty;
+
+    // Charger les transactions si nécessaire
+    if (transactionViewModel.selectedAccountId != selectedAccount.id) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(transactionViewModelProvider.notifier)
+            .loadTransactionsAroundToday(selectedAccount.id);
+      });
+    }
+
+    if (transactionViewModel.isLoading) {
+      return _buildLoadingTransactionsContainer();
+    }
+
+    if (transactionViewModel.hasError) {
+      return _buildErrorTransactionsContainer();
+    }
+
+    if (!hasTransactionsForAccount) {
+      return _buildEmptyTransactionsContainer(
+        onAddTransaction: _showAddTransactionBottomSheet,
+        l10n: l10n,
+      );
+    }
+
+    // Les transactions sont déjà limitées à 50 (25 passées + 25 futures)
+    // et centrées autour d'aujourd'hui par la méthode de base de données
+
+    return GestureDetector(
+      onTap: _showFullTransactionsBottomSheet,
+      child: Container(
+        height: containerHeight.h,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.gradientPinkStart, // #FE68E8
+              AppColors.gradientPinkEnd, // #FBA9ED
+            ],
+          ),
+          borderRadius: BorderRadius.circular(28.r),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28.r),
+          child: PerspectiveListView(
+            visualizedItems: perspectiveVisualizedItems, // Utilise la variable
+            itemExtent: perspectiveItemExtent.h, // Utilise la variable
+            minScale: perspectiveMinScale, // Nouveau paramètre personnalisé
+            initialIndex: _findTodayTransactionIndex(transactions),
+            padding: EdgeInsets.only(top: 20.r, bottom: 20.r),
+            onTapFrontItem: (index) {
+              if (index != null && index < transactions.length) {
+                _navigateToTransactionDetail(transactions[index].transaction);
+              }
+            },
+            onChangeFrontItem: (index) {
+              // Callback quand la transaction au premier plan change
+            },
+            children: transactions.map((transactionWithBalance) {
+              return PerspectiveTransactionItem(
+                transactionWithCounterparty: transactionWithBalance,
+                onTap: () => _navigateToTransactionDetail(
+                  transactionWithBalance.transaction,
+                ),
               );
-            }
-
-            // Les transactions sont déjà limitées à 50 (25 passées + 25 futures)
-            // et centrées autour d'aujourd'hui par la méthode de base de données
-
-            return GestureDetector(
-              onTap: _showFullTransactionsBottomSheet,
-              child: Container(
-                height: containerHeight.h,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      AppColors.gradientPinkStart, // #FE68E8
-                      AppColors.gradientPinkEnd, // #FBA9ED
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(28.r),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(28.r),
-                  child: PerspectiveListView(
-                    visualizedItems:
-                        perspectiveVisualizedItems, // Utilise la variable
-                    itemExtent: perspectiveItemExtent.h, // Utilise la variable
-                    minScale:
-                        perspectiveMinScale, // Nouveau paramètre personnalisé
-                    initialIndex: _findTodayTransactionIndex(transactions),
-                    padding: EdgeInsets.only(top: 20.r, bottom: 20.r),
-                    onTapFrontItem: (index) {
-                      if (index != null && index < transactions.length) {
-                        _navigateToTransactionDetail(
-                          transactions[index].transaction,
-                        );
-                      }
-                    },
-                    onChangeFrontItem: (index) {
-                      // Callback quand la transaction au premier plan change
-                    },
-                    children: transactions.map((transactionWithCounterparty) {
-                      return PerspectiveTransactionItem(
-                        transactionWithCounterparty:
-                            transactionWithCounterparty,
-                        onTap: () => _navigateToTransactionDetail(
-                          transactionWithCounterparty.transaction,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-            );
-          },
-          loading: () => _buildLoadingTransactionsContainer(),
-          error: (error, stack) => _buildErrorTransactionsContainer(),
-        );
-      },
-      loading: () => _buildLoadingTransactionsContainer(),
-      error: (error, stack) => _buildErrorTransactionsContainer(),
+            }).toList(),
+          ),
+        ),
+      ),
     );
   }
 
@@ -517,7 +522,7 @@ class _DraggableBlackContainerState
 
   /// Trouve l'index de la transaction la plus proche d'aujourd'hui
   int _findTodayTransactionIndex(
-    List<TransactionWithCounterparty> transactions,
+    List<domain.TransactionWithBalance> transactions,
   ) {
     if (transactions.isEmpty) return 0;
 
@@ -574,14 +579,13 @@ class _DraggableBlackContainerState
     ).then((_) {
       // Invalider les providers liés aux transactions après fermeture
       if (mounted) {
-        ref.invalidate(accountSummaryProvider);
-        ref.invalidate(transactionsWithBalanceProvider);
-        ref.invalidate(transactionsAroundTodayProvider);
+        ref.invalidate(accountsProvider);
+        ref.invalidate(accountTransactionsProvider);
       }
     });
   }
 
-  void _navigateToTransactionDetail(Transaction transaction) {
+  void _navigateToTransactionDetail(domain.Transaction transaction) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) =>

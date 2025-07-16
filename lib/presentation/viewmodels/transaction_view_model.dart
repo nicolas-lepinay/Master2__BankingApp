@@ -207,8 +207,14 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
     await executeWithErrorHandling(() async {
       state = state.loading();
       
-      final updatedTransaction = domain.Transaction(
-        id: transactionId,
+      // Récupérer la transaction existante
+      final existingTransaction = await _transactionRepository.getTransactionById(transactionId);
+      if (existingTransaction == null) {
+        throw Exception('Transaction not found: $transactionId');
+      }
+      
+      // Utiliser copyWith() pour une mise à jour optimisée
+      final updatedTransaction = existingTransaction.copyWith(
         accountId: accountId,
         counterpartyId: counterpartyId,
         category1Id: categoryIds?.isNotEmpty == true ? categoryIds![0] : null,

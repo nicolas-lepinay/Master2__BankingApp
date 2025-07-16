@@ -2,13 +2,12 @@ import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
-import 'package:bankapp/data/database/app_database.dart';
-import 'package:bankapp/data/database/models/transaction_models.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PerspectiveTransactionItem extends StatelessWidget {
-  final TransactionWithCounterparty transactionWithCounterparty;
+  final domain.TransactionWithBalance transactionWithCounterparty;
   final VoidCallback? onTap;
 
   const PerspectiveTransactionItem({
@@ -21,8 +20,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final transaction = transactionWithCounterparty.transaction;
     final counterparty = transactionWithCounterparty.counterparty;
-    final isDebit =
-        transaction.transactionType == AppConstants.transactionTypeDebit;
+    final isDebit = transaction.type.name == AppConstants.transactionTypeDebit;
 
     return GestureDetector(
       onTap: onTap,
@@ -117,8 +115,8 @@ class PerspectiveTransactionItem extends StatelessWidget {
 
   /// Récupère l'icône à afficher pour la transaction
   IconData _getTransactionIcon(
-    Transaction transaction,
-    Counterparty? counterparty,
+    domain.Transaction transaction,
+    domain.Counterparty? counterparty,
   ) {
     // Si la transaction a un tiers avec une icône
     if (counterparty?.icon != null) {
@@ -131,8 +129,8 @@ class PerspectiveTransactionItem extends StatelessWidget {
 
   /// Récupère le nom à afficher pour la transaction
   String _getTransactionDisplayName(
-    Transaction transaction,
-    Counterparty? counterparty,
+    domain.Transaction transaction,
+    domain.Counterparty? counterparty,
   ) {
     // Priorité 1: Nom du tiers
     if (counterparty?.name != null) {
@@ -145,7 +143,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
     }
 
     // Priorité 3: Type de transaction par défaut
-    return transaction.transactionType == AppConstants.transactionTypeDebit
+    return transaction.type.name == AppConstants.transactionTypeDebit
         ? 'Débit'
         : 'Crédit';
   }

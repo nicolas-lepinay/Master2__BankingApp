@@ -1,6 +1,7 @@
 import 'package:bankapp/core/services/user_preferences_service.dart';
 import 'package:bankapp/data/cache/cache_manager.dart';
 import 'package:bankapp/data/datasources/local/local_datasources.dart';
+import 'package:bankapp/data/repositories/database/followed_transaction_database_repository.dart';
 import 'package:bankapp/data/repositories/repositories.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/domain/repositories/repositories.dart';
@@ -37,6 +38,12 @@ final counterpartyLocalDataSourceProvider =
       return CounterpartyLocalDataSourceImpl(database);
     });
 
+final followedTransactionDatabaseRepositoryProvider =
+    Provider<FollowedTransactionDatabaseRepository>((ref) {
+      final database = ref.watch(databaseProvider);
+      return FollowedTransactionDatabaseRepository(database);
+    });
+
 // ============================================================================
 // SERVICES PROVIDERS
 // ============================================================================
@@ -64,6 +71,7 @@ final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
   return TransactionRepositoryImpl(
     ref.watch(transactionLocalDataSourceProvider),
     ref.watch(cacheManagerProvider),
+    ref.watch(followedTransactionDatabaseRepositoryProvider),
   );
 });
 
@@ -302,12 +310,13 @@ final searchSuggestionsProvider = Provider.family<List<String>, String>((
 // ============================================================================
 // FOLLOWED TRANSACTIONS PROVIDERS
 // ============================================================================
-/*
+
 /// Provider pour les transactions suivies (MVVM version)
-final followedTransactionsProvider = FutureProvider<List<domain.TransactionWithBalance>>((ref) async {
-  final transactionRepository = ref.watch(transactionRepositoryProvider);
-  return transactionRepository.getFollowedTransactionsWithDetails();
-});
+final followedTransactionsProvider =
+    FutureProvider<List<domain.TransactionWithBalance>>((ref) async {
+      final transactionRepository = ref.watch(transactionRepositoryProvider);
+      return transactionRepository.getFollowedTransactionsWithDetails();
+    });
 
 /// Provider pour les IDs des transactions suivies
 final followedTransactionIdsProvider = FutureProvider<List<int>>((ref) async {
@@ -316,7 +325,10 @@ final followedTransactionIdsProvider = FutureProvider<List<int>>((ref) async {
 });
 
 /// Provider pour vérifier si une transaction est suivie
-final isTransactionFollowedProvider = FutureProvider.family<bool, int>((ref, transactionId) async {
+final isTransactionFollowedProvider = FutureProvider.family<bool, int>((
+  ref,
+  transactionId,
+) async {
   final transactionRepository = ref.watch(transactionRepositoryProvider);
   return transactionRepository.isTransactionFollowed(transactionId);
 });
@@ -325,15 +337,4 @@ final isTransactionFollowedProvider = FutureProvider.family<bool, int>((ref, tra
 // TRANSACTION WITH COUNTERPARTY PROVIDERS
 // ============================================================================
 
-/// Provider pour une transaction avec son tiers (MVVM version)
-final transactionWithCounterpartyProvider = FutureProvider.family<domain.TransactionWithBalance?, int>((ref, transactionId) async {
-  final transactionRepository = ref.watch(transactionRepositoryProvider);
-  final counterpartyRepository = ref.watch(counterpartyRepositoryProvider);
-  
-  final transaction = await transactionRepository.getTransactionById(transactionId);
-  if (transaction == null) return null;
-  
-  // Le TransactionWithBalance contient déjà les informations de counterparty
-  return transaction;
-});
-*/
+// Provider supprimé car inutilisé et remplacé par l'architecture MVVM des repositories

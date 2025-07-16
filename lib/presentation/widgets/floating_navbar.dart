@@ -1,6 +1,6 @@
 import 'package:bankapp/core/constants/gradient_colors.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
-import 'package:bankapp/presentation/providers/database_provider.dart';
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/widgets/add_transaction_bottom_sheet_mvvm.dart';
 import 'package:bankapp/presentation/widgets/astroid.dart';
 import 'package:flutter/material.dart';
@@ -29,9 +29,8 @@ class FloatingNavbar extends ConsumerWidget {
     ).then((_) {
       // Invalider les providers liés aux transactions après fermeture
       if (context.mounted) {
-        ref.invalidate(accountSummaryProvider);
-        ref.invalidate(transactionsWithBalanceProvider);
-        ref.invalidate(transactionsAroundTodayProvider);
+        ref.invalidate(accountsProvider);
+        ref.invalidate(accountTransactionsProvider);
       }
     });
   }

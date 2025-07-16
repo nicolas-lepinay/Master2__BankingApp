@@ -3,9 +3,8 @@ import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
-import 'package:bankapp/data/database/app_database.dart';
-import 'package:bankapp/presentation/providers/actions_provider.dart';
-import 'package:bankapp/presentation/providers/database_provider.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/widgets/edit_transaction_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,7 +17,7 @@ class TransactionDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final transactionAsync = ref.watch(transactionProvider(transactionId));
+    final transaction = ref.watch(transactionByIdProvider(transactionId));
 
     return Scaffold(
       appBar: AppBar(
@@ -57,50 +56,31 @@ class TransactionDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: transactionAsync.when(
-        data: (transaction) => transaction == null
-            ? const Center(child: Text('Transaction introuvable'))
-            : _buildTransactionDetail(context, ref, transaction),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text('Erreur: $error'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Retour'),
-              ),
-            ],
-          ),
-        ),
-      ),
+      body: transaction == null
+          ? const Center(child: Text('Transaction introuvable'))
+          : _buildTransactionDetail(context, ref, transaction),
     );
   }
 
   Widget _buildTransactionDetail(
     BuildContext context,
     WidgetRef ref,
-    Transaction transaction,
+    domain.TransactionWithBalance transactionWithBalance,
   ) {
     final l10n = AppLocalizations.of(context)!;
+    final transaction = transactionWithBalance.transaction;
     final isDebit =
-        transaction.transactionType == AppConstants.transactionTypeDebit;
+        transaction.type.name == AppConstants.transactionTypeDebit;
 
     // Récupérer les informations du compte
-    final accountAsync = ref.watch(accountsProvider);
-    Account? account;
+    final accounts = ref.watch(accountsProvider);
+    domain.Account? account;
 
-    accountAsync.whenData((accounts) {
-      try {
-        account = accounts.firstWhere((a) => a.id == transaction.accountId);
-      } catch (e) {
-        // Compte non trouvé
-      }
-    });
+    try {
+      account = accounts.firstWhere((a) => a.id == transaction.accountId);
+    } catch (e) {
+      // Compte non trouvé
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
@@ -126,7 +106,7 @@ class TransactionDetailScreen extends ConsumerWidget {
 
   Widget _buildAmountCard(
     BuildContext context,
-    Transaction transaction,
+    domain.Transaction transaction,
     bool isDebit,
   ) {
     return Card(
@@ -193,8 +173,8 @@ class TransactionDetailScreen extends ConsumerWidget {
   Widget _buildDetailCard(
     BuildContext context,
     AppLocalizations l10n,
-    Transaction transaction,
-    Account? account,
+    domain.Transaction transaction,
+    domain.Account? account,
   ) {
     return Card(
       child: Padding(
@@ -215,7 +195,7 @@ class TransactionDetailScreen extends ConsumerWidget {
             _buildDetailRow(
               'Type',
               AppFormatters.getTransactionTypeLabel(
-                transaction.transactionType,
+                transaction.type.name,
                 context,
               ),
               Icons.swap_vert,
@@ -236,11 +216,11 @@ class TransactionDetailScreen extends ConsumerWidget {
             _buildDetailRow(
               l10n.status,
               AppFormatters.getTransactionStatusLabel(
-                transaction.status,
+                transaction.status.index,
                 context,
               ),
               Icons.info_outline,
-              valueColor: transaction.status == 1
+              valueColor: transaction.status == domain.TransactionStatus.completed
                   ? AppColors.success
                   : AppColors.warning,
             ),
@@ -253,7 +233,7 @@ class TransactionDetailScreen extends ConsumerWidget {
   Widget _buildTechnicalCard(
     BuildContext context,
     AppLocalizations l10n,
-    Transaction transaction,
+    domain.Transaction transaction,
   ) {
     return Card(
       child: Padding(
@@ -370,19 +350,18 @@ class TransactionDetailScreen extends ConsumerWidget {
     WidgetRef ref,
   ) async {
     try {
-      final transactionActions = ref.read(transactionActionsProvider);
-      final transaction = await ref.read(
-        transactionProvider(transactionId).future,
-      );
+      final transactionRepository = ref.read(transactionRepositoryProvider);
+      final transaction = ref.read(transactionByIdProvider(transactionId));
 
       if (transaction == null) {
         throw Exception('Transaction non trouvée');
       }
 
-      await transactionActions.toggleTransactionStatus(
-        transactionId,
-        transaction.accountId,
-      );
+      await transactionRepository.toggleTransactionStatus(transactionId);
+
+      // Invalider les providers pour rafraîchir les données
+      ref.invalidate(accountsProvider);
+      ref.invalidate(accountTransactionsProvider);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -426,19 +405,18 @@ class TransactionDetailScreen extends ConsumerWidget {
 
     if (confirmed == true) {
       try {
-        final transactionActions = ref.read(transactionActionsProvider);
-        final transaction = await ref.read(
-          transactionProvider(transactionId).future,
-        );
+        final transactionRepository = ref.read(transactionRepositoryProvider);
+        final transaction = ref.read(transactionByIdProvider(transactionId));
 
         if (transaction == null) {
           throw Exception('Transaction non trouvée');
         }
 
-        await transactionActions.deleteTransaction(
-          transactionId,
-          transaction.accountId,
-        );
+        await transactionRepository.deleteTransaction(transactionId);
+
+        // Invalider les providers pour rafraîchir les données
+        ref.invalidate(accountsProvider);
+        ref.invalidate(accountTransactionsProvider);
 
         if (context.mounted) {
           Navigator.of(context).pop(); // Retour à l'écran précédent

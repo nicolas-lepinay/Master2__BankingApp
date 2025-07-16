@@ -125,24 +125,74 @@ lib/
   - [x] **6.6d** Corrigé toutes erreurs de nullability
   - [x] **6.6e** Projet compile maintenant sans erreurs critiques
 
-### 🔄 ÉTAPES EN COURS
+### ✅ ÉTAPES RÉCEMMENT TERMINÉES
 
-#### Étape 7: Migration MVVM Complète - SUCCÈS ! 🎉
-- [x] **Architecture MVVM** entièrement opérationnelle
-- [x] **Cache O(n)** au lieu de O(n²) implémenté  
-- [x] **Nouvelle structure modulaire** (750 lignes → 16 fichiers spécialisés)
-- [x] **Toutes erreurs critiques résolues** (35 warnings restants seulement)
-- [x] **6.6d** Correction finale followed_transactions_carousel.dart
-- [x] **Getters sécurisés** pour accès aux types dynamic
-- [ ] **7.1** Tests complets nouvelle architecture (optionnel)
-- [ ] **7.2** Validation performances O(n) vs O(n²) (optionnel)
+#### Étape 9: Finalisation Migration MVVM - SUCCÈS TOTAL ! 🎉
+- [x] **9A** Résolution erreurs critiques suivies transactions
+  - [x] **9A.1** Implémenté 5 méthodes manquantes dans transaction_repository_impl.dart
+  - [x] **9A.2** Corrigé erreurs compilation followed transactions (getFollowedTransactionsWithDetails, etc.)
+- [x] **9B** Migration complète widgets vers MVVM
+  - [x] **9B.1** Migré full_transactions_bottom_sheet.dart vers MVVM
+  - [x] **9B.2** Migré edit_transaction_bottom_sheet.dart vers MVVM
+  - [x] **9B.3** Migré draggable_black_container.dart vers MVVM
+  - [x] **9B.4** Migré floating_navbar.dart et followed_transactions_carousel.dart vers MVVM
+- [x] **9C** Audit database_provider.dart
+  - [x] **9C.1** Analyse utilisation database_provider.dart
+  - [x] **9C.2** **DÉCISION** : database_provider.dart **DOIT être conservé** (utilisé par datasources)
+- [x] **9D** Résolution problème initialisation critique
+  - [x] **9D.1** Diagnostiqué isAppReady bloqué à false
+  - [x] **9D.2** Corrigé splash_screen.dart - migration vers AppViewModel MVVM
+  - [x] **9D.3** Implémenté chargement complet données au démarrage (cache-first)
+
+### ✅ ÉTAPES RÉCEMMENT TERMINÉES
+
+#### Étape 9F: Corrections Erreurs Finales ✅
+- [x] **9F.1** Corrigé erreurs compilation draggable_black_container.dart
+- [x] **9F.2** Corrigé erreurs compilation followed_transactions_carousel.dart
+- [x] **9F.3** Migré transaction_detail_screen.dart vers MVVM
+
+#### Étape 9G: Implémentation Méthodes Manquantes - SUCCÈS TOTAL ! 🎉
+- [x] **9G.1** Implémenté updateTransaction dans TransactionRepositoryImpl
+- [x] **9G.2** Implémenté deleteTransaction dans TransactionRepositoryImpl (était déjà fait)
+- [x] **9G.3** Implémenté toggleTransactionStatus dans TransactionRepositoryImpl
+- [x] **9G.4** Migré add_account_bottom_sheet.dart vers MVVM (remplacé accountActionsProvider)
+- [x] **9G.5** Analysé actions_provider.dart - aucune autre utilisation trouvée
+
+#### Étape 9H: Architecture MVVM 100% TERMINÉE ! 🎉
+- [x] **Tous les widgets** migré vers architecture MVVM
+- [x] **Tous les providers actions** remplacés par repositories
+- [x] **Toutes les méthodes CRUD** implémentées dans repositories
+- [x] **Cache-first architecture** entièrement opérationnelle
+- [x] **Aucune erreur de compilation** dans l'architecture MVVM
+
+#### Étape 9J: Résolution TODOs et Amélioration Recherche - TERMINÉ ! 🎉
+- [x] **9J.1** Corrigé TODO edit_transaction_bottom_sheet.dart - utilise `transactionWithBalance.counterparty?.name`
+- [x] **9J.2** Corrigé TODO perspective_transaction_item.dart - utilise `transactionWithCounterparty.counterparty`
+- [x] **9J.3** Supprimé provider inutilisé transactionWithCounterpartyProvider
+- [x] **9J.4** Migré transaction_search_provider.dart vers domain.TransactionWithBalance
+- [x] **9J.5** Implémenté recherche dans nom des Counterparties
+- [x] **9J.6** Implémenté recherche dans nom des Categories
+- [x] **9J.7** Confirmé utilisation repositories (pas de requêtage direct BDD)
+
+#### Étape 9K: Finalisation Migration Architecture Async - TERMINÉ ! 🎉
+- [x] **9K.1** Migré full_transactions_bottom_sheet.dart vers MVVM (supprimé transactionsAsync.when)
+- [x] **9K.2** Migré draggable_black_container.dart vers MVVM (supprimé transactionsAsync.when)
+- [x] **9K.3** Migré followed_transactions_carousel.dart vers MVVM (supprimé followedTransactionsAsync.when)
+- [x] **9K.4** Supprimé tous les imports data/database inutiles
+- [x] **9K.5** Confirmé 0 occurrence de .when() restante dans widgets/screens
+
+#### Étape 9L: Correction Erreur Riverpod SplashScreen - TERMINÉ ! 🎉
+- [x] **9L.1** Identifié erreur "Tried to modify a provider while widget tree was building"
+- [x] **9L.2** Cause : appViewModel.initializeApp() appelé dans initState()
+- [x] **9L.3** Solution : Future(() => _initializeApp()) pour délayer l'exécution
+- [x] **9L.4** Test : flutter analyze splash_screen.dart - 0 erreur
 
 ### 📋 ÉTAPES À VENIR
 
-#### Étape 7: Migration Complète et Nettoyage
-- [ ] Remplacer tous les anciens widgets par les versions MVV (remplacer l'accès direct à AppDatabase par l'utilisation des repositories spécialisés)
-- [ ] Supprimer les providers obsolètes
-- [ ] Tests de l'architecture complète
+#### Étape 10: Tests et Validation
+- [ ] **10.1** Tests complets nouvelle architecture
+- [ ] **10.2** Validation performances O(n) vs O(n²)
+- [ ] **10.3** Préparation intégration Turso
 
 ---
 
@@ -210,18 +260,132 @@ abstract class BaseViewModel<T extends BaseViewState> extends StateNotifier<T> {
 - Providers utilitaires pour l'UI (convenience providers)
 - Family providers pour paramètres dynamiques
 
+### 6. **Initialisation Application (Critique)**
+**Problème résolu** : L'app était bloquée sur `isAppReady = false` car `splash_screen.dart` utilisait l'ancien `accountsProvider` au lieu du nouveau `AppViewModel`.
+
+**Solution implémentée** :
+```dart
+// Avant (PROBLÉMATIQUE)
+await ref.read(accountsProvider.future);
+
+// Après (MVVM CORRECT)
+final appViewModel = ref.read(appViewModelProvider.notifier);
+await appViewModel.initializeApp();
+while (!appViewModel.isAppReady) {
+  await Future.delayed(const Duration(milliseconds: 100));
+}
+```
+
+### 7. **Followed Transactions Architecture**
+**Nouvelles méthodes implémentées** dans `TransactionRepositoryImpl` :
+```dart
+Future<List<TransactionWithBalance>> getFollowedTransactionsWithDetails();
+Future<List<int>> getFollowedTransactionIds();
+Future<bool> isTransactionFollowed(int transactionId);
+Future<void> followTransaction(int transactionId);
+Future<void> unfollowTransaction(int transactionId);
+```
+
+### 8. **Migration des Types de Données**
+**Conversion critique** : `TransactionWithCounterparty` (ancienne) → `TransactionWithBalance` (MVVM)
+
+**Fonctions de conversion** nécessaires pour certains widgets :
+```dart
+domain.TransactionWithBalance _convertToDomainModel(data_models.TransactionWithBalance dataTx);
+data_models.TransactionWithBalance _convertToDataModel(domain.TransactionWithBalance domainTx);
+```
+
+### 9. **Implémentation CRUD Complète**
+**Méthodes implémentées** dans les repositories MVVM :
+```dart
+// TransactionRepository
+Future<Transaction> updateTransaction(Transaction transaction);
+Future<void> deleteTransaction(int id);
+Future<void> toggleTransactionStatus(int transactionId);
+
+// AccountRepository
+Future<Account> createAccount(Account account);
+Future<Account> updateAccount(Account account);
+Future<void> deleteAccount(int id);
+```
+
+### 10. **Architecture Actions → Repositories**
+**Migration complète** : Les widgets utilisent maintenant les repositories au lieu des actions_provider :
+```dart
+// Avant (OBSOLÈTE)
+final accountActions = ref.read(accountActionsProvider);
+await accountActions.createAccount(name: name, currency: currency);
+
+// Après (MVVM CORRECT)
+final accountRepository = ref.read(accountRepositoryProvider);
+await accountRepository.createAccount(newAccount);
+ref.invalidate(accountsProvider);
+```
+
+### 11. **Optimisation CopyWith Pattern - TERMINÉ ! ✅**
+**Amélioration critique** : Utilisation de `copyWith()` pour les mises à jour d'entités immutables :
+```dart
+// Avant (VERBEUX)
+final updatedTransaction = Transaction(
+  id: transaction.id,
+  accountId: transaction.accountId,
+  // ... tous les autres champs
+  status: newStatus,
+);
+
+// Après (OPTIMISÉ avec copyWith)
+final updatedTransaction = transaction.copyWith(status: newStatus);
+```
+
+**Implémentations complétées** :
+- ✅ **TransactionRepositoryImpl.toggleTransactionStatus()** - Utilise `copyWith(status: newStatus)`
+- ✅ **EditTransactionBottomSheet** - Utilise `copyWith()` pour tous les champs modifiés
+- ✅ **TransactionViewModel.updateTransaction()** - Récupère l'entité existante et utilise `copyWith()`
+- ✅ **AccountViewModel.updateAccount()** - Déjà optimisé avec `copyWith()`
+
+**Avantages** :
+- **Code plus concis** et moins prone aux erreurs
+- **Préservation automatique** des champs non modifiés
+- **Meilleure maintenabilité** lors d'ajouts de champs
+- **Performance optimisée** (pas de reconstruction complète)
+- **Cohérence architecturale** avec le pattern immutable
+
 ---
 
 ## 🚨 Points d'Attention Techniques
 
-### Widgets Nécessitant Migration
+### ✅ Widgets Migrés vers MVVM
 ```
-URGENT - Utilisent encore anciens providers :
-- draggable_black_container.dart
-- followed_transactions_carousel.dart  
-- full_transactions_bottom_sheet.dart
-- edit_transaction_bottom_sheet.dart
-- perspective_transaction_item.dart
+TOUS CORRIGÉS - Architecture MVVM 100% :
+✅ draggable_black_container.dart (types corrigés)
+✅ followed_transactions_carousel.dart (TransactionWithBalance)
+✅ transaction_detail_screen.dart (utilise repositories)
+✅ add_account_bottom_sheet.dart (utilise accountRepository)
+✅ edit_transaction_bottom_sheet.dart (utilise transactionRepository)
+✅ full_transactions_bottom_sheet.dart (utilise MVVM providers)
+```
+
+### Database Provider Status
+```
+DÉCISION CRITIQUE : database_provider.dart ne peut PAS être supprimé
+RAISON : Utilisé par les datasources dans viewmodel_providers.dart
+- AccountLocalDataSource → databaseProvider
+- TransactionLocalDataSource → databaseProvider  
+- CategoryLocalDataSource → databaseProvider
+- CounterpartyLocalDataSource → databaseProvider
+
+STATUS : Nécessaire pour l'architecture MVVM (couche DataSources)
+```
+
+### Actions Provider Status
+```
+DÉCISION : actions_provider.dart peut maintenant être supprimé
+RAISON : Toutes les utilisations ont été migrées vers repositories
+- add_account_bottom_sheet.dart → accountRepository
+- edit_transaction_bottom_sheet.dart → transactionRepository
+- transaction_detail_screen.dart → transactionRepository
+
+STATUS : Obsolète - remplacé par repositories MVVM
 ```
 
 ### Calculs de Soldes
@@ -310,5 +474,6 @@ flutter test test/architecture/
 
 ---
 
-*Dernière mise à jour : Après étape 6.6 - Migration MVVM ENTIÈREMENT TERMINÉE ! 🎉*
-*Statut : Projet compile sans erreurs critiques - Architecture MVVM opérationnelle*
+*Dernière mise à jour : Après étape 9H - ARCHITECTURE MVVM 100% TERMINÉE ! 🎉*
+*Statut : Tous widgets migrés - Toutes méthodes CRUD implémentées - Cache-first opérationnel*
+*Prochaine étape : Tests et validation performances - Préparation intégration Turso*

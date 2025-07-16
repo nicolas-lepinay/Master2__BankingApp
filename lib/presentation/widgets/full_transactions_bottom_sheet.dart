@@ -3,13 +3,19 @@ import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/data/database/app_database.dart';
+// Imports supprimés car plus nécessaires avec MVVM
+// import 'package:bankapp/data/database/app_database.dart';
+// import 'package:bankapp/data/database/models/transaction_models.dart' as data_models;
+import 'package:bankapp/domain/entities/entities.dart' as domain;
+// Imports supprimés car plus nécessaires avec MVVM
+// import 'package:bankapp/domain/value_objects/money.dart';
+// import 'package:bankapp/domain/value_objects/account_balance.dart';
 import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
-import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/providers/transaction_search_provider.dart';
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
 import 'package:bankapp/presentation/widgets/half_search_field.dart';
-import 'package:bankapp/presentation/widgets/transactions_list.dart';
+import 'package:bankapp/presentation/widgets/transactions_list_mvvm.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +39,9 @@ class _FullTransactionsBottomSheetState
   final FocusNode _amountFocusNode = FocusNode();
   final TextEditingController _keywordController = TextEditingController();
   final FocusNode _keywordFocusNode = FocusNode();
+
+  // Fonctions de conversion supprimées car plus nécessaires avec MVVM
+  // TransactionViewModel fournit directement les domain.TransactionWithBalance
 
   @override
   void initState() {
@@ -78,7 +87,7 @@ class _FullTransactionsBottomSheetState
     // FocusManager.instance.primaryFocus?.unfocus();
   }
 
-  void _navigateToTransactionDetail(Transaction transaction) {
+  void _navigateToTransactionDetail(domain.Transaction transaction) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) =>
@@ -95,7 +104,7 @@ class _FullTransactionsBottomSheetState
     final bool isDarkMode = brightness == Brightness.dark;
 
     final selectedCardIndex = ref.watch(selectedCardProvider);
-    final accountsAsync = ref.watch(accountsProvider);
+    final accounts = ref.watch(accountsProvider);
 
     return DraggableScrollableSheet(
       controller: _dragController,
@@ -228,73 +237,88 @@ class _FullTransactionsBottomSheetState
 
                 // Liste des transactions
                 Expanded(
-                  child: accountsAsync.when(
-                    data: (accounts) {
-                      if (accounts.isEmpty) {
-                        return _buildEmptyState(l10n);
-                      }
+                  child: accounts.isEmpty
+                      ? _buildEmptyState(l10n)
+                      : Builder(
+                          builder: (context) {
+                            // Récupérer le compte sélectionné
+                            final selectedAccount =
+                                selectedCardIndex < accounts.length
+                                ? accounts[selectedCardIndex]
+                                : accounts.first;
 
-                      // Récupérer le compte sélectionné
-                      final selectedAccount =
-                          selectedCardIndex < accounts.length
-                          ? accounts[selectedCardIndex]
-                          : accounts.first;
+                            // Récupérer les transactions via TransactionViewModel (MVVM)
+                            final transactionViewModel = ref.watch(
+                              transactionViewModelProvider,
+                            );
+                            final transactions =
+                                transactionViewModel.transactions;
 
-                      // Récupérer les transactions avec solde pour le compte sélectionné
-                      final transactionsAsync = ref.watch(
-                        transactionsWithBalanceProvider(selectedAccount.id),
-                      );
+                            // Vérifier si des transactions sont chargées pour ce compte
+                            final bool hasTransactionsForAccount =
+                                transactionViewModel.selectedAccountId ==
+                                    selectedAccount.id &&
+                                transactions.isNotEmpty;
 
-                      return transactionsAsync.when(
-                        data: (transactions) {
-                          if (transactions.isEmpty) {
-                            return _buildEmptyTransactionsState(l10n);
-                          }
+                            // Charger les transactions si nécessaire
+                            if (transactionViewModel.selectedAccountId !=
+                                selectedAccount.id) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                ref
+                                    .read(transactionViewModelProvider.notifier)
+                                    .loadTransactions(selectedAccount.id);
+                              });
+                            }
 
-                          // Initialiser le provider de recherche avec les transactions
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            ref
-                                .read(transactionSearchProvider.notifier)
-                                .setOriginalTransactions(transactions);
-                          });
+                            if (transactionViewModel.isLoading) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
 
-                          // Écouter l'état de la recherche
-                          final searchState = ref.watch(
-                            transactionSearchProvider,
-                          );
-                          final transactionsToDisplay =
-                              searchState.isSearchActive
-                              ? searchState.filteredTransactions
-                              : transactions;
+                            if (transactionViewModel.hasError) {
+                              return Center(
+                                child: Text(
+                                  transactionViewModel.error ??
+                                      'Erreur inconnue',
+                                ),
+                              );
+                            }
 
-                          if (transactionsToDisplay.isEmpty &&
-                              searchState.isSearchActive) {
-                            return _buildNoResultsState(l10n, appTheme);
-                          }
+                            if (!hasTransactionsForAccount) {
+                              return _buildEmptyTransactionsState(l10n);
+                            }
 
-                          return TransactionsList(
-                            transactions: transactionsToDisplay,
-                            onTransactionTap: _navigateToTransactionDetail,
-                            scrollToToday: !searchState
-                                .isSearchActive, // Pas de scroll auto si recherche active
-                            accountCurrency: selectedAccount.currency,
-                          );
-                        },
-                        loading: () => const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.primary,
-                          ),
+                            // Initialiser le provider de recherche avec les transactions (MVVM)
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              ref
+                                  .read(transactionSearchProvider.notifier)
+                                  .setOriginalTransactions(transactions);
+                            });
+
+                            // Écouter l'état de la recherche
+                            final searchState = ref.watch(
+                              transactionSearchProvider,
+                            );
+                            final transactionsToDisplay =
+                                searchState.isSearchActive
+                                ? searchState.filteredTransactions
+                                : transactions;
+
+                            if (transactionsToDisplay.isEmpty &&
+                                searchState.isSearchActive) {
+                              return _buildNoResultsState(l10n, appTheme);
+                            }
+
+                            return TransactionsListMVVM(
+                              transactions: transactionsToDisplay,
+                              onTransactionTap: _navigateToTransactionDetail,
+                              scrollToToday: !searchState
+                                  .isSearchActive, // Pas de scroll auto si recherche active
+                              accountCurrency: selectedAccount.currency,
+                            );
+                          },
                         ),
-                        error: (error, stack) => _buildErrorState(error),
-                      );
-                    },
-                    loading: () => const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    error: (error, stack) => _buildErrorState(error),
-                  ),
                 ),
               ],
             ),
@@ -377,30 +401,5 @@ class _FullTransactionsBottomSheetState
     );
   }
 
-  Widget _buildErrorState(dynamic error) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(AppConstants.largePadding.r),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64.sp, color: AppColors.error),
-            SizedBox(height: 16.h),
-            Text(
-              'Erreur de chargement', // TODO: Ajouter à l10n
-              style: AppTextStyles.h6.copyWith(color: AppColors.error),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              error.toString(),
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // _buildErrorState supprimé car géré directement dans le ViewModel
 }

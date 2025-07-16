@@ -1,7 +1,8 @@
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/presentation/providers/actions_provider.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -199,13 +200,21 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
     });
 
     try {
-      final accountActions = ref.read(accountActionsProvider);
+      final accountRepository = ref.read(accountRepositoryProvider);
 
-      await accountActions.createAccount(
+      // Créer l'entité Account
+      final newAccount = domain.Account(
+        id: 0, // L'ID sera généré automatiquement
         name: _nameController.text.trim(),
         currency: _selectedCurrency,
         initialBalance: double.parse(_balanceController.text),
+        creationDate: DateTime.now(),
       );
+
+      await accountRepository.createAccount(newAccount);
+
+      // Invalider les providers pour rafraîchir les données
+      ref.invalidate(accountsProvider);
 
       if (mounted) {
         Navigator.of(context).pop();

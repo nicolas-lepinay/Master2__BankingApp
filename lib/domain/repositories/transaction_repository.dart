@@ -71,7 +71,7 @@ abstract class TransactionRepository {
   Stream<List<TransactionWithBalance>> watchTransactionsWithBalance(
     int accountId,
   );
-  /*
+
   /// Get all followed transactions with details
   Future<List<TransactionWithBalance>> getFollowedTransactionsWithDetails();
 
@@ -86,5 +86,7 @@ abstract class TransactionRepository {
 
   /// Unfollow a transaction
   Future<void> unfollowTransaction(int transactionId);
-   */
+
+  /// Toggle transaction status
+  Future<void> toggleTransactionStatus(int transactionId);
 }
