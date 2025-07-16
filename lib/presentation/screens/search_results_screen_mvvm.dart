@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
-import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
+import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/widgets/search_field_mvvm.dart';
 import 'package:bankapp/presentation/widgets/transactions_list_mvvm.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SearchResultsScreenMVVM extends ConsumerStatefulWidget {
@@ -20,10 +20,12 @@ class SearchResultsScreenMVVM extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<SearchResultsScreenMVVM> createState() => _SearchResultsScreenMVVMState();
+  ConsumerState<SearchResultsScreenMVVM> createState() =>
+      _SearchResultsScreenMVVMState();
 }
 
-class _SearchResultsScreenMVVMState extends ConsumerState<SearchResultsScreenMVVM> {
+class _SearchResultsScreenMVVMState
+    extends ConsumerState<SearchResultsScreenMVVM> {
   final TextEditingController _searchController = TextEditingController();
   Map<String, dynamic> _currentFilters = {};
 
@@ -31,7 +33,7 @@ class _SearchResultsScreenMVVMState extends ConsumerState<SearchResultsScreenMVV
   void initState() {
     super.initState();
     _searchController.text = widget.initialQuery;
-    
+
     // Initialiser la recherche si on a une query initiale
     if (widget.initialQuery.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -83,25 +85,17 @@ class _SearchResultsScreenMVVMState extends ConsumerState<SearchResultsScreenMVV
         elevation: 0,
         title: Text(
           l10n.searchResults,
-          style: AppTextStyles.h4.copyWith(
-            color: appTheme.text1,
-          ),
+          style: AppTextStyles.h4.copyWith(color: appTheme.text1),
         ),
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: appTheme.text1,
-          ),
+          icon: Icon(Icons.arrow_back_ios, color: appTheme.text1),
         ),
         actions: [
           if (_currentFilters.isNotEmpty || _searchController.text.isNotEmpty)
             IconButton(
               onPressed: _clearSearch,
-              icon: Icon(
-                Icons.clear_all,
-                color: appTheme.text1,
-              ),
+              icon: Icon(Icons.clear_all, color: appTheme.text1),
             ),
         ],
       ),
@@ -117,7 +111,7 @@ class _SearchResultsScreenMVVMState extends ConsumerState<SearchResultsScreenMVV
                   onSearchChanged: _performSearch,
                   onFiltersChanged: _applyFilters,
                 ),
-                
+
                 // Indicateur de résultats
                 if (searchState.hasResults)
                   Container(
@@ -139,7 +133,10 @@ class _SearchResultsScreenMVVMState extends ConsumerState<SearchResultsScreenMVV
                         if (_currentFilters.isNotEmpty) ...[
                           SizedBox(width: 8.w),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 2.h,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8.r),
@@ -184,11 +181,7 @@ class _SearchResultsScreenMVVMState extends ConsumerState<SearchResultsScreenMVV
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 48.sp,
-              color: Colors.red,
-            ),
+            Icon(Icons.error_outline, size: 48.sp, color: Colors.red),
             SizedBox(height: 16.h),
             Text(
               searchState.error ?? 'Une erreur est survenue',
@@ -230,18 +223,16 @@ class _SearchResultsScreenMVVMState extends ConsumerState<SearchResultsScreenMVV
           SizedBox(height: 16.h),
           Text(
             _searchController.text.isEmpty
-                ? l10n.enterSearchTerm
-                : l10n.noResultsFound,
-            style: AppTextStyles.h6.copyWith(
-              color: appTheme.text2,
-            ),
+                ? "l10n.enterSearchTerm"
+                : "l10n.noResultsFound",
+            style: AppTextStyles.h6.copyWith(color: appTheme.text2),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 8.h),
           Text(
             _searchController.text.isEmpty
-                ? l10n.searchTransactionsHint
-                : l10n.tryDifferentTerms,
+                ? "l10n.searchTransactionsHint"
+                : "l10n.tryDifferentTerms",
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -265,7 +256,7 @@ class _SearchResultsScreenMVVMState extends ConsumerState<SearchResultsScreenMVV
     return Column(
       children: [
         Text(
-          l10n.searchSuggestions,
+          "l10n.searchSuggestions",
           style: AppTextStyles.bodyMedium.copyWith(
             color: AppColors.textSecondary,
             fontWeight: FontWeight.w500,

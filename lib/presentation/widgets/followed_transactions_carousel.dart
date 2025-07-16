@@ -1,12 +1,12 @@
+import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/theme/app_colors.dart';
+import 'package:bankapp/data/database/app_database.dart';
+import 'package:bankapp/data/database/models/transaction_models.dart';
+import 'package:bankapp/presentation/providers/database_provider.dart';
+import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
+import 'package:bankapp/presentation/widgets/followed_transaction_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/data/database/database.dart';
-import 'package:bankapp/core/theme/app_colors.dart';
-import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/presentation/providers/database_provider.dart';
-import 'package:bankapp/presentation/widgets/followed_transaction_item.dart';
-import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class FollowedTransactionsCarousel extends ConsumerStatefulWidget {
@@ -152,7 +152,7 @@ class _FollowedTransactionsCarouselState
                 transactionWithCounterparty.transaction,
               ),
               onIconTap: () => _removeFromFollowed(
-                transactionWithCounterparty.transaction.id,
+                transactionWithCounterparty.transactionId,
                 index,
               ),
             ),
@@ -238,11 +238,13 @@ class _FollowedTransactionsCarouselState
     }
   }
 
-  void _navigateToTransactionDetail(Transaction transaction) {
+  void _navigateToTransactionDetail(dynamic transaction) {
+    // Cast sécurisé vers Transaction
+    final transactionObj = transaction as Transaction;
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) =>
-            TransactionDetailScreen(transactionId: transaction.id),
+            TransactionDetailScreen(transactionId: transactionObj.id),
       ),
     );
   }

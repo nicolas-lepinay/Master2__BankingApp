@@ -1,7 +1,7 @@
-import 'package:intl/intl.dart';
-import 'package:flutter/widgets.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 class AppFormatters {
   // Helper method to get proper locale string from Locale

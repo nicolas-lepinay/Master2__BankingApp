@@ -1,22 +1,54 @@
+import 'package:bankapp/data/database/app_database.dart';
+import 'package:bankapp/data/database/models/models.dart';
+import 'package:bankapp/data/repositories/database/database_repositories.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drift/drift.dart';
-import 'package:bankapp/data/database/database.dart';
 
 // Provider pour l'instance de la base de données
 final databaseProvider = Provider<AppDatabase>((ref) {
   return AppDatabase();
 });
 
+// Providers pour les repositories de base de données
+final userDatabaseRepositoryProvider = Provider<UserDatabaseRepository>((ref) {
+  final database = ref.read(databaseProvider);
+  return UserDatabaseRepository(database);
+});
+
+final accountDatabaseRepositoryProvider = Provider<AccountDatabaseRepository>((
+  ref,
+) {
+  final database = ref.read(databaseProvider);
+  return AccountDatabaseRepository(database);
+});
+
+final counterpartyDatabaseRepositoryProvider =
+    Provider<CounterpartyDatabaseRepository>((ref) {
+      final database = ref.read(databaseProvider);
+      return CounterpartyDatabaseRepository(database);
+    });
+
+final transactionDatabaseRepositoryProvider =
+    Provider<TransactionDatabaseRepository>((ref) {
+      final database = ref.read(databaseProvider);
+      return TransactionDatabaseRepository(database);
+    });
+
+final followedTransactionDatabaseRepositoryProvider =
+    Provider<FollowedTransactionDatabaseRepository>((ref) {
+      final database = ref.read(databaseProvider);
+      return FollowedTransactionDatabaseRepository(database);
+    });
+
 // Provider pour l'utilisateur actuel
 final currentUserProvider = FutureProvider<User>((ref) async {
-  final database = ref.read(databaseProvider);
-  return database.getCurrentUser();
+  final userRepository = ref.read(userDatabaseRepositoryProvider);
+  return userRepository.getCurrentUser();
 });
 
 // Provider pour les comptes
 final accountsProvider = FutureProvider<List<Account>>((ref) async {
-  final database = ref.read(databaseProvider);
-  return database.select(database.accounts).get();
+  final accountRepository = ref.read(accountDatabaseRepositoryProvider);
+  return accountRepository.getAllAccounts();
 });
 
 // Provider pour un compte spécifique avec son résumé
@@ -24,8 +56,8 @@ final accountSummaryProvider = FutureProvider.family<AccountSummary, int>((
   ref,
   accountId,
 ) async {
-  final database = ref.read(databaseProvider);
-  return database.getAccountSummary(accountId);
+  final accountRepository = ref.read(accountDatabaseRepositoryProvider);
+  return accountRepository.getAccountSummary(accountId);
 });
 
 // Provider pour les transactions avec solde d'un compte
@@ -34,25 +66,17 @@ final transactionsWithBalanceProvider =
       ref,
       accountId,
     ) async {
-      final database = ref.read(databaseProvider);
-      return database.getTransactionsWithBalance(accountId);
+      final accountRepository = ref.read(accountDatabaseRepositoryProvider);
+      return accountRepository.getTransactionsWithBalance(accountId);
     });
 
 // Provider pour une transaction spécifique
-final transactionProvider = FutureProvider.family<Transaction, int>((
+final transactionProvider = FutureProvider.family<Transaction?, int>((
   ref,
   transactionId,
 ) async {
-  final database = ref.read(databaseProvider);
-  return (database.select(
-    database.transactions,
-  )..where((t) => t.id.equals(transactionId))).getSingle();
-});
-
-// Provider pour les catégories
-final categoriesProvider = FutureProvider<List<Category>>((ref) async {
-  final database = ref.read(databaseProvider);
-  return database.select(database.categories).get();
+  final transactionRepository = ref.read(transactionDatabaseRepositoryProvider);
+  return transactionRepository.getTransactionById(transactionId);
 });
 
 // Provider pour une transaction spécifique avec son tiers
@@ -61,47 +85,59 @@ final transactionWithCounterpartyProvider =
       ref,
       transactionId,
     ) async {
-      final database = ref.read(databaseProvider);
+      final transactionRepository = ref.read(
+        transactionDatabaseRepositoryProvider,
+      );
+      final transaction = await transactionRepository.getTransactionById(
+        transactionId,
+      );
 
-      final query = database.select(database.transactions).join([
-        leftOuterJoin(
-          database.counterparties,
-          database.counterparties.id.equalsExp(
-            database.transactions.counterpartyId,
-          ),
-        ),
-      ])..where(database.transactions.id.equals(transactionId));
+      if (transaction == null) return null;
 
-      final result = await query.getSingleOrNull();
+      String? counterpartyName;
+      String? counterpartyIcon;
 
-      if (result == null) return null;
-
-      final transaction = result.readTable(database.transactions);
-      final counterparty = result.readTableOrNull(database.counterparties);
+      if (transaction.counterpartyId != null) {
+        final counterpartyRepository = ref.read(
+          counterpartyDatabaseRepositoryProvider,
+        );
+        final counterparty = await counterpartyRepository.getCounterpartyById(
+          transaction.counterpartyId!,
+        );
+        counterpartyName = counterparty?.name;
+        counterpartyIcon = counterparty?.icon;
+      }
 
       return TransactionWithCounterparty(
         transaction: transaction,
-        counterparty: counterparty,
+        counterpartyName: counterpartyName,
+        counterpartyIcon: counterpartyIcon,
       );
     });
 
 // Provider pour les tiers
 final counterpartiesProvider = FutureProvider<List<Counterparty>>((ref) async {
-  final database = ref.read(databaseProvider);
-  return database.select(database.counterparties).get();
+  final counterpartyRepository = ref.read(
+    counterpartyDatabaseRepositoryProvider,
+  );
+  return counterpartyRepository.getAllCounterparties();
 });
 
 /// Provider pour récupérer toutes les transactions suivies avec leurs détails
 final followedTransactionsProvider =
     FutureProvider<List<TransactionWithCounterparty>>((ref) async {
-      final database = ref.read(databaseProvider);
-      return database.getFollowedTransactionsWithDetails();
+      final followedRepository = ref.read(
+        followedTransactionDatabaseRepositoryProvider,
+      );
+      return followedRepository.getFollowedTransactionsWithDetails();
     });
 
 /// Provider pour récupérer seulement les IDs des transactions suivies
 final followedTransactionIdsProvider = FutureProvider<List<int>>((ref) async {
-  final database = ref.read(databaseProvider);
-  return database.getFollowedTransactionIds();
+  final followedRepository = ref.read(
+    followedTransactionDatabaseRepositoryProvider,
+  );
+  return followedRepository.getFollowedTransactionIds();
 });
 
 /// Provider pour vérifier si une transaction spécifique est suivie
@@ -109,17 +145,20 @@ final isTransactionFollowedProvider = FutureProvider.family<bool, int>((
   ref,
   transactionId,
 ) async {
-  final database = ref.read(databaseProvider);
-  return database.isTransactionFollowed(transactionId);
+  final followedRepository = ref.read(
+    followedTransactionDatabaseRepositoryProvider,
+  );
+  return followedRepository.isTransactionFollowed(transactionId);
 });
 
 /// Provider pour les transactions suivies (entités Transaction simples)
-final followedTransactionsSimpleProvider = FutureProvider<List<Transaction>>((
-  ref,
-) async {
-  final database = ref.read(databaseProvider);
-  return database.getFollowedTransactions();
-});
+final followedTransactionsSimpleProvider =
+    FutureProvider<List<FollowedTransaction>>((ref) async {
+      final followedRepository = ref.read(
+        followedTransactionDatabaseRepositoryProvider,
+      );
+      return followedRepository.getFollowedTransactions();
+    });
 
 /// Provider pour récupérer les transactions centrées autour d'aujourd'hui
 final transactionsAroundTodayProvider =
@@ -127,6 +166,8 @@ final transactionsAroundTodayProvider =
       ref,
       accountId,
     ) async {
-      final database = ref.read(databaseProvider);
-      return database.getTransactionsAroundToday(accountId);
+      final transactionRepository = ref.read(
+        transactionDatabaseRepositoryProvider,
+      );
+      return transactionRepository.getTransactionsAroundToday(accountId);
     });

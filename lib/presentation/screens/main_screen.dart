@@ -1,12 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/presentation/providers/database_provider.dart';
+import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/presentation/providers/navigation_provider.dart';
-import 'package:bankapp/presentation/screens/home_screen.dart';
+import 'package:bankapp/presentation/screens/home_screen_mvvm.dart';
 import 'package:bankapp/presentation/screens/settings_screen.dart';
 import 'package:bankapp/presentation/widgets/floating_navbar.dart';
-import 'package:bankapp/core/theme/app_colors.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class MainScreen extends ConsumerWidget {
   const MainScreen({super.key});
@@ -26,7 +24,7 @@ class MainScreen extends ConsumerWidget {
           IndexedStack(
             index: currentIndex,
             children: const [
-              HomeScreen(), // Index 0 - Home
+              HomeScreenMVVM(), // Index 0 - Home (MVVM)
               Center(child: Text('Menu/Tiers')), // Index 1 - Menu/Tiers
               Center(child: Text('Statistiques')), // Index 2 - Statistiques
               SettingsScreen(), // Index 3 - Paramètres

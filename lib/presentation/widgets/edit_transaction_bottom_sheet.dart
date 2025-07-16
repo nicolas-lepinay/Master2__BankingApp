@@ -1,14 +1,15 @@
+import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/core/theme/app_text_styles.dart';
+import 'package:bankapp/core/utils/formatters.dart';
+import 'package:bankapp/presentation/providers/actions_provider.dart';
+import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/presentation/providers/actions_provider.dart';
-import 'package:bankapp/presentation/providers/database_provider.dart';
-import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/core/utils/formatters.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
-import 'package:bankapp/data/database/database.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../data/database/models/transaction_models.dart';
 
 class EditTransactionBottomSheet extends ConsumerStatefulWidget {
   final int transactionId;

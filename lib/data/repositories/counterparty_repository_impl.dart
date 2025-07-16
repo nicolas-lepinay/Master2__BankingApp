@@ -1,8 +1,8 @@
-import 'package:bankapp/domain/entities/entities.dart';
-import 'package:bankapp/domain/repositories/repositories.dart';
 import 'package:bankapp/data/cache/cache_manager.dart';
 import 'package:bankapp/data/datasources/local/local_datasources.dart';
 import 'package:bankapp/data/models/models.dart';
+import 'package:bankapp/domain/entities/entities.dart';
+import 'package:bankapp/domain/repositories/repositories.dart';
 
 class CounterpartyRepositoryImpl implements CounterpartyRepository {
   final CounterpartyLocalDataSource _localDataSource;
@@ -16,7 +16,7 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
     if (_cacheManager.isInitialized) {
       return _cacheManager.getAllCounterparties();
     }
-    
+
     // Sinon, charger depuis la base de données
     final counterpartyModels = await _localDataSource.getAllCounterparties();
     return counterpartyModels.map((model) => model.toEntity()).toList();
@@ -28,12 +28,14 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
     if (_cacheManager.isInitialized) {
       final allCounterparties = _cacheManager.getAllCounterparties();
       try {
-        return allCounterparties.firstWhere((counterparty) => counterparty.id == id);
+        return allCounterparties.firstWhere(
+          (counterparty) => counterparty.id == id,
+        );
       } catch (e) {
         return null;
       }
     }
-    
+
     // Sinon, charger depuis la base de données
     final counterpartyModel = await _localDataSource.getCounterpartyById(id);
     return counterpartyModel?.toEntity();
@@ -43,9 +45,11 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
   Future<List<Counterparty>> searchCounterpartiesByName(String name) async {
     final allCounterparties = await getAllCounterparties();
     final lowerName = name.toLowerCase();
-    
+
     return allCounterparties
-        .where((counterparty) => counterparty.name.toLowerCase().contains(lowerName))
+        .where(
+          (counterparty) => counterparty.name.toLowerCase().contains(lowerName),
+        )
         .toList();
   }
 
@@ -53,15 +57,17 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
   Future<Counterparty> createCounterparty(Counterparty counterparty) async {
     // Créer le modèle pour la base de données
     final counterpartyModel = CounterpartyModel.fromEntity(counterparty);
-    
+
     // Sauvegarder dans la base de données
-    final savedModel = await _localDataSource.createCounterparty(counterpartyModel);
-    
+    final savedModel = await _localDataSource.createCounterparty(
+      counterpartyModel,
+    );
+
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
       await _cacheManager.invalidateAll(); // Recalculer tout
     }
-    
+
     return savedModel.toEntity();
   }
 
@@ -69,15 +75,17 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
   Future<Counterparty> updateCounterparty(Counterparty counterparty) async {
     // Créer le modèle pour la base de données
     final counterpartyModel = CounterpartyModel.fromEntity(counterparty);
-    
+
     // Sauvegarder dans la base de données
-    final savedModel = await _localDataSource.updateCounterparty(counterpartyModel);
-    
+    final savedModel = await _localDataSource.updateCounterparty(
+      counterpartyModel,
+    );
+
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
       await _cacheManager.invalidateAll(); // Recalculer tout
     }
-    
+
     return savedModel.toEntity();
   }
 
@@ -85,7 +93,7 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
   Future<void> deleteCounterparty(int id) async {
     // Supprimer de la base de données
     await _localDataSource.deleteCounterparty(id);
-    
+
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
       await _cacheManager.invalidateAll(); // Recalculer tout
@@ -97,10 +105,11 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
     // Si le cache est initialisé, vérifier dans le cache
     if (_cacheManager.isInitialized) {
       final allTransactions = _cacheManager.getAllTransactions();
-      return allTransactions.any((transaction) => 
-          transaction.counterpartyId == counterpartyId);
+      return allTransactions.any(
+        (transaction) => transaction.counterpartyId == counterpartyId,
+      );
     }
-    
+
     // Sinon, vérifier dans la base de données
     // Note : Cette implémentation nécessiterait une méthode dans la datasource
     // Pour l'instant, on assume que non
@@ -114,12 +123,12 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
       final counterpartyTransactions = allTransactions
           .where((transaction) => transaction.counterpartyId == counterpartyId)
           .toList();
-      
+
       int incomeCount = 0;
       int expenseCount = 0;
       double totalIncome = 0;
       double totalExpenses = 0;
-      
+
       for (final transaction in counterpartyTransactions) {
         if (transaction.isIncome) {
           incomeCount++;
@@ -129,7 +138,7 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
           totalExpenses += transaction.amount;
         }
       }
-      
+
       return {
         'total_transactions': counterpartyTransactions.length,
         'income_count': incomeCount,
@@ -138,7 +147,7 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
         'total_expenses': totalExpenses.round(),
       };
     }
-    
+
     // Fallback : statistiques vides
     return {
       'total_transactions': 0,
@@ -155,10 +164,11 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
     if (_cacheManager.isInitialized) {
       return _cacheManager.counterpartiesStream;
     }
-    
+
     // Sinon, utiliser le stream de la base de données
-    return _localDataSource.watchAllCounterparties()
-        .map((models) => models.map((model) => model.toEntity()).toList());
+    return _localDataSource.watchAllCounterparties().map(
+      (models) => models.map((model) => model.toEntity()).toList(),
+    );
   }
 
   @override
@@ -167,15 +177,18 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
     if (_cacheManager.isInitialized) {
       return _cacheManager.counterpartiesStream.map((counterparties) {
         try {
-          return counterparties.firstWhere((counterparty) => counterparty.id == id);
+          return counterparties.firstWhere(
+            (counterparty) => counterparty.id == id,
+          );
         } catch (e) {
           return null;
         }
       });
     }
-    
+
     // Sinon, utiliser le stream de la base de données
-    return _localDataSource.watchCounterpartyById(id)
+    return _localDataSource
+        .watchCounterpartyById(id)
         .map((model) => model?.toEntity());
   }
 }

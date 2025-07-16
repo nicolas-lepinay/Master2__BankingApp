@@ -1,12 +1,12 @@
+import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/core/theme/app_colors.dart';
+import 'package:bankapp/core/theme/app_colors_extended.dart';
+import 'package:bankapp/core/theme/app_text_styles.dart';
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
+import 'package:bankapp/presentation/widgets/helpers/decorated_input_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/core/theme/app_colors.dart';
-import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/core/theme/app_colors_extended.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
-import 'package:bankapp/presentation/widgets/helpers/decorated_input_border.dart';
-import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SearchFieldMVVM extends ConsumerStatefulWidget {
@@ -39,7 +39,7 @@ class _SearchFieldMVVMState extends ConsumerState<SearchFieldMVVM> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final LayerLink _layerLink = LayerLink();
-  
+
   OverlayEntry? _overlayEntry;
   List<String> _suggestions = [];
 
@@ -58,7 +58,9 @@ class _SearchFieldMVVMState extends ConsumerState<SearchFieldMVVM> {
   }
 
   void _onFocusChanged() {
-    if (_focusNode.hasFocus && _controller.text.isNotEmpty && widget.showSuggestions) {
+    if (_focusNode.hasFocus &&
+        _controller.text.isNotEmpty &&
+        widget.showSuggestions) {
       _showSuggestionsOverlay();
     } else {
       _removeOverlay();
@@ -67,16 +69,16 @@ class _SearchFieldMVVMState extends ConsumerState<SearchFieldMVVM> {
 
   void _onTextChanged(String query) {
     widget.onChanged?.call(query);
-    
+
     if (widget.showSuggestions && query.isNotEmpty) {
       // Obtenir les suggestions du SearchViewModel
       final searchViewModel = ref.read(searchViewModelProvider.notifier);
       final suggestions = searchViewModel.getSearchSuggestions(query);
-      
+
       setState(() {
         _suggestions = suggestions;
       });
-      
+
       if (_focusNode.hasFocus && suggestions.isNotEmpty) {
         _showSuggestionsOverlay();
       } else {
@@ -89,7 +91,7 @@ class _SearchFieldMVVMState extends ConsumerState<SearchFieldMVVM> {
 
   void _showSuggestionsOverlay() {
     _removeOverlay();
-    
+
     _overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
         width: 300.w, // Largeur du field
@@ -103,7 +105,9 @@ class _SearchFieldMVVMState extends ConsumerState<SearchFieldMVVM> {
             child: Container(
               constraints: BoxConstraints(maxHeight: 200.h),
               decoration: BoxDecoration(
-                color: Theme.of(context).extension<AppColorsExtended>()!.background1,
+                color: Theme.of(
+                  context,
+                ).extension<AppColorsExtended>()!.background1,
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(
                   color: AppColors.textSecondary.withValues(alpha: 0.2),
@@ -126,10 +130,7 @@ class _SearchFieldMVVMState extends ConsumerState<SearchFieldMVVM> {
                       size: 20.sp,
                       color: AppColors.textSecondary,
                     ),
-                    title: Text(
-                      suggestion,
-                      style: AppTextStyles.bodyMedium,
-                    ),
+                    title: Text(suggestion, style: AppTextStyles.bodyMedium),
                     onTap: () {
                       _controller.text = suggestion;
                       widget.onChanged?.call(suggestion);
@@ -144,7 +145,7 @@ class _SearchFieldMVVMState extends ConsumerState<SearchFieldMVVM> {
         ),
       ),
     );
-    
+
     Overlay.of(context).insert(_overlayEntry!);
   }
 
@@ -157,7 +158,7 @@ class _SearchFieldMVVMState extends ConsumerState<SearchFieldMVVM> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
-    
+
     return CompositedTransformTarget(
       link: _layerLink,
       child: TextField(
@@ -237,19 +238,19 @@ class _SearchFieldMVVMState extends ConsumerState<SearchFieldMVVM> {
                   ),
                 )
               : _controller.text.isNotEmpty
-                  ? IconButton(
-                      onPressed: () {
-                        _controller.clear();
-                        widget.onChanged?.call('');
-                        _removeOverlay();
-                      },
-                      icon: Icon(
-                        Icons.clear,
-                        color: appTheme.text5!.withValues(alpha: 0.7),
-                        size: 20.sp,
-                      ),
-                    )
-                  : null,
+              ? IconButton(
+                  onPressed: () {
+                    _controller.clear();
+                    widget.onChanged?.call('');
+                    _removeOverlay();
+                  },
+                  icon: Icon(
+                    Icons.clear,
+                    color: appTheme.text5!.withValues(alpha: 0.7),
+                    size: 20.sp,
+                  ),
+                )
+              : null,
         ),
         onChanged: _onTextChanged,
         onSubmitted: (value) {
@@ -275,13 +276,15 @@ class AdvancedSearchFieldMVVM extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<AdvancedSearchFieldMVVM> createState() => _AdvancedSearchFieldMVVMState();
+  ConsumerState<AdvancedSearchFieldMVVM> createState() =>
+      _AdvancedSearchFieldMVVMState();
 }
 
-class _AdvancedSearchFieldMVVMState extends ConsumerState<AdvancedSearchFieldMVVM> {
+class _AdvancedSearchFieldMVVMState
+    extends ConsumerState<AdvancedSearchFieldMVVM> {
   final TextEditingController _searchController = TextEditingController();
   bool _showFilters = false;
-  
+
   // Filtres
   double? _minAmount;
   double? _maxAmount;
@@ -304,7 +307,7 @@ class _AdvancedSearchFieldMVVMState extends ConsumerState<AdvancedSearchFieldMVV
       'counterpartyId': _selectedCounterpartyId,
       'dateRange': _dateRange,
     };
-    
+
     widget.onFiltersChanged?.call(filters);
   }
 
@@ -324,7 +327,7 @@ class _AdvancedSearchFieldMVVMState extends ConsumerState<AdvancedSearchFieldMVV
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
-    
+
     return Column(
       children: [
         // Barre de recherche principale
@@ -349,12 +352,14 @@ class _AdvancedSearchFieldMVVMState extends ConsumerState<AdvancedSearchFieldMVV
               },
               icon: Icon(
                 _showFilters ? Icons.filter_list_off : Icons.filter_list,
-                color: _showFilters ? AppColors.primary : AppColors.textSecondary,
+                color: _showFilters
+                    ? AppColors.primary
+                    : AppColors.textSecondary,
               ),
             ),
           ],
         ),
-        
+
         // Filtres avancés
         if (_showFilters) ...[
           SizedBox(height: 16.h),
@@ -364,7 +369,11 @@ class _AdvancedSearchFieldMVVMState extends ConsumerState<AdvancedSearchFieldMVV
     );
   }
 
-  Widget _buildFiltersSection(BuildContext context, AppLocalizations l10n, AppColorsExtended appTheme) {
+  Widget _buildFiltersSection(
+    BuildContext context,
+    AppLocalizations l10n,
+    AppColorsExtended appTheme,
+  ) {
     return Container(
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
@@ -381,27 +390,25 @@ class _AdvancedSearchFieldMVVMState extends ConsumerState<AdvancedSearchFieldMVV
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                l10n.filters,
-                style: AppTextStyles.h6.copyWith(
-                  color: appTheme.text1,
-                ),
+                "l10n.filters",
+                style: AppTextStyles.h6.copyWith(color: appTheme.text1),
               ),
               TextButton(
                 onPressed: _clearFilters,
-                child: Text(l10n.clearAll),
+                child: Text("l10n.clearAll"),
               ),
             ],
           ),
-          
+
           SizedBox(height: 16.h),
-          
+
           // Filtres de montant
           Row(
             children: [
               Expanded(
                 child: TextFormField(
                   decoration: InputDecoration(
-                    labelText: l10n.minAmount,
+                    labelText: "l10n.minAmount",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.r),
                     ),
@@ -417,7 +424,7 @@ class _AdvancedSearchFieldMVVMState extends ConsumerState<AdvancedSearchFieldMVV
               Expanded(
                 child: TextFormField(
                   decoration: InputDecoration(
-                    labelText: l10n.maxAmount,
+                    labelText: "l10n.maxAmount",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.r),
                     ),
@@ -431,9 +438,9 @@ class _AdvancedSearchFieldMVVMState extends ConsumerState<AdvancedSearchFieldMVV
               ),
             ],
           ),
-          
+
           SizedBox(height: 16.h),
-          
+
           // Sélection de période
           Row(
             children: [
@@ -455,9 +462,9 @@ class _AdvancedSearchFieldMVVMState extends ConsumerState<AdvancedSearchFieldMVV
                   },
                   icon: Icon(Icons.date_range),
                   label: Text(
-                    _dateRange != null 
+                    _dateRange != null
                         ? '${_dateRange!.start.day}/${_dateRange!.start.month} - ${_dateRange!.end.day}/${_dateRange!.end.month}'
-                        : l10n.selectPeriod,
+                        : "l10n.selectPeriod",
                   ),
                 ),
               ),

@@ -1,9 +1,10 @@
 import 'package:drift/drift.dart';
+
 import '../../database/app_database.dart';
 import '../../database/models/models.dart';
 
 /// Repository pour les opérations sur les comptes
-/// 
+///
 /// Contient toutes les opérations CRUD et logiques métier
 /// liées à la gestion des comptes et calculs de solde.
 class AccountDatabaseRepository {
@@ -18,24 +19,25 @@ class AccountDatabaseRepository {
 
   /// Récupère un compte par son ID
   Future<Account?> getAccountById(int id) async {
-    return await (_database.select(_database.accounts)
-          ..where((a) => a.id.equals(id)))
-        .getSingleOrNull();
+    return await (_database.select(
+      _database.accounts,
+    )..where((a) => a.id.equals(id))).getSingleOrNull();
   }
 
   /// Calcule le solde d'un compte à une date spécifique
-  /// 
+  ///
   /// Cette méthode calcule le solde d'un compte en prenant en compte
   /// toutes les transactions jusqu'à la date spécifiée.
   Future<double> getAccountBalanceAtDate(int accountId, DateTime date) async {
-    final account = await (_database.select(_database.accounts)
-          ..where((a) => a.id.equals(accountId)))
-        .getSingle();
+    final account = await (_database.select(
+      _database.accounts,
+    )..where((a) => a.id.equals(accountId))).getSingle();
 
     final transactionsQuery = _database.select(_database.transactions)
-      ..where((t) => 
-          t.accountId.equals(accountId) & 
-          t.date.isSmallerOrEqualValue(date))
+      ..where(
+        (t) =>
+            t.accountId.equals(accountId) & t.date.isSmallerOrEqualValue(date),
+      )
       ..orderBy([(t) => OrderingTerm.asc(t.date)]);
 
     final transactionsList = await transactionsQuery.get();
@@ -54,18 +56,16 @@ class AccountDatabaseRepository {
   }
 
   /// Récupère le solde confirmé d'un compte (status = 1 uniquement)
-  /// 
+  ///
   /// Calcule le solde en ne prenant en compte que les transactions
   /// avec un statut confirmé (status = 1).
   Future<double> getAccountConfirmedBalance(int accountId) async {
-    final account = await (_database.select(_database.accounts)
-          ..where((a) => a.id.equals(accountId)))
-        .getSingle();
+    final account = await (_database.select(
+      _database.accounts,
+    )..where((a) => a.id.equals(accountId))).getSingle();
 
     final transactionsQuery = _database.select(_database.transactions)
-      ..where((t) => 
-          t.accountId.equals(accountId) & 
-          t.status.equals(1))
+      ..where((t) => t.accountId.equals(accountId) & t.status.equals(1))
       ..orderBy([(t) => OrderingTerm.asc(t.date)]);
 
     final transactionsList = await transactionsQuery.get();
@@ -84,13 +84,12 @@ class AccountDatabaseRepository {
   }
 
   /// Récupère les transactions avec le solde courant après chaque transaction
-  /// 
+  ///
   /// Cette méthode retourne toutes les transactions d'un compte
   /// avec le solde calculé après chaque transaction.
   Future<List<TransactionWithBalance>> getTransactionsWithBalance(
     int accountId,
   ) async {
-
     final transactionsQuery = _database.select(_database.transactions)
       ..where((t) => t.accountId.equals(accountId))
       ..orderBy([
@@ -112,10 +111,7 @@ class AccountDatabaseRepository {
 
       result.insert(
         0,
-        TransactionWithBalance(
-          transaction: transaction, 
-          balanceAfter: balance
-        ),
+        TransactionWithBalance(transaction: transaction, balanceAfter: balance),
       );
     }
 
@@ -123,13 +119,13 @@ class AccountDatabaseRepository {
   }
 
   /// Récupère un résumé complet d'un compte
-  /// 
+  ///
   /// Calcule le résumé d'un compte incluant le solde actuel,
   /// le solde confirmé, les dépenses totales et les revenus totaux.
   Future<AccountSummary> getAccountSummary(int accountId) async {
-    final account = await (_database.select(_database.accounts)
-          ..where((a) => a.id.equals(accountId)))
-        .getSingle();
+    final account = await (_database.select(
+      _database.accounts,
+    )..where((a) => a.id.equals(accountId))).getSingle();
 
     final expensesQuery = _database.customSelect(
       'SELECT SUM(COALESCE(amount_converted, amount)) as total FROM transactions WHERE account_id = ? AND transaction_type = \'DEBIT\'',
@@ -149,7 +145,8 @@ class AccountDatabaseRepository {
     final totalExpenses = expensesResult.data['total'] as double? ?? 0.0;
     final totalRevenues = revenuesResult.data['total'] as double? ?? 0.0;
 
-    final currentBalance = account.initialBalance + totalRevenues - totalExpenses;
+    final currentBalance =
+        account.initialBalance + totalRevenues - totalExpenses;
 
     // Récupérer le solde confirmé
     final confirmedBalance = await getAccountConfirmedBalance(accountId);
@@ -170,15 +167,17 @@ class AccountDatabaseRepository {
     required double initialBalance,
     String? icon,
   }) async {
-    return await _database.into(_database.accounts).insert(
-      AccountsCompanion(
-        name: Value(name),
-        currency: Value(currency),
-        initialBalance: Value(initialBalance),
-        creationDate: Value(DateTime.now()),
-        icon: Value(icon),
-      ),
-    );
+    return await _database
+        .into(_database.accounts)
+        .insert(
+          AccountsCompanion(
+            name: Value(name),
+            currency: Value(currency),
+            initialBalance: Value(initialBalance),
+            creationDate: Value(DateTime.now()),
+            icon: Value(icon),
+          ),
+        );
   }
 
   /// Met à jour un compte
@@ -192,25 +191,25 @@ class AccountDatabaseRepository {
     final companion = AccountsCompanion(
       name: name != null ? Value(name) : const Value.absent(),
       currency: currency != null ? Value(currency) : const Value.absent(),
-      initialBalance: initialBalance != null 
-          ? Value(initialBalance) 
+      initialBalance: initialBalance != null
+          ? Value(initialBalance)
           : const Value.absent(),
       icon: icon != null ? Value(icon) : const Value.absent(),
     );
 
-    final updatedRows = await (_database.update(_database.accounts)
-          ..where((a) => a.id.equals(id)))
-        .write(companion);
-    
+    final updatedRows = await (_database.update(
+      _database.accounts,
+    )..where((a) => a.id.equals(id))).write(companion);
+
     return updatedRows > 0;
   }
 
   /// Supprime un compte
   Future<bool> deleteAccount(int id) async {
-    final deletedRows = await (_database.delete(_database.accounts)
-          ..where((a) => a.id.equals(id)))
-        .go();
-    
+    final deletedRows = await (_database.delete(
+      _database.accounts,
+    )..where((a) => a.id.equals(id))).go();
+
     return deletedRows > 0;
   }
 
@@ -232,12 +231,12 @@ class AccountDatabaseRepository {
   Future<List<AccountSummary>> getAllAccountSummaries() async {
     final accounts = await getAllAccounts();
     final summaries = <AccountSummary>[];
-    
+
     for (final account in accounts) {
       final summary = await getAccountSummary(account.id);
       summaries.add(summary);
     }
-    
+
     return summaries;
   }
 }

@@ -1,14 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/presentation/providers/database_provider.dart';
-import 'package:bankapp/presentation/providers/actions_provider.dart';
-import 'package:bankapp/presentation/widgets/edit_transaction_bottom_sheet.dart';
+import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/utils/formatters.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
-import 'package:bankapp/data/database/database.dart';
+import 'package:bankapp/data/database/app_database.dart';
+import 'package:bankapp/presentation/providers/actions_provider.dart';
+import 'package:bankapp/presentation/providers/database_provider.dart';
+import 'package:bankapp/presentation/widgets/edit_transaction_bottom_sheet.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TransactionDetailScreen extends ConsumerWidget {
   final int transactionId;
@@ -58,8 +58,9 @@ class TransactionDetailScreen extends ConsumerWidget {
         ],
       ),
       body: transactionAsync.when(
-        data: (transaction) =>
-            _buildTransactionDetail(context, ref, transaction),
+        data: (transaction) => transaction == null
+            ? const Center(child: Text('Transaction introuvable'))
+            : _buildTransactionDetail(context, ref, transaction),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Column(
@@ -374,6 +375,10 @@ class TransactionDetailScreen extends ConsumerWidget {
         transactionProvider(transactionId).future,
       );
 
+      if (transaction == null) {
+        throw Exception('Transaction non trouvée');
+      }
+
       await transactionActions.toggleTransactionStatus(
         transactionId,
         transaction.accountId,
@@ -425,6 +430,10 @@ class TransactionDetailScreen extends ConsumerWidget {
         final transaction = await ref.read(
           transactionProvider(transactionId).future,
         );
+
+        if (transaction == null) {
+          throw Exception('Transaction non trouvée');
+        }
 
         await transactionActions.deleteTransaction(
           transactionId,

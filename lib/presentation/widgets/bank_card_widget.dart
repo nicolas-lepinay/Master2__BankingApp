@@ -1,12 +1,13 @@
 import 'package:bankapp/core/l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
-import 'package:bankapp/data/database/database.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/core/utils/formatters.dart';
-import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/utils/card_color_utils.dart';
+import 'package:bankapp/core/utils/formatters.dart';
+import 'package:bankapp/data/database/app_database.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../data/database/models/account_models.dart';
 
 class BankCardWidget extends StatefulWidget {
   final AccountSummary accountSummary;

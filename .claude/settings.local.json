@@ -1,12 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(rm:*)",
       "Bash(flutter pub:*)",
       "Bash(flutter analyze:*)",
       "Bash(flutter packages pub run:*)",
       "Bash(flutter clean:*)",
-      "Bash(dart run build_runner:*)"
+      "Bash(dart run build_runner:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

@@ -22,11 +22,14 @@
   "counterparty": "Counterparty",
   "debit": "Debit",
   "credit": "Credit",
+      "balance": "Solde",
+
   "expectedBalance": "Expected Balance",
   "actualBalance": "Actual Balance",
   "status": "Status",
   "pending": "Pending",
   "confirmed": "Confirmed",
+      "canceled": "Annulé",
   "unknown": "Unknown",
   "hello": "Hello",
    "transactions": "Transactions",
@@ -39,5 +42,12 @@
     "loadingError": "Loading error",
     "amount": "Amount",
     "keyword": "Keyword",
-    "close": "Close"
+    "close": "Close",
+    "retry": "Try again",
+    "searchTransactions": "Search for transaction",
+     "searchResults": "Results",
+     "resultsFound": "results found",
+       "filtered": "Filtered",
+    "error": "Erreur"
+
 }

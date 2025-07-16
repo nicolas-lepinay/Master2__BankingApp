@@ -1,18 +1,18 @@
+import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/core/theme/app_colors.dart';
+import 'package:bankapp/core/theme/app_colors_extended.dart';
+import 'package:bankapp/core/theme/app_text_styles.dart';
+import 'package:bankapp/data/database/app_database.dart';
+import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
+import 'package:bankapp/presentation/providers/database_provider.dart';
+import 'package:bankapp/presentation/providers/transaction_search_provider.dart';
+import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
+import 'package:bankapp/presentation/widgets/half_search_field.dart';
+import 'package:bankapp/presentation/widgets/transactions_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/core/theme/app_colors.dart';
-import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/core/theme/app_colors_extended.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
-import 'package:bankapp/presentation/providers/database_provider.dart';
-import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
-import 'package:bankapp/presentation/providers/transaction_search_provider.dart';
-import 'package:bankapp/presentation/widgets/transactions_list.dart';
-import 'package:bankapp/presentation/widgets/half_search_field.dart';
-import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
-import 'package:bankapp/data/database/database.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class FullTransactionsBottomSheet extends ConsumerStatefulWidget {

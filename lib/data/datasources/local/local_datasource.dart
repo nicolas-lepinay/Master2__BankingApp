@@ -1,4 +1,4 @@
-import 'package:bankapp/data/database/database.dart';
+import 'package:bankapp/data/database/app_database.dart';
 
 abstract class LocalDataSource {
   /// Initialize the datasource

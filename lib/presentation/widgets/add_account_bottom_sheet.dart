@@ -1,10 +1,10 @@
+import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/core/theme/app_text_styles.dart';
+import 'package:bankapp/presentation/providers/actions_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/presentation/providers/actions_provider.dart';
-import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AddAccountBottomSheet extends ConsumerStatefulWidget {

@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+
 import 'account_tables.dart';
 import 'category_tables.dart';
 import 'counterparty_tables.dart';

@@ -1,10 +1,10 @@
-import 'package:equatable/equatable.dart';
-import 'package:bankapp/domain/entities/transaction.dart';
 import 'package:bankapp/domain/entities/account.dart';
-import 'package:bankapp/domain/entities/counterparty.dart';
 import 'package:bankapp/domain/entities/category.dart';
-import 'package:bankapp/domain/value_objects/money.dart';
+import 'package:bankapp/domain/entities/counterparty.dart';
+import 'package:bankapp/domain/entities/transaction.dart';
 import 'package:bankapp/domain/value_objects/account_balance.dart';
+import 'package:bankapp/domain/value_objects/money.dart';
+import 'package:equatable/equatable.dart';
 
 class TransactionWithBalance extends Equatable {
   final Transaction transaction;
@@ -37,15 +37,11 @@ class TransactionWithBalance extends Equatable {
     );
   }
 
-  Money get transactionAmount => Money(
-        amount: transaction.amount,
-        currency: transaction.currency,
-      );
+  Money get transactionAmount =>
+      Money(amount: transaction.amount, currency: transaction.currency);
 
-  Money get signedAmount => Money(
-        amount: transaction.signedAmount,
-        currency: transaction.currency,
-      );
+  Money get signedAmount =>
+      Money(amount: transaction.signedAmount, currency: transaction.currency);
 
   bool get isIncome => transaction.isIncome;
   bool get isExpense => transaction.isExpense;
@@ -55,22 +51,23 @@ class TransactionWithBalance extends Equatable {
   bool get hasCounterparty => counterparty != null;
   bool get hasCategories => categories.isNotEmpty;
 
-  String get displayTitle => transaction.title ?? counterparty?.name ?? 'Transaction';
+  String get displayTitle =>
+      transaction.title ?? counterparty?.name ?? 'Transaction';
 
   String get displayAmount {
     final symbol = isIncome ? '+' : '-';
     return '$symbol${transactionAmount.amount.toStringAsFixed(2)} ${transactionAmount.currency}';
   }
 
-  String get displayBalance => 
+  String get displayBalance =>
       '${balanceAfter.amount.toStringAsFixed(2)} ${balanceAfter.currency}';
 
   bool matchesKeyword(String keyword) {
     final lowerKeyword = keyword.toLowerCase();
     return displayTitle.toLowerCase().contains(lowerKeyword) ||
-           (transaction.comment?.toLowerCase().contains(lowerKeyword) ?? false) ||
-           (counterparty?.name.toLowerCase().contains(lowerKeyword) ?? false) ||
-           categories.any((cat) => cat.label.toLowerCase().contains(lowerKeyword));
+        (transaction.comment?.toLowerCase().contains(lowerKeyword) ?? false) ||
+        (counterparty?.name.toLowerCase().contains(lowerKeyword) ?? false) ||
+        categories.any((cat) => cat.label.toLowerCase().contains(lowerKeyword));
   }
 
   bool isInAmountRange(double? minAmount, double? maxAmount) {
@@ -82,12 +79,12 @@ class TransactionWithBalance extends Equatable {
 
   @override
   List<Object?> get props => [
-        transaction,
-        account,
-        balanceAfter,
-        counterparty,
-        categories,
-      ];
+    transaction,
+    account,
+    balanceAfter,
+    counterparty,
+    categories,
+  ];
 
   @override
   bool get stringify => true;

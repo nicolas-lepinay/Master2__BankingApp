@@ -22,11 +22,13 @@
   "counterparty": "Tiers",
   "debit": "Débit",
   "credit": "Crédit",
+    "balance": "Solde",
   "expectedBalance": "Solde attendu",
   "actualBalance": "Solde réel",
   "status": "Statut",
   "pending": "En attente",
   "confirmed": "Confirmé",
+    "canceled": "Annulé",
   "unknown": "Inconnu",
   "hello": "Salut",
   "transactions": "Transactions",
@@ -39,5 +41,11 @@
   "loadingError": "Erreur de chargement",
   "amount": "Montant",
   "keyword": "Mot-clé",
-  "close": "Fermer"
+  "close": "Fermer",
+  "retry": "Réessayer",
+  "searchTransactions": "Chercher une transaction",
+  "searchResults": "Résultats",
+  "resultsFound": "résultats trouvés",
+  "filtered": "Filtrés",
+  "error": "Erreur"
 }

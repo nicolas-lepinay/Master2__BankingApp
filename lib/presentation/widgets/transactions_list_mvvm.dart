@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/domain/entities/entities.dart' as domain;
-import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
+import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
-import 'package:bankapp/presentation/widgets/transaction_item_mvvm.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
+import 'package:bankapp/presentation/widgets/transaction_item_mvvm.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TransactionsListMVVM extends ConsumerStatefulWidget {
@@ -32,7 +32,8 @@ class TransactionsListMVVM extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<TransactionsListMVVM> createState() => _TransactionsListMVVMState();
+  ConsumerState<TransactionsListMVVM> createState() =>
+      _TransactionsListMVVMState();
 }
 
 class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
@@ -72,30 +73,31 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    
+
     double targetOffset = 0;
     double currentOffset = 0;
-    
+
     final groupedTransactions = _groupTransactionsByDate(widget.transactions);
-    
+
     for (final entry in groupedTransactions.entries) {
       final date = entry.key;
       final transactions = entry.value;
-      
+
       // Hauteur du header de date
       currentOffset += 60.h;
-      
+
       if (date.isAtSameMomentAs(today)) {
         targetOffset = currentOffset - 100.h; // Offset pour centrer
         break;
       }
-      
+
       // Hauteur des transactions de cette date
       if (_areHeadersExpanded) {
-        currentOffset += transactions.length * 80.h; // Hauteur approximative par transaction
+        currentOffset +=
+            transactions.length * 80.h; // Hauteur approximative par transaction
       }
     }
-    
+
     if (targetOffset > 0) {
       _scrollController.animateTo(
         targetOffset.clamp(0, _scrollController.position.maxScrollExtent),
@@ -109,33 +111,34 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
     List<domain.TransactionWithBalance> transactions,
   ) {
     final Map<DateTime, List<domain.TransactionWithBalance>> grouped = {};
-    
+
     for (final transaction in transactions) {
       final date = DateTime(
         transaction.transaction.date.year,
         transaction.transaction.date.month,
         transaction.transaction.date.day,
       );
-      
+
       if (!grouped.containsKey(date)) {
         grouped[date] = [];
       }
       grouped[date]!.add(transaction);
     }
-    
+
     return grouped;
   }
 
   double _calculateDayTotal(List<domain.TransactionWithBalance> transactions) {
     return transactions.fold(0.0, (sum, tx) {
-      return sum + (tx.isIncome ? tx.transaction.amount : -tx.transaction.amount);
+      return sum +
+          (tx.isIncome ? tx.transaction.amount : -tx.transaction.amount);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
-    
+
     if (widget.transactions.isEmpty) {
       return _buildEmptyState(context, appTheme);
     }
@@ -143,20 +146,16 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
     return Column(
       children: [
         // Barre de recherche si activée
-        if (widget.showSearch)
-          _buildSearchBar(context, appTheme),
-        
+        if (widget.showSearch) _buildSearchBar(context, appTheme),
+
         // Statistiques rapides
         _buildQuickStats(context, appTheme),
-        
+
         // Liste des transactions
-        Expanded(
-          child: _buildTransactionsList(context, appTheme),
-        ),
-        
+        Expanded(child: _buildTransactionsList(context, appTheme)),
+
         // Pagination si activée
-        if (widget.showPagination)
-          _buildPaginationControls(context, appTheme),
+        if (widget.showPagination) _buildPaginationControls(context, appTheme),
       ],
     );
   }
@@ -167,7 +166,9 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
       decoration: BoxDecoration(
         color: appTheme.background1,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.textSecondary.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: AppColors.textSecondary.withValues(alpha: 0.2),
+        ),
       ),
       child: TextField(
         controller: _searchController,
@@ -175,10 +176,15 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
           hintText: 'Rechercher une transaction...',
           prefixIcon: Icon(Icons.search, color: appTheme.text3),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+            vertical: 12.h,
+          ),
         ),
         onChanged: (query) {
-          final transactionViewModel = ref.read(transactionViewModelProvider.notifier);
+          final transactionViewModel = ref.read(
+            transactionViewModelProvider.notifier,
+          );
           transactionViewModel.searchTransactions(query);
         },
       ),
@@ -189,20 +195,22 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
     final incomeTotal = widget.transactions
         .where((tx) => tx.isIncome)
         .fold(0.0, (sum, tx) => sum + tx.transaction.amount);
-    
+
     final expenseTotal = widget.transactions
         .where((tx) => tx.isExpense)
         .fold(0.0, (sum, tx) => sum + tx.transaction.amount);
-    
+
     final netAmount = incomeTotal - expenseTotal;
-    
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         color: appTheme.background1,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.textSecondary.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: AppColors.textSecondary.withValues(alpha: 0.2),
+        ),
       ),
       child: Row(
         children: [
@@ -245,7 +253,12 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
     );
   }
 
-  Widget _buildStatItem(String label, double amount, Color color, String currency) {
+  Widget _buildStatItem(
+    String label,
+    double amount,
+    Color color,
+    String currency,
+  ) {
     return Column(
       children: [
         Text(
@@ -266,7 +279,10 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
     );
   }
 
-  Widget _buildTransactionsList(BuildContext context, AppColorsExtended appTheme) {
+  Widget _buildTransactionsList(
+    BuildContext context,
+    AppColorsExtended appTheme,
+  ) {
     final groupedTransactions = _groupTransactionsByDate(widget.transactions);
     final sortedDates = groupedTransactions.keys.toList()
       ..sort((a, b) => b.compareTo(a)); // Plus récent en premier
@@ -279,7 +295,7 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
         final date = sortedDates[index];
         final transactions = groupedTransactions[date]!;
         final dayTotal = _calculateDayTotal(transactions);
-        
+
         return _buildDateGroup(context, appTheme, date, transactions, dayTotal);
       },
     );
@@ -297,18 +313,21 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
       children: [
         // Header de la date
         _buildDateHeader(context, appTheme, date, dayTotal),
-        
+
         // Transactions de la journée
         if (_areHeadersExpanded)
           ...transactions.map(
             (transaction) => TransactionItemMVVM(
               transactionWithBalance: transaction,
-              onTap: () => widget.onTransactionTap?.call(transaction.transaction),
-              onEdit: () => widget.onTransactionEdit?.call(transaction.transaction),
-              onDelete: () => widget.onTransactionDelete?.call(transaction.transaction),
+              onTap: () =>
+                  widget.onTransactionTap?.call(transaction.transaction),
+              onEdit: () =>
+                  widget.onTransactionEdit?.call(transaction.transaction),
+              onDelete: () =>
+                  widget.onTransactionDelete?.call(transaction.transaction),
             ),
           ),
-        
+
         SizedBox(height: 16.h),
       ],
     );
@@ -322,7 +341,7 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
   ) {
     final isToday = _isToday(date);
     final isYesterday = _isYesterday(date);
-    
+
     String dateText;
     if (isToday) {
       dateText = 'Aujourd\'hui';
@@ -331,7 +350,7 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
     } else {
       dateText = AppFormatters.formatDate(date, context);
     }
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -341,10 +360,14 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
         decoration: BoxDecoration(
-          color: isToday ? AppColors.primary.withValues(alpha: 0.1) : appTheme.background1,
+          color: isToday
+              ? AppColors.primary.withValues(alpha: 0.1)
+              : appTheme.background1,
           borderRadius: BorderRadius.circular(8.r),
           border: Border.all(
-            color: isToday ? AppColors.primary.withValues(alpha: 0.3) : AppColors.textSecondary.withValues(alpha: 0.2),
+            color: isToday
+                ? AppColors.primary.withValues(alpha: 0.3)
+                : AppColors.textSecondary.withValues(alpha: 0.2),
           ),
         ),
         child: Row(
@@ -364,7 +387,10 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
             ),
             const Spacer(),
             Text(
-              AppFormatters.formatAmount(dayTotal, widget.accountCurrency ?? 'EUR'),
+              AppFormatters.formatAmount(
+                dayTotal,
+                widget.accountCurrency ?? 'EUR',
+              ),
               style: AppTextStyles.bodyMedium.copyWith(
                 color: dayTotal >= 0 ? Colors.green : Colors.red,
                 fontWeight: FontWeight.w700,
@@ -376,17 +402,26 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
     );
   }
 
-  Widget _buildPaginationControls(BuildContext context, AppColorsExtended appTheme) {
+  Widget _buildPaginationControls(
+    BuildContext context,
+    AppColorsExtended appTheme,
+  ) {
     return Consumer(
       builder: (context, ref, child) {
         final transactionState = ref.watch(transactionViewModelProvider);
-        final transactionViewModel = ref.read(transactionViewModelProvider.notifier);
-        
+        final transactionViewModel = ref.read(
+          transactionViewModelProvider.notifier,
+        );
+
         return Container(
           padding: EdgeInsets.all(16.r),
           decoration: BoxDecoration(
             color: appTheme.background1,
-            border: Border(top: BorderSide(color: AppColors.textSecondary.withValues(alpha: 0.2))),
+            border: Border(
+              top: BorderSide(
+                color: AppColors.textSecondary.withValues(alpha: 0.2),
+              ),
+            ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -399,15 +434,13 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
                 icon: Icon(Icons.chevron_left, size: 18.sp),
                 label: const Text('Précédent'),
               ),
-              
+
               // Indicateur de page
               Text(
                 'Page ${transactionState.currentPage + 1} sur ${transactionState.totalPages}',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: appTheme.text2,
-                ),
+                style: AppTextStyles.bodyMedium.copyWith(color: appTheme.text2),
               ),
-              
+
               // Bouton suivant
               ElevatedButton.icon(
                 onPressed: transactionState.hasNextPage
@@ -428,24 +461,16 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.receipt_long_outlined,
-            size: 64.sp,
-            color: appTheme.text3,
-          ),
+          Icon(Icons.receipt_long_outlined, size: 64.sp, color: appTheme.text3),
           SizedBox(height: 16.h),
           Text(
             'Aucune transaction',
-            style: AppTextStyles.h5.copyWith(
-              color: appTheme.text2,
-            ),
+            style: AppTextStyles.h5.copyWith(color: appTheme.text2),
           ),
           SizedBox(height: 8.h),
           Text(
             'Les transactions de ce compte apparaîtront ici',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: appTheme.text3,
-            ),
+            style: AppTextStyles.bodyMedium.copyWith(color: appTheme.text3),
             textAlign: TextAlign.center,
           ),
         ],

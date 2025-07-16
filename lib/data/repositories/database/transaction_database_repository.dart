@@ -1,9 +1,10 @@
 import 'package:drift/drift.dart';
+
 import '../../database/app_database.dart';
 import '../../database/models/models.dart';
 
 /// Repository pour les opérations sur les transactions
-/// 
+///
 /// Contient toutes les opérations CRUD et logiques métier
 /// liées à la gestion des transactions générales.
 class TransactionDatabaseRepository {
@@ -24,29 +25,32 @@ class TransactionDatabaseRepository {
 
   /// Récupère une transaction par son ID
   Future<Transaction?> getTransactionById(int id) async {
-    return await (_database.select(_database.transactions)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    return await (_database.select(
+      _database.transactions,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
   /// Récupère les transactions avec leurs contreparties
-  /// 
+  ///
   /// Retourne les transactions avec les informations
   /// de contrepartie associées via un JOIN.
   Future<List<TransactionWithCounterparty>> getTransactionsWithCounterparty(
     int accountId,
   ) async {
-    final query = _database.select(_database.transactions).join([
-      leftOuterJoin(
-        _database.counterparties,
-        _database.counterparties.id.equalsExp(_database.transactions.counterpartyId),
-      ),
-    ])
-      ..where(_database.transactions.accountId.equals(accountId))
-      ..orderBy([
-        OrderingTerm.desc(_database.transactions.date),
-        OrderingTerm.desc(_database.transactions.id),
-      ]);
+    final query =
+        _database.select(_database.transactions).join([
+            leftOuterJoin(
+              _database.counterparties,
+              _database.counterparties.id.equalsExp(
+                _database.transactions.counterpartyId,
+              ),
+            ),
+          ])
+          ..where(_database.transactions.accountId.equals(accountId))
+          ..orderBy([
+            OrderingTerm.desc(_database.transactions.date),
+            OrderingTerm.desc(_database.transactions.id),
+          ]);
 
     final results = await query.get();
     final transactionsWithCounterparty = <TransactionWithCounterparty>[];
@@ -68,7 +72,7 @@ class TransactionDatabaseRepository {
   }
 
   /// Récupère les transactions autour d'aujourd'hui (passé et futur)
-  /// 
+  ///
   /// Cette méthode retourne les transactions dans une perspective
   /// temporelle avec celles du passé et celles programmées pour le futur.
   Future<List<TransactionWithCounterparty>> getTransactionsAroundToday(
@@ -80,20 +84,23 @@ class TransactionDatabaseRepository {
     final startDate = now.subtract(Duration(days: pastDays));
     final endDate = now.add(Duration(days: futureDays));
 
-    final query = _database.select(_database.transactions).join([
-      leftOuterJoin(
-        _database.counterparties,
-        _database.counterparties.id.equalsExp(_database.transactions.counterpartyId),
-      ),
-    ])
-      ..where(
-        _database.transactions.accountId.equals(accountId) &
-        _database.transactions.date.isBetweenValues(startDate, endDate),
-      )
-      ..orderBy([
-        OrderingTerm.asc(_database.transactions.date),
-        OrderingTerm.asc(_database.transactions.id),
-      ]);
+    final query =
+        _database.select(_database.transactions).join([
+            leftOuterJoin(
+              _database.counterparties,
+              _database.counterparties.id.equalsExp(
+                _database.transactions.counterpartyId,
+              ),
+            ),
+          ])
+          ..where(
+            _database.transactions.accountId.equals(accountId) &
+                _database.transactions.date.isBetweenValues(startDate, endDate),
+          )
+          ..orderBy([
+            OrderingTerm.asc(_database.transactions.date),
+            OrderingTerm.asc(_database.transactions.id),
+          ]);
 
     final results = await query.get();
     final transactionsWithCounterparty = <TransactionWithCounterparty>[];
@@ -131,24 +138,26 @@ class TransactionDatabaseRepository {
     required DateTime date,
     required int status,
   }) async {
-    return await _database.into(_database.transactions).insert(
-      TransactionsCompanion(
-        accountId: Value(accountId),
-        counterpartyId: Value(counterpartyId),
-        category1Id: Value(category1Id),
-        category2Id: Value(category2Id),
-        category3Id: Value(category3Id),
-        category4Id: Value(category4Id),
-        transactionType: Value(transactionType),
-        currency: Value(currency),
-        amount: Value(amount),
-        amountConverted: Value(amountConverted),
-        title: Value(title),
-        comment: Value(comment),
-        date: Value(date),
-        status: Value(status),
-      ),
-    );
+    return await _database
+        .into(_database.transactions)
+        .insert(
+          TransactionsCompanion(
+            accountId: Value(accountId),
+            counterpartyId: Value(counterpartyId),
+            category1Id: Value(category1Id),
+            category2Id: Value(category2Id),
+            category3Id: Value(category3Id),
+            category4Id: Value(category4Id),
+            transactionType: Value(transactionType),
+            currency: Value(currency),
+            amount: Value(amount),
+            amountConverted: Value(amountConverted),
+            title: Value(title),
+            comment: Value(comment),
+            date: Value(date),
+            status: Value(status),
+          ),
+        );
   }
 
   /// Met à jour une transaction
@@ -171,34 +180,48 @@ class TransactionDatabaseRepository {
   }) async {
     final companion = TransactionsCompanion(
       accountId: accountId != null ? Value(accountId) : const Value.absent(),
-      counterpartyId: counterpartyId != null ? Value(counterpartyId) : const Value.absent(),
-      category1Id: category1Id != null ? Value(category1Id) : const Value.absent(),
-      category2Id: category2Id != null ? Value(category2Id) : const Value.absent(),
-      category3Id: category3Id != null ? Value(category3Id) : const Value.absent(),
-      category4Id: category4Id != null ? Value(category4Id) : const Value.absent(),
-      transactionType: transactionType != null ? Value(transactionType) : const Value.absent(),
+      counterpartyId: counterpartyId != null
+          ? Value(counterpartyId)
+          : const Value.absent(),
+      category1Id: category1Id != null
+          ? Value(category1Id)
+          : const Value.absent(),
+      category2Id: category2Id != null
+          ? Value(category2Id)
+          : const Value.absent(),
+      category3Id: category3Id != null
+          ? Value(category3Id)
+          : const Value.absent(),
+      category4Id: category4Id != null
+          ? Value(category4Id)
+          : const Value.absent(),
+      transactionType: transactionType != null
+          ? Value(transactionType)
+          : const Value.absent(),
       currency: currency != null ? Value(currency) : const Value.absent(),
       amount: amount != null ? Value(amount) : const Value.absent(),
-      amountConverted: amountConverted != null ? Value(amountConverted) : const Value.absent(),
+      amountConverted: amountConverted != null
+          ? Value(amountConverted)
+          : const Value.absent(),
       title: title != null ? Value(title) : const Value.absent(),
       comment: comment != null ? Value(comment) : const Value.absent(),
       date: date != null ? Value(date) : const Value.absent(),
       status: status != null ? Value(status) : const Value.absent(),
     );
 
-    final updatedRows = await (_database.update(_database.transactions)
-          ..where((t) => t.id.equals(id)))
-        .write(companion);
-    
+    final updatedRows = await (_database.update(
+      _database.transactions,
+    )..where((t) => t.id.equals(id))).write(companion);
+
     return updatedRows > 0;
   }
 
   /// Supprime une transaction
   Future<bool> deleteTransaction(int id) async {
-    final deletedRows = await (_database.delete(_database.transactions)
-          ..where((t) => t.id.equals(id)))
-        .go();
-    
+    final deletedRows = await (_database.delete(
+      _database.transactions,
+    )..where((t) => t.id.equals(id))).go();
+
     return deletedRows > 0;
   }
 
@@ -208,9 +231,11 @@ class TransactionDatabaseRepository {
     String transactionType,
   ) async {
     return await (_database.select(_database.transactions)
-          ..where((t) => 
-              t.accountId.equals(accountId) &
-              t.transactionType.equals(transactionType))
+          ..where(
+            (t) =>
+                t.accountId.equals(accountId) &
+                t.transactionType.equals(transactionType),
+          )
           ..orderBy([
             (t) => OrderingTerm.desc(t.date),
             (t) => OrderingTerm.desc(t.id),
@@ -224,9 +249,9 @@ class TransactionDatabaseRepository {
     int status,
   ) async {
     return await (_database.select(_database.transactions)
-          ..where((t) => 
-              t.accountId.equals(accountId) &
-              t.status.equals(status))
+          ..where(
+            (t) => t.accountId.equals(accountId) & t.status.equals(status),
+          )
           ..orderBy([
             (t) => OrderingTerm.desc(t.date),
             (t) => OrderingTerm.desc(t.id),
@@ -241,9 +266,11 @@ class TransactionDatabaseRepository {
     DateTime endDate,
   ) async {
     return await (_database.select(_database.transactions)
-          ..where((t) => 
-              t.accountId.equals(accountId) &
-              t.date.isBetweenValues(startDate, endDate))
+          ..where(
+            (t) =>
+                t.accountId.equals(accountId) &
+                t.date.isBetweenValues(startDate, endDate),
+          )
           ..orderBy([
             (t) => OrderingTerm.desc(t.date),
             (t) => OrderingTerm.desc(t.id),
@@ -257,9 +284,11 @@ class TransactionDatabaseRepository {
     int counterpartyId,
   ) async {
     return await (_database.select(_database.transactions)
-          ..where((t) => 
-              t.accountId.equals(accountId) &
-              t.counterpartyId.equals(counterpartyId))
+          ..where(
+            (t) =>
+                t.accountId.equals(accountId) &
+                t.counterpartyId.equals(counterpartyId),
+          )
           ..orderBy([
             (t) => OrderingTerm.desc(t.date),
             (t) => OrderingTerm.desc(t.id),
@@ -273,12 +302,14 @@ class TransactionDatabaseRepository {
     String searchTerm,
   ) async {
     final lowerSearchTerm = searchTerm.toLowerCase();
-    
+
     return await (_database.select(_database.transactions)
-          ..where((t) => 
-              t.accountId.equals(accountId) &
-              (t.title.lower().contains(lowerSearchTerm) |
-               t.comment.lower().contains(lowerSearchTerm)))
+          ..where(
+            (t) =>
+                t.accountId.equals(accountId) &
+                (t.title.lower().contains(lowerSearchTerm) |
+                    t.comment.lower().contains(lowerSearchTerm)),
+          )
           ..orderBy([
             (t) => OrderingTerm.desc(t.date),
             (t) => OrderingTerm.desc(t.id),
@@ -288,9 +319,9 @@ class TransactionDatabaseRepository {
 
   /// Récupère le nombre total de transactions d'un compte
   Future<int> getTransactionCount(int accountId) async {
-    final result = await (_database.select(_database.transactions)
-          ..where((t) => t.accountId.equals(accountId)))
-        .get();
+    final result = await (_database.select(
+      _database.transactions,
+    )..where((t) => t.accountId.equals(accountId))).get();
     return result.length;
   }
 

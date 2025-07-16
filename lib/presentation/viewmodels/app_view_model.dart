@@ -1,6 +1,6 @@
+import 'package:bankapp/core/services/user_preferences_service.dart';
 import 'package:bankapp/data/cache/cache_manager.dart';
 import 'package:bankapp/data/datasources/local/local_datasources.dart';
-import 'package:bankapp/core/services/user_preferences_service.dart';
 import 'package:bankapp/presentation/viewmodels/base_view_model.dart';
 
 /// États de l'application
@@ -21,7 +21,7 @@ class AppViewState extends BaseViewState {
   final double initializationProgress;
   final String? currentStep;
   final String? error;
-  
+
   const AppViewState({
     this.initializationState = AppInitializationState.initial,
     this.isFirstLaunch = true,
@@ -30,7 +30,7 @@ class AppViewState extends BaseViewState {
     this.currentStep,
     this.error,
   });
-  
+
   AppViewState copyWith({
     AppInitializationState? initializationState,
     bool? isFirstLaunch,
@@ -43,12 +43,13 @@ class AppViewState extends BaseViewState {
       initializationState: initializationState ?? this.initializationState,
       isFirstLaunch: isFirstLaunch ?? this.isFirstLaunch,
       userName: userName ?? this.userName,
-      initializationProgress: initializationProgress ?? this.initializationProgress,
+      initializationProgress:
+          initializationProgress ?? this.initializationProgress,
       currentStep: currentStep ?? this.currentStep,
       error: error ?? this.error,
     );
   }
-  
+
   AppViewState loading(String step, double progress) {
     return copyWith(
       currentStep: step,
@@ -56,7 +57,7 @@ class AppViewState extends BaseViewState {
       error: null,
     );
   }
-  
+
   AppViewState success({
     AppInitializationState? initializationState,
     bool? isFirstLaunch,
@@ -71,24 +72,28 @@ class AppViewState extends BaseViewState {
       error: null,
     );
   }
-  
+
   AppViewState failure(String errorMessage) {
     return copyWith(
       initializationState: AppInitializationState.error,
       error: errorMessage,
     );
   }
-  
-  bool get isInitialized => initializationState == AppInitializationState.initialized;
-  bool get isLoading => initializationState != AppInitializationState.initialized && 
-                        initializationState != AppInitializationState.error;
+
+  bool get isInitialized =>
+      initializationState == AppInitializationState.initialized;
+  bool get isLoading =>
+      initializationState != AppInitializationState.initialized &&
+      initializationState != AppInitializationState.error;
   bool get hasError => error != null;
   bool get hasUserName => userName != null && userName!.isNotEmpty;
-  
-  String get welcomeMessage => hasUserName ? 'Bonjour, $userName !' : 'Bonjour !';
-  
+
+  String get welcomeMessage =>
+      hasUserName ? 'Bonjour, $userName !' : 'Bonjour !';
+
   @override
-  String toString() => 'AppViewState(initializationState: $initializationState, isFirstLaunch: $isFirstLaunch, userName: $userName, progress: $initializationProgress, error: $error)';
+  String toString() =>
+      'AppViewState(initializationState: $initializationState, isFirstLaunch: $isFirstLaunch, userName: $userName, progress: $initializationProgress, error: $error)';
 }
 
 /// ViewModel principal de l'application
@@ -99,7 +104,7 @@ class AppViewModel extends BaseViewModel<AppViewState> {
   final CategoryLocalDataSource _categoryDataSource;
   final CounterpartyLocalDataSource _counterpartyDataSource;
   final UserPreferencesService _userPreferencesService;
-  
+
   AppViewModel(
     this._cacheManager,
     this._accountDataSource,
@@ -108,42 +113,45 @@ class AppViewModel extends BaseViewModel<AppViewState> {
     this._counterpartyDataSource,
     this._userPreferencesService,
   ) : super(const AppViewState());
-  
+
   /// Initialise l'application
   Future<void> initializeApp() async {
     await executeWithErrorHandling(() async {
       // Étape 1 : Vérifier le premier lancement
-      state = state.copyWith(initializationState: AppInitializationState.checkingFirstLaunch);
+      state = state.copyWith(
+        initializationState: AppInitializationState.checkingFirstLaunch,
+      );
       state = state.loading('Vérification du premier lancement...', 0.1);
-      
+
       await _userPreferencesService.init();
       final isFirstLaunch = _userPreferencesService.isFirstLaunch();
       final userName = _userPreferencesService.getUserName();
-      
-      state = state.copyWith(
-        isFirstLaunch: isFirstLaunch,
-        userName: userName,
-      );
-      
+
+      state = state.copyWith(isFirstLaunch: isFirstLaunch, userName: userName);
+
       // Étape 2 : Charger les préférences utilisateur
-      state = state.copyWith(initializationState: AppInitializationState.loadingUserPreferences);
+      state = state.copyWith(
+        initializationState: AppInitializationState.loadingUserPreferences,
+      );
       state = state.loading('Chargement des préférences utilisateur...', 0.2);
-      
+
       // Attendre un peu pour montrer le progress
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       // Étape 3 : Initialiser le cache
-      state = state.copyWith(initializationState: AppInitializationState.loadingCache);
+      state = state.copyWith(
+        initializationState: AppInitializationState.loadingCache,
+      );
       state = state.loading('Chargement des données...', 0.3);
-      
+
       if (!_cacheManager.isInitialized) {
         await _initializeCache();
       }
-      
+
       // Étape 4 : Finalisation
       state = state.loading('Finalisation...', 0.9);
       await Future.delayed(const Duration(milliseconds: 300));
-      
+
       state = state.success(
         initializationState: AppInitializationState.initialized,
         isFirstLaunch: isFirstLaunch,
@@ -151,25 +159,25 @@ class AppViewModel extends BaseViewModel<AppViewState> {
       );
     });
   }
-  
+
   /// Initialise le cache avec toutes les données
   Future<void> _initializeCache() async {
     // Charger les comptes
     state = state.loading('Chargement des comptes...', 0.4);
     final accounts = await _accountDataSource.getAllAccounts();
-    
+
     // Charger les transactions
     state = state.loading('Chargement des transactions...', 0.5);
     final transactions = await _transactionDataSource.getAllTransactions();
-    
+
     // Charger les catégories
     state = state.loading('Chargement des catégories...', 0.6);
     final categories = await _categoryDataSource.getAllCategories();
-    
+
     // Charger les contreparties
     state = state.loading('Chargement des contreparties...', 0.7);
     final counterparties = await _counterpartyDataSource.getAllCounterparties();
-    
+
     // Initialiser le cache
     state = state.loading('Initialisation du cache...', 0.8);
     await _cacheManager.initialize(
@@ -179,66 +187,67 @@ class AppViewModel extends BaseViewModel<AppViewState> {
       counterparties: counterparties,
     );
   }
-  
+
   /// Définit le nom d'utilisateur lors du premier lancement
   Future<void> setUserName(String name) async {
     await executeWithErrorHandling(() async {
       state = state.loading('Sauvegarde du nom d\'utilisateur...', 0.5);
-      
+
       final success = await _userPreferencesService.setUserName(name);
       if (!success) {
-        state = state.failure('Impossible de sauvegarder le nom d\'utilisateur');
+        state = state.failure(
+          'Impossible de sauvegarder le nom d\'utilisateur',
+        );
         return;
       }
-      
-      state = state.copyWith(
-        userName: name,
-        isFirstLaunch: false,
-      );
-      
+
+      state = state.copyWith(userName: name, isFirstLaunch: false);
+
       // Continuer l'initialisation
       await initializeApp();
     });
   }
-  
+
   /// Réinitialise l'application (pour le développement)
   Future<void> resetApp() async {
     await executeWithErrorHandling(() async {
       state = state.loading('Réinitialisation...', 0.0);
-      
+
       // Effacer les préférences utilisateur
       await _userPreferencesService.clearAll();
-      
+
       // Nettoyer le cache
       _cacheManager.dispose();
-      
+
       // Réinitialiser l'état
       state = const AppViewState();
-      
+
       // Relancer l'initialisation
       await initializeApp();
     });
   }
-  
+
   /// Met à jour le nom d'utilisateur
   Future<void> updateUserName(String newName) async {
     await executeWithErrorHandling(() async {
       final success = await _userPreferencesService.setUserName(newName);
       if (!success) {
-        state = state.failure('Impossible de mettre à jour le nom d\'utilisateur');
+        state = state.failure(
+          'Impossible de mettre à jour le nom d\'utilisateur',
+        );
         return;
       }
-      
+
       state = state.copyWith(userName: newName);
     });
   }
-  
+
   /// Vérifie si l'application est prête
   bool get isAppReady => state.isInitialized && _cacheManager.isInitialized;
-  
+
   /// Obtient le message de bienvenue
   String get welcomeMessage => state.welcomeMessage;
-  
+
   /// Obtient les statistiques de l'application
   Map<String, dynamic> getAppStats() {
     if (!_cacheManager.isInitialized) {
@@ -250,7 +259,7 @@ class AppViewModel extends BaseViewModel<AppViewState> {
         'cacheInitialized': false,
       };
     }
-    
+
     return {
       'accounts': _cacheManager.getAllAccounts().length,
       'transactions': _cacheManager.getAllTransactions().length,
@@ -261,18 +270,18 @@ class AppViewModel extends BaseViewModel<AppViewState> {
       'isFirstLaunch': state.isFirstLaunch,
     };
   }
-  
+
   /// Force une réinitialisation du cache
   Future<void> refreshCache() async {
     await executeWithErrorHandling(() async {
       state = state.loading('Actualisation du cache...', 0.0);
-      
+
       // Nettoyer le cache existant
       _cacheManager.dispose();
-      
+
       // Réinitialiser le cache
       await _initializeCache();
-      
+
       state = state.success(
         initializationState: AppInitializationState.initialized,
         isFirstLaunch: state.isFirstLaunch,
@@ -280,7 +289,7 @@ class AppViewModel extends BaseViewModel<AppViewState> {
       );
     });
   }
-  
+
   /// Obtient les informations de débogage
   Map<String, dynamic> getDebugInfo() {
     return {
@@ -295,7 +304,7 @@ class AppViewModel extends BaseViewModel<AppViewState> {
       },
     };
   }
-  
+
   @override
   void resetToInitialState() {
     state = const AppViewState();

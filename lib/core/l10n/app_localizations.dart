@@ -236,6 +236,12 @@ abstract class AppLocalizations {
   /// **'Credit'**
   String get credit;
 
+  /// No description provided for @balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Solde'**
+  String get balance;
+
   /// No description provided for @expectedBalance.
   ///
   /// In en, this message translates to:
@@ -265,6 +271,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirmed'**
   String get confirmed;
+
+  /// No description provided for @canceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Annulé'**
+  String get canceled;
 
   /// No description provided for @unknown.
   ///
@@ -341,31 +353,19 @@ abstract class AppLocalizations {
   /// No description provided for @retry.
   ///
   /// In en, this message translates to:
-  /// **'Retry'**
+  /// **'Try again'**
   String get retry;
 
   /// No description provided for @searchTransactions.
   ///
   /// In en, this message translates to:
-  /// **'Search transactions'**
+  /// **'Search for transaction'**
   String get searchTransactions;
-
-  /// No description provided for @tapToCreateAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap to create a new account'**
-  String get tapToCreateAccount;
-
-  /// No description provided for @error.
-  ///
-  /// In en, this message translates to:
-  /// **'Error'**
-  String get error;
 
   /// No description provided for @searchResults.
   ///
   /// In en, this message translates to:
-  /// **'Search Results'**
+  /// **'Results'**
   String get searchResults;
 
   /// No description provided for @resultsFound.
@@ -380,119 +380,11 @@ abstract class AppLocalizations {
   /// **'Filtered'**
   String get filtered;
 
-  /// No description provided for @enterSearchTerm.
+  /// No description provided for @error.
   ///
   /// In en, this message translates to:
-  /// **'Enter a search term'**
-  String get enterSearchTerm;
-
-  /// No description provided for @noResultsFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No results found'**
-  String get noResultsFound;
-
-  /// No description provided for @searchTransactionsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Search by title, amount, or counterparty'**
-  String get searchTransactionsHint;
-
-  /// No description provided for @tryDifferentTerms.
-  ///
-  /// In en, this message translates to:
-  /// **'Try different search terms'**
-  String get tryDifferentTerms;
-
-  /// No description provided for @searchSuggestions.
-  ///
-  /// In en, this message translates to:
-  /// **'Search suggestions'**
-  String get searchSuggestions;
-
-  /// No description provided for @suggestions.
-  ///
-  /// In en, this message translates to:
-  /// **'Suggestions'**
-  String get suggestions;
-
-  /// No description provided for @recentSearches.
-  ///
-  /// In en, this message translates to:
-  /// **'Recent searches'**
-  String get recentSearches;
-
-  /// No description provided for @noSuggestionsFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No suggestions found'**
-  String get noSuggestionsFound;
-
-  /// No description provided for @noRecentSearches.
-  ///
-  /// In en, this message translates to:
-  /// **'No recent searches'**
-  String get noRecentSearches;
-
-  /// No description provided for @minAmount.
-  ///
-  /// In en, this message translates to:
-  /// **'Min amount'**
-  String get minAmount;
-
-  /// No description provided for @maxAmount.
-  ///
-  /// In en, this message translates to:
-  /// **'Max amount'**
-  String get maxAmount;
-
-  /// No description provided for @selectPeriod.
-  ///
-  /// In en, this message translates to:
-  /// **'Select period'**
-  String get selectPeriod;
-
-  /// No description provided for @filters.
-  ///
-  /// In en, this message translates to:
-  /// **'Filters'**
-  String get filters;
-
-  /// No description provided for @clearAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear all'**
-  String get clearAll;
-
-  /// No description provided for @balance.
-  ///
-  /// In en, this message translates to:
-  /// **'Balance'**
-  String get balance;
-
-  /// No description provided for @edit.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit'**
-  String get edit;
-
-  /// No description provided for @delete.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get delete;
-
-  /// No description provided for @completed.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed'**
-  String get completed;
-
-  /// No description provided for @cancelled.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancelled'**
-  String get cancelled;
+  /// **'Erreur'**
+  String get error;
 }
 
 class _AppLocalizationsDelegate

@@ -1,6 +1,5 @@
-import 'package:flutter/cupertino.dart';
+import 'package:bankapp/data/database/models/transaction_models.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/data/database/database.dart';
 
 // État de recherche
 class TransactionSearchState {

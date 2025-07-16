@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/core/theme/app_colors.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
+import 'package:flutter/material.dart';
 
 class CardColorUtilsMVVM {
   // Liste des couleurs dans l'ordre souhaité
@@ -15,7 +15,10 @@ class CardColorUtilsMVVM {
 
   /// Retourne la couleur d'une carte basée sur la liste des comptes
   /// Respecte l'ordre des couleurs même avec des IDs non-consécutifs
-  static Color getCardColor(domain.Account account, List<domain.Account> allAccounts) {
+  static Color getCardColor(
+    domain.Account account,
+    List<domain.Account> allAccounts,
+  ) {
     // Trier les comptes par ID pour avoir un ordre stable
     final sortedAccounts = List<domain.Account>.from(allAccounts)
       ..sort((a, b) => a.id.compareTo(b.id));
@@ -33,7 +36,10 @@ class CardColorUtilsMVVM {
   }
 
   /// Version simplifiée pour quand on a juste l'ID du compte
-  static Color getCardColorById(int accountId, List<domain.Account> allAccounts) {
+  static Color getCardColorById(
+    int accountId,
+    List<domain.Account> allAccounts,
+  ) {
     final account = allAccounts.firstWhere(
       (a) => a.id == accountId,
       orElse: () => domain.Account(

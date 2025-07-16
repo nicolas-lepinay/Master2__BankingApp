@@ -1,8 +1,8 @@
-import 'package:bankapp/domain/entities/entities.dart';
-import 'package:bankapp/domain/repositories/repositories.dart';
 import 'package:bankapp/data/cache/cache_manager.dart';
 import 'package:bankapp/data/datasources/local/local_datasources.dart';
 import 'package:bankapp/data/models/models.dart';
+import 'package:bankapp/domain/entities/entities.dart';
+import 'package:bankapp/domain/repositories/repositories.dart';
 
 class CategoryRepositoryImpl implements CategoryRepository {
   final CategoryLocalDataSource _localDataSource;
@@ -16,7 +16,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
     if (_cacheManager.isInitialized) {
       return _cacheManager.getAllCategories();
     }
-    
+
     // Sinon, charger depuis la base de données
     final categoryModels = await _localDataSource.getAllCategories();
     return categoryModels.map((model) => model.toEntity()).toList();
@@ -33,7 +33,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
         return null;
       }
     }
-    
+
     // Sinon, charger depuis la base de données
     final categoryModel = await _localDataSource.getCategoryById(id);
     return categoryModel?.toEntity();
@@ -48,7 +48,9 @@ class CategoryRepositoryImpl implements CategoryRepository {
   @override
   Future<List<Category>> getSubcategories(int parentId) async {
     final allCategories = await getAllCategories();
-    return allCategories.where((category) => category.parentId == parentId).toList();
+    return allCategories
+        .where((category) => category.parentId == parentId)
+        .toList();
   }
 
   @override
@@ -60,15 +62,15 @@ class CategoryRepositoryImpl implements CategoryRepository {
   Future<Category> createCategory(Category category) async {
     // Créer le modèle pour la base de données
     final categoryModel = CategoryModel.fromEntity(category);
-    
+
     // Sauvegarder dans la base de données
     final savedModel = await _localDataSource.createCategory(categoryModel);
-    
+
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
       await _cacheManager.invalidateAll(); // Recalculer tout
     }
-    
+
     return savedModel.toEntity();
   }
 
@@ -76,15 +78,15 @@ class CategoryRepositoryImpl implements CategoryRepository {
   Future<Category> updateCategory(Category category) async {
     // Créer le modèle pour la base de données
     final categoryModel = CategoryModel.fromEntity(category);
-    
+
     // Sauvegarder dans la base de données
     final savedModel = await _localDataSource.updateCategory(categoryModel);
-    
+
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
       await _cacheManager.invalidateAll(); // Recalculer tout
     }
-    
+
     return savedModel.toEntity();
   }
 
@@ -92,7 +94,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
   Future<void> deleteCategory(int id) async {
     // Supprimer de la base de données
     await _localDataSource.deleteCategory(id);
-    
+
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
       await _cacheManager.invalidateAll(); // Recalculer tout
@@ -110,10 +112,11 @@ class CategoryRepositoryImpl implements CategoryRepository {
     // Si le cache est initialisé, vérifier dans le cache
     if (_cacheManager.isInitialized) {
       final allTransactions = _cacheManager.getAllTransactions();
-      return allTransactions.any((transaction) => 
-          transaction.categoryIds.contains(categoryId));
+      return allTransactions.any(
+        (transaction) => transaction.categoryIds.contains(categoryId),
+      );
     }
-    
+
     // Sinon, vérifier dans la base de données
     // Note : Cette implémentation nécessiterait une méthode dans la datasource
     // Pour l'instant, on assume que non
@@ -126,10 +129,11 @@ class CategoryRepositoryImpl implements CategoryRepository {
     if (_cacheManager.isInitialized) {
       return _cacheManager.categoriesStream;
     }
-    
+
     // Sinon, utiliser le stream de la base de données
-    return _localDataSource.watchAllCategories()
-        .map((models) => models.map((model) => model.toEntity()).toList());
+    return _localDataSource.watchAllCategories().map(
+      (models) => models.map((model) => model.toEntity()).toList(),
+    );
   }
 
   @override
@@ -144,9 +148,10 @@ class CategoryRepositoryImpl implements CategoryRepository {
         }
       });
     }
-    
+
     // Sinon, utiliser le stream de la base de données
-    return _localDataSource.watchCategoryById(id)
+    return _localDataSource
+        .watchCategoryById(id)
         .map((model) => model?.toEntity());
   }
 }

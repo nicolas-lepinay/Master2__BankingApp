@@ -78,6 +78,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get credit => 'Credit';
 
   @override
+  String get balance => 'Solde';
+
+  @override
   String get expectedBalance => 'Expected Balance';
 
   @override
@@ -91,6 +94,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirmed => 'Confirmed';
+
+  @override
+  String get canceled => 'Annulé';
 
   @override
   String get unknown => 'Unknown';
@@ -130,19 +136,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get close => 'Close';
 
   @override
-  String get retry => 'Retry';
+  String get retry => 'Try again';
 
   @override
-  String get searchTransactions => 'Search transactions';
+  String get searchTransactions => 'Search for transaction';
 
   @override
-  String get tapToCreateAccount => 'Tap to create a new account';
-
-  @override
-  String get error => 'Error';
-
-  @override
-  String get searchResults => 'Search Results';
+  String get searchResults => 'Results';
 
   @override
   String get resultsFound => 'results found';
@@ -151,59 +151,5 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filtered => 'Filtered';
 
   @override
-  String get enterSearchTerm => 'Enter a search term';
-
-  @override
-  String get noResultsFound => 'No results found';
-
-  @override
-  String get searchTransactionsHint => 'Search by title, amount, or counterparty';
-
-  @override
-  String get tryDifferentTerms => 'Try different search terms';
-
-  @override
-  String get searchSuggestions => 'Search suggestions';
-
-  @override
-  String get suggestions => 'Suggestions';
-
-  @override
-  String get recentSearches => 'Recent searches';
-
-  @override
-  String get noSuggestionsFound => 'No suggestions found';
-
-  @override
-  String get noRecentSearches => 'No recent searches';
-
-  @override
-  String get minAmount => 'Min amount';
-
-  @override
-  String get maxAmount => 'Max amount';
-
-  @override
-  String get selectPeriod => 'Select period';
-
-  @override
-  String get filters => 'Filters';
-
-  @override
-  String get clearAll => 'Clear all';
-
-  @override
-  String get balance => 'Balance';
-
-  @override
-  String get edit => 'Edit';
-
-  @override
-  String get delete => 'Delete';
-
-  @override
-  String get completed => 'Completed';
-
-  @override
-  String get cancelled => 'Cancelled';
+  String get error => 'Erreur';
 }

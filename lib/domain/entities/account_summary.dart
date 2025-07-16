@@ -1,9 +1,9 @@
-import 'package:equatable/equatable.dart';
 import 'package:bankapp/domain/entities/account.dart';
 import 'package:bankapp/domain/entities/transaction_with_balance.dart';
-import 'package:bankapp/domain/value_objects/money.dart';
 import 'package:bankapp/domain/value_objects/account_balance.dart';
 import 'package:bankapp/domain/value_objects/date_range.dart';
+import 'package:bankapp/domain/value_objects/money.dart';
+import 'package:equatable/equatable.dart';
 
 class AccountSummary extends Equatable {
   final Account account;
@@ -37,7 +37,8 @@ class AccountSummary extends Equatable {
       account: account ?? this.account,
       currentBalance: currentBalance ?? this.currentBalance,
       recentTransactions: recentTransactions ?? this.recentTransactions,
-      totalTransactionsCount: totalTransactionsCount ?? this.totalTransactionsCount,
+      totalTransactionsCount:
+          totalTransactionsCount ?? this.totalTransactionsCount,
       totalIncome: totalIncome ?? this.totalIncome,
       totalExpenses: totalExpenses ?? this.totalExpenses,
       lastTransactionDate: lastTransactionDate ?? this.lastTransactionDate,
@@ -49,13 +50,13 @@ class AccountSummary extends Equatable {
   bool get hasTransactions => totalTransactionsCount > 0;
   bool get hasRecentTransactions => recentTransactions.isNotEmpty;
 
-  String get displayCurrentBalance => 
+  String get displayCurrentBalance =>
       '${currentBalance.amount.toStringAsFixed(2)} ${currentBalance.currency}';
 
-  String get displayTotalIncome => 
+  String get displayTotalIncome =>
       '+${totalIncome.amount.toStringAsFixed(2)} ${totalIncome.currency}';
 
-  String get displayTotalExpenses => 
+  String get displayTotalExpenses =>
       '-${totalExpenses.amount.toStringAsFixed(2)} ${totalExpenses.currency}';
 
   String get displayNetAmount {
@@ -64,7 +65,9 @@ class AccountSummary extends Equatable {
   }
 
   List<TransactionWithBalance> getTransactionsInRange(DateRange dateRange) {
-    return recentTransactions.where((tx) => dateRange.contains(tx.transaction.date)).toList();
+    return recentTransactions
+        .where((tx) => dateRange.contains(tx.transaction.date))
+        .toList();
   }
 
   List<TransactionWithBalance> getIncomeTransactions() {
@@ -86,14 +89,14 @@ class AccountSummary extends Equatable {
 
   @override
   List<Object?> get props => [
-        account,
-        currentBalance,
-        recentTransactions,
-        totalTransactionsCount,
-        totalIncome,
-        totalExpenses,
-        lastTransactionDate,
-      ];
+    account,
+    currentBalance,
+    recentTransactions,
+    totalTransactionsCount,
+    totalIncome,
+    totalExpenses,
+    lastTransactionDate,
+  ];
 
   @override
   bool get stringify => true;

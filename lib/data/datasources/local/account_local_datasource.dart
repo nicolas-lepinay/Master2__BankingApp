@@ -1,4 +1,4 @@
-import 'package:bankapp/data/database/database.dart';
+import 'package:bankapp/data/database/app_database.dart';
 import 'package:bankapp/data/models/models.dart';
 
 abstract class AccountLocalDataSource {

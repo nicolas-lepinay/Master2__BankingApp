@@ -1,7 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drift/drift.dart';
-import 'package:bankapp/data/database/database.dart';
+import 'package:bankapp/data/database/app_database.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
+import 'package:drift/drift.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Provider pour les actions sur les comptes
 final accountActionsProvider = Provider((ref) => AccountActions(ref));

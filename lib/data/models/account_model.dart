@@ -1,4 +1,4 @@
-import 'package:bankapp/data/database/database.dart';
+import 'package:bankapp/data/database/app_database.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:drift/drift.dart';
 

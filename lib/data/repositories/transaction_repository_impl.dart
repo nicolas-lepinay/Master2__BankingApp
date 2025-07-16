@@ -1,9 +1,9 @@
-import 'package:bankapp/domain/entities/entities.dart';
-import 'package:bankapp/domain/repositories/repositories.dart';
-import 'package:bankapp/domain/value_objects/value_objects.dart';
 import 'package:bankapp/data/cache/cache_manager.dart';
 import 'package:bankapp/data/datasources/local/local_datasources.dart';
 import 'package:bankapp/data/models/models.dart';
+import 'package:bankapp/domain/entities/entities.dart';
+import 'package:bankapp/domain/repositories/repositories.dart';
+import 'package:bankapp/domain/value_objects/value_objects.dart';
 
 class TransactionRepositoryImpl implements TransactionRepository {
   final TransactionLocalDataSource _localDataSource;
@@ -17,7 +17,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
     if (_cacheManager.isInitialized) {
       return _cacheManager.getAllTransactions();
     }
-    
+
     // Sinon, charger depuis la base de données
     final transactionModels = await _localDataSource.getAllTransactions();
     return transactionModels.map((model) => model.toEntity()).toList();
@@ -29,9 +29,11 @@ class TransactionRepositoryImpl implements TransactionRepository {
     if (_cacheManager.isInitialized) {
       return _cacheManager.getTransactionsByAccountId(accountId);
     }
-    
+
     // Sinon, charger depuis la base de données
-    final transactionModels = await _localDataSource.getTransactionsByAccountId(accountId);
+    final transactionModels = await _localDataSource.getTransactionsByAccountId(
+      accountId,
+    );
     return transactionModels.map((model) => model.toEntity()).toList();
   }
 
@@ -41,12 +43,14 @@ class TransactionRepositoryImpl implements TransactionRepository {
     if (_cacheManager.isInitialized) {
       final allTransactions = _cacheManager.getAllTransactions();
       try {
-        return allTransactions.firstWhere((transaction) => transaction.id == id);
+        return allTransactions.firstWhere(
+          (transaction) => transaction.id == id,
+        );
       } catch (e) {
         return null;
       }
     }
-    
+
     // Sinon, charger depuis la base de données
     final transactionModel = await _localDataSource.getTransactionById(id);
     return transactionModel?.toEntity();
@@ -56,15 +60,17 @@ class TransactionRepositoryImpl implements TransactionRepository {
   Future<Transaction> createTransaction(Transaction transaction) async {
     // Créer le modèle pour la base de données
     final transactionModel = TransactionModel.fromEntity(transaction);
-    
+
     // Sauvegarder dans la base de données
-    final savedModel = await _localDataSource.createTransaction(transactionModel);
-    
+    final savedModel = await _localDataSource.createTransaction(
+      transactionModel,
+    );
+
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
       await _cacheManager.addTransaction(savedModel);
     }
-    
+
     return savedModel.toEntity();
   }
 
@@ -72,15 +78,19 @@ class TransactionRepositoryImpl implements TransactionRepository {
   Future<Transaction> updateTransaction(Transaction transaction) async {
     // Créer le modèle pour la base de données
     final transactionModel = TransactionModel.fromEntity(transaction);
-    
+
     // Sauvegarder dans la base de données
-    final savedModel = await _localDataSource.updateTransaction(transactionModel);
-    
+    final savedModel = await _localDataSource.updateTransaction(
+      transactionModel,
+    );
+
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
-      await _cacheManager.addTransaction(savedModel); // addTransaction fait aussi update
+      await _cacheManager.addTransaction(
+        savedModel,
+      ); // addTransaction fait aussi update
     }
-    
+
     return savedModel.toEntity();
   }
 
@@ -88,7 +98,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
   Future<void> deleteTransaction(int id) async {
     // Supprimer de la base de données
     await _localDataSource.deleteTransaction(id);
-    
+
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
       await _cacheManager.removeTransaction(id);
@@ -96,14 +106,18 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
-  Future<List<TransactionWithBalance>> getTransactionsWithBalance(int accountId) async {
+  Future<List<TransactionWithBalance>> getTransactionsWithBalance(
+    int accountId,
+  ) async {
     // Si le cache est initialisé, utiliser le cache
     if (_cacheManager.isInitialized) {
       return _cacheManager.getTransactionsWithBalance(accountId);
     }
-    
+
     // Fallback : calculer depuis la base de données (plus lent)
-    final transactionModels = await _localDataSource.getTransactionsByAccountId(accountId);
+    final transactionModels = await _localDataSource.getTransactionsByAccountId(
+      accountId,
+    );
     // Note : Cette implémentation de fallback est simplifiée
     // En production, il faudrait recalculer les soldes ici
     return transactionModels.map((model) {
@@ -132,19 +146,23 @@ class TransactionRepositoryImpl implements TransactionRepository {
   ) async {
     final allTransactions = await getTransactionsWithBalance(accountId);
     return allTransactions
-        .where((txWithBalance) => dateRange.contains(txWithBalance.transaction.date))
+        .where(
+          (txWithBalance) => dateRange.contains(txWithBalance.transaction.date),
+        )
         .toList();
   }
 
   @override
-  Future<List<TransactionWithBalance>> getTransactionsAroundToday(int accountId) async {
+  Future<List<TransactionWithBalance>> getTransactionsAroundToday(
+    int accountId,
+  ) async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final dateRange = DateRange(
       start: today.subtract(const Duration(days: 30)),
       end: today.add(const Duration(days: 30)),
     );
-    
+
     return getTransactionsWithBalanceInRange(accountId, dateRange);
   }
 
@@ -167,7 +185,10 @@ class TransactionRepositoryImpl implements TransactionRepository {
   ) async {
     final allTransactions = await getTransactionsWithBalance(accountId);
     return allTransactions
-        .where((txWithBalance) => txWithBalance.isInAmountRange(minAmount, maxAmount))
+        .where(
+          (txWithBalance) =>
+              txWithBalance.isInAmountRange(minAmount, maxAmount),
+        )
         .toList();
   }
 
@@ -178,8 +199,10 @@ class TransactionRepositoryImpl implements TransactionRepository {
   ) async {
     final allTransactions = await getTransactionsWithBalance(accountId);
     return allTransactions
-        .where((txWithBalance) => 
-            txWithBalance.transaction.categoryIds.contains(categoryId))
+        .where(
+          (txWithBalance) =>
+              txWithBalance.transaction.categoryIds.contains(categoryId),
+        )
         .toList();
   }
 
@@ -190,8 +213,10 @@ class TransactionRepositoryImpl implements TransactionRepository {
   ) async {
     final allTransactions = await getTransactionsWithBalance(accountId);
     return allTransactions
-        .where((txWithBalance) => 
-            txWithBalance.transaction.counterpartyId == counterpartyId)
+        .where(
+          (txWithBalance) =>
+              txWithBalance.transaction.counterpartyId == counterpartyId,
+        )
         .toList();
   }
 
@@ -201,10 +226,11 @@ class TransactionRepositoryImpl implements TransactionRepository {
     if (_cacheManager.isInitialized) {
       return _cacheManager.transactionsStream;
     }
-    
+
     // Sinon, utiliser le stream de la base de données
-    return _localDataSource.watchAllTransactions()
-        .map((models) => models.map((model) => model.toEntity()).toList());
+    return _localDataSource.watchAllTransactions().map(
+      (models) => models.map((model) => model.toEntity()).toList(),
+    );
   }
 
   @override
@@ -212,27 +238,33 @@ class TransactionRepositoryImpl implements TransactionRepository {
     // Si le cache est initialisé, utiliser le stream du cache
     if (_cacheManager.isInitialized) {
       return _cacheManager.transactionsStream.map((transactions) {
-        return transactions.where((transaction) => transaction.accountId == accountId).toList();
+        return transactions
+            .where((transaction) => transaction.accountId == accountId)
+            .toList();
       });
     }
-    
+
     // Sinon, utiliser le stream de la base de données
-    return _localDataSource.watchTransactionsByAccountId(accountId)
+    return _localDataSource
+        .watchTransactionsByAccountId(accountId)
         .map((models) => models.map((model) => model.toEntity()).toList());
   }
 
   @override
-  Stream<List<TransactionWithBalance>> watchTransactionsWithBalance(int accountId) {
+  Stream<List<TransactionWithBalance>> watchTransactionsWithBalance(
+    int accountId,
+  ) {
     // Si le cache est initialisé, utiliser le stream du cache
     if (_cacheManager.isInitialized) {
       return _cacheManager.transactionsStream.asyncMap((_) async {
         return _cacheManager.getTransactionsWithBalance(accountId);
       });
     }
-    
+
     // Sinon, utiliser le stream de la base de données
-    return _localDataSource.watchTransactionsByAccountId(accountId)
-        .asyncMap((models) async {
+    return _localDataSource.watchTransactionsByAccountId(accountId).asyncMap((
+      models,
+    ) async {
       return getTransactionsWithBalance(accountId);
     });
   }

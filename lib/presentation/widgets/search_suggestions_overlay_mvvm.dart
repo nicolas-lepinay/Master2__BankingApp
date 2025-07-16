@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
-import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
+import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/screens/search_results_screen_mvvm.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SearchSuggestionsOverlayMVVM extends ConsumerStatefulWidget {
@@ -25,10 +25,12 @@ class SearchSuggestionsOverlayMVVM extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<SearchSuggestionsOverlayMVVM> createState() => _SearchSuggestionsOverlayMVVMState();
+  ConsumerState<SearchSuggestionsOverlayMVVM> createState() =>
+      _SearchSuggestionsOverlayMVVMState();
 }
 
-class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestionsOverlayMVVM> {
+class _SearchSuggestionsOverlayMVVMState
+    extends ConsumerState<SearchSuggestionsOverlayMVVM> {
   List<String> _suggestions = [];
   List<String> _recentSearches = [];
   bool _isLoading = false;
@@ -63,7 +65,7 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
 
     final searchViewModel = ref.read(searchViewModelProvider.notifier);
     final suggestions = searchViewModel.getSearchSuggestions(query);
-    
+
     setState(() {
       _suggestions = suggestions;
       _isLoading = false;
@@ -73,9 +75,9 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
   void _onSuggestionTap(String suggestion) {
     widget.controller.text = suggestion;
     widget.onSuggestionSelected?.call();
-    
+
     // TODO: Enregistrer la recherche récente
-    
+
     // Naviguer vers les résultats de recherche
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -110,10 +112,7 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
         color: appTheme.background1,
         child: Container(
           width: widget.overlayWidth.w,
-          constraints: BoxConstraints(
-            maxHeight: 300.h,
-            minHeight: 100.h,
-          ),
+          constraints: BoxConstraints(maxHeight: 300.h, minHeight: 100.h),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
@@ -137,7 +136,9 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      query.isNotEmpty ? l10n.suggestions : l10n.recentSearches,
+                      query.isNotEmpty
+                          ? "l10n.suggestions"
+                          : "l10n.recentSearches",
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: appTheme.text2,
                         fontWeight: FontWeight.w600,
@@ -147,7 +148,7 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
                       GestureDetector(
                         onTap: _clearRecentSearches,
                         child: Text(
-                          l10n.clearAll,
+                          "l10n.clearAll",
                           style: AppTextStyles.bodySmall.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w500,
@@ -159,9 +160,7 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
               ),
 
               // Contenu
-              Flexible(
-                child: _buildContent(context, l10n, appTheme, query),
-              ),
+              Flexible(child: _buildContent(context, l10n, appTheme, query)),
             ],
           ),
         ),
@@ -198,7 +197,10 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
     }
   }
 
-  Widget _buildSuggestionsList(AppLocalizations l10n, AppColorsExtended appTheme) {
+  Widget _buildSuggestionsList(
+    AppLocalizations l10n,
+    AppColorsExtended appTheme,
+  ) {
     if (_suggestions.isEmpty) {
       return Container(
         padding: EdgeInsets.all(20.r),
@@ -212,7 +214,7 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
             ),
             SizedBox(height: 8.h),
             Text(
-              l10n.noSuggestionsFound,
+              "l10n.noSuggestionsFound",
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -234,7 +236,7 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
       itemBuilder: (context, index) {
         final suggestion = _suggestions[index];
         final query = widget.controller.text.trim().toLowerCase();
-        
+
         return ListTile(
           dense: true,
           leading: Icon(
@@ -254,7 +256,10 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
     );
   }
 
-  Widget _buildRecentSearchesList(AppLocalizations l10n, AppColorsExtended appTheme) {
+  Widget _buildRecentSearchesList(
+    AppLocalizations l10n,
+    AppColorsExtended appTheme,
+  ) {
     if (_recentSearches.isEmpty) {
       return Container(
         padding: EdgeInsets.all(20.r),
@@ -268,7 +273,7 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
             ),
             SizedBox(height: 8.h),
             Text(
-              l10n.noRecentSearches,
+              "l10n.noRecentSearches",
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -289,7 +294,7 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
       ),
       itemBuilder: (context, index) {
         final search = _recentSearches[index];
-        
+
         return ListTile(
           dense: true,
           leading: Icon(
@@ -299,9 +304,7 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
           ),
           title: Text(
             search,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: appTheme.text3,
-            ),
+            style: AppTextStyles.bodyMedium.copyWith(color: appTheme.text3),
           ),
           trailing: GestureDetector(
             onTap: () {
@@ -322,13 +325,15 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
     );
   }
 
-  Widget _buildHighlightedText(String text, String query, AppColorsExtended appTheme) {
+  Widget _buildHighlightedText(
+    String text,
+    String query,
+    AppColorsExtended appTheme,
+  ) {
     if (query.isEmpty) {
       return Text(
         text,
-        style: AppTextStyles.bodyMedium.copyWith(
-          color: appTheme.text3,
-        ),
+        style: AppTextStyles.bodyMedium.copyWith(color: appTheme.text3),
       );
     }
 
@@ -339,22 +344,17 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
     if (startIndex == -1) {
       return Text(
         text,
-        style: AppTextStyles.bodyMedium.copyWith(
-          color: appTheme.text3,
-        ),
+        style: AppTextStyles.bodyMedium.copyWith(color: appTheme.text3),
       );
     }
 
     final endIndex = startIndex + query.length;
-    
+
     return RichText(
       text: TextSpan(
-        style: AppTextStyles.bodyMedium.copyWith(
-          color: appTheme.text3,
-        ),
+        style: AppTextStyles.bodyMedium.copyWith(color: appTheme.text3),
         children: [
-          if (startIndex > 0)
-            TextSpan(text: text.substring(0, startIndex)),
+          if (startIndex > 0) TextSpan(text: text.substring(0, startIndex)),
           TextSpan(
             text: text.substring(startIndex, endIndex),
             style: TextStyle(
@@ -362,8 +362,7 @@ class _SearchSuggestionsOverlayMVVMState extends ConsumerState<SearchSuggestions
               fontWeight: FontWeight.w600,
             ),
           ),
-          if (endIndex < text.length)
-            TextSpan(text: text.substring(endIndex)),
+          if (endIndex < text.length) TextSpan(text: text.substring(endIndex)),
         ],
       ),
     );

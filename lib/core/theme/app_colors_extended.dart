@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
+import 'package:flutter/material.dart';
 
 @immutable
 class AppColorsExtended extends ThemeExtension<AppColorsExtended> {

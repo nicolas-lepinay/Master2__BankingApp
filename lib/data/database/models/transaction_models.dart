@@ -1,4 +1,6 @@
 
+import '../app_database.dart';
+
 /// Classe helper pour représenter une transaction avec son solde après opération
 class TransactionWithBalance {
   final dynamic transaction; // Type générique pour compatibilité avec Drift
@@ -35,6 +37,18 @@ class TransactionWithCounterparty {
     this.counterpartyName,
     this.counterpartyIcon,
   });
+
+  // Getters pour compatibilité avec l'ancien code
+  Counterparty? get counterparty => counterpartyName != null
+      ? Counterparty(
+          id: 0, // ID temporaire
+          name: counterpartyName!,
+          icon: counterpartyIcon,
+        )
+      : null;
+
+  // Getter pour accéder de manière sécurisée à l'ID de la transaction
+  int get transactionId => (transaction as Transaction).id;
 
   @override
   String toString() => 'TransactionWithCounterparty(transaction: $transaction, counterpartyName: $counterpartyName, counterpartyIcon: $counterpartyIcon)';

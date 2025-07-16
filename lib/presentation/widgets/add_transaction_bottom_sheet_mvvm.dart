@@ -1,19 +1,19 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/domain/entities/entities.dart' as domain;
-import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AddTransactionBottomSheetMVVM extends ConsumerStatefulWidget {
-  final int accountId;
+  final int? accountId; // Optionnel pour permettre sélection
   final domain.Transaction? transactionToEdit;
 
   const AddTransactionBottomSheetMVVM({
     super.key,
-    required this.accountId,
+    this.accountId, // Plus obligatoire
     this.transactionToEdit,
   });
 
@@ -116,7 +116,10 @@ class _AddTransactionBottomSheetMVVMState
       padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: AppColors.textSecondary.withValues(alpha: 0.2), width: 1.w),
+          bottom: BorderSide(
+            color: AppColors.textSecondary.withValues(alpha: 0.2),
+            width: 1.w,
+          ),
         ),
       ),
       child: Row(
@@ -143,9 +146,7 @@ class _AddTransactionBottomSheetMVVMState
       children: [
         Text(
           'Type de transaction',
-          style: AppTextStyles.bodyMedium.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
         ),
         SizedBox(height: 8.h),
         Row(
@@ -180,7 +181,7 @@ class _AddTransactionBottomSheetMVVMState
     Color color,
   ) {
     final isSelected = _selectedType == type;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -190,10 +191,14 @@ class _AddTransactionBottomSheetMVVMState
       child: Container(
         padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.1) : AppColors.surfaceLight,
+          color: isSelected
+              ? color.withValues(alpha: 0.1)
+              : AppColors.surfaceLight,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: isSelected ? color : AppColors.textSecondary.withValues(alpha: 0.2),
+            color: isSelected
+                ? color
+                : AppColors.textSecondary.withValues(alpha: 0.2),
             width: 2.w,
           ),
         ),
@@ -225,9 +230,7 @@ class _AddTransactionBottomSheetMVVMState
       decoration: InputDecoration(
         labelText: 'Titre',
         hintText: 'Ex: Supermarché, Salaire...',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
@@ -246,9 +249,7 @@ class _AddTransactionBottomSheetMVVMState
         labelText: 'Montant',
         hintText: '0.00',
         suffixText: 'EUR',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
@@ -269,7 +270,9 @@ class _AddTransactionBottomSheetMVVMState
       child: Container(
         padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.textSecondary.withValues(alpha: 0.2)),
+          border: Border.all(
+            color: AppColors.textSecondary.withValues(alpha: 0.2),
+          ),
           borderRadius: BorderRadius.circular(12.r),
         ),
         child: Row(
@@ -290,7 +293,7 @@ class _AddTransactionBottomSheetMVVMState
     return Consumer(
       builder: (context, ref, child) {
         final counterparties = ref.watch(counterpartyRepositoryProvider);
-        
+
         return FutureBuilder<List<domain.Counterparty>>(
           future: counterparties.getAllCounterparties(),
           builder: (context, snapshot) {
@@ -300,9 +303,9 @@ class _AddTransactionBottomSheetMVVMState
                 child: const CircularProgressIndicator(),
               );
             }
-            
+
             final counterpartyList = snapshot.data!;
-            
+
             return DropdownButtonFormField<int>(
               value: _selectedCounterpartyId,
               decoration: InputDecoration(
@@ -312,10 +315,7 @@ class _AddTransactionBottomSheetMVVMState
                 ),
               ),
               items: [
-                const DropdownMenuItem<int>(
-                  value: null,
-                  child: Text('Aucune'),
-                ),
+                const DropdownMenuItem<int>(value: null, child: Text('Aucune')),
                 ...counterpartyList.map(
                   (counterparty) => DropdownMenuItem<int>(
                     value: counterparty.id,
@@ -339,7 +339,7 @@ class _AddTransactionBottomSheetMVVMState
     return Consumer(
       builder: (context, ref, child) {
         final categories = ref.watch(categoryRepositoryProvider);
-        
+
         return FutureBuilder<List<domain.Category>>(
           future: categories.getAllCategories(),
           builder: (context, snapshot) {
@@ -349,9 +349,9 @@ class _AddTransactionBottomSheetMVVMState
                 child: const CircularProgressIndicator(),
               );
             }
-            
+
             final categoryList = snapshot.data!;
-            
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -366,8 +366,10 @@ class _AddTransactionBottomSheetMVVMState
                   spacing: 8.w,
                   runSpacing: 8.h,
                   children: categoryList.map((category) {
-                    final isSelected = _selectedCategoryIds.contains(category.id);
-                    
+                    final isSelected = _selectedCategoryIds.contains(
+                      category.id,
+                    );
+
                     return FilterChip(
                       label: Text(category.label),
                       selected: isSelected,
@@ -398,9 +400,7 @@ class _AddTransactionBottomSheetMVVMState
       decoration: InputDecoration(
         labelText: 'Commentaire (optionnel)',
         hintText: 'Ajouter une note...',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
       ),
     );
   }
@@ -411,9 +411,7 @@ class _AddTransactionBottomSheetMVVMState
       children: [
         Text(
           'Statut',
-          style: AppTextStyles.bodyMedium.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
         ),
         SizedBox(height: 8.h),
         DropdownButtonFormField<domain.TransactionStatus>(
@@ -464,7 +462,9 @@ class _AddTransactionBottomSheetMVVMState
             onPressed: _isLoading ? null : _saveTransaction,
             child: _isLoading
                 ? const CircularProgressIndicator()
-                : Text(widget.transactionToEdit != null ? 'Modifier' : 'Ajouter'),
+                : Text(
+                    widget.transactionToEdit != null ? 'Modifier' : 'Ajouter',
+                  ),
           ),
         ),
       ],
@@ -478,7 +478,7 @@ class _AddTransactionBottomSheetMVVMState
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    
+
     if (date != null) {
       setState(() {
         _selectedDate = date;
@@ -495,9 +495,11 @@ class _AddTransactionBottomSheetMVVMState
 
     try {
       final amount = double.parse(_amountController.text);
-      final transactionViewModel = ref.read(transactionViewModelProvider.notifier);
+      final transactionViewModel = ref.read(
+        transactionViewModelProvider.notifier,
+      );
       final selectedAccount = ref.read(selectedAccountProvider);
-      
+
       if (selectedAccount == null) {
         throw Exception('Aucun compte sélectionné');
       }
@@ -505,14 +507,14 @@ class _AddTransactionBottomSheetMVVMState
       if (widget.transactionToEdit != null) {
         await transactionViewModel.updateTransaction(
           transactionId: widget.transactionToEdit!.id,
-          accountId: widget.accountId,
+          accountId: selectedAccount.id,
           type: _selectedType,
           amount: amount,
           currency: selectedAccount.currency,
           date: _selectedDate,
           title: _titleController.text.trim(),
-          comment: _commentController.text.trim().isNotEmpty 
-              ? _commentController.text.trim() 
+          comment: _commentController.text.trim().isNotEmpty
+              ? _commentController.text.trim()
               : null,
           counterpartyId: _selectedCounterpartyId,
           categoryIds: _selectedCategoryIds,
@@ -520,14 +522,14 @@ class _AddTransactionBottomSheetMVVMState
         );
       } else {
         await transactionViewModel.createTransaction(
-          accountId: widget.accountId,
+          accountId: selectedAccount.id,
           type: _selectedType,
           amount: amount,
           currency: selectedAccount.currency,
           date: _selectedDate,
           title: _titleController.text.trim(),
-          comment: _commentController.text.trim().isNotEmpty 
-              ? _commentController.text.trim() 
+          comment: _commentController.text.trim().isNotEmpty
+              ? _commentController.text.trim()
               : null,
           counterpartyId: _selectedCounterpartyId,
           categoryIds: _selectedCategoryIds,
@@ -550,10 +552,7 @@ class _AddTransactionBottomSheetMVVMState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {

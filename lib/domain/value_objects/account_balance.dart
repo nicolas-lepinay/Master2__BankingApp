@@ -1,14 +1,11 @@
-import 'package:equatable/equatable.dart';
 import 'package:bankapp/domain/value_objects/money.dart';
+import 'package:equatable/equatable.dart';
 
 class AccountBalance extends Equatable {
   final Money balance;
   final DateTime calculatedAt;
 
-  const AccountBalance({
-    required this.balance,
-    required this.calculatedAt,
-  });
+  const AccountBalance({required this.balance, required this.calculatedAt});
 
   AccountBalance add(Money amount) {
     return AccountBalance(

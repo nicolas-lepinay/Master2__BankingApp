@@ -1,21 +1,21 @@
+import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/core/theme/app_colors.dart';
+import 'package:bankapp/core/theme/app_text_styles.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
+import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
+import 'package:bankapp/presentation/screens/search_results_screen_mvvm.dart';
+import 'package:bankapp/presentation/viewmodels/viewmodels.dart';
+import 'package:bankapp/presentation/widgets/add_account_bottom_sheet.dart';
+import 'package:bankapp/presentation/widgets/bank_card_widget_mvvm.dart';
+import 'package:bankapp/presentation/widgets/cards_swiper_widget.dart';
+import 'package:bankapp/presentation/widgets/dashed_button.dart';
+import 'package:bankapp/presentation/widgets/draggable_black_container.dart';
+import 'package:bankapp/presentation/widgets/search_field_mvvm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
-import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
-import 'package:bankapp/presentation/widgets/cards_swiper_widget.dart';
-import 'package:bankapp/presentation/widgets/bank_card_widget_mvvm.dart';
-import 'package:bankapp/presentation/widgets/dashed_button.dart';
-import 'package:bankapp/presentation/widgets/add_account_bottom_sheet.dart';
-import 'package:bankapp/presentation/widgets/draggable_black_container.dart';
-import 'package:bankapp/presentation/widgets/search_field_mvvm.dart';
-import 'package:bankapp/presentation/screens/search_results_screen_mvvm.dart';
-import 'package:bankapp/presentation/viewmodels/viewmodels.dart';
-import 'package:bankapp/core/theme/app_colors.dart';
-import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
-import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HomeScreenMVVM extends ConsumerStatefulWidget {
@@ -42,7 +42,7 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
       parent: _containerAnimationController,
       curve: Curves.easeInOut,
     );
-    
+
     // Initialiser l'application au démarrage
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeApp();
@@ -65,9 +65,9 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
     final normalPosition = 0.65;
     final animationValue =
         ((normalPosition - extent) / (normalPosition - minThreshold)).clamp(
-      0.0,
-      1.0,
-    );
+          0.0,
+          1.0,
+        );
     _containerAnimationController.animateTo(animationValue);
 
     final isExpanded = extent <= 0.3;
@@ -77,11 +77,11 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Écouter l'état de l'application
     final appState = ref.watch(appViewModelProvider);
     final isAppReady = ref.watch(isAppReadyProvider);
-    
+
     // Si l'application n'est pas encore initialisée, afficher l'écran de chargement
     if (!isAppReady) {
       return _buildLoadingScreen(context, appState);
@@ -122,18 +122,18 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
                     color: AppColors.white,
                   ),
                 ),
-                
+
                 SizedBox(height: 32.h),
-                
+
                 // Message de bienvenue
                 Text(
                   appState.welcomeMessage,
                   style: AppTextStyles.h4,
                   textAlign: TextAlign.center,
                 ),
-                
+
                 SizedBox(height: 24.h),
-                
+
                 // Indicateur de progression
                 if (appState.isLoading)
                   Column(
@@ -142,13 +142,17 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
                         width: 200.w,
                         child: LinearProgressIndicator(
                           value: appState.initializationProgress,
-                          backgroundColor: AppColors.primary.withValues(alpha: 0.2),
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                          backgroundColor: AppColors.primary.withValues(
+                            alpha: 0.2,
+                          ),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.primary,
+                          ),
                         ),
                       ),
-                      
+
                       SizedBox(height: 16.h),
-                      
+
                       if (appState.currentStep != null)
                         Text(
                           appState.currentStep!,
@@ -159,7 +163,7 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
                         ),
                     ],
                   ),
-                
+
                 // Affichage des erreurs
                 if (appState.hasError)
                   Container(
@@ -187,7 +191,9 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
                         SizedBox(height: 16.h),
                         ElevatedButton(
                           onPressed: () {
-                            final appViewModel = ref.read(appViewModelProvider.notifier);
+                            final appViewModel = ref.read(
+                              appViewModelProvider.notifier,
+                            );
                             appViewModel.initializeApp();
                           },
                           child: Text(l10n.retry),
@@ -243,7 +249,7 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
 
   Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
     final welcomeMessage = ref.watch(welcomeMessageProvider);
-    
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.r, vertical: 16.r),
       child: Column(
@@ -289,9 +295,9 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
               ),
             ],
           ),
-          
+
           SizedBox(height: 16.h),
-          
+
           // Search field
           SearchFieldMVVM(
             hintText: l10n.searchTransactions,
@@ -302,9 +308,8 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
                 // Naviguer vers l'écran de recherche avec la query
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => SearchResultsScreenMVVM(
-                      initialQuery: query,
-                    ),
+                    builder: (context) =>
+                        SearchResultsScreenMVVM(initialQuery: query),
                   ),
                 );
               }
@@ -320,26 +325,26 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
       animation: _containerAnimation,
       builder: (context, child) {
         final verticalOffset = _containerAnimation.value * 80.h;
-        
+
         return Transform.translate(
           offset: Offset(0, verticalOffset),
           child: Consumer(
             builder: (context, ref, child) {
               final accounts = ref.watch(accountsProvider);
               final accountState = ref.watch(accountViewModelProvider);
-              
+
               if (accountState.isLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
-              
+
               if (accountState.hasError) {
                 return _buildErrorState(context, accountState.error!);
               }
-              
+
               if (accounts.isEmpty) {
                 return _buildEmptyState(context, l10n);
               }
-              
+
               return _buildAccountCards(context, l10n, accounts);
             },
           ),
@@ -348,14 +353,20 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
     );
   }
 
-  Widget _buildAccountCards(BuildContext context, AppLocalizations l10n, List<domain.Account> accounts) {
+  Widget _buildAccountCards(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<domain.Account> accounts,
+  ) {
     return Column(
       children: [
         CardsSwiperWidget<domain.Account>(
           cardData: accounts,
           onCardChange: (index) {
             if (index >= 0 && index < accounts.length) {
-              final accountViewModel = ref.read(accountViewModelProvider.notifier);
+              final accountViewModel = ref.read(
+                accountViewModelProvider.notifier,
+              );
               accountViewModel.selectAccount(accounts[index].id);
               ref.read(selectedCardProvider.notifier).setSelectedCard(index);
             }
@@ -370,7 +381,7 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
             if (accountIndex < 0 || accountIndex >= accounts.length) {
               return const SizedBox.shrink();
             }
-            
+
             final account = accounts[accountIndex];
             return _buildAccountCard(context, account, accounts);
           },
@@ -380,19 +391,26 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
     );
   }
 
-  Widget _buildAccountCard(BuildContext context, domain.Account account, List<domain.Account> allAccounts) {
+  Widget _buildAccountCard(
+    BuildContext context,
+    domain.Account account,
+    List<domain.Account> allAccounts,
+  ) {
     return Consumer(
       builder: (context, ref, child) {
-        final selectedAccountSummary = ref.watch(selectedAccountSummaryProvider);
+        final selectedAccountSummary = ref.watch(
+          selectedAccountSummaryProvider,
+        );
         final selectedAccount = ref.watch(selectedAccountProvider);
-        
-        if (selectedAccount?.id == account.id && selectedAccountSummary != null) {
+
+        if (selectedAccount?.id == account.id &&
+            selectedAccountSummary != null) {
           return BankCardWidgetMVVM(
             accountSummary: selectedAccountSummary,
             allAccounts: allAccounts,
           );
         }
-        
+
         return _buildLoadingCard(account.id, allAccounts);
       },
     );
@@ -404,7 +422,7 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
       builder: (context, child) {
         final opacity = _containerAnimation.value;
         final scale = 0.8 + (_containerAnimation.value * 0.2);
-        
+
         return opacity > 0.1
             ? Opacity(
                 opacity: opacity,
@@ -448,7 +466,7 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
           Text(l10n.addAccount, style: AppTextStyles.h5),
           SizedBox(height: AppConstants.verySmallPadding.h),
           Text(
-            l10n.tapToCreateAccount,
+            l10n.addAccount,
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -472,17 +490,15 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 48.sp,
-            color: Colors.red,
-          ),
+          Icon(Icons.error_outline, size: 48.sp, color: Colors.red),
           SizedBox(height: 16.h),
           Text('${l10n.error}: $error'),
           SizedBox(height: 16.h),
           ElevatedButton(
             onPressed: () {
-              final accountViewModel = ref.read(accountViewModelProvider.notifier);
+              final accountViewModel = ref.read(
+                accountViewModelProvider.notifier,
+              );
               accountViewModel.refresh();
             },
             child: Text(l10n.retry),

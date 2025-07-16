@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TransactionItemMVVM extends StatelessWidget {
@@ -40,7 +40,7 @@ class TransactionItemMVVM extends StatelessWidget {
           children: [
             // Icône de transaction
             _buildTransactionIcon(context, appTheme),
-            
+
             SizedBox(width: AppConstants.defaultPadding.w),
 
             // Informations de la transaction
@@ -64,10 +64,14 @@ class TransactionItemMVVM extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      
+
                       // Montant
                       Text(
-                        _formatAmount(transaction.amount, transaction.currency, isIncome),
+                        _formatAmount(
+                          transaction.amount,
+                          transaction.currency,
+                          isIncome,
+                        ),
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: _getAmountColor(isIncome, isExpense),
                           fontWeight: FontWeight.w700,
@@ -75,9 +79,9 @@ class TransactionItemMVVM extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   SizedBox(height: 4.h),
-                  
+
                   // Détails et solde
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -87,7 +91,8 @@ class TransactionItemMVVM extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (transaction.comment != null && transaction.comment!.isNotEmpty)
+                            if (transaction.comment != null &&
+                                transaction.comment!.isNotEmpty)
                               Text(
                                 transaction.comment!,
                                 style: AppTextStyles.bodySmall.copyWith(
@@ -97,7 +102,10 @@ class TransactionItemMVVM extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             Text(
-                              AppFormatters.formatDate(transaction.date, context),
+                              AppFormatters.formatDate(
+                                transaction.date,
+                                context,
+                              ),
                               style: AppTextStyles.bodySmall.copyWith(
                                 color: appTheme.text3,
                               ),
@@ -105,7 +113,7 @@ class TransactionItemMVVM extends StatelessWidget {
                           ],
                         ),
                       ),
-                      
+
                       // Solde après transaction
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -130,14 +138,19 @@ class TransactionItemMVVM extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   // Indicateur de statut si nécessaire
                   if (transaction.status != domain.TransactionStatus.completed)
                     Container(
                       margin: EdgeInsets.only(top: 4.h),
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 2.h,
+                      ),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(transaction.status).withValues(alpha: 0.2),
+                        color: _getStatusColor(
+                          transaction.status,
+                        ).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Text(
@@ -151,7 +164,7 @@ class TransactionItemMVVM extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Menu d'actions
             if (onEdit != null || onDelete != null)
               PopupMenuButton<String>(
@@ -173,7 +186,7 @@ class TransactionItemMVVM extends StatelessWidget {
                         children: [
                           Icon(Icons.edit, size: 20.sp),
                           SizedBox(width: 8.w),
-                          Text(l10n.edit),
+                          Text("l10n.edit"),
                         ],
                       ),
                     ),
@@ -184,7 +197,10 @@ class TransactionItemMVVM extends StatelessWidget {
                         children: [
                           Icon(Icons.delete, size: 20.sp, color: Colors.red),
                           SizedBox(width: 8.w),
-                          Text(l10n.delete, style: TextStyle(color: Colors.red)),
+                          Text(
+                            "l10n.delete",
+                            style: TextStyle(color: Colors.red),
+                          ),
                         ],
                       ),
                     ),
@@ -204,10 +220,13 @@ class TransactionItemMVVM extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionIcon(BuildContext context, AppColorsExtended appTheme) {
+  Widget _buildTransactionIcon(
+    BuildContext context,
+    AppColorsExtended appTheme,
+  ) {
     final transaction = transactionWithBalance.transaction;
     final isIncome = transactionWithBalance.isIncome;
-    
+
     return Container(
       width: 50.w,
       height: 50.w,
@@ -215,7 +234,10 @@ class TransactionItemMVVM extends StatelessWidget {
         color: appTheme.background1,
         borderRadius: BorderRadius.circular(50.r),
         border: Border.all(
-          color: _getAmountColor(isIncome, transactionWithBalance.isExpense).withValues(alpha: 0.3),
+          color: _getAmountColor(
+            isIncome,
+            transactionWithBalance.isExpense,
+          ).withValues(alpha: 0.3),
           width: 2.w,
         ),
       ),
@@ -231,25 +253,31 @@ class TransactionItemMVVM extends StatelessWidget {
     if (title == null || title.isEmpty) {
       return Icons.swap_horiz;
     }
-    
+
     final lowerTitle = title.toLowerCase();
-    
+
     // Mappage des mots-clés vers des icônes
     if (lowerTitle.contains('salaire') || lowerTitle.contains('paie')) {
       return Icons.work;
-    } else if (lowerTitle.contains('restaurant') || lowerTitle.contains('food')) {
+    } else if (lowerTitle.contains('restaurant') ||
+        lowerTitle.contains('food')) {
       return Icons.restaurant;
-    } else if (lowerTitle.contains('supermarché') || lowerTitle.contains('courses')) {
+    } else if (lowerTitle.contains('supermarché') ||
+        lowerTitle.contains('courses')) {
       return Icons.shopping_cart;
-    } else if (lowerTitle.contains('essence') || lowerTitle.contains('carburant')) {
+    } else if (lowerTitle.contains('essence') ||
+        lowerTitle.contains('carburant')) {
       return Icons.local_gas_station;
-    } else if (lowerTitle.contains('transport') || lowerTitle.contains('metro')) {
+    } else if (lowerTitle.contains('transport') ||
+        lowerTitle.contains('metro')) {
       return Icons.directions_bus;
-    } else if (lowerTitle.contains('loyer') || lowerTitle.contains('logement')) {
+    } else if (lowerTitle.contains('loyer') ||
+        lowerTitle.contains('logement')) {
       return Icons.home;
     } else if (lowerTitle.contains('santé') || lowerTitle.contains('médical')) {
       return Icons.medical_services;
-    } else if (lowerTitle.contains('virement') || lowerTitle.contains('transfer')) {
+    } else if (lowerTitle.contains('virement') ||
+        lowerTitle.contains('transfer')) {
       return Icons.compare_arrows;
     } else if (lowerTitle.contains('retrait') || lowerTitle.contains('atm')) {
       return Icons.atm;
@@ -288,14 +316,17 @@ class TransactionItemMVVM extends StatelessWidget {
     }
   }
 
-  String _getStatusText(domain.TransactionStatus status, AppLocalizations l10n) {
+  String _getStatusText(
+    domain.TransactionStatus status,
+    AppLocalizations l10n,
+  ) {
     switch (status) {
       case domain.TransactionStatus.pending:
         return l10n.pending;
       case domain.TransactionStatus.completed:
-        return l10n.completed;
+        return l10n.confirmed;
       case domain.TransactionStatus.cancelled:
-        return l10n.cancelled;
+        return l10n.canceled;
     }
   }
 }

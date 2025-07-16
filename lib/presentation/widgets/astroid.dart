@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:animate_gradient/animate_gradient.dart';
 import 'dart:math' as math;
+
+import 'package:animate_gradient/animate_gradient.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AdjustableStarPainter extends CustomPainter {
