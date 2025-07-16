@@ -153,14 +153,14 @@ Future<void> insertInitialData(AppDatabase database) async {
       .insert(
         TransactionsCompanion(
           accountId: const Value(1),
-          transactionType: const Value('expense'),
+          transactionType: const Value('income'),
           currency: const Value('EUR'),
           amount: const Value(10.0),
           title: const Value('Remboursement'),
           date: Value(
             DateTime.now()
                 .subtract(const Duration(days: 1))
-                .subtract(const Duration(seconds: 20)),
+                .subtract(const Duration(hours: 2)),
           ),
           status: const Value(1),
         ),
@@ -188,14 +188,14 @@ Future<void> insertInitialData(AppDatabase database) async {
       .insert(
         TransactionsCompanion(
           accountId: const Value(1),
-          transactionType: const Value('expense'),
+          transactionType: const Value('income'),
           currency: const Value('EUR'),
           amount: const Value(2500.0),
           title: const Value('Salaire programmé'),
           date: Value(
             DateTime.now()
                 .add(const Duration(days: 3))
-                .add(const Duration(seconds: 10)),
+                .add(const Duration(hours: 1)),
           ),
           status: const Value(0),
         ),

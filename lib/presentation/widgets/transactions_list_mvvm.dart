@@ -301,6 +301,9 @@ class _TransactionsListMVVMState extends State<TransactionsListMVVM> {
       final date = grouped[entry.key]!.first.transaction.date;
       final dateLabel = AppFormatters.formatDate(date, context);
 
+      // Trier les transactions de ce groupe par date (plus récente en premier)
+      entry.value.sort((a, b) => b.transaction.date.compareTo(a.transaction.date));
+
       result.add(
         TransactionGroup(
           dateLabel: dateLabel,
