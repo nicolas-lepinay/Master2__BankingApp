@@ -178,6 +178,10 @@ class AppViewModel extends BaseViewModel<AppViewState> {
     state = state.loading('Chargement des contreparties...', 0.7);
     final counterparties = await _counterpartyDataSource.getAllCounterparties();
 
+    // Charger les IDs des transactions suivies
+    state = state.loading('Chargement des transactions suivies...', 0.75);
+    final followedTransactionIds = await _transactionDataSource.getFollowedTransactionIds();
+
     // Initialiser le cache
     state = state.loading('Initialisation du cache...', 0.8);
     await _cacheManager.initialize(
@@ -185,6 +189,7 @@ class AppViewModel extends BaseViewModel<AppViewState> {
       transactions: transactions,
       categories: categories,
       counterparties: counterparties,
+      followedTransactionIds: followedTransactionIds,
     );
   }
 

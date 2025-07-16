@@ -151,7 +151,7 @@ class SettingsScreen extends ConsumerWidget {
                   Navigator.of(context).pop();
                 },
               );
-            }).toList(),
+            }),
           ],
         ),
       ),
@@ -205,7 +205,7 @@ class SettingsScreen extends ConsumerWidget {
                   );
                 },
               );
-            }).toList(),
+            }),
           ],
         ),
       ),
@@ -247,12 +247,12 @@ class SettingsScreen extends ConsumerWidget {
         ),
         SizedBox(height: 16.h),
         const Text(
-          'Fonctionnalités:\n' +
-              '• Gestion des comptes\n' +
-              '• Suivi des transactions\n' +
-              '• Calcul automatique des soldes\n' +
-              '• Interface multilingue\n' +
-              '• Thème clair/sombre',
+          'Fonctionnalités:\n'
+          '• Gestion des comptes\n'
+          '• Suivi des transactions\n'
+          '• Calcul automatique des soldes\n'
+          '• Interface multilingue\n'
+          '• Thème clair/sombre',
         ),
       ],
     );

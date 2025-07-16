@@ -30,4 +30,7 @@ abstract class CounterpartyRepository {
   
   /// Stream to watch specific counterparty changes
   Stream<Counterparty?> watchCounterpartyById(int id);
+  
+  /// Find or create a counterparty by name
+  Future<Counterparty> findOrCreateCounterpartyByName(String name);
 }

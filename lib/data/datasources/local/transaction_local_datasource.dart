@@ -45,6 +45,9 @@ abstract class TransactionLocalDataSource {
   
   /// Stream to watch transactions for specific account
   Stream<List<TransactionModel>> watchTransactionsByAccountId(int accountId);
+  
+  /// Get followed transaction IDs
+  Future<List<int>> getFollowedTransactionIds();
 }
 
 class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
@@ -158,5 +161,11 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
       ..orderBy([(tbl) => OrderingTerm(expression: tbl.date, mode: OrderingMode.desc)]))
       .watch()
       .map((transactions) => transactions.map((transaction) => TransactionModel.fromDrift(transaction)).toList());
+  }
+  
+  @override
+  Future<List<int>> getFollowedTransactionIds() async {
+    final followedTransactions = await _database.select(_database.followedTransactions).get();
+    return followedTransactions.map((ft) => ft.transactionId).toList();
   }
 }

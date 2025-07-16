@@ -17,10 +17,12 @@ class CacheManager {
   final Map<int, TransactionModel> _transactions = {};
   final Map<int, CategoryModel> _categories = {};
   final Map<int, CounterpartyModel> _counterparties = {};
+  final Set<int> _followedTransactionIds = {};
 
   // Cache des données enrichies (calculées)
   final Map<int, List<TransactionWithBalance>> _transactionsWithBalance = {};
   final Map<int, AccountSummary> _accountSummaries = {};
+  final List<TransactionWithBalance> _followedTransactionsWithBalance = [];
 
   // Streams pour la réactivité
   final StreamController<List<Account>> _accountsController =
@@ -31,6 +33,9 @@ class CacheManager {
       StreamController<List<Category>>.broadcast();
   final StreamController<List<Counterparty>> _counterpartiesController =
       StreamController<List<Counterparty>>.broadcast();
+  final StreamController<List<TransactionWithBalance>>
+  _followedTransactionsController =
+      StreamController<List<TransactionWithBalance>>.broadcast();
 
   // Flags d'initialisation
   bool _isInitialized = false;
@@ -42,6 +47,7 @@ class CacheManager {
     required List<TransactionModel> transactions,
     required List<CategoryModel> categories,
     required List<CounterpartyModel> counterparties,
+    required List<int> followedTransactionIds,
   }) async {
     if (_isInitialized || _isLoading) return;
 
@@ -53,6 +59,7 @@ class CacheManager {
       await _loadTransactions(transactions);
       await _loadCategories(categories);
       await _loadCounterparties(counterparties);
+      await _loadFollowedTransactionIds(followedTransactionIds);
 
       // Calculer les données enrichies
       await _calculateAllTransactionsWithBalance();
@@ -101,6 +108,14 @@ class CacheManager {
     for (final counterparty in counterparties) {
       _counterparties[counterparty.id] = counterparty;
     }
+  }
+
+  /// Charge les IDs des transactions suivies dans le cache
+  Future<void> _loadFollowedTransactionIds(
+    List<int> followedTransactionIds,
+  ) async {
+    _followedTransactionIds.clear();
+    _followedTransactionIds.addAll(followedTransactionIds);
   }
 
   /// Calcule toutes les transactions avec solde (optimisé O(n))
@@ -155,6 +170,39 @@ class CacheManager {
 
       _transactionsWithBalance[accountId] = transactionsWithBalance;
     }
+
+    // Calculer les transactions suivies avec balance
+    await _calculateFollowedTransactionsWithBalance();
+  }
+
+  /// Calcule les transactions suivies avec leurs soldes
+  Future<void> _calculateFollowedTransactionsWithBalance() async {
+    _followedTransactionsWithBalance.clear();
+
+    for (final transactionId in _followedTransactionIds) {
+      // Rechercher la transaction dans tous les comptes
+      TransactionWithBalance? foundTransaction;
+
+      for (final transactions in _transactionsWithBalance.values) {
+        try {
+          foundTransaction = transactions.firstWhere(
+            (txWithBalance) => txWithBalance.transaction.id == transactionId,
+          );
+          break;
+        } catch (e) {
+          // Continue à chercher dans le compte suivant
+        }
+      }
+
+      if (foundTransaction != null) {
+        _followedTransactionsWithBalance.add(foundTransaction);
+      }
+    }
+
+    // Trier par date (plus récentes en premier)
+    _followedTransactionsWithBalance.sort(
+      (a, b) => b.transaction.date.compareTo(a.transaction.date),
+    );
   }
 
   /// Obtient les catégories d'une transaction
@@ -258,6 +306,7 @@ class CacheManager {
     _counterpartiesController.add(
       _counterparties.values.map((c) => c.toEntity()).toList(),
     );
+    _followedTransactionsController.add(_followedTransactionsWithBalance);
   }
 
   // === GETTERS PUBLICS ===
@@ -311,6 +360,21 @@ class CacheManager {
     return _counterparties.values.map((c) => c.toEntity()).toList();
   }
 
+  /// Obtient les transactions suivies avec balance
+  List<TransactionWithBalance> getFollowedTransactionsWithBalance() {
+    return List.from(_followedTransactionsWithBalance);
+  }
+
+  /// Obtient les IDs des transactions suivies
+  List<int> getFollowedTransactionIds() {
+    return List.from(_followedTransactionIds);
+  }
+
+  /// Vérifie si une transaction est suivie
+  bool isTransactionFollowed(int transactionId) {
+    return _followedTransactionIds.contains(transactionId);
+  }
+
   // === STREAMS ===
 
   /// Stream des comptes
@@ -326,6 +390,10 @@ class CacheManager {
   /// Stream des contreparties
   Stream<List<Counterparty>> get counterpartiesStream =>
       _counterpartiesController.stream;
+
+  /// Stream des transactions suivies
+  Stream<List<TransactionWithBalance>> get followedTransactionsStream =>
+      _followedTransactionsController.stream;
 
   // === MUTATIONS ===
 
@@ -363,19 +431,39 @@ class CacheManager {
     _notifyAllStreams();
   }
 
+  /// Suit une transaction
+  Future<void> followTransaction(int transactionId) async {
+    if (!_followedTransactionIds.contains(transactionId)) {
+      _followedTransactionIds.add(transactionId);
+      await _calculateFollowedTransactionsWithBalance();
+      _followedTransactionsController.add(_followedTransactionsWithBalance);
+    }
+  }
+
+  /// Arrête le suivi d'une transaction
+  Future<void> unfollowTransaction(int transactionId) async {
+    if (_followedTransactionIds.remove(transactionId)) {
+      await _calculateFollowedTransactionsWithBalance();
+      _followedTransactionsController.add(_followedTransactionsWithBalance);
+    }
+  }
+
   /// Nettoie le cache
   void dispose() {
     _accounts.clear();
     _transactions.clear();
     _categories.clear();
     _counterparties.clear();
+    _followedTransactionIds.clear();
     _transactionsWithBalance.clear();
     _accountSummaries.clear();
+    _followedTransactionsWithBalance.clear();
 
     _accountsController.close();
     _transactionsController.close();
     _categoriesController.close();
     _counterpartiesController.close();
+    _followedTransactionsController.close();
 
     _isInitialized = false;
     _isLoading = false;

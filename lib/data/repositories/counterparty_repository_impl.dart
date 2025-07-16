@@ -191,4 +191,26 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
         .watchCounterpartyById(id)
         .map((model) => model?.toEntity());
   }
+
+  @override
+  Future<Counterparty> findOrCreateCounterpartyByName(String name) async {
+    // D'abord, chercher dans le cache/DB
+    final existingCounterparties = await searchCounterpartiesByName(name);
+    
+    // Chercher un match exact
+    for (final counterparty in existingCounterparties) {
+      if (counterparty.name.toLowerCase() == name.toLowerCase()) {
+        return counterparty;
+      }
+    }
+    
+    // Si pas trouvé, créer un nouveau counterparty
+    final newCounterparty = Counterparty(
+      id: 0, // Will be assigned by database
+      name: name,
+      icon: null,
+    );
+    
+    return await createCounterparty(newCounterparty);
+  }
 }

@@ -216,7 +216,7 @@ class _TransactionsListState extends State<TransactionsList> {
                       )
                     : null,
               );
-            }).toList(),
+            }),
 
             SizedBox(height: AppConstants.largePadding.h),
           ],

@@ -10,11 +10,17 @@ class TransactionRepositoryImpl implements TransactionRepository {
   final TransactionLocalDataSource _localDataSource;
   final CacheManager _cacheManager;
   final FollowedTransactionDatabaseRepository _followedTransactionRepository;
+  final AccountLocalDataSource _accountLocalDataSource;
+  final CounterpartyLocalDataSource _counterpartyLocalDataSource;
+  final CategoryLocalDataSource _categoryLocalDataSource;
 
   TransactionRepositoryImpl(
     this._localDataSource,
     this._cacheManager,
     this._followedTransactionRepository,
+    this._accountLocalDataSource,
+    this._counterpartyLocalDataSource,
+    this._categoryLocalDataSource,
   );
 
   @override
@@ -121,28 +127,8 @@ class TransactionRepositoryImpl implements TransactionRepository {
     }
 
     // Fallback : calculer depuis la base de données (plus lent)
-    final transactionModels = await _localDataSource.getTransactionsByAccountId(
-      accountId,
-    );
-    // Note : Cette implémentation de fallback est simplifiée
-    // En production, il faudrait recalculer les soldes ici
-    return transactionModels.map((model) {
-      // Implémentation simplifiée pour le fallback
-      return TransactionWithBalance(
-        transaction: model.toEntity(),
-        account: Account(
-          id: accountId,
-          name: 'Account',
-          currency: model.currency,
-          initialBalance: 0,
-          creationDate: DateTime.now(),
-        ),
-        balanceAfter: AccountBalance(
-          balance: Money(amount: 0, currency: model.currency),
-          calculatedAt: DateTime.now(),
-        ),
-      );
-    }).toList();
+    print('⚠️  FALLBACK: Cache non initialisé, calcul des soldes depuis la DB pour compte $accountId');
+    return await _calculateTransactionsWithBalanceFallback(accountId);
   }
 
   @override
@@ -280,9 +266,17 @@ class TransactionRepositoryImpl implements TransactionRepository {
   // ============================================================================
 
   @override
-  Future<List<TransactionWithBalance>> getFollowedTransactionsWithDetails() async {
-    final followedTransactionsWithCounterparty = await _followedTransactionRepository
-        .getFollowedTransactionsWithDetails();
+  Future<List<TransactionWithBalance>>
+  getFollowedTransactionsWithDetails() async {
+    // Si le cache est initialisé, utiliser le cache MVVM
+    if (_cacheManager.isInitialized) {
+      return _cacheManager.getFollowedTransactionsWithBalance();
+    }
+
+    // Fallback : utiliser l'ancienne méthode
+    final followedTransactionsWithCounterparty =
+        await _followedTransactionRepository
+            .getFollowedTransactionsWithDetails();
 
     // Convertir TransactionWithCounterparty en TransactionWithBalance
     final List<TransactionWithBalance> result = [];
@@ -327,11 +321,13 @@ class TransactionRepositoryImpl implements TransactionRepository {
         calculatedAt: DateTime.now(),
       );
 
-      result.add(TransactionWithBalance(
-        transaction: transaction,
-        account: account,
-        balanceAfter: balance,
-      ));
+      result.add(
+        TransactionWithBalance(
+          transaction: transaction,
+          account: account,
+          balanceAfter: balance,
+        ),
+      );
     }
 
     return result;
@@ -339,22 +335,50 @@ class TransactionRepositoryImpl implements TransactionRepository {
 
   @override
   Future<List<int>> getFollowedTransactionIds() async {
+    // Si le cache est initialisé, utiliser le cache MVVM
+    if (_cacheManager.isInitialized) {
+      return _cacheManager.getFollowedTransactionIds();
+    }
+
+    // Fallback : utiliser l'ancienne méthode
     return await _followedTransactionRepository.getFollowedTransactionIds();
   }
 
   @override
   Future<bool> isTransactionFollowed(int transactionId) async {
-    return await _followedTransactionRepository.isTransactionFollowed(transactionId);
+    // Si le cache est initialisé, utiliser le cache MVVM
+    if (_cacheManager.isInitialized) {
+      return _cacheManager.isTransactionFollowed(transactionId);
+    }
+
+    // Fallback : utiliser l'ancienne méthode
+    return await _followedTransactionRepository.isTransactionFollowed(
+      transactionId,
+    );
   }
 
   @override
   Future<void> followTransaction(int transactionId) async {
+    // Ajouter dans la base de données
     await _followedTransactionRepository.addFollowedTransaction(transactionId);
+
+    // Mettre à jour le cache si initialisé
+    if (_cacheManager.isInitialized) {
+      await _cacheManager.followTransaction(transactionId);
+    }
   }
 
   @override
   Future<void> unfollowTransaction(int transactionId) async {
-    await _followedTransactionRepository.removeFollowedTransaction(transactionId);
+    // Supprimer de la base de données
+    await _followedTransactionRepository.removeFollowedTransaction(
+      transactionId,
+    );
+
+    // Mettre à jour le cache si initialisé
+    if (_cacheManager.isInitialized) {
+      await _cacheManager.unfollowTransaction(transactionId);
+    }
   }
 
   @override
@@ -376,4 +400,95 @@ class TransactionRepositoryImpl implements TransactionRepository {
     // Sauvegarder la transaction mise à jour
     await updateTransaction(updatedTransaction);
   }
+
+  /// Calcule les transactions avec solde depuis la base de données (fallback)
+  /// Inspiré du code V1 - utilisé uniquement en cas de cache non initialisé
+  Future<List<TransactionWithBalance>> _calculateTransactionsWithBalanceFallback(
+    int accountId,
+  ) async {
+    try {
+      // Récupérer le compte depuis la DataSource
+      final accountModel = await _accountLocalDataSource.getAccountById(accountId);
+      if (accountModel == null) {
+        print('❌ FALLBACK: Compte $accountId introuvable');
+        return [];
+      }
+      
+      final account = accountModel.toEntity();
+      
+      // Récupérer les transactions triées par date
+      final transactionModels = await _localDataSource.getTransactionsByAccountId(
+        accountId,
+      );
+      
+      // Trier par date (ascendant) pour calculer les soldes chronologiquement
+      transactionModels.sort((a, b) => a.date.compareTo(b.date));
+      
+      final transactionsWithBalance = <TransactionWithBalance>[];
+      double currentBalance = account.initialBalance;
+      
+      print('📊 FALLBACK: Calcul des soldes pour ${transactionModels.length} transactions (solde initial: ${account.initialBalance})');
+      
+      for (final transactionModel in transactionModels) {
+        final transaction = transactionModel.toEntity();
+        
+        // Calculer le nouveau solde (même logique que le cache)
+        final signedAmount = transaction.type == TransactionType.income
+            ? transaction.amount
+            : -transaction.amount;
+        currentBalance += signedAmount;
+        
+        // Récupérer la contrepartie si disponible
+        Counterparty? counterparty;
+        if (transaction.counterpartyId != null) {
+          final counterpartyModel = await _counterpartyLocalDataSource.getCounterpartyById(
+            transaction.counterpartyId!,
+          );
+          counterparty = counterpartyModel?.toEntity();
+        }
+        
+        // Récupérer les catégories
+        final categories = await _getTransactionCategoriesFallback(transaction);
+        
+        // Créer l'objet TransactionWithBalance
+        final transactionWithBalance = TransactionWithBalance(
+          transaction: transaction,
+          account: account,
+          balanceAfter: AccountBalance(
+            balance: Money(amount: currentBalance, currency: account.currency),
+            calculatedAt: DateTime.now(),
+          ),
+          counterparty: counterparty,
+          categories: categories,
+        );
+        
+        transactionsWithBalance.add(transactionWithBalance);
+      }
+      
+      print('✅ FALLBACK: Calcul terminé, solde final: $currentBalance');
+      return transactionsWithBalance;
+      
+    } catch (e) {
+      print('❌ FALLBACK: Erreur lors du calcul des soldes: $e');
+      rethrow;
+    }
+  }
+  
+  /// Récupère les catégories d'une transaction (fallback)
+  Future<List<Category>> _getTransactionCategoriesFallback(
+    Transaction transaction,
+  ) async {
+    final categories = <Category>[];
+    
+    // Récupérer chaque catégorie si elle existe
+    for (final categoryId in transaction.categoryIds) {
+      final categoryModel = await _categoryLocalDataSource.getCategoryById(categoryId);
+      if (categoryModel != null) {
+        categories.add(categoryModel.toEntity());
+      }
+    }
+    
+    return categories;
+  }
+
 }

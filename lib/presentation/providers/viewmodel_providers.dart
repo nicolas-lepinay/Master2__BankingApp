@@ -72,6 +72,9 @@ final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
     ref.watch(transactionLocalDataSourceProvider),
     ref.watch(cacheManagerProvider),
     ref.watch(followedTransactionDatabaseRepositoryProvider),
+    ref.watch(accountLocalDataSourceProvider),
+    ref.watch(counterpartyLocalDataSourceProvider),
+    ref.watch(categoryLocalDataSourceProvider),
   );
 });
 
