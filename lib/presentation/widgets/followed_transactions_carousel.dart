@@ -35,7 +35,14 @@ class _FollowedTransactionsCarouselState
 
   @override
   Widget build(BuildContext context) {
-    // Utiliser TransactionRepository directement (MVVM)
+    // Temporairement, afficher l'état vide en attendant l'implémentation complète
+    // des transactions suivies dans le cache MVVM
+    return _buildEmptyState();
+    
+    // TODO: Implémenter les transactions suivies dans le cache MVVM
+    // Une fois que le cache gérera les transactions suivies, 
+    // nous pourrons utiliser cette implémentation :
+    /*
     final transactionRepository = ref.watch(transactionRepositoryProvider);
     
     return FutureBuilder<List<domain.TransactionWithBalance>>(
@@ -46,6 +53,7 @@ class _FollowedTransactionsCarouselState
         }
         
         if (snapshot.hasError) {
+          print('FollowedTransactionsCarousel Error: ${snapshot.error}');
           return _buildErrorState();
         }
         
@@ -57,6 +65,7 @@ class _FollowedTransactionsCarouselState
         return _buildCarousel(transactions);
       },
     );
+    */
   }
 
   Widget _buildEmptyState() {

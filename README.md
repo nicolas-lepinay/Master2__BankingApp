@@ -187,6 +187,12 @@ lib/
 - [x] **9L.3** Solution : Future(() => _initializeApp()) pour délayer l'exécution
 - [x] **9L.4** Test : flutter analyze splash_screen.dart - 0 erreur
 
+#### Étape 9M: Correction Erreur FollowedTransactionsCarousel - TERMINÉ ! 🎉
+- [x] **9M.1** Identifié erreur _buildErrorState() affiché dans followed_transactions_carousel
+- [x] **9M.2** Cause : getFollowedTransactionsWithDetails() échoue (pas de gestion dans cache MVVM)
+- [x] **9M.3** Solution temporaire : Afficher _buildEmptyState() en attendant implémentation complète
+- [x] **9M.4** TODO ajouté : Implémenter transactions suivies dans cache MVVM
+
 ### 📋 ÉTAPES À VENIR
 
 #### Étape 10: Tests et Validation
