@@ -248,6 +248,28 @@ lib/
   - [x] **9P.4b** Provider mis à jour avec nouvelles dépendances
   - [x] **9P.4c** Fallback prêt pour production en cas de cache défaillant
 
+#### Étape 9Q: Restauration Interface Utilisateur Originale MVVM - TERMINÉ ! 🎉
+- [x] **9Q.1** Analysé et identifié modifications UI non-demandées lors migration MVVM
+  - [x] **9Q.1a** transaction_item_mvvm.dart : Couleurs hardcodées, méthodes privées inutiles
+  - [x] **9Q.1b** transactions_list_mvvm.dart : Fonctionnalités supplémentaires non-désirées
+  - [x] **9Q.1c** Perte de l'UI originale : AppColorsExtended, AppTextStyles, AppFormatters
+- [x] **9Q.2** Restauré UI originale transaction_item_mvvm.dart
+  - [x] **9Q.2a** Supprimé méthodes privées _formatAmount() et _getAmountColor()
+  - [x] **9Q.2b** Restauré AppColorsExtended : appTheme.text1, appTheme.textCredit, appTheme.textDebit
+  - [x] **9Q.2c** Restauré AppTextStyles : transactionTitle, transactionAmount, transactionBalance
+  - [x] **9Q.2d** Restauré AppFormatters.formatAmountClean() et formatCurrency()
+  - [x] **9Q.2e** Restauré layout exact : icône 50x50, Row avec colonnes, padding defaults
+- [x] **9Q.3** Restauré UI originale transactions_list_mvvm.dart
+  - [x] **9Q.3a** Supprimé fonctionnalités supplémentaires : barre de recherche, statistiques, pagination
+  - [x] **9Q.3b** Restauré headers animés _buildAnimatedDateHeader() avec animation de glissement
+  - [x] **9Q.3c** Restauré logique scroll to today exacte avec calcul précis
+  - [x] **9Q.3d** Restauré _calculateDayTotals() avec expenses/revenues et _formatNetAmount()
+  - [x] **9Q.3e** Restauré TransactionGroup et _groupTransactionsByDate() originaux
+- [x] **9Q.4** Validation et tests
+  - [x] **9Q.4a** Compilation sans erreur critique (5 warnings style mineurs)
+  - [x] **9Q.4b** UI identique à l'original avec architecture MVVM conservée
+  - [x] **9Q.4c** Intégration full_transactions_bottom_sheet.dart fonctionnelle
+
 ### 📋 ÉTAPES À VENIR
 
 #### Étape 10: Tests et Validation
@@ -641,8 +663,66 @@ Future<List<TransactionWithBalance>> _calculateTransactionsWithBalanceFallback(i
 
 **Utilisation** : Se déclenche automatiquement si `_cacheManager.isInitialized == false`
 
+### 14. **Restauration Interface Utilisateur Originale - TERMINÉ ! ✅**
+**Problème identifié** : Lors de la migration MVVM, l'interface utilisateur des widgets `transaction_item_mvvm.dart` et `transactions_list_mvvm.dart` avait été modifiée sans demande explicite.
+
+**Modifications non-demandées détectées** :
+```dart
+// ❌ PROBLÉMATIQUE - Couleurs hardcodées au lieu du thème
+Color _getAmountColor(bool isIncome, bool isExpense) {
+  if (isIncome) return Colors.green;        // Hardcodé !
+  else if (isExpense) return Colors.red;   // Hardcodé !
+  else return AppColors.textSecondary;     // Hardcodé !
+}
+
+// ❌ PROBLÉMATIQUE - Méthodes privées inutiles
+String _formatAmount(double amount, String currency, bool isIncome) {
+  final formattedAmount = AppFormatters.formatAmount(amount, currency);
+  return isIncome ? '+$formattedAmount' : '-$formattedAmount';
+}
+
+// ❌ PROBLÉMATIQUE - Fonctionnalités supplémentaires non-demandées
+_buildSearchBar(), _buildQuickStats(), _buildPaginationControls()
+```
+
+**Restauration complète effectuée** :
+```dart
+// ✅ CORRECT - Respect du thème original
+final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+style: AppTextStyles.transactionAmount.copyWith(
+  color: isDebit ? appTheme.text1 : appTheme.textCredit,
+),
+
+// ✅ CORRECT - Utilisation formatters originaux
+Text(
+  AppFormatters.formatAmountClean(
+    isDebit ? -transaction.amount : transaction.amount,
+    transaction.currency,
+    context: context,
+  ),
+),
+
+// ✅ CORRECT - Headers animés restaurés
+Widget _buildAnimatedDateHeader() {
+  return AnimatedAlign(
+    alignment: isExpanded ? Alignment.centerLeft : Alignment.center,
+    // Animation de glissement exacte
+  );
+}
+```
+
+**Éléments restaurés** :
+- ✅ **AppColorsExtended** : `appTheme.text1`, `appTheme.textCredit`, `appTheme.textDebit`
+- ✅ **AppTextStyles** : `transactionTitle`, `transactionAmount`, `transactionBalance`
+- ✅ **AppFormatters** : `formatAmountClean()`, `formatCurrency()`
+- ✅ **Layout exact** : Icône 50x50, padding defaults, Row avec colonnes
+- ✅ **Headers animés** : `_buildAnimatedDateHeader()` avec animation de glissement
+- ✅ **Scroll to today** : Logique exacte avec calcul précis des offsets
+
+**Résultat** : Interface utilisateur identique à l'original avec architecture MVVM préservée
+
 ---
 
-*Dernière mise à jour : Après étape 9P - FALLBACK ROBUSTE PRODUCTION ! 🎉*
-*Statut : Architecture MVVM complète avec sécurité de production - Fallback robuste opérationnel*
+*Dernière mise à jour : Après étape 9Q - UI ORIGINALE RESTAURÉE ! 🎉*
+*Statut : Architecture MVVM complète + Interface utilisateur originale préservée*
 *Prochaine étape : Tests et validation performances - Préparation intégration Turso*

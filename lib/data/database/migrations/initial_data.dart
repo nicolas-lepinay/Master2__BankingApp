@@ -118,7 +118,7 @@ Future<void> insertInitialData(AppDatabase database) async {
         TransactionsCompanion(
           accountId: const Value(1),
           counterpartyId: const Value(1), // Netflix
-          transactionType: const Value('DEBIT'),
+          transactionType: const Value('expense'),
           currency: const Value('EUR'),
           amount: const Value(20.0),
           title: const Value('Abonnement Netflix'),
@@ -134,7 +134,7 @@ Future<void> insertInitialData(AppDatabase database) async {
         TransactionsCompanion(
           accountId: const Value(1),
           counterpartyId: const Value(5), // Spotify
-          transactionType: const Value('DEBIT'),
+          transactionType: const Value('expense'),
           currency: const Value('EUR'),
           amount: const Value(30.0),
           title: const Value('Abonnement Spotify'),
@@ -153,7 +153,7 @@ Future<void> insertInitialData(AppDatabase database) async {
       .insert(
         TransactionsCompanion(
           accountId: const Value(1),
-          transactionType: const Value('CREDIT'),
+          transactionType: const Value('expense'),
           currency: const Value('EUR'),
           amount: const Value(10.0),
           title: const Value('Remboursement'),
@@ -173,7 +173,7 @@ Future<void> insertInitialData(AppDatabase database) async {
         TransactionsCompanion(
           accountId: const Value(1),
           counterpartyId: const Value(4),
-          transactionType: const Value('DEBIT'),
+          transactionType: const Value('expense'),
           currency: const Value('EUR'),
           amount: const Value(50.0),
           title: const Value('Facture électricité (programmée)'),
@@ -188,7 +188,7 @@ Future<void> insertInitialData(AppDatabase database) async {
       .insert(
         TransactionsCompanion(
           accountId: const Value(1),
-          transactionType: const Value('CREDIT'),
+          transactionType: const Value('expense'),
           currency: const Value('EUR'),
           amount: const Value(2500.0),
           title: const Value('Salaire programmé'),
@@ -207,7 +207,7 @@ Future<void> insertInitialData(AppDatabase database) async {
       .insert(
         TransactionsCompanion(
           accountId: const Value(1),
-          transactionType: const Value('DEBIT'),
+          transactionType: const Value('expense'),
           currency: const Value('EUR'),
           amount: const Value(800.55),
           title: const Value('Airbnb'),

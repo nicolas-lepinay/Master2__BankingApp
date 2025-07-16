@@ -1,51 +1,38 @@
-import 'package:bankapp/core/theme/app_colors.dart';
+import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
-import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/widgets/transaction_item_mvvm.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class TransactionsListMVVM extends ConsumerStatefulWidget {
+class TransactionsListMVVM extends StatefulWidget {
   final List<domain.TransactionWithBalance> transactions;
   final Function(domain.Transaction)? onTransactionTap;
-  final Function(domain.Transaction)? onTransactionEdit;
-  final Function(domain.Transaction)? onTransactionDelete;
   final bool scrollToToday;
   final String? accountCurrency;
-  final bool showPagination;
-  final bool showSearch;
 
   const TransactionsListMVVM({
     super.key,
     required this.transactions,
     this.onTransactionTap,
-    this.onTransactionEdit,
-    this.onTransactionDelete,
     this.scrollToToday = false,
     this.accountCurrency,
-    this.showPagination = false,
-    this.showSearch = false,
   });
 
   @override
-  ConsumerState<TransactionsListMVVM> createState() =>
-      _TransactionsListMVVMState();
+  State<TransactionsListMVVM> createState() => _TransactionsListMVVMState();
 }
 
-class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
+class _TransactionsListMVVMState extends State<TransactionsListMVVM> {
   final ScrollController _scrollController = ScrollController();
-  final TextEditingController _searchController = TextEditingController();
-  bool _areHeadersExpanded = true;
-  bool _hasScrolledToToday = false;
+  bool _areHeadersExpanded = true; // Tous les headers sont expanded par défaut
+  bool _hasScrolledToToday = false; // Flag pour éviter les scrolls répétés
 
   @override
   void dispose() {
     _scrollController.dispose();
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -53,6 +40,8 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
   void didUpdateWidget(TransactionsListMVVM oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    // Si les transactions ont changé et qu'on doit scroller vers aujourd'hui
+    // ET qu'on ne l'a pas encore fait
     if (widget.scrollToToday &&
         !_hasScrolledToToday &&
         widget.transactions != oldWidget.transactions &&
@@ -64,336 +53,223 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
   void _scrollToTodayAfterBuild() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToToday();
-      _hasScrolledToToday = true;
+      _hasScrolledToToday = true; // Marquer comme fait
     });
   }
 
   void _scrollToToday() {
-    if (widget.transactions.isEmpty) return;
+    if (!mounted || widget.transactions.isEmpty) return;
 
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final groupedTransactions = _groupTransactionsByDate(
+      widget.transactions,
+      context,
+    );
+    if (groupedTransactions.isEmpty) return;
 
-    double targetOffset = 0;
-    double currentOffset = 0;
+    final today = DateTime.now();
+    final todayOnly = DateTime(today.year, today.month, today.day);
 
-    final groupedTransactions = _groupTransactionsByDate(widget.transactions);
+    // Trouver l'index du groupe de transactions le plus proche d'aujourd'hui
+    int closestIndex = 0;
+    Duration smallestDifference = Duration.zero;
 
-    for (final entry in groupedTransactions.entries) {
-      final date = entry.key;
-      final transactions = entry.value;
+    for (int i = 0; i < groupedTransactions.length; i++) {
+      final groupDate = groupedTransactions[i].date;
+      final groupDateOnly = DateTime(
+        groupDate.year,
+        groupDate.month,
+        groupDate.day,
+      );
+      final difference = todayOnly.difference(groupDateOnly).abs();
 
-      // Hauteur du header de date
-      currentOffset += 60.h;
-
-      if (date.isAtSameMomentAs(today)) {
-        targetOffset = currentOffset - 100.h; // Offset pour centrer
-        break;
-      }
-
-      // Hauteur des transactions de cette date
-      if (_areHeadersExpanded) {
-        currentOffset +=
-            transactions.length * 80.h; // Hauteur approximative par transaction
+      if (i == 0 || difference < smallestDifference) {
+        smallestDifference = difference;
+        closestIndex = i;
       }
     }
 
-    if (targetOffset > 0) {
+    // Calculer la position approximative pour scroller
+    // Chaque groupe a approximativement: 40px pour le header + (nombre de transactions * 80px)
+    double targetOffset = 0;
+
+    for (int i = 0; i < closestIndex; i++) {
+      final group = groupedTransactions[i];
+      targetOffset += 50.h; // Header de date
+      targetOffset +=
+          group.transactions.length * 80.h; // Environ 80px par transaction
+      targetOffset += 8.h; // Spacing entre les groupes
+    }
+
+    // S'assurer que l'offset est dans les limites du scroll
+    if (_scrollController.hasClients) {
+      final maxScrollExtent = _scrollController.position.maxScrollExtent;
+      targetOffset = targetOffset.clamp(0.0, maxScrollExtent);
+
       _scrollController.animateTo(
-        targetOffset.clamp(0, _scrollController.position.maxScrollExtent),
+        targetOffset,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
       );
     }
   }
 
-  Map<DateTime, List<domain.TransactionWithBalance>> _groupTransactionsByDate(
-    List<domain.TransactionWithBalance> transactions,
-  ) {
-    final Map<DateTime, List<domain.TransactionWithBalance>> grouped = {};
-
-    for (final transaction in transactions) {
-      final date = DateTime(
-        transaction.transaction.date.year,
-        transaction.transaction.date.month,
-        transaction.transaction.date.day,
-      );
-
-      if (!grouped.containsKey(date)) {
-        grouped[date] = [];
-      }
-      grouped[date]!.add(transaction);
-    }
-
-    return grouped;
+  void _toggleAllHeaders() {
+    setState(() {
+      _areHeadersExpanded = !_areHeadersExpanded;
+    });
   }
 
-  double _calculateDayTotal(List<domain.TransactionWithBalance> transactions) {
-    return transactions.fold(0.0, (sum, tx) {
-      return sum +
-          (tx.isIncome ? tx.transaction.amount : -tx.transaction.amount);
-    });
+  // Calculer les totaux pour une date donnée
+  Map<String, double> _calculateDayTotals(
+    List<domain.TransactionWithBalance> dayTransactions,
+  ) {
+    double totalExpenses = 0.0;
+    double totalRevenues = 0.0;
+
+    for (final transactionWithBalance in dayTransactions) {
+      final transaction = transactionWithBalance.transaction;
+      final amount = transaction.amount;
+
+      if (transactionWithBalance.isExpense) {
+        totalExpenses += amount;
+      } else {
+        totalRevenues += amount;
+      }
+    }
+    return {'expenses': totalExpenses, 'revenues': totalRevenues};
+  }
+
+  // Formater le montant net
+  String _formatNetAmount(
+    Map<String, double> dayTotals,
+    List<domain.TransactionWithBalance> dayTransactions,
+  ) {
+    final totalExpenses = dayTotals['expenses'] ?? 0.0;
+    final totalRevenues = dayTotals['revenues'] ?? 0.0;
+    final netAmount = totalRevenues - totalExpenses;
+
+    // Priorité : devise du compte > devise de la première transaction > EUR par défaut
+    final currency =
+        widget.accountCurrency ??
+        (dayTransactions.isNotEmpty
+            ? dayTransactions.first.transaction.currency
+            : 'EUR');
+
+    return AppFormatters.formatAmountClean(
+      netAmount,
+      currency,
+      showSign: true,
+      context: context,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
-
     if (widget.transactions.isEmpty) {
-      return _buildEmptyState(context, appTheme);
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.all(AppConstants.largePadding.r),
+          child: Text('Aucune transaction', style: AppTextStyles.bodyMedium),
+        ),
+      );
     }
 
-    return Column(
-      children: [
-        // Barre de recherche si activée
-        if (widget.showSearch) _buildSearchBar(context, appTheme),
-
-        // Statistiques rapides
-        _buildQuickStats(context, appTheme),
-
-        // Liste des transactions
-        Expanded(child: _buildTransactionsList(context, appTheme)),
-
-        // Pagination si activée
-        if (widget.showPagination) _buildPaginationControls(context, appTheme),
-      ],
+    // Grouper les transactions par date
+    final groupedTransactions = _groupTransactionsByDate(
+      widget.transactions,
+      context,
     );
-  }
 
-  Widget _buildSearchBar(BuildContext context, AppColorsExtended appTheme) {
-    return Container(
-      margin: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        color: appTheme.background1,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: AppColors.textSecondary.withValues(alpha: 0.2),
-        ),
-      ),
-      child: TextField(
-        controller: _searchController,
-        decoration: InputDecoration(
-          hintText: 'Rechercher une transaction...',
-          prefixIcon: Icon(Icons.search, color: appTheme.text3),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 16.w,
-            vertical: 12.h,
-          ),
-        ),
-        onChanged: (query) {
-          final transactionViewModel = ref.read(
-            transactionViewModelProvider.notifier,
-          );
-          transactionViewModel.searchTransactions(query);
-        },
-      ),
-    );
-  }
-
-  Widget _buildQuickStats(BuildContext context, AppColorsExtended appTheme) {
-    final incomeTotal = widget.transactions
-        .where((tx) => tx.isIncome)
-        .fold(0.0, (sum, tx) => sum + tx.transaction.amount);
-
-    final expenseTotal = widget.transactions
-        .where((tx) => tx.isExpense)
-        .fold(0.0, (sum, tx) => sum + tx.transaction.amount);
-
-    final netAmount = incomeTotal - expenseTotal;
-
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        color: appTheme.background1,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: AppColors.textSecondary.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildStatItem(
-              'Revenus',
-              incomeTotal,
-              Colors.green,
-              widget.accountCurrency ?? 'EUR',
-            ),
-          ),
-          Container(
-            width: 1.w,
-            height: 30.h,
-            color: AppColors.textSecondary.withValues(alpha: 0.2),
-          ),
-          Expanded(
-            child: _buildStatItem(
-              'Dépenses',
-              expenseTotal,
-              Colors.red,
-              widget.accountCurrency ?? 'EUR',
-            ),
-          ),
-          Container(
-            width: 1.w,
-            height: 30.h,
-            color: AppColors.textSecondary.withValues(alpha: 0.2),
-          ),
-          Expanded(
-            child: _buildStatItem(
-              'Net',
-              netAmount,
-              netAmount >= 0 ? Colors.green : Colors.red,
-              widget.accountCurrency ?? 'EUR',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem(
-    String label,
-    double amount,
-    Color color,
-    String currency,
-  ) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          AppFormatters.formatAmount(amount, currency),
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: color,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTransactionsList(
-    BuildContext context,
-    AppColorsExtended appTheme,
-  ) {
-    final groupedTransactions = _groupTransactionsByDate(widget.transactions);
-    final sortedDates = groupedTransactions.keys.toList()
-      ..sort((a, b) => b.compareTo(a)); // Plus récent en premier
+    // Scroller vers aujourd'hui après la construction si nécessaire
+    // ET seulement si on ne l'a pas encore fait
+    if (widget.scrollToToday && !_hasScrolledToToday) {
+      _scrollToTodayAfterBuild();
+    }
 
     return ListView.builder(
       controller: _scrollController,
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      itemCount: sortedDates.length,
+      padding: EdgeInsets.only(bottom: 100.h), // Espace pour la bottom nav
+      itemCount: groupedTransactions.length,
       itemBuilder: (context, index) {
-        final date = sortedDates[index];
-        final transactions = groupedTransactions[date]!;
-        final dayTotal = _calculateDayTotal(transactions);
+        final group = groupedTransactions[index];
+        final dayTotals = _calculateDayTotals(group.transactions);
 
-        return _buildDateGroup(context, appTheme, date, transactions, dayTotal);
-      },
-    );
-  }
-
-  Widget _buildDateGroup(
-    BuildContext context,
-    AppColorsExtended appTheme,
-    DateTime date,
-    List<domain.TransactionWithBalance> transactions,
-    double dayTotal,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header de la date
-        _buildDateHeader(context, appTheme, date, dayTotal),
-
-        // Transactions de la journée
-        if (_areHeadersExpanded)
-          ...transactions.map(
-            (transaction) => TransactionItemMVVM(
-              transactionWithBalance: transaction,
-              onTap: () =>
-                  widget.onTransactionTap?.call(transaction.transaction),
-              onEdit: () =>
-                  widget.onTransactionEdit?.call(transaction.transaction),
-              onDelete: () =>
-                  widget.onTransactionDelete?.call(transaction.transaction),
-            ),
-          ),
-
-        SizedBox(height: 16.h),
-      ],
-    );
-  }
-
-  Widget _buildDateHeader(
-    BuildContext context,
-    AppColorsExtended appTheme,
-    DateTime date,
-    double dayTotal,
-  ) {
-    final isToday = _isToday(date);
-    final isYesterday = _isYesterday(date);
-
-    String dateText;
-    if (isToday) {
-      dateText = 'Aujourd\'hui';
-    } else if (isYesterday) {
-      dateText = 'Hier';
-    } else {
-      dateText = AppFormatters.formatDate(date, context);
-    }
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _areHeadersExpanded = !_areHeadersExpanded;
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-        decoration: BoxDecoration(
-          color: isToday
-              ? AppColors.primary.withValues(alpha: 0.1)
-              : appTheme.background1,
-          borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(
-            color: isToday
-                ? AppColors.primary.withValues(alpha: 0.3)
-                : AppColors.textSecondary.withValues(alpha: 0.2),
-          ),
-        ),
-        child: Row(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              _areHeadersExpanded ? Icons.expand_less : Icons.expand_more,
-              color: appTheme.text3,
-              size: 20.sp,
+            // En-tête de date animé avec glissement
+            _buildAnimatedDateHeader(
+              group.dateLabel,
+              _areHeadersExpanded, // Utiliser l'état global
+              dayTotals,
+              group.transactions, // Passer les transactions du groupe
             ),
-            SizedBox(width: 8.w),
-            Text(
-              dateText,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: appTheme.text1,
-                fontWeight: FontWeight.w600,
+            SizedBox(height: AppConstants.verySmallPadding.h / 4),
+            // Liste des transactions pour cette date
+            ...group.transactions.map((transactionWithBalance) {
+              return TransactionItemMVVM(
+                transactionWithBalance: transactionWithBalance,
+                onTap: widget.onTransactionTap != null
+                    ? () => widget.onTransactionTap!(
+                        transactionWithBalance.transaction,
+                      )
+                    : null,
+              );
+            }),
+
+            SizedBox(height: AppConstants.largePadding.h),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildAnimatedDateHeader(
+    String dateLabel,
+    bool isExpanded,
+    Map<String, double> dayTotals,
+    List<domain.TransactionWithBalance> dayTransactions, // Nouveau paramètre
+  ) {
+    return GestureDetector(
+      onTap: _toggleAllHeaders, // Toggle tous les headers
+      child: SizedBox(
+        //height: 30.h, // Hauteur fixe pour éviter les sauts
+        child: Stack(
+          children: [
+            // Date - Animation de glissement du centre vers la gauche
+            AnimatedAlign(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              alignment: isExpanded ? Alignment.centerLeft : Alignment.center,
+              child: Text(
+                dateLabel.toUpperCase(),
+                style: AppTextStyles.dateHeader.copyWith(
+                  color: Theme.of(
+                    context,
+                  ).extension<AppColorsExtended>()!.text3,
+                ),
               ),
             ),
-            const Spacer(),
-            Text(
-              AppFormatters.formatAmount(
-                dayTotal,
-                widget.accountCurrency ?? 'EUR',
-              ),
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: dayTotal >= 0 ? Colors.green : Colors.red,
-                fontWeight: FontWeight.w700,
+
+            // Total - Animation d'apparition depuis la droite
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              right: isExpanded ? 0 : -100.w, // -100 pour cacher complètement
+              top: 0,
+              bottom: 0,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                opacity: isExpanded ? 1.0 : 0.0,
+                child: Text(
+                  _formatNetAmount(dayTotals, dayTransactions),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).extension<AppColorsExtended>()!.text4,
+                  ),
+                ),
               ),
             ),
           ],
@@ -402,93 +278,53 @@ class _TransactionsListMVVMState extends ConsumerState<TransactionsListMVVM> {
     );
   }
 
-  Widget _buildPaginationControls(
+  List<TransactionGroup> _groupTransactionsByDate(
+    List<domain.TransactionWithBalance> transactions,
     BuildContext context,
-    AppColorsExtended appTheme,
   ) {
-    return Consumer(
-      builder: (context, ref, child) {
-        final transactionState = ref.watch(transactionViewModelProvider);
-        final transactionViewModel = ref.read(
-          transactionViewModelProvider.notifier,
-        );
+    final Map<String, List<domain.TransactionWithBalance>> grouped = {};
 
-        return Container(
-          padding: EdgeInsets.all(16.r),
-          decoration: BoxDecoration(
-            color: appTheme.background1,
-            border: Border(
-              top: BorderSide(
-                color: AppColors.textSecondary.withValues(alpha: 0.2),
-              ),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Bouton précédent
-              ElevatedButton.icon(
-                onPressed: transactionState.hasPreviousPage
-                    ? () => transactionViewModel.previousPage()
-                    : null,
-                icon: Icon(Icons.chevron_left, size: 18.sp),
-                label: const Text('Précédent'),
-              ),
+    for (final transactionWithBalance in transactions) {
+      final date = transactionWithBalance.transaction.date;
+      final dateKey = '${date.year}-${date.month}-${date.day}';
 
-              // Indicateur de page
-              Text(
-                'Page ${transactionState.currentPage + 1} sur ${transactionState.totalPages}',
-                style: AppTextStyles.bodyMedium.copyWith(color: appTheme.text2),
-              ),
+      if (!grouped.containsKey(dateKey)) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey]!.add(transactionWithBalance);
+    }
 
-              // Bouton suivant
-              ElevatedButton.icon(
-                onPressed: transactionState.hasNextPage
-                    ? () => transactionViewModel.nextPage()
-                    : null,
-                icon: Icon(Icons.chevron_right, size: 18.sp),
-                label: const Text('Suivant'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+    // Convertir en liste triée par date (plus récente en premier)
+    final List<TransactionGroup> result = [];
+
+    for (final entry in grouped.entries) {
+      final date = grouped[entry.key]!.first.transaction.date;
+      final dateLabel = AppFormatters.formatDate(date, context);
+
+      result.add(
+        TransactionGroup(
+          dateLabel: dateLabel,
+          date: date,
+          transactions: entry.value,
+        ),
+      );
+    }
+
+    // Trier par date décroissante (plus récent en premier)
+    result.sort((a, b) => b.date.compareTo(a.date));
+
+    return result;
   }
+}
 
-  Widget _buildEmptyState(BuildContext context, AppColorsExtended appTheme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.receipt_long_outlined, size: 64.sp, color: appTheme.text3),
-          SizedBox(height: 16.h),
-          Text(
-            'Aucune transaction',
-            style: AppTextStyles.h5.copyWith(color: appTheme.text2),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Les transactions de ce compte apparaîtront ici',
-            style: AppTextStyles.bodyMedium.copyWith(color: appTheme.text3),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
+class TransactionGroup {
+  final String dateLabel;
+  final DateTime date;
+  final List<domain.TransactionWithBalance> transactions;
 
-  bool _isToday(DateTime date) {
-    final now = DateTime.now();
-    return date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day;
-  }
-
-  bool _isYesterday(DateTime date) {
-    final yesterday = DateTime.now().subtract(const Duration(days: 1));
-    return date.year == yesterday.year &&
-        date.month == yesterday.month &&
-        date.day == yesterday.day;
-  }
+  TransactionGroup({
+    required this.dateLabel,
+    required this.date,
+    required this.transactions,
+  });
 }
