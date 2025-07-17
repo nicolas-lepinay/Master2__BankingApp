@@ -8,6 +8,7 @@ import 'package:equatable/equatable.dart';
 class AccountSummary extends Equatable {
   final Account account;
   final AccountBalance currentBalance;
+  final AccountBalance confirmedBalance;
   final List<TransactionWithBalance> recentTransactions;
   final int totalTransactionsCount;
   final Money totalIncome;
@@ -17,6 +18,7 @@ class AccountSummary extends Equatable {
   const AccountSummary({
     required this.account,
     required this.currentBalance,
+    required this.confirmedBalance,
     required this.recentTransactions,
     required this.totalTransactionsCount,
     required this.totalIncome,
@@ -27,6 +29,7 @@ class AccountSummary extends Equatable {
   AccountSummary copyWith({
     Account? account,
     AccountBalance? currentBalance,
+    AccountBalance? confirmedBalance,
     List<TransactionWithBalance>? recentTransactions,
     int? totalTransactionsCount,
     Money? totalIncome,
@@ -36,6 +39,7 @@ class AccountSummary extends Equatable {
     return AccountSummary(
       account: account ?? this.account,
       currentBalance: currentBalance ?? this.currentBalance,
+      confirmedBalance: confirmedBalance ?? this.confirmedBalance,
       recentTransactions: recentTransactions ?? this.recentTransactions,
       totalTransactionsCount:
           totalTransactionsCount ?? this.totalTransactionsCount,
@@ -52,6 +56,9 @@ class AccountSummary extends Equatable {
 
   String get displayCurrentBalance =>
       '${currentBalance.amount.toStringAsFixed(2)} ${currentBalance.currency}';
+
+  String get displayConfirmedBalance =>
+      '${confirmedBalance.amount.toStringAsFixed(2)} ${confirmedBalance.currency}';
 
   String get displayTotalIncome =>
       '+${totalIncome.amount.toStringAsFixed(2)} ${totalIncome.currency}';
@@ -87,10 +94,14 @@ class AccountSummary extends Equatable {
   bool get isBalancePositive => currentBalance.isPositive;
   bool get isBalanceNegative => currentBalance.isNegative;
 
+  bool get isConfirmedBalancePositive => confirmedBalance.isPositive;
+  bool get isConfirmedBalanceNegative => confirmedBalance.isNegative;
+
   @override
   List<Object?> get props => [
     account,
     currentBalance,
+    confirmedBalance,
     recentTransactions,
     totalTransactionsCount,
     totalIncome,

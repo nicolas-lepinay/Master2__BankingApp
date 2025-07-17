@@ -28,10 +28,6 @@ class BankCardWidget extends StatefulWidget {
 
 class _BankCardWidgetState extends State<BankCardWidget> {
   bool _isBalanceVisible = true; // Par défaut, le solde est visible
-  final GlobalKey _balanceKey =
-      GlobalKey(); // Clé pour mesurer la position du solde
-  bool _positionAlreadyMeasured =
-      false; // Flag pour s'assurer que la position n'est mesurée qu'une fois
 
   Color get cardColor {
     return CardColorUtils.getCardColor(
@@ -148,7 +144,6 @@ class _BankCardWidgetState extends State<BankCardWidget> {
 
                   // Montant du solde attendu avec toggle visibility
                   Row(
-                    key: _balanceKey, // Ajouter la clé pour mesurer la position
                     children: [
                       Expanded(
                         child: Text(

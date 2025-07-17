@@ -1,4 +1,3 @@
-import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
@@ -46,8 +45,15 @@ class _BankCardWidgetMVVMState extends State<BankCardWidgetMVVM> {
     String formattedAmount = AppFormatters.formatAmountClean(
       amount,
       widget.accountSummary.account.currency,
+      showSign: false,
+      context: context,
     );
-    return _isBalanceVisible ? formattedAmount : '••••••';
+    if (_isBalanceVisible) {
+      return formattedAmount;
+    } else {
+      // Masquer avec des points
+      return '•' * formattedAmount.length;
+    }
   }
 
   @override
@@ -74,209 +80,185 @@ class _BankCardWidgetMVVMState extends State<BankCardWidgetMVVM> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.symmetric(horizontal: 20.w),
-      padding: EdgeInsets.all(AppConstants.defaultPadding.r),
+      // Supprimer la hauteur fixe pour que la carte s'adapte à son contenu
+      margin: EdgeInsets.symmetric(horizontal: 30.w),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(32.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10.r,
-            offset: Offset(0, 5.h),
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 20.r,
+            offset: Offset(0, 8.h),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          _buildHeader(context, l10n),
+          // Pattern de points en arrière-plan
+          Positioned.fill(child: CustomPaint(painter: DotPatternPainter())),
 
-          SizedBox(height: AppConstants.defaultPadding.h),
-
-          _buildBalance(context),
-
-          SizedBox(height: AppConstants.defaultPadding.h),
-
-          _buildFooter(context, l10n),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Nom du compte
-        Expanded(
-          child: Text(
-            widget.accountSummary.account.name,
-            style: AppTextStyles.h5.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.w600,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-
-        // Bouton de visibilité du solde
-        GestureDetector(
-          onTap: _toggleBalanceVisibility,
-          child: Container(
-            padding: EdgeInsets.all(8.r),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            child: Icon(
-              _isBalanceVisible ? Icons.visibility : Icons.visibility_off,
-              color: AppColors.white,
-              size: 20.sp,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBalance(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Solde actuel
-        Row(
-          key: _balanceKey,
-          children: [
-            Expanded(
-              child: Text(
-                _formatBalanceDisplay(
-                  widget.accountSummary.currentBalance.amount,
-                ),
-                style: AppTextStyles.h2.copyWith(
-                  color: AppColors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-
-            // Indicateur de tendance
-            if (widget.accountSummary.getBalanceChangePercentage() != 0)
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: widget.accountSummary.getBalanceChangePercentage() > 0
-                      ? Colors.green.withValues(alpha: 0.2)
-                      : Colors.red.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      widget.accountSummary.getBalanceChangePercentage() > 0
-                          ? Icons.trending_up
-                          : Icons.trending_down,
-                      color: AppColors.white,
-                      size: 14.sp,
-                    ),
-                    SizedBox(width: 4.w),
-                    Text(
-                      '${widget.accountSummary.getBalanceChangePercentage().toStringAsFixed(1)}%',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.w600,
+          // Contenu de la carte avec padding et intrinsicHeight
+          IntrinsicHeight(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 18.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize:
+                    MainAxisSize.min, // Important pour la hauteur adaptative
+                children: [
+                  // Header avec nom du compte et icône
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.accountSummary.account.name,
+                          style: cardColor == AppColors.primaryGreen
+                              ? AppTextStyles.cardAccountNameDark
+                              : AppTextStyles.cardAccountName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
+
+                      if (widget.accountSummary.account.icon != null)
+                        SizedBox(width: 30.w),
+
+                      // Icône du compte (optionnelle)
+                      if (widget.accountSummary.account.icon != null)
+                        Container(
+                          width: 40.w,
+                          height: 40.h,
+                          decoration: BoxDecoration(
+                            color: cardColor == AppColors.primaryGreen
+                                ? AppColors.darkest.withValues(alpha: 0.2)
+                                : AppColors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Icon(
+                            Icons
+                                .account_balance, // Remplacer par l'icône du compte
+                            color: cardColor == AppColors.primaryGreen
+                                ? AppColors.darkest
+                                : AppColors.white,
+                            size: 20.sp,
+                          ),
+                        ),
+                    ],
+                  ),
+
+                  SizedBox(height: 20.h),
+
+                  // Solde attendu
+                  Text(
+                    AppLocalizations.of(context)!.expectedBalance.toUpperCase(),
+                    style: AppTextStyles.cardBalanceLabel.copyWith(
+                      color: cardColor == AppColors.primaryGreen
+                          ? AppColors.darkest.withValues(alpha: 0.6)
+                          : AppColors.white.withValues(alpha: 0.6),
                     ),
-                  ],
-                ),
+                  ),
+
+                  SizedBox(height: 8.h),
+
+                  // Montant du solde attendu avec toggle visibility
+                  Row(
+                    key: _balanceKey, // Ajouter la clé pour mesurer la position
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _formatBalanceDisplay(
+                            widget.accountSummary.currentBalance.amount,
+                          ),
+                          style: cardColor == AppColors.primaryGreen
+                              ? AppTextStyles.cardBalanceAmountDark
+                              : AppTextStyles.cardBalanceAmount,
+                        ),
+                      ),
+
+                      // Bouton pour cacher/afficher le solde
+                      GestureDetector(
+                        onTap: _toggleBalanceVisibility,
+                        child: Container(
+                          width: 40.w,
+                          height: 40.h,
+                          decoration: BoxDecoration(
+                            color: cardColor == AppColors.primaryGreen
+                                ? AppColors.darkest.withValues(alpha: 0.1)
+                                : AppColors.white.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          child: Icon(
+                            _isBalanceVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: cardColor == AppColors.primaryGreen
+                                ? AppColors.darkest
+                                : AppColors.white,
+                            size: 20.sp,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 10.h),
+
+                  // Solde réel (toujours présent, mais peut être caché par le container noir)
+                  Text(
+                    AppLocalizations.of(context)!.actualBalance.toUpperCase(),
+                    style: AppTextStyles.cardBalanceLabel.copyWith(
+                      color: cardColor == AppColors.primaryGreen
+                          ? AppColors.darkest.withValues(alpha: 0.6)
+                          : AppColors.white.withValues(alpha: 0.6),
+                    ),
+                  ),
+
+                  SizedBox(height: 8.h),
+
+                  Text(
+                    _formatBalanceDisplay(
+                      widget.accountSummary.confirmedBalance.amount,
+                    ),
+                    style: cardColor == AppColors.primaryGreen
+                        ? AppTextStyles.cardBalanceRealAmountDark
+                        : AppTextStyles.cardBalanceRealAmount,
+                  ),
+                ],
               ),
-          ],
-        ),
-
-        SizedBox(height: 8.h),
-
-        // Statistiques rapides
-        Row(
-          children: [
-            _buildStatItem(
-              AppLocalizations.of(context)!.incomes,
-              widget.accountSummary.totalIncome.amount,
-              Colors.green,
             ),
-            SizedBox(width: 20.w),
-            _buildStatItem(
-              AppLocalizations.of(context)!.expenses,
-              widget.accountSummary.totalExpenses.amount,
-              Colors.red,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatItem(String label, double amount, Color color) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.white.withValues(alpha: 0.8),
-            ),
-          ),
-          SizedBox(height: 2.h),
-          Text(
-            _formatBalanceDisplay(amount),
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.w600,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildFooter(BuildContext context, AppLocalizations l10n) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Nombre de transactions
-        Text(
-          '${widget.accountSummary.totalTransactionsCount} transactions',
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.white.withValues(alpha: 0.8),
-          ),
-        ),
+// Custom painter pour le pattern de points en arrière-plan
+class DotPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.white.withValues(alpha: 0.09)
+      ..style = PaintingStyle.fill;
 
-        // Devise
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Text(
-            widget.accountSummary.account.currency,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    );
+    final double dotSize = 1.7.r;
+    final double spacing = 20.0.w;
+
+    // Dessiner une grille de points
+    for (double x = spacing; x < size.width; x += spacing) {
+      for (double y = spacing; y < size.height; y += spacing) {
+        // Ajouter un peu de randomness pour un effet plus naturel
+        final offsetX = x + (x * 0.05 * (x / size.width));
+        final offsetY = y + (y * 0.05 * (y / size.height));
+
+        canvas.drawCircle(Offset(offsetX, offsetY), dotSize, paint);
+      }
+    }
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

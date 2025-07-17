@@ -250,6 +250,13 @@ class CacheManager {
             ),
             calculatedAt: DateTime.now(),
           ),
+          confirmedBalance: AccountBalance(
+            balance: Money(
+              amount: account.initialBalance,
+              currency: account.currency,
+            ),
+            calculatedAt: DateTime.now(),
+          ),
           recentTransactions: [],
           totalTransactionsCount: 0,
           totalIncome: Money(amount: 0, currency: account.currency),
@@ -271,6 +278,26 @@ class CacheManager {
         }
       }
 
+      // Calculer le solde confirmé (uniquement transactions confirmées)
+      final confirmedTransactions = transactionsWithBalance
+          .where((txWithBalance) => txWithBalance.transaction.isCompleted)
+          .toList();
+
+      AccountBalance confirmedBalance;
+      if (confirmedTransactions.isEmpty) {
+        // Pas de transactions confirmées, utiliser le solde initial
+        confirmedBalance = AccountBalance(
+          balance: Money(
+            amount: account.initialBalance,
+            currency: account.currency,
+          ),
+          calculatedAt: DateTime.now(),
+        );
+      } else {
+        // Utiliser le solde après la dernière transaction confirmée
+        confirmedBalance = confirmedTransactions.last.balanceAfter;
+      }
+
       // Prendre les 10 dernières transactions
       final recentTransactions = transactionsWithBalance.reversed
           .take(10)
@@ -285,6 +312,7 @@ class CacheManager {
       _accountSummaries[account.id] = AccountSummary(
         account: account.toEntity(),
         currentBalance: currentBalance,
+        confirmedBalance: confirmedBalance,
         recentTransactions: recentTransactions,
         totalTransactionsCount: transactionsWithBalance.length,
         totalIncome: Money(amount: totalIncome, currency: account.currency),

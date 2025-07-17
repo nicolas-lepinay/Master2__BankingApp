@@ -5,14 +5,12 @@ import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
-import 'package:bankapp/presentation/screens/search_results_screen_mvvm.dart';
 import 'package:bankapp/presentation/viewmodels/viewmodels.dart';
 import 'package:bankapp/presentation/widgets/add_account_bottom_sheet.dart';
 import 'package:bankapp/presentation/widgets/bank_card_widget_mvvm.dart';
 import 'package:bankapp/presentation/widgets/cards_swiper_widget.dart';
 import 'package:bankapp/presentation/widgets/dashed_button.dart';
 import 'package:bankapp/presentation/widgets/draggable_black_container.dart';
-import 'package:bankapp/presentation/widgets/search_field_mvvm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -297,24 +295,6 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
           ),
 
           SizedBox(height: 16.h),
-
-          // Search field
-          SearchFieldMVVM(
-            hintText: l10n.searchTransactions,
-            iconData: Icons.search,
-            showSuggestions: false, // Désactiver les suggestions pour le home
-            onChanged: (query) {
-              if (query.isNotEmpty) {
-                // Naviguer vers l'écran de recherche avec la query
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        SearchResultsScreenMVVM(initialQuery: query),
-                  ),
-                );
-              }
-            },
-          ),
         ],
       ),
     );

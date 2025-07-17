@@ -106,6 +106,13 @@ class AccountRepositoryImpl implements AccountRepository {
         ),
         calculatedAt: DateTime.now(),
       ),
+      confirmedBalance: AccountBalance(
+        balance: Money(
+          amount: account.initialBalance,
+          currency: account.currency,
+        ),
+        calculatedAt: DateTime.now(),
+      ),
       recentTransactions: [],
       totalTransactionsCount: 0,
       totalIncome: Money(amount: 0, currency: account.currency),
