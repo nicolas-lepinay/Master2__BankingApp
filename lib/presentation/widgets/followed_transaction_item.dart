@@ -98,7 +98,7 @@ class FollowedTransactionItem extends StatelessWidget {
             // Montant
             Text(
               AppFormatters.formatAmountClean(
-                transaction.amount,
+                isExpense ? -transaction.amount : transaction.amount,
                 transaction.currency,
                 showSign: true,
                 context: context,
