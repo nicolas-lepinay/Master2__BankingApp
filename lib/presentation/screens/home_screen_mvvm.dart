@@ -12,7 +12,6 @@ import 'package:bankapp/presentation/widgets/dashed_button.dart';
 import 'package:bankapp/presentation/widgets/draggable_black_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -69,7 +68,7 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return _buildMainScreen(context, l10n).animate().fadeIn(duration: 1000.ms);
+    return _buildMainScreen(context, l10n);
   }
 
   Widget _buildMainScreen(BuildContext context, AppLocalizations l10n) {
