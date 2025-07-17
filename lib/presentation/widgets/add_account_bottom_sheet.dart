@@ -200,21 +200,14 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
     });
 
     try {
-      final accountRepository = ref.read(accountRepositoryProvider);
+      final accountViewModel = ref.read(accountViewModelProvider.notifier);
 
-      // Créer l'entité Account
-      final newAccount = domain.Account(
-        id: 0, // L'ID sera généré automatiquement
+      // Utiliser le ViewModel pour créer le compte
+      await accountViewModel.createAccount(
         name: _nameController.text.trim(),
         currency: _selectedCurrency,
         initialBalance: double.parse(_balanceController.text),
-        creationDate: DateTime.now(),
       );
-
-      await accountRepository.createAccount(newAccount);
-
-      // Invalider les providers pour rafraîchir les données
-      ref.invalidate(accountsProvider);
 
       if (mounted) {
         Navigator.of(context).pop();

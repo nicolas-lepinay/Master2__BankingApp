@@ -271,7 +271,7 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
                   scale: scale,
                   child: Container(
                     margin: EdgeInsets.symmetric(
-                      vertical: 50.r,
+                      vertical: 70.r,
                       horizontal: AppConstants.veryLargePadding.r,
                     ),
                     child: DashedButton(

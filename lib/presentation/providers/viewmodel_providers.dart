@@ -116,7 +116,7 @@ final accountViewModelProvider =
 
 final transactionViewModelProvider =
     StateNotifierProvider<TransactionViewModel, TransactionViewState>((ref) {
-      return TransactionViewModel(ref.watch(transactionRepositoryProvider));
+      return TransactionViewModel(ref.watch(transactionRepositoryProvider), ref);
     });
 
 final searchViewModelProvider =
@@ -348,5 +348,32 @@ final isTransactionFollowedProvider = FutureProvider.family<bool, int>((
 // ============================================================================
 // TRANSACTION WITH COUNTERPARTY PROVIDERS
 // ============================================================================
+
+// ============================================================================
+// INVALIDATION HELPERS
+// ============================================================================
+
+/// Invalide tous les providers liés aux comptes et leurs résumés
+void invalidateAccountProviders(Ref ref) {
+  // Invalider les providers des comptes
+  ref.invalidate(accountViewModelProvider);
+  ref.invalidate(accountsProvider);
+  ref.invalidate(selectedAccountProvider);
+  ref.invalidate(selectedAccountSummaryProvider);
+  
+  // Invalider les providers d'account summary (tous les ID)
+  ref.invalidate(accountSummaryByIdProvider);
+}
+
+/// Invalide tous les providers liés aux transactions
+void invalidateTransactionProviders(Ref ref) {
+  // Invalider les providers des transactions
+  ref.invalidate(transactionViewModelProvider);
+  ref.invalidate(filteredTransactionsProvider);
+  ref.invalidate(paginatedTransactionsProvider);
+  
+  // Invalider aussi les résumés de comptes car ils dépendent des transactions
+  invalidateAccountProviders(ref);
+}
 
 // Provider supprimé car inutilisé et remplacé par l'architecture MVVM des repositories

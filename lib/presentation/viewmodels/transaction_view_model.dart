@@ -2,6 +2,9 @@ import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/domain/repositories/repositories.dart';
 import 'package:bankapp/domain/value_objects/value_objects.dart';
 import 'package:bankapp/presentation/viewmodels/base_view_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+// Import pour l'invalidation
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart' show accountSummaryByIdProvider;
 
 /// État pour la gestion des transactions
 class TransactionViewState extends BaseViewState {
@@ -128,10 +131,12 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
     with ListViewModelMixin<TransactionViewState, domain.TransactionWithBalance>,
          PaginationViewModelMixin<TransactionViewState, domain.TransactionWithBalance> {
   final TransactionRepository _transactionRepository;
+  final Ref? _ref;
   
   TransactionViewModel(
-    this._transactionRepository,
-  ) : super(const TransactionViewState());
+    this._transactionRepository, [
+    this._ref,
+  ]) : super(const TransactionViewState());
   
   /// Charge les transactions pour un compte
   Future<void> loadTransactions(int accountId) async {
@@ -185,6 +190,11 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
       
       await _transactionRepository.createTransaction(newTransaction);
       
+      // Invalider les providers d'account summary pour une réactivité automatique
+      if (_ref != null) {
+        _ref!.invalidate(accountSummaryByIdProvider);
+      }
+      
       // Recharger les transactions
       await loadTransactions(accountId);
     });
@@ -232,6 +242,11 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
       
       await _transactionRepository.updateTransaction(updatedTransaction);
       
+      // Invalider les providers d'account summary pour une réactivité automatique
+      if (_ref != null) {
+        _ref!.invalidate(accountSummaryByIdProvider);
+      }
+      
       // Recharger les transactions
       await loadTransactions(accountId);
     });
@@ -243,6 +258,11 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
       state = state.loading();
       
       await _transactionRepository.deleteTransaction(transactionId);
+      
+      // Invalider les providers d'account summary pour une réactivité automatique
+      if (_ref != null) {
+        _ref!.invalidate(accountSummaryByIdProvider);
+      }
       
       // Recharger les transactions si un compte est sélectionné
       if (state.selectedAccountId != null) {

@@ -9,8 +9,11 @@ class CardColorUtilsMVVM {
     AppColors.primaryPink,
     AppColors.primaryGreen,
     AppColors.primaryOrange,
-    AppColors.primaryPurple,
     AppColors.primaryRed,
+    AppColors.primaryTeal,
+    AppColors.primaryPurple,
+    AppColors.secondaryOrange,
+    AppColors.secondaryGreen,
   ];
 
   /// Retourne la couleur d'une carte basée sur la liste des comptes

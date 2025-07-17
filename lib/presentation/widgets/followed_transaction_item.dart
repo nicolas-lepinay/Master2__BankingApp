@@ -25,10 +25,8 @@ class FollowedTransactionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final transaction = transactionWithCounterparty.transaction;
-    // TODO: Get counterparty from repository later
-    final counterparty =
-        null; // transactionWithCounterparty doesn't have counterparty
-    final isDebit = transaction.type.name == AppConstants.transactionTypeDebit;
+    final counterparty = transactionWithCounterparty.counterparty;
+    final isExpense = transactionWithCounterparty.isExpense;
 
     final content = Container(
       width: width != null ? width?.w : width,
@@ -100,13 +98,13 @@ class FollowedTransactionItem extends StatelessWidget {
             // Montant
             Text(
               AppFormatters.formatAmountClean(
-                isDebit ? -transaction.amount : transaction.amount,
+                transaction.amount,
                 transaction.currency,
-                showSign: false,
+                showSign: true,
                 context: context,
               ),
               style: AppTextStyles.followedTransactionAmount.copyWith(
-                color: isDebit
+                color: isExpense
                     ? AppColors.secondaryPink
                     : AppColors.primaryGreen,
               ),
@@ -164,9 +162,9 @@ class FollowedTransactionItem extends StatelessWidget {
     }
 
     // Priorité 3: Type de transaction par défaut
-    return transaction.type.name == AppConstants.transactionTypeDebit
-        ? 'Débit'
-        : 'Crédit';
+    return transaction.type == domain.TransactionType.expense
+        ? 'Dépense'
+        : 'Revenu';
   }
 
   /// Convertit une string d'icône en IconData

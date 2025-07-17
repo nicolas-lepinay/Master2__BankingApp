@@ -10,13 +10,17 @@ class AppColors {
   // Card colors for stacked cards
   static const Color primaryBlue = Color(0xFF443EE3);
   static const Color primaryPink = Color(0xFFFE68E8);
+  static const Color primaryGreen = Color(0xFFAFFF59);
+  static const Color primaryOrange = Color(0xFFFF6A00);
+  static const Color primaryRed = Color(0xFFE33E62);
+  static const Color primaryTeal = Color(0xFF01F5B0);
+  static const Color primaryPurple = Color(0xFF7952FC);
+  static const Color secondaryOrange = Color(0xFFFF3201);
+  static const Color secondaryGreen = Color(0xFF1DF489);
+
+  // Perspective ListView Colors
   static const Color secondaryPink = Color(0xFFFBA9ED);
   static const Color tertiaryPink = Color(0xFFFFC4F9);
-
-  static const Color primaryGreen = Color(0xFFAFFF59);
-  static const Color primaryOrange = Color(0xFFEB6B25);
-  static const Color primaryPurple = Color(0xFF7952FC);
-  static const Color primaryRed = Color(0xFFE33E62);
 
   // Gradient colors for Perspective Transaction List
   static const Color gradientPinkStart = primaryPink;

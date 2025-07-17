@@ -1,5 +1,5 @@
+import 'package:bankapp/core/extensions/color_extensions.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
-import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/card_color_utils_mvvm.dart';
 import 'package:bankapp/core/utils/formatters.dart';
@@ -98,7 +98,11 @@ class _BankCardWidgetMVVMState extends State<BankCardWidgetMVVM> {
       child: Stack(
         children: [
           // Pattern de points en arrière-plan
-          Positioned.fill(child: CustomPaint(painter: DotPatternPainter())),
+          Positioned.fill(
+            child: CustomPaint(
+              painter: DotPatternPainter(backgroundColor: cardColor),
+            ),
+          ),
 
           // Contenu de la carte avec padding et intrinsicHeight
           IntrinsicHeight(
@@ -115,9 +119,9 @@ class _BankCardWidgetMVVMState extends State<BankCardWidgetMVVM> {
                       Expanded(
                         child: Text(
                           widget.accountSummary.account.name,
-                          style: cardColor == AppColors.primaryGreen
-                              ? AppTextStyles.cardAccountNameDark
-                              : AppTextStyles.cardAccountName,
+                          style: AppTextStyles.cardAccountName.copyWith(
+                            color: cardColor.contrastingTextColor,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -132,17 +136,15 @@ class _BankCardWidgetMVVMState extends State<BankCardWidgetMVVM> {
                           width: 40.w,
                           height: 40.h,
                           decoration: BoxDecoration(
-                            color: cardColor == AppColors.primaryGreen
-                                ? AppColors.darkest.withValues(alpha: 0.2)
-                                : AppColors.white.withValues(alpha: 0.2),
+                            color: cardColor.contrastingTextColor.withValues(
+                              alpha: 0.2,
+                            ),
                             borderRadius: BorderRadius.circular(8.r),
                           ),
                           child: Icon(
                             Icons
                                 .account_balance, // Remplacer par l'icône du compte
-                            color: cardColor == AppColors.primaryGreen
-                                ? AppColors.darkest
-                                : AppColors.white,
+                            color: cardColor.contrastingTextColor,
                             size: 20.sp,
                           ),
                         ),
@@ -155,9 +157,9 @@ class _BankCardWidgetMVVMState extends State<BankCardWidgetMVVM> {
                   Text(
                     AppLocalizations.of(context)!.expectedBalance.toUpperCase(),
                     style: AppTextStyles.cardBalanceLabel.copyWith(
-                      color: cardColor == AppColors.primaryGreen
-                          ? AppColors.darkest.withValues(alpha: 0.6)
-                          : AppColors.white.withValues(alpha: 0.6),
+                      color: cardColor.contrastingTextColor.withValues(
+                        alpha: 0.6,
+                      ),
                     ),
                   ),
 
@@ -172,9 +174,9 @@ class _BankCardWidgetMVVMState extends State<BankCardWidgetMVVM> {
                           _formatBalanceDisplay(
                             widget.accountSummary.currentBalance.amount,
                           ),
-                          style: cardColor == AppColors.primaryGreen
-                              ? AppTextStyles.cardBalanceAmountDark
-                              : AppTextStyles.cardBalanceAmount,
+                          style: AppTextStyles.cardBalanceAmount.copyWith(
+                            color: cardColor.contrastingTextColor,
+                          ),
                         ),
                       ),
 
@@ -185,18 +187,16 @@ class _BankCardWidgetMVVMState extends State<BankCardWidgetMVVM> {
                           width: 40.w,
                           height: 40.h,
                           decoration: BoxDecoration(
-                            color: cardColor == AppColors.primaryGreen
-                                ? AppColors.darkest.withValues(alpha: 0.1)
-                                : AppColors.white.withValues(alpha: 0.1),
+                            color: cardColor.contrastingTextColor.withValues(
+                              alpha: 0.1,
+                            ),
                             borderRadius: BorderRadius.circular(20.r),
                           ),
                           child: Icon(
                             _isBalanceVisible
                                 ? Icons.visibility
                                 : Icons.visibility_off,
-                            color: cardColor == AppColors.primaryGreen
-                                ? AppColors.darkest
-                                : AppColors.white,
+                            color: cardColor.contrastingTextColor,
                             size: 20.sp,
                           ),
                         ),
@@ -210,9 +210,9 @@ class _BankCardWidgetMVVMState extends State<BankCardWidgetMVVM> {
                   Text(
                     AppLocalizations.of(context)!.actualBalance.toUpperCase(),
                     style: AppTextStyles.cardBalanceLabel.copyWith(
-                      color: cardColor == AppColors.primaryGreen
-                          ? AppColors.darkest.withValues(alpha: 0.6)
-                          : AppColors.white.withValues(alpha: 0.6),
+                      color: cardColor.contrastingTextColor.withValues(
+                        alpha: 0.6,
+                      ),
                     ),
                   ),
 
@@ -222,9 +222,9 @@ class _BankCardWidgetMVVMState extends State<BankCardWidgetMVVM> {
                     _formatBalanceDisplay(
                       widget.accountSummary.confirmedBalance.amount,
                     ),
-                    style: cardColor == AppColors.primaryGreen
-                        ? AppTextStyles.cardBalanceRealAmountDark
-                        : AppTextStyles.cardBalanceRealAmount,
+                    style: AppTextStyles.cardBalanceRealAmount.copyWith(
+                      color: cardColor.contrastingTextColor,
+                    ),
                   ),
                 ],
               ),
@@ -238,10 +238,14 @@ class _BankCardWidgetMVVMState extends State<BankCardWidgetMVVM> {
 
 // Custom painter pour le pattern de points en arrière-plan
 class DotPatternPainter extends CustomPainter {
+  final Color backgroundColor;
+
+  DotPatternPainter({required this.backgroundColor});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.white.withValues(alpha: 0.09)
+      ..color = backgroundColor.contrastingTextColor.withValues(alpha: 0.09)
       ..style = PaintingStyle.fill;
 
     final double dotSize = 1.7.r;
