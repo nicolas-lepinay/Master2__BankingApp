@@ -216,7 +216,6 @@ class _TransactionsListMVVMState extends State<TransactionsListMVVM> {
                     : null,
               );
             }),
-
             SizedBox(height: AppConstants.largePadding.h),
           ],
         );
@@ -302,7 +301,9 @@ class _TransactionsListMVVMState extends State<TransactionsListMVVM> {
       final dateLabel = AppFormatters.formatDate(date, context);
 
       // Trier les transactions de ce groupe par date (plus récente en premier)
-      entry.value.sort((a, b) => b.transaction.date.compareTo(a.transaction.date));
+      entry.value.sort(
+        (a, b) => b.transaction.date.compareTo(a.transaction.date),
+      );
 
       result.add(
         TransactionGroup(

@@ -244,6 +244,15 @@ final transactionByIdProvider =
       return transactionViewModel.getTransactionById(transactionId);
     });
 
+/// Provider pour obtenir l'AccountSummary d'un compte spécifique
+final accountSummaryByIdProvider = FutureProvider.family<domain.AccountSummary, int>((
+  ref,
+  accountId,
+) async {
+  final accountRepository = ref.watch(accountRepositoryProvider);
+  return accountRepository.getAccountSummary(accountId);
+});
+
 // ============================================================================
 // COMPUTED PROVIDERS
 // ============================================================================
