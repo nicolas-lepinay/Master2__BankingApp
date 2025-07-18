@@ -25,13 +25,13 @@ class _EditTransactionBottomSheetState
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _commentController = TextEditingController();
-  final _counterpartyController = TextEditingController(); // Nouveau contrôleur
+  int? _selectedCounterpartyId;
 
-  String _transactionType = AppConstants.transactionTypeDebit;
+  domain.TransactionType _transactionType = domain.TransactionType.expense;
   String _selectedCurrency = 'EUR';
   int? _selectedAccountId;
   DateTime _selectedDate = DateTime.now();
-  int _status = 1;
+  domain.TransactionStatus _status = domain.TransactionStatus.completed;
   bool _isLoading = false;
   bool _isInitialized = false;
 
@@ -40,7 +40,6 @@ class _EditTransactionBottomSheetState
     _titleController.dispose();
     _amountController.dispose();
     _commentController.dispose();
-    _counterpartyController.dispose(); // Disposer du nouveau contrôleur
     super.dispose();
   }
 
@@ -54,13 +53,12 @@ class _EditTransactionBottomSheetState
     _titleController.text = transaction.title ?? '';
     _amountController.text = transaction.amount.toString();
     _commentController.text = transaction.comment ?? '';
-    _counterpartyController.text =
-        transactionWithBalance.counterparty?.name ?? '';
-    _transactionType = transaction.type.name;
+    _selectedCounterpartyId = transaction.counterpartyId;
+    _transactionType = transaction.type;
     _selectedCurrency = transaction.currency;
     _selectedAccountId = transaction.accountId;
     _selectedDate = transaction.date;
-    _status = transaction.status.index;
+    _status = transaction.status;
     _isInitialized = true;
   }
 
@@ -159,41 +157,65 @@ class _EditTransactionBottomSheetState
 
                   SizedBox(height: AppConstants.defaultPadding.h),
 
-                  // Tiers
-                  TextFormField(
-                    controller: _counterpartyController,
-                    decoration: InputDecoration(
-                      labelText: l10n.counterparty,
-                      hintText: 'Ex: Netflix, Apple, Intermarché...',
-                      suffixIcon: const Icon(Icons.business),
-                    ),
-                    textCapitalization: TextCapitalization.words,
+                  // Tiers (Counterparty)
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final counterpartyState = ref.watch(counterpartyViewModelProvider);
+                      final counterparties = counterpartyState.counterparties;
+                      
+                      // Charger les contreparties si nécessaire
+                      if (counterparties.isEmpty && !counterpartyState.isLoading) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          ref.read(counterpartyViewModelProvider.notifier).loadCounterparties();
+                        });
+                      }
+                      
+                      if (counterpartyState.isLoading) {
+                        return const CircularProgressIndicator();
+                      }
+                      
+                      return DropdownButtonFormField<int>(
+                        value: _selectedCounterpartyId,
+                        decoration: InputDecoration(
+                          labelText: l10n.counterparty,
+                          hintText: 'Sélectionnez un tiers',
+                          suffixIcon: const Icon(Icons.business),
+                        ),
+                        items: [
+                          const DropdownMenuItem<int>(
+                            value: null,
+                            child: Text('Aucun tiers'),
+                          ),
+                          ...counterparties.map((counterparty) {
+                            return DropdownMenuItem<int>(
+                              value: counterparty.id,
+                              child: Text(counterparty.name),
+                            );
+                          }),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCounterpartyId = value;
+                          });
+                        },
+                      );
+                    },
                   ),
 
                   SizedBox(height: AppConstants.defaultPadding.h),
 
                   // Type de transaction
-                  DropdownButtonFormField<String>(
+                  DropdownButtonFormField<domain.TransactionType>(
                     value: _transactionType,
                     decoration: const InputDecoration(labelText: 'Type'),
                     items: [
                       DropdownMenuItem(
-                        value: AppConstants.transactionTypeDebit,
-                        child: Text(
-                          AppFormatters.getTransactionTypeLabel(
-                            AppConstants.transactionTypeDebit,
-                            context,
-                          ),
-                        ),
+                        value: domain.TransactionType.expense,
+                        child: Text(l10n.expense),
                       ),
                       DropdownMenuItem(
-                        value: AppConstants.transactionTypeCredit,
-                        child: Text(
-                          AppFormatters.getTransactionTypeLabel(
-                            AppConstants.transactionTypeCredit,
-                            context,
-                          ),
-                        ),
+                        value: domain.TransactionType.income,
+                        child: Text(l10n.income),
                       ),
                     ],
                     onChanged: (value) {
@@ -301,24 +323,24 @@ class _EditTransactionBottomSheetState
                   SizedBox(height: AppConstants.defaultPadding.h),
 
                   // Statut
-                  DropdownButtonFormField<int>(
+                  DropdownButtonFormField<domain.TransactionStatus>(
                     value: _status,
                     decoration: InputDecoration(labelText: l10n.status),
                     items: [
                       DropdownMenuItem(
-                        value: AppConstants.transactionStatusPending,
+                        value: domain.TransactionStatus.pending,
                         child: Text(
                           AppFormatters.getTransactionStatusLabel(
-                            AppConstants.transactionStatusPending,
+                            domain.TransactionStatus.pending,
                             context,
                           ),
                         ),
                       ),
                       DropdownMenuItem(
-                        value: AppConstants.transactionStatusConfirmed,
+                        value: domain.TransactionStatus.completed,
                         child: Text(
                           AppFormatters.getTransactionStatusLabel(
-                            AppConstants.transactionStatusConfirmed,
+                            domain.TransactionStatus.completed,
                             context,
                           ),
                         ),
@@ -409,21 +431,15 @@ class _EditTransactionBottomSheetState
     });
 
     try {
-      final transactionRepository = ref.read(transactionRepositoryProvider);
+      final transactionViewModel = ref.read(
+        transactionViewModelProvider.notifier,
+      );
 
-      // Récupérer la transaction existante pour préserver les données non modifiées
-      final existingTransaction = await transactionRepository
-          .getTransactionById(widget.transactionId);
-      if (existingTransaction == null) {
-        throw Exception('Transaction not found');
-      }
-
-      // Créer la transaction mise à jour en utilisant copyWith
-      final updatedTransaction = existingTransaction.copyWith(
+      // Créer la transaction mise à jour avec les nouvelles valeurs
+      await transactionViewModel.updateTransaction(
+        transactionId: widget.transactionId,
         accountId: _selectedAccountId!,
-        type: domain.TransactionType.values.firstWhere(
-          (t) => t.name == _transactionType,
-        ),
+        type: _transactionType,
         currency: _selectedCurrency,
         amount: double.parse(_amountController.text),
         title: _titleController.text.trim(),
@@ -431,14 +447,9 @@ class _EditTransactionBottomSheetState
             ? null
             : _commentController.text.trim(),
         date: _selectedDate,
-        status: domain.TransactionStatus.values[_status],
+        status: _status,
+        counterpartyId: _selectedCounterpartyId,
       );
-
-      await transactionRepository.updateTransaction(updatedTransaction);
-
-      // Invalider les providers pour rafraîchir les données
-      ref.invalidate(accountsProvider);
-      ref.invalidate(accountTransactionsProvider);
 
       if (mounted) {
         Navigator.of(context).pop();

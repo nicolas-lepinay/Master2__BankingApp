@@ -1,4 +1,5 @@
 import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/core/services/user_preferences_service.dart';
 import 'package:bankapp/core/theme/app_theme.dart';
 import 'package:bankapp/presentation/providers/settings_provider.dart';
 import 'package:bankapp/presentation/providers/theme_provider.dart'
@@ -9,7 +10,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialiser les préférences utilisateur au démarrage
+  await UserPreferencesService.instance.init();
+  
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -49,7 +55,7 @@ class MyApp extends ConsumerWidget {
           // Disable debug banner
           debugShowCheckedModeBanner: false,
 
-          // Home screen
+          // First screen launched
           home: const SplashScreen(),
         );
       },

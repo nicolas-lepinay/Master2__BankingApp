@@ -14,7 +14,6 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
     final currentTheme = ref.watch(theme_provider.themeProvider);
     final currentLanguage = ref.watch(languageProvider);
 
@@ -144,11 +143,13 @@ class SettingsScreen extends ConsumerWidget {
                 trailing: currentTheme == theme
                     ? Icon(Icons.check, color: AppColors.primary, size: 16.sp)
                     : null,
-                onTap: () {
-                  ref
+                onTap: () async {
+                  await ref
                       .read(theme_provider.themeProvider.notifier)
                       .setTheme(theme);
-                  Navigator.of(context).pop();
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
                 },
               );
             }),
@@ -188,21 +189,23 @@ class SettingsScreen extends ConsumerWidget {
                 trailing: currentLanguage == language
                     ? Icon(Icons.check, color: AppColors.primary, size: 16.sp)
                     : null,
-                onTap: () {
-                  ref.read(languageProvider.notifier).setLanguage(language);
-                  Navigator.of(context).pop();
+                onTap: () async {
+                  await ref.read(languageProvider.notifier).setLanguage(language);
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
 
-                  // Afficher un message de confirmation
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        language == AppLanguage.french
-                            ? 'Langue changée vers ${language.displayName}'
-                            : 'Language changed to ${language.displayName}',
+                    // Afficher un message de confirmation
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          language == AppLanguage.french
+                              ? 'Langue changée vers ${language.displayName}'
+                              : 'Language changed to ${language.displayName}',
+                        ),
+                        backgroundColor: Colors.green,
                       ),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
+                    );
+                  }
                 },
               );
             }),

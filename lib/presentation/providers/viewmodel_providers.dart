@@ -119,6 +119,11 @@ final transactionViewModelProvider =
       return TransactionViewModel(ref.watch(transactionRepositoryProvider), ref);
     });
 
+final counterpartyViewModelProvider =
+    StateNotifierProvider<CounterpartyViewModel, CounterpartyViewState>((ref) {
+      return CounterpartyViewModel(ref.watch(counterpartyRepositoryProvider));
+    });
+
 final searchViewModelProvider =
     StateNotifierProvider<SearchViewModel, SearchViewState>((ref) {
       return SearchViewModel(
@@ -208,6 +213,18 @@ final paginatedSearchResultsProvider =
       final searchState = ref.watch(searchViewModelProvider);
       return searchState.paginatedResults;
     });
+
+/// Provider pour les contreparties
+final counterpartiesProvider = Provider<List<domain.Counterparty>>((ref) {
+  final counterpartyState = ref.watch(counterpartyViewModelProvider);
+  return counterpartyState.counterparties;
+});
+
+/// Provider pour la contrepartie sélectionnée
+final selectedCounterpartyProvider = Provider<domain.Counterparty?>((ref) {
+  final counterpartyState = ref.watch(counterpartyViewModelProvider);
+  return counterpartyState.selectedCounterparty;
+});
 
 // ============================================================================
 // FAMILY PROVIDERS (avec paramètres)

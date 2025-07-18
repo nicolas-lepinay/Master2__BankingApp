@@ -354,8 +354,9 @@ class _DraggableBlackContainerState
                   textAlign: TextAlign.center,
                 ),
 
-                SizedBox(height: AppConstants.verySmallPadding.r),
+                //SizedBox(height: AppConstants.verySmallPadding.r),
 
+                /*
                 // Texte secondaire
                 Text(
                   l10n.startAddingTransactions,
@@ -365,8 +366,8 @@ class _DraggableBlackContainerState
                   ),
                   textAlign: TextAlign.center,
                 ),
-
-                SizedBox(height: AppConstants.largePadding.r),
+              */
+                SizedBox(height: AppConstants.veryLargePadding.r),
               ],
             );
           }

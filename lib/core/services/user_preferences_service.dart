@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UserPreferencesService {
   static const String _userNameKey = 'user_name';
   static const String _isFirstLaunchKey = 'is_first_launch';
+  static const String _themeKey = 'theme_mode';
+  static const String _languageKey = 'app_language';
 
   static UserPreferencesService? _instance;
   static UserPreferencesService get instance => _instance ??= UserPreferencesService._();
@@ -58,5 +60,31 @@ class UserPreferencesService {
       return 'Bonjour, $name !';
     }
     return 'Bonjour !';
+  }
+
+  // === GESTION DU THÈME ===
+
+  /// Get saved theme mode (default: light)
+  String getThemeMode() {
+    return _prefs?.getString(_themeKey) ?? 'light';
+  }
+
+  /// Set theme mode
+  Future<bool> setThemeMode(String themeMode) async {
+    await init();
+    return _prefs?.setString(_themeKey, themeMode) ?? false;
+  }
+
+  // === GESTION DE LA LANGUE ===
+
+  /// Get saved language (default: system)
+  String getLanguage() {
+    return _prefs?.getString(_languageKey) ?? 'system';
+  }
+
+  /// Set language
+  Future<bool> setLanguage(String language) async {
+    await init();
+    return _prefs?.setString(_languageKey, language) ?? false;
   }
 }

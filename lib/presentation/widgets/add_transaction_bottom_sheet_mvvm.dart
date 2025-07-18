@@ -292,43 +292,80 @@ class _AddTransactionBottomSheetMVVMState
   Widget _buildCounterpartyField() {
     return Consumer(
       builder: (context, ref, child) {
-        final counterparties = ref.watch(counterpartyRepositoryProvider);
+        final counterpartyViewState = ref.watch(counterpartyViewModelProvider);
+        final counterparties = counterpartyViewState.counterparties;
+        
+        // Charger les contreparties si nécessaire (logique cohérente avec edit_transaction_bottom_sheet.dart)
+        if (counterparties.isEmpty && !counterpartyViewState.isLoading) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(counterpartyViewModelProvider.notifier).loadCounterparties();
+          });
+        }
 
-        return FutureBuilder<List<domain.Counterparty>>(
-          future: counterparties.getAllCounterparties(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return Container(
-                padding: EdgeInsets.all(16.r),
-                child: const CircularProgressIndicator(),
-              );
-            }
-
-            final counterpartyList = snapshot.data!;
-
-            return DropdownButtonFormField<int>(
-              value: _selectedCounterpartyId,
-              decoration: InputDecoration(
-                labelText: 'Contrepartie (optionnel)',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
+        if (counterpartyViewState.isLoading) {
+          return Container(
+            padding: EdgeInsets.all(16.r),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: AppColors.textSecondary.withValues(alpha: 0.2),
               ),
-              items: [
-                const DropdownMenuItem<int>(value: null, child: Text('Aucune')),
-                ...counterpartyList.map(
-                  (counterparty) => DropdownMenuItem<int>(
-                    value: counterparty.id,
-                    child: Text(counterparty.name),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (counterpartyViewState.hasError) {
+          return Container(
+            padding: EdgeInsets.all(16.r),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.red),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.error, color: Colors.red, size: 20.sp),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    'Erreur: ${counterpartyViewState.error}',
+                    style: AppTextStyles.bodyMedium.copyWith(color: Colors.red),
                   ),
                 ),
+                IconButton(
+                  onPressed: () {
+                    ref.read(counterpartyViewModelProvider.notifier).refresh();
+                  },
+                  icon: Icon(Icons.refresh, color: Colors.red, size: 20.sp),
+                ),
               ],
-              onChanged: (value) {
-                setState(() {
-                  _selectedCounterpartyId = value;
-                });
-              },
-            );
+            ),
+          );
+        }
+
+        return DropdownButtonFormField<int>(
+          value: _selectedCounterpartyId,
+          decoration: InputDecoration(
+            labelText: 'Contrepartie (optionnel)',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+          ),
+          items: [
+            const DropdownMenuItem<int>(value: null, child: Text('Aucune')),
+            ...counterparties.map(
+              (counterparty) => DropdownMenuItem<int>(
+                value: counterparty.id,
+                child: Text(counterparty.name),
+              ),
+            ),
+          ],
+          onChanged: (value) {
+            setState(() {
+              _selectedCounterpartyId = value;
+            });
           },
         );
       },
@@ -424,15 +461,21 @@ class _AddTransactionBottomSheetMVVMState
           items: [
             DropdownMenuItem<domain.TransactionStatus>(
               value: domain.TransactionStatus.pending,
-              child: Text(_getStatusLabel(domain.TransactionStatus.pending)),
+              child: Text(
+                AppFormatters.getTransactionStatusLabel(
+                  domain.TransactionStatus.pending,
+                  context,
+                ),
+              ),
             ),
             DropdownMenuItem<domain.TransactionStatus>(
               value: domain.TransactionStatus.completed,
-              child: Text(_getStatusLabel(domain.TransactionStatus.completed)),
-            ),
-            DropdownMenuItem<domain.TransactionStatus>(
-              value: domain.TransactionStatus.cancelled,
-              child: Text(_getStatusLabel(domain.TransactionStatus.cancelled)),
+              child: Text(
+                AppFormatters.getTransactionStatusLabel(
+                  domain.TransactionStatus.completed,
+                  context,
+                ),
+              ),
             ),
           ],
           onChanged: (value) {
@@ -564,14 +607,4 @@ class _AddTransactionBottomSheetMVVMState
     }
   }
 
-  String _getStatusLabel(domain.TransactionStatus status) {
-    switch (status) {
-      case domain.TransactionStatus.pending:
-        return 'En attente';
-      case domain.TransactionStatus.completed:
-        return 'Terminé';
-      case domain.TransactionStatus.cancelled:
-        return 'Annulé';
-    }
-  }
 }

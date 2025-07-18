@@ -69,8 +69,7 @@ class TransactionDetailScreen extends ConsumerWidget {
   ) {
     final l10n = AppLocalizations.of(context)!;
     final transaction = transactionWithBalance.transaction;
-    final isDebit =
-        transaction.type.name == AppConstants.transactionTypeDebit;
+    final isExpense = transaction.isExpense;
 
     // Récupérer les informations du compte
     final accounts = ref.watch(accountsProvider);
@@ -88,7 +87,7 @@ class TransactionDetailScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Carte principale avec montant
-          _buildAmountCard(context, transaction, isDebit),
+          _buildAmountCard(context, transaction, isExpense),
 
           const SizedBox(height: AppConstants.largePadding),
 
@@ -194,10 +193,7 @@ class TransactionDetailScreen extends ConsumerWidget {
 
             _buildDetailRow(
               'Type',
-              AppFormatters.getTransactionTypeLabel(
-                transaction.type.name,
-                context,
-              ),
+              AppFormatters.getTransactionTypeLabel(transaction.type, context),
               Icons.swap_vert,
             ),
 
@@ -216,11 +212,12 @@ class TransactionDetailScreen extends ConsumerWidget {
             _buildDetailRow(
               l10n.status,
               AppFormatters.getTransactionStatusLabel(
-                transaction.status.index,
+                transaction.status,
                 context,
               ),
               Icons.info_outline,
-              valueColor: transaction.status == domain.TransactionStatus.completed
+              valueColor:
+                  transaction.status == domain.TransactionStatus.completed
                   ? AppColors.success
                   : AppColors.warning,
             ),

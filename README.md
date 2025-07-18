@@ -53,32 +53,32 @@ lib/
 
 ### ✅ ÉTAPES TERMINÉES
 
-#### Étape 1: Entités Domain ✅
+### Étape 1: Entités Domain ✅
 - [x] `lib/domain/entities/account.dart` - Entité compte avec logique métier
 - [x] `lib/domain/entities/transaction.dart` - Entité transaction avec enums
 - [x] `lib/domain/entities/transaction_with_balance.dart` - Transaction enrichie
 - [x] `lib/domain/value_objects/money.dart` - Value object monétaire
 - [x] Suppression de l'entité User (remplacée par UserPreferencesService)
 
-#### Étape 2: Repositories et DataSources ✅
+### Étape 2: Repositories et DataSources ✅
 - [x] Interfaces repository dans `domain/repositories/`
 - [x] Implémentations dans `data/repositories/`
 - [x] DataSources locales pour Drift
 - [x] Modèles avec mapping Drift ↔ Domain
 
-#### Étape 3: Cache et Optimisations ✅
+### Étape 3: Cache et Optimisations ✅
 - [x] `lib/data/cache/cache_manager.dart` - Cache singleton O(n)
 - [x] Repositories utilisant le cache
 - [x] Calculs de soldes optimisés
 
-#### Étape 4: ViewModels MVVM ✅
+### Étape 4: ViewModels MVVM ✅
 - [x] `lib/presentation/viewmodels/base_view_model.dart` - Classe de base
 - [x] `lib/presentation/viewmodels/account_view_model.dart` - Gestion comptes
 - [x] `lib/presentation/viewmodels/transaction_view_model.dart` - Gestion transactions
 - [x] `lib/presentation/viewmodels/search_view_model.dart` - Recherche avancée
 - [x] `lib/presentation/viewmodels/app_view_model.dart` - Initialisation app
 
-#### Étape 5: Migration Widgets (EN COURS)
+### Étape 5: Migration Widgets (EN COURS)
 - [x] **5.1** `lib/presentation/providers/viewmodel_providers.dart` - Providers Riverpod
 - [x] **5.2** `lib/presentation/screens/home_screen_mvvm.dart` - HomeScreen migré
 - [x] **5.3** Widgets de transaction migrés :
@@ -86,8 +86,6 @@ lib/
   - [x] `lib/presentation/widgets/transactions_list_mvvm.dart`
   - [x] `lib/presentation/widgets/add_transaction_bottom_sheet_mvvm.dart`
   - [x] `lib/presentation/widgets/bank_card_widget_mvvm.dart`
-
-### ✅ ÉTAPES RÉCEMMENT TERMINÉES
 
 #### Étape 5.4: Écrans de Recherche ✅
 - [x] `lib/presentation/widgets/search_field_mvvm.dart` - Champ de recherche avec suggestions
@@ -102,9 +100,7 @@ lib/
 - [x] Correction des hardcoded strings dans HomeScreen MVVM
 - [x] Support complet l10n pour widgets MVVM
 
-### ✅ ÉTAPES RÉCEMMENT TERMINÉES
-
-#### Étape 6: Refactorisation Database.dart ✅
+### Étape 6: Refactorisation Database.dart ✅
 - [x] **6.1** Analysé le fichier monolithique `database.dart` (750+ lignes)
 - [x] **6.2** Créé la nouvelle structure modulaire :
   - [x] `lib/data/database/app_database.dart` (24 lignes vs 750)
@@ -114,10 +110,6 @@ lib/
 - [x] **6.3** Migration des providers critiques vers nouveau système
 - [x] **6.4** Suppression des conflits Drift (ancien database.dart supprimé)
 - [x] **6.5** Migration des imports dans DataSources et Models
-
-### ✅ ÉTAPES TERMINÉES
-
-#### Étape 6: Refactorisation Database.dart ✅ (100% TERMINÉ)
 - [x] **6.6** Finalisation Migration Database (100% terminé) :
   - [x] **6.6a** Corrigé tous imports database.dart restants (17 fichiers)
   - [x] **6.6b** Résolu types manquants (TransactionWithBalance, TransactionWithCounterparty)
@@ -125,9 +117,7 @@ lib/
   - [x] **6.6d** Corrigé toutes erreurs de nullability
   - [x] **6.6e** Projet compile maintenant sans erreurs critiques
 
-### ✅ ÉTAPES RÉCEMMENT TERMINÉES
-
-#### Étape 9: Finalisation Migration MVVM - SUCCÈS TOTAL ! 🎉
+### Étape 9: Finalisation Migration MVVM
 - [x] **9A** Résolution erreurs critiques suivies transactions
   - [x] **9A.1** Implémenté 5 méthodes manquantes dans transaction_repository_impl.dart
   - [x] **9A.2** Corrigé erreurs compilation followed transactions (getFollowedTransactionsWithDetails, etc.)
@@ -143,15 +133,9 @@ lib/
   - [x] **9D.1** Diagnostiqué isAppReady bloqué à false
   - [x] **9D.2** Corrigé splash_screen.dart - migration vers AppViewModel MVVM
   - [x] **9D.3** Implémenté chargement complet données au démarrage (cache-first)
-
-### ✅ ÉTAPES RÉCEMMENT TERMINÉES
-
-#### Étape 9F: Corrections Erreurs Finales ✅
 - [x] **9F.1** Corrigé erreurs compilation draggable_black_container.dart
 - [x] **9F.2** Corrigé erreurs compilation followed_transactions_carousel.dart
 - [x] **9F.3** Migré transaction_detail_screen.dart vers MVVM
-
-#### Étape 9G: Implémentation Méthodes Manquantes - SUCCÈS TOTAL ! 🎉
 - [x] **9G.1** Implémenté updateTransaction dans TransactionRepositoryImpl
 - [x] **9G.2** Implémenté deleteTransaction dans TransactionRepositoryImpl (était déjà fait)
 - [x] **9G.3** Implémenté toggleTransactionStatus dans TransactionRepositoryImpl
@@ -165,7 +149,7 @@ lib/
 - [x] **Cache-first architecture** entièrement opérationnelle
 - [x] **Aucune erreur de compilation** dans l'architecture MVVM
 
-#### Étape 9J: Résolution TODOs et Amélioration Recherche - TERMINÉ ! 🎉
+#### Étape 9J: Résolution TODOs et Amélioration Recherche
 - [x] **9J.1** Corrigé TODO edit_transaction_bottom_sheet.dart - utilise `transactionWithBalance.counterparty?.name`
 - [x] **9J.2** Corrigé TODO perspective_transaction_item.dart - utilise `transactionWithCounterparty.counterparty`
 - [x] **9J.3** Supprimé provider inutilisé transactionWithCounterpartyProvider
@@ -174,26 +158,26 @@ lib/
 - [x] **9J.6** Implémenté recherche dans nom des Categories
 - [x] **9J.7** Confirmé utilisation repositories (pas de requêtage direct BDD)
 
-#### Étape 9K: Finalisation Migration Architecture Async - TERMINÉ ! 🎉
+#### Étape 9K: Finalisation Migration Architecture Async
 - [x] **9K.1** Migré full_transactions_bottom_sheet.dart vers MVVM (supprimé transactionsAsync.when)
 - [x] **9K.2** Migré draggable_black_container.dart vers MVVM (supprimé transactionsAsync.when)
 - [x] **9K.3** Migré followed_transactions_carousel.dart vers MVVM (supprimé followedTransactionsAsync.when)
 - [x] **9K.4** Supprimé tous les imports data/database inutiles
 - [x] **9K.5** Confirmé 0 occurrence de .when() restante dans widgets/screens
 
-#### Étape 9L: Correction Erreur Riverpod SplashScreen - TERMINÉ ! 🎉
+#### Étape 9L: Correction Erreur Riverpod SplashScreen
 - [x] **9L.1** Identifié erreur "Tried to modify a provider while widget tree was building"
 - [x] **9L.2** Cause : appViewModel.initializeApp() appelé dans initState()
 - [x] **9L.3** Solution : Future(() => _initializeApp()) pour délayer l'exécution
 - [x] **9L.4** Test : flutter analyze splash_screen.dart - 0 erreur
 
-#### Étape 9M: Correction Erreur FollowedTransactionsCarousel - TERMINÉ ! 🎉
+#### Étape 9M: Correction Erreur FollowedTransactionsCarousel
 - [x] **9M.1** Identifié erreur _buildErrorState() affiché dans followed_transactions_carousel
 - [x] **9M.2** Cause : getFollowedTransactionsWithDetails() échoue (pas de gestion dans cache MVVM)
 - [x] **9M.3** Solution temporaire : Afficher _buildEmptyState() en attendant implémentation complète
 - [x] **9M.4** TODO ajouté : Implémenter transactions suivies dans cache MVVM
 
-#### Étape 9N: Implémentation Complète Transactions Suivies MVVM - TERMINÉ ! 🎉
+#### Étape 9N: Implémentation Complète Transactions Suivies MVVM
 - [x] **9N.1** Ajouté méthodes followed transactions dans CacheManager
   - [x] **9N.1a** `_loadFollowedTransactionIds()` pour charger les IDs au démarrage
   - [x] **9N.1b** `_calculateFollowedTransactionsWithBalance()` pour calculer les transactions suivies enrichies
@@ -212,7 +196,7 @@ lib/
   - [x] **9N.4b** Restauré le FutureBuilder avec repository MVVM
   - [x] **9N.4c** Corrigé la gestion des erreurs et actualisation
 
-#### Étape 9O: Migration Complète AppDatabase vers MVVM - TERMINÉ ! 🎉
+#### Étape 9O: Migration Complète AppDatabase vers MVVM
 - [x] **9O.1** Analysé et identifié méthodes obsolètes dans app_database.dart
   - [x] **9O.1a** `findOrCreateCounterparty()` - Requête directe contournant l'architecture
   - [x] **9O.1b** `removeFollowedTransaction()` - Requête directe contournant l'architecture
@@ -229,7 +213,7 @@ lib/
   - [x] **9O.4b** Supprimé actions_provider.dart du projet
   - [x] **9O.4c** Confirmé 0 erreur de compilation après nettoyage
 
-#### Étape 9P: Implémentation Fallback Robuste Production - TERMINÉ ! 🎉
+#### Étape 9P: Implémentation Fallback Robuste Production
 - [x] **9P.1** Analysé et identifié fallback insuffisant dans TransactionRepositoryImpl
   - [x] **9P.1a** TODO ligne 128 : "En production, il faudrait recalculer les soldes ici"
   - [x] **9P.1b** Fallback actuel : Soldes à 0 pour toutes les transactions (incorrect)
@@ -248,7 +232,7 @@ lib/
   - [x] **9P.4b** Provider mis à jour avec nouvelles dépendances
   - [x] **9P.4c** Fallback prêt pour production en cas de cache défaillant
 
-#### Étape 9Q: Restauration Interface Utilisateur Originale MVVM - TERMINÉ ! 🎉
+#### Étape 9Q: Restauration Interface Utilisateur Originale MVVM
 - [x] **9Q.1** Analysé et identifié modifications UI non-demandées lors migration MVVM
   - [x] **9Q.1a** transaction_item_mvvm.dart : Couleurs hardcodées, méthodes privées inutiles
   - [x] **9Q.1b** transactions_list_mvvm.dart : Fonctionnalités supplémentaires non-désirées
@@ -270,12 +254,86 @@ lib/
   - [x] **9Q.4b** UI identique à l'original avec architecture MVVM conservée
   - [x] **9Q.4c** Intégration full_transactions_bottom_sheet.dart fonctionnelle
 
+### Étape 10: Implémentation Persistance des Préférences Utilisateur ✅
+
+#### 10A: Migration add_transaction_bottom_sheet vers CounterpartyViewModel ✅
+- [x] **10A.1** Analysé l'utilisation de FutureBuilder dans add_transaction_bottom_sheet_mvvm.dart
+- [x] **10A.2** Migré vers CounterpartyViewModel avec gestion d'état MVVM
+- [x] **10A.3** Harmonisé la logique avec edit_transaction_bottom_sheet.dart
+- [x] **10A.4** Implémenté chargement conditionnel des contreparties
+- [x] **10A.5** Ajouté gestion d'erreurs avec UI de retry
+
+#### 10B: Système de Persistance des Préférences
+- [x] **10B.1** Étendu UserPreferencesService pour thème et langue
+  - [x] **10B.1a** Ajouté constantes `_themeKey` et `_languageKey`
+  - [x] **10B.1b** Implémenté `getThemeMode()` (default: 'light')
+  - [x] **10B.1c** Implémenté `getLanguage()` (default: 'system')
+  - [x] **10B.1d** Ajouté `setThemeMode()` et `setLanguage()` avec SharedPreferences
+- [x] **10B.2** Migré ThemeProvider vers persistance
+  - [x] **10B.2a** Ajouté extension `ThemeModeExtension` pour conversion String ↔ Enum
+  - [x] **10B.2b** Implémenté `_loadTheme()` au démarrage
+  - [x] **10B.2c** Modifié `setTheme()` pour sauvegarder automatiquement
+  - [x] **10B.2d** Injecté UserPreferencesService dans constructor
+- [x] **10B.3** Migré LanguageProvider vers persistance
+  - [x] **10B.3a** Ajouté `AppLanguageExtension.fromString()` pour conversion
+  - [x] **10B.3b** Implémenté `_loadLanguage()` au démarrage
+  - [x] **10B.3c** Modifié `setLanguage()` pour sauvegarder automatiquement
+  - [x] **10B.3d** Injecté UserPreferencesService dans constructor
+- [x] **10B.4** Mis à jour SettingsScreen pour persistance
+  - [x] **10B.4a** Modifié sélecteur de thème pour appels async
+  - [x] **10B.4b** Modifié sélecteur de langue pour appels async
+  - [x] **10B.4c** Ajouté vérification `context.mounted` pour sécurité
+- [x] **10B.5** Configuré initialisation dans main.dart
+  - [x] **10B.5a** Ajouté `WidgetsFlutterBinding.ensureInitialized()`
+  - [x] **10B.5b** Ajouté `await UserPreferencesService.instance.init()`
+  - [x] **10B.5c** Assuré chargement des préférences avant démarrage UI
+
+#### 10C: Comportement Implémenté selon Spécifications ✅
+- [x] **10C.1** Valeurs par défaut respectées
+  - [x] **10C.1a** Thème par défaut : `light` (pas `system` comme demandé)
+  - [x] **10C.1b** Langue par défaut : `system` (suit la langue du système)
+- [x] **10C.2** Persistance complète fonctionnelle
+  - [x] **10C.2a** Sauvegarde automatique lors des changements dans Settings
+  - [x] **10C.2b** Chargement automatique au démarrage de l'application
+  - [x] **10C.2c** Conservation des choix utilisateur entre les sessions
+- [x] **10C.3** Flow utilisateur optimal
+  - [x] **10C.3a** Premier lancement : Thème `light`, Langue `system`
+  - [x] **10C.3b** Changements sauvés immédiatement dans SharedPreferences
+  - [x] **10C.3c** Redémarrage app : Préférences utilisateur restaurées
+
+#### 10D: Architecture Technique Finale ✅
+**Stack de Persistance** :
+```dart
+UserPreferencesService (SharedPreferences)
+    ↓
+ThemeProvider & LanguageProvider (avec persistance)
+    ↓
+SettingsScreen (sauvegarde automatique)
+    ↓
+main.dart (chargement au démarrage)
+```
+
+**Fichiers Modifiés** :
+- `lib/core/services/user_preferences_service.dart` : Étendu pour thème/langue
+- `lib/presentation/providers/theme_provider.dart` : Persistance avec extensions
+- `lib/presentation/providers/settings_provider.dart` : Persistance avec extensions
+- `lib/presentation/screens/settings_screen.dart` : Appels async pour sauvegarde
+- `lib/presentation/widgets/add_transaction_bottom_sheet_mvvm.dart` : Migration MVVM
+- `lib/main.dart` : Initialisation UserPreferencesService
+
+**Points Techniques Critiques** :
+- **Extensions Enum** : `ThemeModeExtension` et `AppLanguageExtension` pour conversions
+- **Chargement Asynchrone** : `_loadTheme()` et `_loadLanguage()` dans constructeurs
+- **Sauvegarde Immédiate** : Chaque `setTheme()` et `setLanguage()` persiste
+- **Défauts Personnalisés** : Thème `light` (pas `system`) selon spécifications
+- **Logique MVVM Cohérente** : Chargement conditionnel des contreparties
+
 ### 📋 ÉTAPES À VENIR
 
-#### Étape 10: Tests et Validation
-- [ ] **10.1** Tests complets nouvelle architecture
-- [ ] **10.2** Validation performances O(n) vs O(n²)
-- [ ] **10.3** Préparation intégration Turso
+#### Étape X : Tests et Validation
+- [ ] **X.1** Tests complets nouvelle architecture
+- [ ] **X.2** Validation performances O(n) vs O(n²)
+- [ ] **X.3** Préparation intégration Turso
 
 ---
 
@@ -405,7 +463,7 @@ await accountRepository.createAccount(newAccount);
 ref.invalidate(accountsProvider);
 ```
 
-### 11. **Optimisation CopyWith Pattern - TERMINÉ ! ✅**
+### 11. **Optimisation CopyWith Pattern**
 **Amélioration critique** : Utilisation de `copyWith()` pour les mises à jour d'entités immutables :
 ```dart
 // Avant (VERBEUX)
@@ -486,32 +544,11 @@ STATUS : SUPPRIMÉ - entièrement remplacé par repositories MVVM
 
 ---
 
-## 🎯 Plan d'Actions Immédiat
-
-### Phase Actuelle : Étape 7 - SUCCÈS TOTAL ! 🎉
-1. ✅ **Migration MVVM** entièrement terminée et opérationnelle
-2. ✅ **Projet compile** sans erreurs critiques (35 warnings/infos uniquement)
-3. ✅ **Architecture modulaire** remplace 750 lignes monolithiques
-4. ✅ **Cache O(n)** implémenté avec performances optimisées
-5. ✅ **Dernière erreur corrigée** - followed_transactions_carousel.dart
-
-### Phase Suivante : Étape 8 (Optionnel)
-1. **Nettoyage final** des warnings et imports inutilisés
-2. **Tests architecture** et validation performances
-3. **Préparation Turso** pour multi-utilisateur
-
-### Phase Finale : Étape 8
-1. **Nettoyage définitif** anciens providers
-2. **Tests architecture complète** et validation O(n)
-3. **Préparation intégration Turso**
-
----
-
 ## 📝 Commandes de Développement
 
 ### Analyse du Code
 ```bash
-flutter analyze lib/presentation/viewmodels/ --no-fatal-infos
+flutter analyze --no-fatal-infos
 ```
 
 ### Génération Drift
@@ -555,7 +592,7 @@ flutter test test/architecture/
 - **Séparation des responsabilités** claire
 - **Prêt pour Turso** multi-utilisateur
 
-### 11. **Architecture Transactions Suivies MVVM - TERMINÉ ! ✅**
+### 11. **Architecture Transactions Suivies MVVM**
 **Implémentation complète** : Les transactions suivies sont maintenant entièrement intégrées dans l'architecture MVVM avec cache-first :
 ```dart
 // lib/data/cache/cache_manager.dart - Gestion cache des transactions suivies
@@ -587,7 +624,7 @@ List<TransactionWithBalance> getFollowedTransactionsWithBalance();
 - **Cohérence** : Intégration parfaite avec l'architecture MVVM existante
 - **Fallback robuste** : Utilise l'ancienne méthode si le cache n'est pas initialisé
 
-### 12. **Migration AppDatabase.dart vers MVVM - TERMINÉ ! ✅**
+### 12. **Migration AppDatabase.dart vers MVVM **
 **Problème résolu** : Le fichier `app_database.dart` contenait encore des méthodes qui contournaient l'architecture MVVM :
 ```dart
 // AVANT (PROBLÉMATIQUE) - Requêtes directes contournant les repositories
@@ -615,7 +652,7 @@ Future<void> removeFollowedTransaction(int transactionId) async {
 - ✅ `app_database.dart` : Plus de TODO, 100% respecte MVVM
 - ✅ `actions_provider.dart` : Supprimé (obsolète, remplacé par repositories)
 
-### 13. **Fallback Robuste Production - TERMINÉ ! ✅**
+### 13. **Fallback Robuste Production**
 **Problème critique résolu** : Le fallback de `TransactionRepositoryImpl.getTransactionsWithBalance()` était insuffisant pour la production :
 ```dart
 // AVANT (PROBLÉMATIQUE) - Fallback avec soldes incorrects
@@ -663,7 +700,7 @@ Future<List<TransactionWithBalance>> _calculateTransactionsWithBalanceFallback(i
 
 **Utilisation** : Se déclenche automatiquement si `_cacheManager.isInitialized == false`
 
-### 14. **Restauration Interface Utilisateur Originale - TERMINÉ ! ✅**
+### 14. **Restauration Interface Utilisateur Originale**
 **Problème identifié** : Lors de la migration MVVM, l'interface utilisateur des widgets `transaction_item_mvvm.dart` et `transactions_list_mvvm.dart` avait été modifiée sans demande explicite.
 
 **Modifications non-demandées détectées** :
@@ -723,6 +760,6 @@ Widget _buildAnimatedDateHeader() {
 
 ---
 
-*Dernière mise à jour : Après étape 9Q - UI ORIGINALE RESTAURÉE ! 🎉*
-*Statut : Architecture MVVM complète + Interface utilisateur originale préservée*
-*Prochaine étape : Tests et validation performances - Préparation intégration Turso*
+*Dernière mise à jour : Après étape 10D - PERSISTANCE PRÉFÉRENCES UTILISATEUR TERMINÉE ! 🎉*
+*Statut : Architecture MVVM complète + Persistance des préférences + Interface utilisateur originale*
+*Prochaine étape : Tests complets et optimisations performances*

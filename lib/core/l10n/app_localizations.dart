@@ -140,6 +140,18 @@ abstract class AppLocalizations {
   /// **'Incomes'**
   String get incomes;
 
+  /// No description provided for @expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get expense;
+
+  /// No description provided for @income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get income;
+
   /// No description provided for @addAccount.
   ///
   /// In en, this message translates to:

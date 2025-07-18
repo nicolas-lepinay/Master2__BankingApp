@@ -6,6 +6,8 @@
   "tomorrow": "Tomorrow",
   "expenses": "Expenses",
   "incomes": "Incomes",
+  "expense": "Expense",
+  "income": "Income",
   "addAccount": "Add a new account",
   "accountName": "Account Name",
   "initialBalance": "Initial Balance",

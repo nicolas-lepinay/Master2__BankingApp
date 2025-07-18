@@ -143,10 +143,8 @@ class TransactionModel {
         return domain.TransactionStatus.pending;
       case 1:
         return domain.TransactionStatus.completed;
-      case 2:
-        return domain.TransactionStatus.cancelled;
       default:
-        return domain.TransactionStatus.completed;
+        return domain.TransactionStatus.pending;
     }
   }
 
@@ -156,8 +154,6 @@ class TransactionModel {
         return 0;
       case domain.TransactionStatus.completed:
         return 1;
-      case domain.TransactionStatus.cancelled:
-        return 2;
     }
   }
 

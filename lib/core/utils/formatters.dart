@@ -1,5 +1,6 @@
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
@@ -638,27 +639,29 @@ class AppFormatters {
   }
 
   // Transaction type and status helpers with localization
-  static String getTransactionTypeLabel(String type, BuildContext context) {
+  static String getTransactionTypeLabel(
+    domain.TransactionType type,
+    BuildContext context,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     switch (type) {
-      case AppConstants.transactionTypeDebit:
-        return l10n.debit;
-      case AppConstants.transactionTypeCredit:
-        return l10n.credit;
-      default:
-        return type;
+      case domain.TransactionType.expense:
+        return l10n.expense;
+      case domain.TransactionType.income:
+        return l10n.income;
     }
   }
 
-  static String getTransactionStatusLabel(int status, BuildContext context) {
+  static String getTransactionStatusLabel(
+    domain.TransactionStatus status,
+    BuildContext context,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     switch (status) {
-      case AppConstants.transactionStatusPending:
+      case domain.TransactionStatus.pending:
         return l10n.pending;
-      case AppConstants.transactionStatusConfirmed:
+      case domain.TransactionStatus.completed:
         return l10n.confirmed;
-      default:
-        return l10n.unknown;
     }
   }
 }

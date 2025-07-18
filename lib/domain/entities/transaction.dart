@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 enum TransactionType { income, expense }
 
-enum TransactionStatus { pending, completed, cancelled }
+enum TransactionStatus { pending, completed }
 
 class Transaction extends Equatable {
   final int id;
@@ -81,36 +81,39 @@ class Transaction extends Equatable {
   bool get isExpense => type == TransactionType.expense;
   bool get isCompleted => status == TransactionStatus.completed;
   bool get isPending => status == TransactionStatus.pending;
-  bool get isCancelled => status == TransactionStatus.cancelled;
 
   bool get hasCounterparty => counterpartyId != null;
-  bool get hasCategories => category1Id != null || category2Id != null || category3Id != null || category4Id != null;
+  bool get hasCategories =>
+      category1Id != null ||
+      category2Id != null ||
+      category3Id != null ||
+      category4Id != null;
 
   List<int> get categoryIds => [
-        if (category1Id != null) category1Id!,
-        if (category2Id != null) category2Id!,
-        if (category3Id != null) category3Id!,
-        if (category4Id != null) category4Id!,
-      ];
+    if (category1Id != null) category1Id!,
+    if (category2Id != null) category2Id!,
+    if (category3Id != null) category3Id!,
+    if (category4Id != null) category4Id!,
+  ];
 
   @override
   List<Object?> get props => [
-        id,
-        accountId,
-        counterpartyId,
-        category1Id,
-        category2Id,
-        category3Id,
-        category4Id,
-        type,
-        currency,
-        amount,
-        amountConverted,
-        title,
-        comment,
-        date,
-        status,
-      ];
+    id,
+    accountId,
+    counterpartyId,
+    category1Id,
+    category2Id,
+    category3Id,
+    category4Id,
+    type,
+    currency,
+    amount,
+    amountConverted,
+    title,
+    comment,
+    date,
+    status,
+  ];
 
   @override
   bool get stringify => true;
