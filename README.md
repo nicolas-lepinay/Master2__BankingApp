@@ -760,6 +760,201 @@ Widget _buildAnimatedDateHeader() {
 
 ---
 
-*Dernière mise à jour : Après étape 10D - PERSISTANCE PRÉFÉRENCES UTILISATEUR TERMINÉE ! 🎉*
-*Statut : Architecture MVVM complète + Persistance des préférences + Interface utilisateur originale*
-*Prochaine étape : Tests complets et optimisations performances*
+## 🌍 Étape 11: Service de Conversion des Devises
+
+### 📋 Contexte et Objectifs
+
+**Fonctionnalité** : Permettre aux utilisateurs de saisir des transactions dans une devise différente de la devise du compte, avec conversion automatique.
+
+**Exemple d'usage** :
+- Compte en EUR, transaction de 15.00 USD
+- Saisie : "15.00 USD" → Conversion automatique → Stockage : `amount: 15.00`, `currency: USD`, `amountConverted: 13.85`
+- Affichage : "13.85 €" (devise du compte)
+- Calcul solde : Utilise `amountConverted` (13.85 €)
+
+### 🏗️ Architecture Hybride Retenue
+
+**✅ APPROCHE HYBRIDE OPTIMISÉE :**
+1. **Pas de table Currency** dans la DB (évite les Foreign Keys)
+2. **CurrencyService statique** pour les devises supportées
+3. **Table ExchangeRates** séparée pour le cache des taux
+4. **Validation métier** au niveau repository
+5. **Colonnes currency actuelles** conservées (pas de FK)
+
+### 🔧 Stack Technique
+
+**API de Taux de Change** :
+- **ExchangeRate-API** : `https://api.exchangerate-api.com/v4/latest/EUR`
+- **Gratuit illimité** (pas de clé API requise)
+- **Mise à jour quotidienne** des taux
+
+**Stratégie de Cache** :
+1. **Cache mémoire** : Intégré au CacheManager existant
+2. **Cache local** : SQLite avec expiration (6 heures)
+3. **Cache de secours** : Derniers taux connus (30 jours)
+
+### 📁 Structure d'Architecture
+
+```
+lib/
+├── core/
+│   ├── services/
+│   │   ├── currency_service.dart           # Devises supportées (statique)
+│   │   └── currency_conversion_service.dart # Conversion avec cache
+│   └── constants/
+│       └── supported_currencies.dart       # Constantes des devises
+├── domain/
+│   ├── entities/
+│   │   ├── currency.dart                  # Entité Currency
+│   │   └── exchange_rate.dart             # Entité ExchangeRate
+│   └── repositories/
+│       └── exchange_rate_repository.dart  # Interface repository
+├── data/
+│   ├── models/
+│   │   └── exchange_rate_model.dart       # Modèle Drift pour cache
+│   ├── datasources/
+│   │   ├── local/
+│   │   │   └── exchange_rate_local_datasource.dart
+│   │   └── remote/
+│   │       └── exchange_rate_remote_datasource.dart
+│   └── repositories/
+│       └── exchange_rate_repository_impl.dart
+└── presentation/
+    └── viewmodels/
+        └── currency_viewmodel.dart        # ViewModel pour UI
+```
+
+### 🚀 Plan d'Implémentation Détaillé
+
+#### **Phase 1 : Foundation (Entities & Constants)**
+- **1.1** Créer `lib/domain/entities/currency.dart`
+  - **1.1a** Entité Currency avec code, symbole, nameKey, countryKey
+  - **1.1b** Méthodes utilitaires (formatAmount, getDisplayName)
+  - **1.1c** Support i18n intégré
+- **1.2** Créer `lib/domain/entities/exchange_rate.dart`
+  - **1.2a** Entité ExchangeRate avec fromCurrency, toCurrency, rate
+  - **1.2b** Méthodes de validation et expiration
+  - **1.2c** Méthodes de conversion (convertAmount)
+- **1.3** Créer `lib/core/constants/supported_currencies.dart`
+  - **1.3a** Liste des devises supportées (EUR, USD, GBP, JPY, etc.)
+  - **1.3b** Métadonnées complètes (symboles, décimales, drapeaux)
+  - **1.3c** Constantes pour validation
+- **1.4** Étendre les fichiers de localisation
+  - **1.4a** Ajouter clés de traduction dans `app_en.arb`
+  - **1.4b** Ajouter traductions françaises dans `app_fr.arb`
+  - **1.4c** Générer nouvelles localisations
+
+#### **Phase 2 : Services & Models**
+- **2.1** Créer `lib/core/services/currency_service.dart`
+  - **2.1a** Service statique pour gestion des devises
+  - **2.1b** Méthodes getCurrency, isValidCurrency, getAllCurrencies
+  - **2.1c** Validation centralisée des codes devises
+- **2.2** Créer `lib/data/models/exchange_rate_model.dart`
+  - **2.2a** Modèle Drift pour table ExchangeRates
+  - **2.2b** Colonnes : fromCurrency, toCurrency, rate, lastUpdated, expiresAt
+  - **2.2c** Méthodes de conversion vers/depuis entité domain
+- **2.3** Ajouter table ExchangeRates à la base de données
+  - **2.3a** Étendre `lib/data/database/tables/exchange_rates_table.dart`
+  - **2.3b** Ajouter à `lib/data/database/app_database.dart`
+  - **2.3c** Générer migration Drift avec `build_runner`
+
+#### **Phase 3 : Data Layer (DataSources & Repositories)**
+- **3.1** Créer `lib/data/datasources/remote/exchange_rate_remote_datasource.dart`
+  - **3.1a** Interface et implémentation pour API calls
+  - **3.1b** Intégration avec ExchangeRate-API
+  - **3.1c** Gestion d'erreurs et timeouts
+- **3.2** Créer `lib/data/datasources/local/exchange_rate_local_datasource.dart`
+  - **3.2a** Interface et implémentation pour cache SQLite
+  - **3.2b** Méthodes CRUD pour ExchangeRates
+  - **3.2c** Logique d'expiration et nettoyage
+- **3.3** Créer `lib/domain/repositories/exchange_rate_repository.dart`
+  - **3.3a** Interface repository avec méthodes métier
+  - **3.3b** Méthodes : getRates, getRate, updateRates, convertAmount
+  - **3.3c** Définition des contrats d'erreur
+- **3.4** Créer `lib/data/repositories/exchange_rate_repository_impl.dart`
+  - **3.4a** Implémentation avec stratégie cache 3 niveaux
+  - **3.4b** Logique fallback et gestion d'erreurs
+  - **3.4c** Optimisations performance et requêtes
+
+#### **Phase 4 : Integration avec CacheManager**
+- **4.1** Étendre `lib/data/cache/cache_manager.dart`
+  - **4.1a** Ajouter cache mémoire pour ExchangeRates
+  - **4.1b** Méthodes de conversion intégrées
+  - **4.1c** Streams pour réactivité des taux
+- **4.2** Créer `lib/core/services/currency_conversion_service.dart`
+  - **4.2a** Service de conversion haut niveau
+  - **4.2b** Intégration avec CacheManager et repositories
+  - **4.2c** Gestion des conversions batch et optimisées
+- **4.3** Modifier calculs de soldes dans CacheManager
+  - **4.3a** Utiliser `amountConverted` si disponible
+  - **4.3b** Maintenir compatibilité avec transactions existantes
+  - **4.3c** Optimiser performance des calculs
+
+#### **Phase 5 : ViewModels & UI**
+- **5.1** Créer `lib/presentation/viewmodels/currency_viewmodel.dart`
+  - **5.1a** ViewModel pour gestion des devises dans l'UI
+  - **5.1b** États : loading, error, loaded avec liste des devises
+  - **5.1c** Méthodes de conversion temps réel
+- **5.2** Étendre `lib/presentation/viewmodels/transaction_viewmodel.dart`
+  - **5.2a** Ajouter support pour devises multiples
+  - **5.2b** Conversion automatique lors de la saisie
+  - **5.2c** Validation des devises dans les formulaires
+- **5.3** Modifier `lib/presentation/widgets/add_transaction_bottom_sheet_mvvm.dart`
+  - **5.3a** Ajouter sélecteur de devise
+  - **5.3b** Affichage conversion temps réel
+  - **5.3c** Validation et UX optimisée
+- **5.4** Mettre à jour affichage des transactions
+  - **5.4a** Afficher montant converti dans les listes
+  - **5.4b** Indicateur visuel pour transactions converties
+  - **5.4c** Détails de conversion dans les écrans de détail
+
+#### **Phase 6 : Tests & Optimisations**
+- **6.1** Tests unitaires
+  - **6.1a** Tests des services de conversion
+  - **6.1b** Tests des repositories avec mocks
+  - **6.1c** Tests des ViewModels et logique métier
+- **6.2** Tests d'intégration
+  - **6.2a** Tests des flows complets de conversion
+  - **6.2b** Tests des fallbacks et gestion d'erreurs
+  - **6.2c** Tests de performance et cache
+- **6.3** Optimisations finales
+  - **6.3a** Profiling et optimisation performance
+  - **6.3b** Réduction des requêtes API
+  - **6.3c** Optimisation UX et feedback utilisateur
+
+### 📊 Avantages de cette Architecture
+
+1. **🚀 Performance** :
+   - Pas de JOIN requis pour les transactions
+   - Cache intelligent à 3 niveaux
+   - Conversion O(1) via HashMap
+
+2. **🛡️ Robustesse** :
+   - Fallbacks multiples en cas d'erreur
+   - Validation centralisée des devises
+   - Gestion d'erreurs comprehensive
+
+3. **🔧 Maintenabilité** :
+   - Code découplé et modulaire
+   - Respect de l'architecture MVVM existante
+   - Ajout facile de nouvelles devises
+
+4. **🌍 Scalabilité** :
+   - Support de milliers d'utilisateurs
+   - Cache partagé optimisé
+   - Requêtes API minimales
+
+### 🎯 Critères de Réussite
+
+- [ ] **Phase 1** : Compilation sans erreur après ajout des entités
+- [ ] **Phase 2** : Services fonctionnels avec validation
+- [ ] **Phase 3** : Cache local opérationnel avec API
+- [ ] **Phase 4** : Conversion intégrée au CacheManager
+- [ ] **Phase 5** : UI complète avec sélection de devises
+- [ ] **Phase 6** : Tests complets et optimisations
+
+---
+
+*Dernière mise à jour : Après étape 11 - SERVICE DE CONVERSION DES DEVISES - ARCHITECTURE PLANIFIÉE ! 🌍*
+*Statut : Architecture MVVM complète + Persistance des préférences + Service de conversion planifié*
+*Prochaine étape : Implémentation du service de conversion étape par étape*

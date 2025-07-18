@@ -96,44 +96,24 @@ class AppFormatters {
       final formattedNumber = formatter.format(amount.abs());
 
       switch (languageCode) {
+        // English: $10.50, £15.75
+        // Chinese: ¥10.50, $15.75
         case 'en':
-          // English: $10.50, £15.75
+        case 'zh':
           return amount >= 0
               ? '$symbol$formattedNumber'
               : '-$symbol$formattedNumber';
 
         case 'fr':
-          // French: 10,50€, 15,75€
+          // French: 10,50€, 15,75$
           return amount >= 0
               ? '$formattedNumber$symbol'
               : '-$formattedNumber$symbol';
 
-        case 'es':
-          // Spanish: 10,50€, $15,75
-          if (currency == 'EUR') {
-            return amount >= 0
-                ? '$formattedNumber$symbol'
-                : '-$formattedNumber$symbol';
-          } else {
-            return amount >= 0
-                ? '$symbol$formattedNumber'
-                : '-$symbol$formattedNumber';
-          }
-
-        case 'it':
-          // Italian: 10,50€, $15,75
-          if (currency == 'EUR') {
-            return amount >= 0
-                ? '$formattedNumber$symbol'
-                : '-$formattedNumber$symbol';
-          } else {
-            return amount >= 0
-                ? '$symbol$formattedNumber'
-                : '-$symbol$formattedNumber';
-          }
-
         case 'de':
-          // German: 10,50€, $15,75
+        case 'it':
+        case 'es':
+          // Spanish, Italian, German: 10,50€, $15,75
           if (currency == 'EUR') {
             return amount >= 0
                 ? '$formattedNumber$symbol'
@@ -189,12 +169,6 @@ class AppFormatters {
                 ? '$symbol$formattedNumber'
                 : '-$symbol$formattedNumber';
           }
-
-        case 'zh':
-          // Chinese: ¥10.50, $15.75
-          return amount >= 0
-              ? '$symbol$formattedNumber'
-              : '-$symbol$formattedNumber';
 
         case 'ar':
           // Arabic: 10.50 ر.س, $15.75
