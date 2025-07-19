@@ -1,6 +1,7 @@
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/services/user_preferences_service.dart';
 import 'package:bankapp/core/theme/app_theme.dart';
+import 'package:bankapp/core/utils/app_logger.dart';
 import 'package:bankapp/presentation/providers/settings_provider.dart';
 import 'package:bankapp/presentation/providers/theme_provider.dart'
     as theme_provider;
@@ -19,6 +20,13 @@ void main() async {
 
   // Initialiser les préférences utilisateur au démarrage
   await UserPreferencesService.instance.init();
+
+  // Test de logging au démarrage
+  AppLogger.info(
+    'MainApp',
+    'main',
+    '🚀 Application starting with logging system',
+  );
 
   runApp(const ProviderScope(child: MyApp()));
 }

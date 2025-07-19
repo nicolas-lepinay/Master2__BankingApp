@@ -43,8 +43,13 @@ class AppLogger {
     // Fallback debugPrint pour compatibilité (si DevTools non disponible)
     if (kDebugMode) {
       debugPrint(logMessage);
+      // Force print pour IntelliJ debugging
+      // ignore: avoid_print
+      print(logMessage);
       if (error != null) {
         debugPrint('  ❌ Error: $error');
+        // ignore: avoid_print
+        print('  ❌ Error: $error');
       }
     }
   }

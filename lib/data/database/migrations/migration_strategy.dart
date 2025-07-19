@@ -15,8 +15,6 @@ MigrationStrategy createMigrationStrategy() {
       // Insérer les données initiales
       await insertInitialData(m.database as AppDatabase);
     },
-    onUpgrade: (Migrator m, int from, int to) async {
-      // TODO: Implémenter les migrations futures si nécessaire
-    },
+    onUpgrade: (Migrator m, int from, int to) async {},
   );
 }
