@@ -1,7 +1,6 @@
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

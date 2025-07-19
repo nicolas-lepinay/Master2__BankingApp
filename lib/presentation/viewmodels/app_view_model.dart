@@ -1,6 +1,8 @@
+import 'package:bankapp/core/services/smart_exchange_rate_service.dart';
 import 'package:bankapp/core/services/user_preferences_service.dart';
 import 'package:bankapp/data/cache/cache_manager.dart';
 import 'package:bankapp/data/datasources/local/local_datasources.dart';
+import 'package:bankapp/domain/repositories/exchange_rate_repository.dart';
 import 'package:bankapp/presentation/viewmodels/base_view_model.dart';
 
 /// États de l'application
@@ -104,6 +106,8 @@ class AppViewModel extends BaseViewModel<AppViewState> {
   final CategoryLocalDataSource _categoryDataSource;
   final CounterpartyLocalDataSource _counterpartyDataSource;
   final UserPreferencesService _userPreferencesService;
+  final ExchangeRateRepository? _exchangeRateRepository;
+  final SmartExchangeRateService? _smartExchangeRateService;
 
   AppViewModel(
     this._cacheManager,
@@ -112,6 +116,8 @@ class AppViewModel extends BaseViewModel<AppViewState> {
     this._categoryDataSource,
     this._counterpartyDataSource,
     this._userPreferencesService,
+    this._exchangeRateRepository,
+    this._smartExchangeRateService,
   ) : super(const AppViewState());
 
   /// Initialise l'application
@@ -148,7 +154,13 @@ class AppViewModel extends BaseViewModel<AppViewState> {
         await _initializeCache();
       }
 
-      // Étape 4 : Finalisation
+      // Étape 4 : Gestion intelligente des taux de change
+      if (_smartExchangeRateService != null) {
+        state = state.loading('Synchronisation des taux de change...', 0.85);
+        await _smartLoadExchangeRates();
+      }
+
+      // Étape 5 : Finalisation
       state = state.loading('Finalisation...', 0.9);
       await Future.delayed(const Duration(milliseconds: 300));
 
@@ -180,7 +192,8 @@ class AppViewModel extends BaseViewModel<AppViewState> {
 
     // Charger les IDs des transactions suivies
     state = state.loading('Chargement des transactions suivies...', 0.75);
-    final followedTransactionIds = await _transactionDataSource.getFollowedTransactionIds();
+    final followedTransactionIds = await _transactionDataSource
+        .getFollowedTransactionIds();
 
     // Initialiser le cache
     state = state.loading('Initialisation du cache...', 0.8);
@@ -190,7 +203,41 @@ class AppViewModel extends BaseViewModel<AppViewState> {
       categories: categories,
       counterparties: counterparties,
       followedTransactionIds: followedTransactionIds,
+      exchangeRateRepository: _exchangeRateRepository,
     );
+  }
+
+  /// Gestion intelligente des taux de change au démarrage
+  Future<void> _smartLoadExchangeRates() async {
+    if (_smartExchangeRateService == null) return;
+
+    try {
+      final service = _smartExchangeRateService!;
+
+      if (service.isCacheEmpty()) {
+        // Cas 1 : Cache vide → Charger devise locale
+        state = state.loading('Détection de votre devise locale...', 0.86);
+        final result = await service.initializeEmptyCache();
+
+        if (result.success) {
+          // Cache initialisé avec la devise locale
+        } else {
+          // Échec non-bloquant : l'app continue de fonctionner
+        }
+      } else {
+        // Cas 2 : Cache existant → Mise à jour sélective des taux expirés
+        state = state.loading('Mise à jour des taux expirés...', 0.87);
+        final result = await service.updateExpiredRatesWithTimeout();
+
+        if (result.success && result.updatedCurrencies.isNotEmpty) {
+          // Taux mis à jour avec succès
+        } else {
+          // Échec ou aucune mise à jour nécessaire : continuer avec cache existant
+        }
+      }
+    } catch (e) {
+      // Ignorer les erreurs - pas critique pour l'initialisation de l'app
+    }
   }
 
   /// Définit le nom d'utilisateur lors du premier lancement

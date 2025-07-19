@@ -14,6 +14,7 @@ class TransactionModel {
   final String currency;
   final double amount;
   final double? amountConverted;
+  final String? originalCurrency;
   final String? title;
   final String? comment;
   final DateTime date;
@@ -31,6 +32,7 @@ class TransactionModel {
     required this.currency,
     required this.amount,
     this.amountConverted,
+    this.originalCurrency,
     this.title,
     this.comment,
     required this.date,
@@ -50,6 +52,7 @@ class TransactionModel {
       currency: data.currency,
       amount: data.amount,
       amountConverted: data.amountConverted,
+      originalCurrency: data.originalCurrency,
       title: data.title,
       comment: data.comment,
       date: data.date,
@@ -70,6 +73,7 @@ class TransactionModel {
       currency: transaction.currency,
       amount: transaction.amount,
       amountConverted: transaction.amountConverted,
+      originalCurrency: transaction.originalCurrency,
       title: transaction.title,
       comment: transaction.comment,
       date: transaction.date,
@@ -90,6 +94,7 @@ class TransactionModel {
       currency: currency,
       amount: amount,
       amountConverted: amountConverted,
+      originalCurrency: originalCurrency,
       title: title,
       comment: comment,
       date: date,
@@ -110,6 +115,7 @@ class TransactionModel {
       currency: Value(currency),
       amount: Value(amount),
       amountConverted: Value(amountConverted),
+      originalCurrency: Value(originalCurrency),
       title: Value(title),
       comment: Value(comment),
       date: Value(date),
@@ -169,6 +175,7 @@ class TransactionModel {
     String? currency,
     double? amount,
     double? amountConverted,
+    String? originalCurrency,
     String? title,
     String? comment,
     DateTime? date,
@@ -186,6 +193,7 @@ class TransactionModel {
       currency: currency ?? this.currency,
       amount: amount ?? this.amount,
       amountConverted: amountConverted ?? this.amountConverted,
+      originalCurrency: originalCurrency ?? this.originalCurrency,
       title: title ?? this.title,
       comment: comment ?? this.comment,
       date: date ?? this.date,

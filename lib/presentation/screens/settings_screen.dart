@@ -1,5 +1,4 @@
 import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/presentation/providers/settings_provider.dart';
@@ -190,7 +189,9 @@ class SettingsScreen extends ConsumerWidget {
                     ? Icon(Icons.check, color: AppColors.primary, size: 16.sp)
                     : null,
                 onTap: () async {
-                  await ref.read(languageProvider.notifier).setLanguage(language);
+                  await ref
+                      .read(languageProvider.notifier)
+                      .setLanguage(language);
                   if (context.mounted) {
                     Navigator.of(context).pop();
 

@@ -18,6 +18,7 @@ part 'app_database.g.dart';
     Counterparties,
     Transactions,
     FollowedTransactions,
+    ExchangeRates,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -25,7 +26,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(createDatabaseConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => createMigrationStrategy();

@@ -22,6 +22,7 @@ class Transactions extends Table {
   TextColumn get currency => text()();
   RealColumn get amount => real()();
   RealColumn get amountConverted => real().nullable()();
+  TextColumn get originalCurrency => text().nullable()();
   TextColumn get title => text().nullable()();
   TextColumn get comment => text().nullable()();
   DateTimeColumn get date => dateTime()();

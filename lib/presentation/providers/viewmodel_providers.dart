@@ -1,6 +1,10 @@
+import 'package:bankapp/core/services/currency_conversion_service.dart';
+import 'package:bankapp/core/services/firebase_functions_service.dart';
+import 'package:bankapp/core/services/smart_exchange_rate_service.dart';
 import 'package:bankapp/core/services/user_preferences_service.dart';
 import 'package:bankapp/data/cache/cache_manager.dart';
 import 'package:bankapp/data/datasources/local/local_datasources.dart';
+import 'package:bankapp/data/datasources/remote/exchange_rate_remote_datasource.dart';
 import 'package:bankapp/data/repositories/database/followed_transaction_database_repository.dart';
 import 'package:bankapp/data/repositories/repositories.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
@@ -42,6 +46,25 @@ final followedTransactionDatabaseRepositoryProvider =
     Provider<FollowedTransactionDatabaseRepository>((ref) {
       final database = ref.watch(databaseProvider);
       return FollowedTransactionDatabaseRepository(database);
+    });
+
+final exchangeRateLocalDataSourceProvider =
+    Provider<ExchangeRateLocalDataSource>((ref) {
+      final database = ref.watch(databaseProvider);
+      return ExchangeRateLocalDataSourceImpl(database);
+    });
+
+final firebaseFunctionsServiceProvider = Provider<FirebaseFunctionsService>((
+  ref,
+) {
+  return FirebaseFunctionsService();
+});
+
+final exchangeRateRemoteDataSourceProvider =
+    Provider<ExchangeRateRemoteDataSource>((ref) {
+      return ExchangeRateRemoteDataSourceImpl(
+        firebaseFunctionsService: ref.watch(firebaseFunctionsServiceProvider),
+      );
     });
 
 // ============================================================================
@@ -92,6 +115,31 @@ final counterpartyRepositoryProvider = Provider<CounterpartyRepository>((ref) {
   );
 });
 
+final exchangeRateRepositoryProvider = Provider<ExchangeRateRepository>((ref) {
+  return ExchangeRateRepositoryImpl(
+    ref.watch(exchangeRateLocalDataSourceProvider),
+    ref.watch(exchangeRateRemoteDataSourceProvider),
+  );
+});
+
+final currencyConversionServiceProvider = Provider<CurrencyConversionService>((
+  ref,
+) {
+  return CurrencyConversionService(
+    ref.watch(cacheManagerProvider),
+    ref.watch(exchangeRateRepositoryProvider),
+  );
+});
+
+final smartExchangeRateServiceProvider = Provider<SmartExchangeRateService>((
+  ref,
+) {
+  return SmartExchangeRateService(
+    ref.watch(cacheManagerProvider),
+    ref.watch(exchangeRateRepositoryProvider),
+  );
+});
+
 // ============================================================================
 // VIEWMODELS PROVIDERS
 // ============================================================================
@@ -106,17 +154,25 @@ final appViewModelProvider = StateNotifierProvider<AppViewModel, AppViewState>((
     ref.watch(categoryLocalDataSourceProvider),
     ref.watch(counterpartyLocalDataSourceProvider),
     ref.watch(userPreferencesServiceProvider),
+    ref.watch(exchangeRateRepositoryProvider),
+    ref.watch(smartExchangeRateServiceProvider),
   );
 });
 
 final accountViewModelProvider =
     StateNotifierProvider<AccountViewModel, AccountViewState>((ref) {
-      return AccountViewModel(ref.watch(accountRepositoryProvider));
+      return AccountViewModel(
+        ref.watch(accountRepositoryProvider),
+        ref.watch(smartExchangeRateServiceProvider),
+      );
     });
 
 final transactionViewModelProvider =
     StateNotifierProvider<TransactionViewModel, TransactionViewState>((ref) {
-      return TransactionViewModel(ref.watch(transactionRepositoryProvider), ref);
+      return TransactionViewModel(
+        ref.watch(transactionRepositoryProvider),
+        ref,
+      );
     });
 
 final counterpartyViewModelProvider =
@@ -131,6 +187,11 @@ final searchViewModelProvider =
         ref.watch(categoryRepositoryProvider),
         ref.watch(counterpartyRepositoryProvider),
       );
+    });
+
+final currencyViewModelProvider =
+    StateNotifierProvider<CurrencyViewModel, CurrencyViewState>((ref) {
+      return CurrencyViewModel(ref.watch(currencyConversionServiceProvider));
     });
 
 // ============================================================================
@@ -262,13 +323,11 @@ final transactionByIdProvider =
     });
 
 /// Provider pour obtenir l'AccountSummary d'un compte spécifique
-final accountSummaryByIdProvider = FutureProvider.family<domain.AccountSummary, int>((
-  ref,
-  accountId,
-) async {
-  final accountRepository = ref.watch(accountRepositoryProvider);
-  return accountRepository.getAccountSummary(accountId);
-});
+final accountSummaryByIdProvider =
+    FutureProvider.family<domain.AccountSummary, int>((ref, accountId) async {
+      final accountRepository = ref.watch(accountRepositoryProvider);
+      return accountRepository.getAccountSummary(accountId);
+    });
 
 // ============================================================================
 // COMPUTED PROVIDERS
@@ -377,7 +436,7 @@ void invalidateAccountProviders(Ref ref) {
   ref.invalidate(accountsProvider);
   ref.invalidate(selectedAccountProvider);
   ref.invalidate(selectedAccountSummaryProvider);
-  
+
   // Invalider les providers d'account summary (tous les ID)
   ref.invalidate(accountSummaryByIdProvider);
 }
@@ -388,7 +447,7 @@ void invalidateTransactionProviders(Ref ref) {
   ref.invalidate(transactionViewModelProvider);
   ref.invalidate(filteredTransactionsProvider);
   ref.invalidate(paginatedTransactionsProvider);
-  
+
   // Invalider aussi les résumés de comptes car ils dépendent des transactions
   invalidateAccountProviders(ref);
 }

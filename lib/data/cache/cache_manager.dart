@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bankapp/data/models/models.dart';
 import 'package:bankapp/domain/entities/entities.dart';
+import 'package:bankapp/domain/repositories/exchange_rate_repository.dart';
 import 'package:bankapp/domain/value_objects/value_objects.dart';
 
 /// Gestionnaire de cache centralisé pour toutes les données
@@ -24,6 +25,11 @@ class CacheManager {
   final Map<int, AccountSummary> _accountSummaries = {};
   final List<TransactionWithBalance> _followedTransactionsWithBalance = [];
 
+  // Cache des taux de change
+  final Map<String, ExchangeRate> _exchangeRates = {};
+  ExchangeRateRepository? _exchangeRateRepository;
+  DateTime? _lastExchangeRateUpdate;
+
   // Streams pour la réactivité
   final StreamController<List<Account>> _accountsController =
       StreamController<List<Account>>.broadcast();
@@ -36,6 +42,8 @@ class CacheManager {
   final StreamController<List<TransactionWithBalance>>
   _followedTransactionsController =
       StreamController<List<TransactionWithBalance>>.broadcast();
+  final StreamController<Map<String, ExchangeRate>> _exchangeRatesController =
+      StreamController<Map<String, ExchangeRate>>.broadcast();
 
   // Flags d'initialisation
   bool _isInitialized = false;
@@ -48,6 +56,7 @@ class CacheManager {
     required List<CategoryModel> categories,
     required List<CounterpartyModel> counterparties,
     required List<int> followedTransactionIds,
+    ExchangeRateRepository? exchangeRateRepository,
   }) async {
     if (_isInitialized || _isLoading) return;
 
@@ -60,6 +69,12 @@ class CacheManager {
       await _loadCategories(categories);
       await _loadCounterparties(counterparties);
       await _loadFollowedTransactionIds(followedTransactionIds);
+
+      // Initialiser le repository des taux de change
+      if (exchangeRateRepository != null) {
+        _exchangeRateRepository = exchangeRateRepository;
+        await _loadExchangeRates();
+      }
 
       // Calculer les données enrichies
       await _calculateAllTransactionsWithBalance();
@@ -145,10 +160,12 @@ class CacheManager {
       double currentBalance = account.initialBalance;
 
       for (final transaction in transactions) {
-        // Calculer le nouveau solde
+        // Calculer le nouveau solde en utilisant le montant converti si disponible
+        final effectiveAmount =
+            transaction.amountConverted ?? transaction.amount;
         final signedAmount = transaction.type == TransactionType.income
-            ? transaction.amount
-            : -transaction.amount;
+            ? effectiveAmount
+            : -effectiveAmount;
         currentBalance += signedAmount;
 
         // Créer l'objet enrichi
@@ -335,6 +352,7 @@ class CacheManager {
       _counterparties.values.map((c) => c.toEntity()).toList(),
     );
     _followedTransactionsController.add(_followedTransactionsWithBalance);
+    _exchangeRatesController.add(Map.from(_exchangeRates));
   }
 
   // === GETTERS PUBLICS ===
@@ -476,6 +494,146 @@ class CacheManager {
     }
   }
 
+  // === GESTION DES TAUX DE CHANGE ===
+
+  /// Charge les taux de change depuis le repository
+  Future<void> _loadExchangeRates() async {
+    if (_exchangeRateRepository == null) return;
+
+    try {
+      final validRates = await _exchangeRateRepository!.getAllValidRates();
+      _exchangeRates.clear();
+
+      for (final rate in validRates) {
+        final key = '${rate.fromCurrency}_${rate.toCurrency}';
+        _exchangeRates[key] = rate;
+      }
+
+      _lastExchangeRateUpdate = DateTime.now();
+    } catch (e) {
+      // Ignorer les erreurs de chargement des taux - pas critique
+    }
+  }
+
+  /// Convertit un montant d'une devise à une autre
+  Future<double?> convertAmount(
+    double amount,
+    String fromCurrency,
+    String toCurrency,
+  ) async {
+    if (fromCurrency == toCurrency) return amount;
+
+    // Essayer d'abord avec le cache
+    final cacheKey = '${fromCurrency}_$toCurrency';
+    final cachedRate = _exchangeRates[cacheKey];
+
+    if (cachedRate != null && cachedRate.isValid) {
+      return cachedRate.convertAmount(amount);
+    }
+
+    // Si pas en cache ou expiré, essayer via le repository
+    if (_exchangeRateRepository != null) {
+      try {
+        final convertedAmount = await _exchangeRateRepository!.convertAmount(
+          amount,
+          fromCurrency,
+          toCurrency,
+        );
+
+        // Mettre à jour le cache avec le nouveau taux
+        final rate = await _exchangeRateRepository!.getExchangeRate(
+          fromCurrency,
+          toCurrency,
+        );
+        if (rate != null) {
+          _exchangeRates[cacheKey] = rate;
+          _exchangeRatesController.add(Map.from(_exchangeRates));
+        }
+
+        return convertedAmount;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    return null;
+  }
+
+  /// Obtient un taux de change
+  Future<ExchangeRate?> getExchangeRate(
+    String fromCurrency,
+    String toCurrency,
+  ) async {
+    if (fromCurrency == toCurrency) {
+      return ExchangeRate.withDefaultExpiration(
+        fromCurrency: fromCurrency,
+        toCurrency: toCurrency,
+        rate: 1.0,
+      );
+    }
+
+    final cacheKey = '${fromCurrency}_$toCurrency';
+    final cachedRate = _exchangeRates[cacheKey];
+
+    if (cachedRate != null && cachedRate.isValid) {
+      return cachedRate;
+    }
+
+    if (_exchangeRateRepository != null) {
+      try {
+        final rate = await _exchangeRateRepository!.getExchangeRate(
+          fromCurrency,
+          toCurrency,
+        );
+        if (rate != null) {
+          _exchangeRates[cacheKey] = rate;
+          _exchangeRatesController.add(Map.from(_exchangeRates));
+        }
+        return rate;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    return null;
+  }
+
+  /// Met à jour les taux de change pour une devise de base
+  Future<void> updateExchangeRates(String baseCurrency) async {
+    if (_exchangeRateRepository == null) return;
+
+    try {
+      await _exchangeRateRepository!.updateExchangeRates(baseCurrency);
+      await _loadExchangeRates();
+      _exchangeRatesController.add(Map.from(_exchangeRates));
+    } catch (e) {
+      // Ignorer les erreurs de mise à jour
+    }
+  }
+
+  /// Vérifie si un taux de change est disponible
+  Future<bool> isExchangeRateAvailable(
+    String fromCurrency,
+    String toCurrency,
+  ) async {
+    if (fromCurrency == toCurrency) return true;
+
+    final rate = await getExchangeRate(fromCurrency, toCurrency);
+    return rate != null;
+  }
+
+  /// Obtient tous les taux de change en cache
+  Map<String, ExchangeRate> getAllExchangeRates() {
+    return Map.from(_exchangeRates);
+  }
+
+  /// Obtient la date de dernière mise à jour des taux
+  DateTime? get lastExchangeRateUpdate => _lastExchangeRateUpdate;
+
+  /// Stream des taux de change
+  Stream<Map<String, ExchangeRate>> get exchangeRatesStream =>
+      _exchangeRatesController.stream;
+
   /// Nettoie le cache
   void dispose() {
     _accounts.clear();
@@ -486,12 +644,14 @@ class CacheManager {
     _transactionsWithBalance.clear();
     _accountSummaries.clear();
     _followedTransactionsWithBalance.clear();
+    _exchangeRates.clear();
 
     _accountsController.close();
     _transactionsController.close();
     _categoriesController.close();
     _counterpartiesController.close();
     _followedTransactionsController.close();
+    _exchangeRatesController.close();
 
     _isInitialized = false;
     _isLoading = false;

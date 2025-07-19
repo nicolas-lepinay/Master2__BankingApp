@@ -1,3 +1,4 @@
+import 'package:bankapp/core/services/smart_exchange_rate_service.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/domain/repositories/repositories.dart';
 import 'package:bankapp/presentation/viewmodels/base_view_model.dart';
@@ -68,8 +69,12 @@ class AccountViewState extends BaseViewState {
 /// ViewModel pour la gestion des comptes
 class AccountViewModel extends BaseViewModel<AccountViewState> {
   final AccountRepository _accountRepository;
+  final SmartExchangeRateService? _smartExchangeRateService;
   
-  AccountViewModel(this._accountRepository) : super(const AccountViewState()) {
+  AccountViewModel(
+    this._accountRepository,
+    this._smartExchangeRateService,
+  ) : super(const AccountViewState()) {
     _init();
   }
   
@@ -144,6 +149,9 @@ class AccountViewModel extends BaseViewModel<AccountViewState> {
       
       // Sélectionner le nouveau compte
       await selectAccount(createdAccount.id);
+      
+      // Cas 3 : Mise à jour asynchrone des taux de change pour la devise du compte
+      _ensureExchangeRatesForCurrency(currency);
     });
   }
   
@@ -267,6 +275,23 @@ class AccountViewModel extends BaseViewModel<AccountViewState> {
   /// Indique si le solde est négatif
   bool get isBalanceNegative => 
       state.selectedAccountSummary?.isBalanceNegative ?? false;
+  
+  /// S'assure que les taux de change sont disponibles pour une devise
+  /// (Méthode asynchrone non-bloquante)
+  void _ensureExchangeRatesForCurrency(String currency) {
+    if (_smartExchangeRateService == null) return;
+    
+    // Exécuter en arrière-plan sans bloquer l'UI
+    Future(() async {
+      try {
+        await _smartExchangeRateService!.ensureCurrencyAvailable(currency);
+        // Succès : les taux de change sont maintenant disponibles
+      } catch (e) {
+        // Échec non-bloquant : l'utilisateur pourra utiliser l'app normalement
+        // Les conversions afficheront un message d'erreur approprié
+      }
+    });
+  }
   
   @override
   void resetToInitialState() {

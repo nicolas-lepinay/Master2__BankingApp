@@ -6,7 +6,11 @@
       "Bash(flutter packages pub run:*)",
       "Bash(flutter clean:*)",
       "Bash(dart run build_runner:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(flutter gen-l10n:*)",
+      "Bash(flutter packages:*)",
+      "Bash(flutter test:*)",
+      "Bash(dart pub run:*)"
     ],
     "deny": []
   }
