@@ -1,14 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:bankapp/core/utils/app_logger.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 /// Service pour appeler les Firebase Cloud Functions
-class FirebaseFunctionsService {
+class FirebaseFunctionsService with AppLoggerMixin {
   final http.Client _client;
 
   /// URL de base des Cloud Functions
-  static const String _functionsBaseUrl =
+  static String get _functionsBaseUrl =>
+      dotenv.env['FIREBASE_CLOUD_FUNCTION_EXCHANGE_RATE_FETCHER_URL'] ??
       'https://europe-west6-exchange-rate-fetcher-app.cloudfunctions.net';
 
   /// Timeout pour les requêtes HTTP
@@ -21,10 +24,16 @@ class FirebaseFunctionsService {
   Future<FirebaseExchangeRatesResponse> getExchangeRates(
     String baseCurrency,
   ) async {
+    final startTime = DateTime.now();
+    final currency = baseCurrency.toUpperCase();
+
+    // Log début appel Firebase
+    logFirebaseCall('getExchangeRates', currency, reason: 'update rates');
+
     try {
       final url = Uri.parse('$_functionsBaseUrl/getExchangeRates_v1');
 
-      final requestBody = {'baseCurrency': baseCurrency.toUpperCase()};
+      final requestBody = {'baseCurrency': currency};
 
       final response = await _client
           .post(
@@ -38,28 +47,84 @@ class FirebaseFunctionsService {
           .timeout(_timeout);
 
       final responseData = json.decode(response.body) as Map<String, dynamic>;
+      final duration = DateTime.now().difference(startTime);
 
       if (response.statusCode == 200) {
-        return FirebaseExchangeRatesResponse.fromJson(responseData);
+        final result = FirebaseExchangeRatesResponse.fromJson(responseData);
+
+        // Log succès avec détails
+        final ratesCount = result.data?.rates.length ?? 0;
+        final isCached = result.cached ?? false;
+        logFirebaseSuccess(
+          'getExchangeRates',
+          currency,
+          ratesCount,
+          duration,
+          cached: isCached,
+        );
+
+        return result;
       } else {
+        final error = responseData['error'] ?? 'Unknown error';
+        logFirebaseError(
+          'getExchangeRates',
+          currency,
+          'HTTP ${response.statusCode}: $error',
+          duration,
+        );
+
         throw FirebaseFunctionException(
-          'Firebase Function call failed with status ${response.statusCode}: ${responseData['error'] ?? 'Unknown error'}',
+          'Firebase Function call failed with status ${response.statusCode}: $error',
         );
       }
-    } on SocketException {
+    } on SocketException catch (e) {
+      final duration = DateTime.now().difference(startTime);
+      logFirebaseError(
+        'getExchangeRates',
+        currency,
+        'No internet connection',
+        duration,
+      );
+
       throw FirebaseFunctionNetworkException(
         'No internet connection available',
       );
     } on http.ClientException catch (e) {
+      final duration = DateTime.now().difference(startTime);
+      logFirebaseError(
+        'getExchangeRates',
+        currency,
+        'Network error: ${e.message}',
+        duration,
+      );
+
       throw FirebaseFunctionNetworkException('Network error: ${e.message}');
     } on FormatException catch (e) {
+      final duration = DateTime.now().difference(startTime);
+      logFirebaseError(
+        'getExchangeRates',
+        currency,
+        'Parse error: ${e.message}',
+        duration,
+      );
+
       throw FirebaseFunctionParseException(
         'Failed to parse response: ${e.message}',
       );
     } catch (e) {
+      final duration = DateTime.now().difference(startTime);
+
       if (e is FirebaseFunctionBaseException) {
+        // Erreur déjà loggée plus haut
         rethrow;
       }
+
+      logFirebaseError(
+        'getExchangeRates',
+        currency,
+        'Unexpected error: $e',
+        duration,
+      );
       throw FirebaseFunctionException('Unexpected error: $e');
     }
   }

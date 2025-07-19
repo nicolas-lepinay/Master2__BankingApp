@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:bankapp/core/services/currency_locale_service.dart';
+import 'package:bankapp/core/utils/app_logger.dart';
 import 'package:bankapp/data/cache/cache_manager.dart';
 import 'package:bankapp/domain/repositories/exchange_rate_repository.dart';
 
 /// Service intelligent pour la gestion des taux de change
 /// Optimisé pour l'UX et l'efficacité réseau
-class SmartExchangeRateService {
+class SmartExchangeRateService with AppLoggerMixin {
   final CacheManager _cacheManager;
   final ExchangeRateRepository _exchangeRateRepository;
 
@@ -63,12 +64,15 @@ class SmartExchangeRateService {
       final expiredCurrencies = await getExpiredBaseCurrencies();
       
       if (expiredCurrencies.isEmpty) {
+        logInfo('updateExpiredRatesWithTimeout', 'No expired currencies found');
         return ExchangeRateUpdateResult.success(
           updatedCurrencies: [],
           duration: DateTime.now().difference(startTime),
           strategy: UpdateStrategy.noneNeeded,
         );
       }
+      
+      AppLogger.updateStrategy('SmartExchangeRateService', 'updateExpiredRatesWithTimeout', 'selective', expiredCurrencies);
 
       // Limiter le nombre de devises à traiter
       final currenciesToUpdate = expiredCurrencies.take(_maxParallelCurrencies).toList();
@@ -97,17 +101,20 @@ class SmartExchangeRateService {
 
       final successful = results.values.where((success) => success).length;
       final duration = DateTime.now().difference(startTime);
+      final successfulCurrencies = results.entries
+          .where((entry) => entry.value)
+          .map((entry) => entry.key)
+          .toList();
 
       if (successful > 0) {
+        logInfo('updateExpiredRatesWithTimeout', 'Updated $successful/${currenciesToUpdate.length} currencies (${duration.inMilliseconds}ms): ${successfulCurrencies.join(", ")}');
         return ExchangeRateUpdateResult.success(
-          updatedCurrencies: results.entries
-              .where((entry) => entry.value)
-              .map((entry) => entry.key)
-              .toList(),
+          updatedCurrencies: successfulCurrencies,
           duration: duration,
           strategy: UpdateStrategy.selective,
         );
       } else {
+        logWarning('updateExpiredRatesWithTimeout', 'All ${currenciesToUpdate.length} currency updates failed after ${duration.inMilliseconds}ms');
         return ExchangeRateUpdateResult.failure(
           error: 'All currency updates failed',
           duration: duration,
@@ -116,15 +123,19 @@ class SmartExchangeRateService {
       }
 
     } on TimeoutException {
+      final duration = DateTime.now().difference(startTime);
+      AppLogger.timeout('SmartExchangeRateService', 'updateExpiredRatesWithTimeout', duration, 'Global timeout exceeded');
       return ExchangeRateUpdateResult.failure(
         error: 'Update timeout after ${_globalTimeout.inSeconds}s',
-        duration: DateTime.now().difference(startTime),
+        duration: duration,
         strategy: UpdateStrategy.selective,
       );
     } catch (e) {
+      final duration = DateTime.now().difference(startTime);
+      logError('updateExpiredRatesWithTimeout', 'Unexpected error during selective update', e);
       return ExchangeRateUpdateResult.failure(
         error: 'Unexpected error: $e',
-        duration: DateTime.now().difference(startTime),
+        duration: duration,
         strategy: UpdateStrategy.selective,
       );
     }
@@ -133,43 +144,55 @@ class SmartExchangeRateService {
   /// S'assure qu'une devise spécifique est disponible et à jour
   Future<ExchangeRateUpdateResult> ensureCurrencyAvailable(String currency) async {
     final startTime = DateTime.now();
+    final upperCurrency = currency.toUpperCase();
     
     try {
       // Vérifier si des taux existent déjà pour cette devise
       final existingRates = _cacheManager.getAllExchangeRates().values
-          .where((rate) => rate.fromCurrency == currency.toUpperCase())
+          .where((rate) => rate.fromCurrency == upperCurrency)
           .toList();
 
       // Si des taux existent et sont valides, pas besoin de mise à jour
       if (existingRates.isNotEmpty && existingRates.any((rate) => rate.isValid)) {
+        final validCount = existingRates.where((rate) => rate.isValid).length;
+        logInfo('ensureCurrencyAvailable', '$upperCurrency already available ($validCount valid rates)');
         return ExchangeRateUpdateResult.success(
           updatedCurrencies: [],
           duration: DateTime.now().difference(startTime),
           strategy: UpdateStrategy.noneNeeded,
         );
       }
+      
+      logInfo('ensureCurrencyAvailable', 'Updating rates for $upperCurrency (${existingRates.length} existing, none valid)');
 
       // Sinon, mettre à jour cette devise
       await _exchangeRateRepository
-          .updateExchangeRates(currency.toUpperCase())
+          .updateExchangeRates(upperCurrency)
           .timeout(_currencyTimeout);
+      
+      final duration = DateTime.now().difference(startTime);
+      logInfo('ensureCurrencyAvailable', 'Successfully updated $upperCurrency (${duration.inMilliseconds}ms)');
 
       return ExchangeRateUpdateResult.success(
-        updatedCurrencies: [currency.toUpperCase()],
-        duration: DateTime.now().difference(startTime),
+        updatedCurrencies: [upperCurrency],
+        duration: duration,
         strategy: UpdateStrategy.single,
       );
 
     } on TimeoutException {
+      final duration = DateTime.now().difference(startTime);
+      AppLogger.timeout('SmartExchangeRateService', 'ensureCurrencyAvailable', duration, 'Currency timeout for $upperCurrency');
       return ExchangeRateUpdateResult.failure(
-        error: 'Currency update timeout for $currency',
-        duration: DateTime.now().difference(startTime),
+        error: 'Currency update timeout for $upperCurrency',
+        duration: duration,
         strategy: UpdateStrategy.single,
       );
     } catch (e) {
+      final duration = DateTime.now().difference(startTime);
+      logError('ensureCurrencyAvailable', 'Failed to update $upperCurrency', e);
       return ExchangeRateUpdateResult.failure(
-        error: 'Failed to update $currency: $e',
-        duration: DateTime.now().difference(startTime),
+        error: 'Failed to update $upperCurrency: $e',
+        duration: duration,
         strategy: UpdateStrategy.single,
       );
     }
@@ -182,11 +205,14 @@ class SmartExchangeRateService {
 
   /// Récupère la devise locale de l'utilisateur
   String getLocalCurrency() {
-    return CurrencyLocaleService.getLocalCurrency();
+    final localCurrency = CurrencyLocaleService.getLocalCurrency();
+    AppLogger.localeDetected('SmartExchangeRateService', 'getLocalCurrency', 'auto-detected', localCurrency);
+    return localCurrency;
   }
 
   /// Stratégie pour cache vide : charger devise locale
   Future<ExchangeRateUpdateResult> initializeEmptyCache() async {
+    logInfo('initializeEmptyCache', 'Cache is empty, initializing with local currency');
     final localCurrency = getLocalCurrency();
     return await ensureCurrencyAvailable(localCurrency);
   }
@@ -201,7 +227,7 @@ class SmartExchangeRateService {
         .map((rate) => rate.fromCurrency)
         .toSet();
 
-    return {
+    final stats = {
       'totalRates': allRates.length,
       'validRates': validRates.length,
       'expiredRates': expiredRates.length,
@@ -210,6 +236,9 @@ class SmartExchangeRateService {
       'isEmpty': isCacheEmpty(),
       'localCurrency': getLocalCurrency(),
     };
+    
+    AppLogger.statistics('SmartExchangeRateService', 'getCacheStatistics', stats);
+    return stats;
   }
 }
 

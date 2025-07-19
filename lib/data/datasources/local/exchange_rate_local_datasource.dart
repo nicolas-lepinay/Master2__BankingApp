@@ -1,3 +1,4 @@
+import 'package:bankapp/core/utils/app_logger.dart';
 import 'package:bankapp/data/database/app_database.dart';
 import 'package:bankapp/data/models/exchange_rate_model.dart';
 import 'package:drift/drift.dart';
@@ -45,7 +46,7 @@ abstract class ExchangeRateLocalDataSource {
 }
 
 /// Implémentation du DataSource local utilisant Drift
-class ExchangeRateLocalDataSourceImpl implements ExchangeRateLocalDataSource {
+class ExchangeRateLocalDataSourceImpl with AppLoggerMixin implements ExchangeRateLocalDataSource {
   final AppDatabase _database;
 
   ExchangeRateLocalDataSourceImpl(this._database);
@@ -56,14 +57,25 @@ class ExchangeRateLocalDataSourceImpl implements ExchangeRateLocalDataSource {
       ..where((tbl) => tbl.fromCurrency.equals(fromCurrency));
     
     final results = await query.get();
-    
-    return results.map((row) => ExchangeRateModel(
+    final rates = results.map((row) => ExchangeRateModel(
       fromCurrency: row.fromCurrency,
       toCurrency: row.toCurrency,
       rate: row.rate,
       lastUpdated: row.lastUpdated,
       expiresAt: row.expiresAt,
     )).toList();
+    
+    if (rates.isNotEmpty) {
+      final now = DateTime.now();
+      final validRates = rates.where((r) => r.expiresAt.isAfter(now)).length;
+      final avgAge = rates.map((r) => now.difference(r.lastUpdated).inHours).reduce((a, b) => a + b) / rates.length;
+      
+      logInfo('getExchangeRates', 'Found ${rates.length} rates for $fromCurrency ($validRates valid, avg age: ${avgAge.toStringAsFixed(1)}h)');
+    } else {
+      logCacheMiss('getExchangeRates', fromCurrency, 'ALL', reason: 'no rates found');
+    }
+    
+    return rates;
   }
 
   @override
@@ -75,19 +87,42 @@ class ExchangeRateLocalDataSourceImpl implements ExchangeRateLocalDataSource {
     
     final result = await query.getSingleOrNull();
     
-    if (result == null) return null;
+    if (result == null) {
+      logCacheMiss('getExchangeRate', fromCurrency, toCurrency, reason: 'not found');
+      return null;
+    }
     
-    return ExchangeRateModel(
+    final rate = ExchangeRateModel(
       fromCurrency: result.fromCurrency,
       toCurrency: result.toCurrency,
       rate: result.rate,
       lastUpdated: result.lastUpdated,
       expiresAt: result.expiresAt,
     );
+    
+    final now = DateTime.now();
+    final ageHours = now.difference(rate.lastUpdated).inHours.toDouble();
+    final isValid = rate.expiresAt.isAfter(now);
+    
+    if (isValid) {
+      logCacheHit('getExchangeRate', fromCurrency, toCurrency, rate: rate.rate, age: ageHours);
+    } else {
+      logCacheMiss('getExchangeRate', fromCurrency, toCurrency, reason: 'expired');
+    }
+    
+    return rate;
   }
 
   @override
   Future<void> saveExchangeRates(List<ExchangeRateModel> rates) async {
+    if (rates.isEmpty) {
+      logWarning('saveExchangeRates', 'No rates to save');
+      return;
+    }
+    
+    final baseCurrency = rates.first.fromCurrency;
+    final expiresAt = rates.first.expiresAt;
+    
     await _database.batch((batch) {
       for (final rate in rates) {
         batch.insert(
@@ -103,6 +138,8 @@ class ExchangeRateLocalDataSourceImpl implements ExchangeRateLocalDataSource {
         );
       }
     });
+    
+    logCacheUpdate('saveExchangeRates', baseCurrency, rates.length, expires: expiresAt);
   }
 
   @override
@@ -123,9 +160,13 @@ class ExchangeRateLocalDataSourceImpl implements ExchangeRateLocalDataSource {
   Future<void> deleteExpiredRates() async {
     final now = DateTime.now();
     
-    await (_database.delete(_database.exchangeRates)
+    final deletedCount = await (_database.delete(_database.exchangeRates)
       ..where((tbl) => tbl.expiresAt.isSmallerThanValue(now)))
       .go();
+    
+    if (deletedCount > 0) {
+      logInfo('deleteExpiredRates', 'Deleted $deletedCount expired rates');
+    }
   }
 
   @override
@@ -187,6 +228,7 @@ class ExchangeRateLocalDataSourceImpl implements ExchangeRateLocalDataSource {
 
   /// Nettoie automatiquement les taux expirés (appelé périodiquement)
   Future<void> cleanup() async {
+    logInfo('cleanup', 'Starting cache cleanup');
     await deleteExpiredRates();
   }
 
