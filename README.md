@@ -16,6 +16,17 @@ Cette application bancaire permet aux utilisateurs de gerer leurs comptes et tra
 - 🎨 **Theme adaptatif** (clair/sombre) avec persistance des preferences
 - 🚀 **Performance optimisée** avec architecture cache-first
 
+### Captures d'écran
+
+<img width="404" height="860" alt="Image" src="https://github.com/user-attachments/assets/359e8de7-58f7-4937-9a11-0376be2c23b5" />
+
+<img width="404" height="860" alt="Image" src="https://github.com/user-attachments/assets/db847541-262e-4c87-a2e6-fa78ce05a200" />
+
+<img width="404" height="860" alt="Image" src="https://github.com/user-attachments/assets/e813efa2-7317-4bcd-9fe5-f2d9321a6cd3" />
+
+<img width="404" height="860" alt="Image" src="https://github.com/user-attachments/assets/05d4eb95-9e89-47e4-99fd-75aecc217b6c" />
+
+
 ## Architecture technique
 
 ### Stack technologique
