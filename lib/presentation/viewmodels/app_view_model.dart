@@ -1,5 +1,6 @@
 import 'package:bankapp/core/services/smart_exchange_rate_service.dart';
 import 'package:bankapp/core/services/user_preferences_service.dart';
+import 'package:bankapp/core/utils/app_logger.dart';
 import 'package:bankapp/data/cache/cache_manager.dart';
 import 'package:bankapp/data/datasources/local/local_datasources.dart';
 import 'package:bankapp/domain/repositories/exchange_rate_repository.dart';
@@ -221,6 +222,11 @@ class AppViewModel extends BaseViewModel<AppViewState> {
 
         if (result.success) {
           // Cache initialisé avec la devise locale
+          AppLogger.info(
+            'AppViewState',
+            '_smartLoadExchangeRates',
+            '✅ Exchange rates cache was empty → it has been populated with user\'s local currency.',
+          );
         } else {
           // Échec non-bloquant : l'app continue de fonctionner
         }
@@ -231,8 +237,18 @@ class AppViewModel extends BaseViewModel<AppViewState> {
 
         if (result.success && result.updatedCurrencies.isNotEmpty) {
           // Taux mis à jour avec succès
+          AppLogger.info(
+            'AppViewState',
+            '_smartLoadExchangeRates',
+            '✅ Exchange rates cache already existed but was stale → it has been updated successfully.',
+          );
         } else {
           // Échec ou aucune mise à jour nécessaire : continuer avec cache existant
+          AppLogger.info(
+            'AppViewState',
+            '_smartLoadExchangeRates',
+            'Exchange rates cache already exists and has not been updated (either it was up-to-date or the update failed).',
+          );
         }
       }
     } catch (e) {

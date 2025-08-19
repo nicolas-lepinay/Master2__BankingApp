@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:bankapp/core/utils/app_logger.dart';
+
 /// Service pour détecter la devise locale de l'utilisateur
 /// basé sur son pays (locale.countryCode)
 class CurrencyLocaleService {
@@ -73,16 +75,46 @@ class CurrencyLocaleService {
       final locale = PlatformDispatcher.instance.locale;
       final countryCode = locale.countryCode;
       
-      // Si pas de code pays, utiliser fallback
-      if (countryCode == null || countryCode.isEmpty) {
+      // Log du code pays détecté
+      if (countryCode != null && countryCode.isNotEmpty) {
+        final upperCountryCode = countryCode.toUpperCase();
+        final detectedCurrency = _countryToCurrency[upperCountryCode] ?? _defaultCurrency;
+        final isSupported = _countryToCurrency.containsKey(upperCountryCode);
+        
+        AppLogger.localeDetected(
+          'CurrencyLocaleService', 
+          'getLocalCurrency', 
+          upperCountryCode, 
+          detectedCurrency
+        );
+        
+        if (!isSupported) {
+          AppLogger.info(
+            'CurrencyLocaleService', 
+            'getLocalCurrency', 
+            'Country $upperCountryCode not supported, using fallback $_defaultCurrency'
+          );
+        }
+        
+        return detectedCurrency;
+      } else {
+        // Si pas de code pays, utiliser fallback
+        AppLogger.warning(
+          'CurrencyLocaleService', 
+          'getLocalCurrency', 
+          'No country code detected, using fallback $_defaultCurrency'
+        );
         return _defaultCurrency;
       }
       
-      // Mapper le code pays vers la devise
-      return _countryToCurrency[countryCode.toUpperCase()] ?? _defaultCurrency;
-      
     } catch (e) {
       // En cas d'erreur, retourner fallback
+      AppLogger.error(
+        'CurrencyLocaleService', 
+        'getLocalCurrency', 
+        'Error detecting locale, using fallback $_defaultCurrency',
+        e
+      );
       return _defaultCurrency;
     }
   }
