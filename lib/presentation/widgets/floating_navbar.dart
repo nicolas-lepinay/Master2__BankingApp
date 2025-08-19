@@ -1,12 +1,12 @@
+import 'package:bankapp/core/constants/gradient_colors.dart';
+import 'package:bankapp/core/theme/app_colors.dart';
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
+import 'package:bankapp/presentation/widgets/add_transaction_bottom_sheet_mvvm.dart';
+import 'package:bankapp/presentation/widgets/astroid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:bankapp/core/theme/app_colors.dart';
-import 'package:bankapp/core/constants/gradient_colors.dart';
-import 'package:bankapp/presentation/providers/database_provider.dart';
-import 'package:bankapp/presentation/widgets/astroid.dart';
-import 'package:bankapp/presentation/widgets/add_transaction_bottom_sheet.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class FloatingNavbar extends ConsumerWidget {
   final int currentIndex;
@@ -25,13 +25,12 @@ class FloatingNavbar extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const AddTransactionBottomSheet(),
+      builder: (context) => const AddTransactionBottomSheetMVVM(),
     ).then((_) {
       // Invalider les providers liés aux transactions après fermeture
       if (context.mounted) {
-        ref.invalidate(accountSummaryProvider);
-        ref.invalidate(transactionsWithBalanceProvider);
-        ref.invalidate(transactionsAroundTodayProvider);
+        ref.invalidate(accountsProvider);
+        ref.invalidate(accountTransactionsProvider);
       }
     });
   }

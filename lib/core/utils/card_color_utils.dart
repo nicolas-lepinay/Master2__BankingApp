@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:bankapp/data/database/database.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
+import 'package:bankapp/data/database/app_database.dart';
+import 'package:flutter/material.dart';
 
 class CardColorUtils {
   // Liste des couleurs dans l'ordre souhaité

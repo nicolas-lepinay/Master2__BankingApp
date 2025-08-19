@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/presentation/providers/database_provider.dart';
-import 'package:bankapp/presentation/screens/main_screen.dart';
+import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
+import 'package:bankapp/presentation/screens/main_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -18,15 +18,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeApp();
+    // Délayer l'initialisation pour éviter de modifier un provider pendant le build
+    Future(() => _initializeApp());
   }
 
   Future<void> _initializeApp() async {
-    // Initialiser la base de données en chargeant les comptes
-    await ref.read(accountsProvider.future);
+    // Initialiser l'application avec l'AppViewModel (architecture MVVM)
+    final appViewModel = ref.read(appViewModelProvider.notifier);
+    await appViewModel.initializeApp();
 
-    // Simuler un délai de chargement minimum
-    await Future.delayed(const Duration(seconds: 3));
+    // Attendre que l'application soit complètement prête
+    while (!appViewModel.isAppReady) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
 
     if (mounted) {
       Navigator.of(context).pushReplacement(

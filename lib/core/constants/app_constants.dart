@@ -1,12 +1,4 @@
 class AppConstants {
-  // Transaction types
-  static const String transactionTypeDebit = 'DEBIT';
-  static const String transactionTypeCredit = 'CREDIT';
-
-  // Transaction status
-  static const int transactionStatusPending = 0;
-  static const int transactionStatusConfirmed = 1;
-
   // Supported currencies
   static const List<String> supportedCurrencies = [
     'EUR',

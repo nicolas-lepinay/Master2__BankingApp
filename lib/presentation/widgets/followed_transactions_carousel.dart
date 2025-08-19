@@ -1,12 +1,12 @@
+import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/theme/app_colors.dart';
+// import 'package:bankapp/data/database/app_database.dart'; // Supprimé avec MVVM
+import 'package:bankapp/domain/entities/entities.dart' as domain;
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
+import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
+import 'package:bankapp/presentation/widgets/followed_transaction_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/data/database/database.dart';
-import 'package:bankapp/core/theme/app_colors.dart';
-import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/presentation/providers/database_provider.dart';
-import 'package:bankapp/presentation/widgets/followed_transaction_item.dart';
-import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class FollowedTransactionsCarousel extends ConsumerStatefulWidget {
@@ -35,18 +35,27 @@ class _FollowedTransactionsCarouselState
 
   @override
   Widget build(BuildContext context) {
-    final followedTransactionsAsync = ref.watch(followedTransactionsProvider);
-
-    return followedTransactionsAsync.when(
-      data: (transactions) {
+    final transactionRepository = ref.watch(transactionRepositoryProvider);
+    
+    return FutureBuilder<List<domain.TransactionWithBalance>>(
+      future: transactionRepository.getFollowedTransactionsWithDetails(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _buildLoadingState();
+        }
+        
+        if (snapshot.hasError) {
+          print('FollowedTransactionsCarousel Error: ${snapshot.error}');
+          return _buildErrorState();
+        }
+        
+        final transactions = snapshot.data ?? [];
         if (transactions.isEmpty) {
           return _buildEmptyState();
         }
 
         return _buildCarousel(transactions);
       },
-      loading: () => _buildLoadingState(),
-      error: (error, stack) => _buildErrorState(),
     );
   }
 
@@ -120,7 +129,7 @@ class _FollowedTransactionsCarouselState
     );
   }
 
-  Widget _buildCarousel(List<TransactionWithCounterparty> transactions) {
+  Widget _buildCarousel(List<domain.TransactionWithBalance> transactions) {
     // Limiter à 5 transactions + gérer les points de suspension
     final displayTransactions = transactions.take(5).toList();
     final hasMore = transactions.length >= 3;
@@ -143,16 +152,16 @@ class _FollowedTransactionsCarouselState
           }
 
           // Items de transactions avec animation
-          final transactionWithCounterparty = displayTransactions[index];
+          final transactionWithBalance = displayTransactions[index];
           return SlideTransition(
             position: _slideAnimations[index],
             child: FollowedTransactionItem(
-              transactionWithCounterparty: transactionWithCounterparty,
+              transactionWithCounterparty: transactionWithBalance,
               onTap: () => _navigateToTransactionDetail(
-                transactionWithCounterparty.transaction,
+                transactionWithBalance.transaction,
               ),
               onIconTap: () => _removeFromFollowed(
-                transactionWithCounterparty.transaction.id,
+                transactionWithBalance.transaction.id,
                 index,
               ),
             ),
@@ -211,12 +220,12 @@ class _FollowedTransactionsCarouselState
       // Démarrer l'animation de glissement
       await _animationControllers[index].forward();
 
-      // Retirer de la base de données
-      final database = ref.read(databaseProvider);
-      await database.removeFollowedTransaction(transactionId);
+      // Retirer de la base de données via le repository MVVM
+      final transactionRepository = ref.read(transactionRepositoryProvider);
+      await transactionRepository.unfollowTransaction(transactionId);
 
-      // Rafraîchir la liste
-      ref.invalidate(followedTransactionsProvider);
+      // Rafraîchir l'écran en rechargant la widget
+      if (mounted) setState(() {});
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -238,7 +247,7 @@ class _FollowedTransactionsCarouselState
     }
   }
 
-  void _navigateToTransactionDetail(Transaction transaction) {
+  void _navigateToTransactionDetail(domain.Transaction transaction) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) =>

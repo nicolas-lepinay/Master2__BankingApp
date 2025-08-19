@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:bankapp/data/database/database.dart';
+import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
-import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PerspectiveTransactionItem extends StatelessWidget {
-  final TransactionWithCounterparty transactionWithCounterparty;
+  final domain.TransactionWithBalance transactionWithCounterparty;
   final VoidCallback? onTap;
 
   const PerspectiveTransactionItem({
@@ -20,8 +20,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final transaction = transactionWithCounterparty.transaction;
     final counterparty = transactionWithCounterparty.counterparty;
-    final isDebit =
-        transaction.transactionType == AppConstants.transactionTypeDebit;
+    final isExpense = transactionWithCounterparty.isExpense;
 
     return GestureDetector(
       onTap: onTap,
@@ -61,7 +60,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
                 ],
               ),
               child: Icon(
-                _getTransactionIcon(transaction, counterparty),
+                _getTransactionIcon(transactionWithCounterparty),
                 color: AppColors.textDark25,
                 size: 22.sp, // Réduire la taille de l'icône
               ),
@@ -76,7 +75,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
                 children: [
                   // Nom du tiers ou titre de la transaction
                   Text(
-                    _getTransactionDisplayName(transaction, counterparty),
+                    _getTransactionDisplayName(transactionWithCounterparty),
                     style: AppTextStyles.transactionNamePerspective,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -101,7 +100,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
             // Montant de la transaction
             Text(
               AppFormatters.formatAmountClean(
-                isDebit ? -transaction.amount : transaction.amount,
+                isExpense ? -transaction.amount : transaction.amount,
                 transaction.currency,
                 showSign: true,
                 context: context,
@@ -115,38 +114,30 @@ class PerspectiveTransactionItem extends StatelessWidget {
   }
 
   /// Récupère l'icône à afficher pour la transaction
-  IconData _getTransactionIcon(
-    Transaction transaction,
-    Counterparty? counterparty,
-  ) {
+  IconData _getTransactionIcon(domain.TransactionWithBalance transaction) {
     // Si la transaction a un tiers avec une icône
-    if (counterparty?.icon != null) {
-      return _getIconFromString(counterparty!.icon!);
+    if (transaction.counterparty?.icon != null) {
+      return _getIconFromString(transaction.counterparty!.icon!);
     }
 
     // Sinon, utiliser l'icône basée sur le titre
-    return _getIconFromTitle(transaction.title);
+    return _getIconFromTitle(transaction.transaction.title);
   }
 
   /// Récupère le nom à afficher pour la transaction
-  String _getTransactionDisplayName(
-    Transaction transaction,
-    Counterparty? counterparty,
-  ) {
+  String _getTransactionDisplayName(domain.TransactionWithBalance transaction) {
     // Priorité 1: Nom du tiers
-    if (counterparty?.name != null) {
-      return counterparty!.name;
+    if (transaction.counterparty?.name != null) {
+      return transaction.counterparty!.name;
     }
 
     // Priorité 2: Titre de la transaction
-    if (transaction.title?.isNotEmpty == true) {
-      return transaction.title!;
+    if (transaction.transaction.title?.isNotEmpty == true) {
+      return transaction.transaction.title!;
     }
 
     // Priorité 3: Type de transaction par défaut
-    return transaction.transactionType == AppConstants.transactionTypeDebit
-        ? 'Débit'
-        : 'Crédit';
+    return transaction.isExpense ? 'Dépense' : 'Revenu';
   }
 
   /// Convertit une string d'icône en IconData

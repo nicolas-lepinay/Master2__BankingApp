@@ -30,6 +30,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get incomes => 'Revenus';
 
   @override
+  String get expense => 'Dépense';
+
+  @override
+  String get income => 'Revenu';
+
+  @override
   String get addAccount => 'Ajouter un compte';
 
   @override
@@ -78,6 +84,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get credit => 'Crédit';
 
   @override
+  String get balance => 'Solde';
+
+  @override
   String get expectedBalance => 'Solde attendu';
 
   @override
@@ -91,6 +100,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get confirmed => 'Confirmé';
+
+  @override
+  String get canceled => 'Annulé';
 
   @override
   String get unknown => 'Inconnu';
@@ -128,4 +140,280 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get close => 'Fermer';
+
+  @override
+  String get retry => 'Réessayer';
+
+  @override
+  String get searchTransactions => 'Chercher une transaction';
+
+  @override
+  String get searchResults => 'Résultats';
+
+  @override
+  String get resultsFound => 'résultats trouvés';
+
+  @override
+  String get filtered => 'Filtrés';
+
+  @override
+  String get error => 'Erreur';
+
+  @override
+  String get euroCurrencyName => 'Euro';
+
+  @override
+  String get euroCountryName => 'Union Européenne';
+
+  @override
+  String get usdCurrencyName => 'Dollar Américain';
+
+  @override
+  String get usdCountryName => 'États-Unis';
+
+  @override
+  String get gbpCurrencyName => 'Livre Sterling';
+
+  @override
+  String get gbpCountryName => 'Royaume-Uni';
+
+  @override
+  String get jpyCurrencyName => 'Yen Japonais';
+
+  @override
+  String get jpyCountryName => 'Japon';
+
+  @override
+  String get cadCurrencyName => 'Dollar Canadien';
+
+  @override
+  String get cadCountryName => 'Canada';
+
+  @override
+  String get audCurrencyName => 'Dollar Australien';
+
+  @override
+  String get audCountryName => 'Australie';
+
+  @override
+  String get chfCurrencyName => 'Franc Suisse';
+
+  @override
+  String get chfCountryName => 'Suisse';
+
+  @override
+  String get cnyCurrencyName => 'Yuan Chinois';
+
+  @override
+  String get cnyCountryName => 'Chine';
+
+  @override
+  String get hkdCurrencyName => 'Dollar de Hong Kong';
+
+  @override
+  String get hkdCountryName => 'Hong Kong';
+
+  @override
+  String get sgdCurrencyName => 'Dollar de Singapour';
+
+  @override
+  String get sgdCountryName => 'Singapour';
+
+  @override
+  String get krwCurrencyName => 'Won Sud-Coréen';
+
+  @override
+  String get krwCountryName => 'Corée du Sud';
+
+  @override
+  String get inrCurrencyName => 'Roupie Indienne';
+
+  @override
+  String get inrCountryName => 'Inde';
+
+  @override
+  String get twdCurrencyName => 'Nouveau Dollar de Taïwan';
+
+  @override
+  String get twdCountryName => 'Taïwan';
+
+  @override
+  String get thbCurrencyName => 'Baht Thaïlandais';
+
+  @override
+  String get thbCountryName => 'Thaïlande';
+
+  @override
+  String get idrCurrencyName => 'Rupiah Indonésienne';
+
+  @override
+  String get idrCountryName => 'Indonésie';
+
+  @override
+  String get phpCurrencyName => 'Peso Philippin';
+
+  @override
+  String get phpCountryName => 'Philippines';
+
+  @override
+  String get myrCurrencyName => 'Ringgit Malaisien';
+
+  @override
+  String get myrCountryName => 'Malaisie';
+
+  @override
+  String get sekCurrencyName => 'Couronne Suédoise';
+
+  @override
+  String get sekCountryName => 'Suède';
+
+  @override
+  String get nokCurrencyName => 'Couronne Norvégienne';
+
+  @override
+  String get nokCountryName => 'Norvège';
+
+  @override
+  String get dkkCurrencyName => 'Couronne Danoise';
+
+  @override
+  String get dkkCountryName => 'Danemark';
+
+  @override
+  String get plnCurrencyName => 'Złoty Polonais';
+
+  @override
+  String get plnCountryName => 'Pologne';
+
+  @override
+  String get czkCurrencyName => 'Couronne Tchèque';
+
+  @override
+  String get czkCountryName => 'République Tchèque';
+
+  @override
+  String get hufCurrencyName => 'Forint Hongrois';
+
+  @override
+  String get hufCountryName => 'Hongrie';
+
+  @override
+  String get ronCurrencyName => 'Leu Roumain';
+
+  @override
+  String get ronCountryName => 'Roumanie';
+
+  @override
+  String get tryCurrencyName => 'Livre Turque';
+
+  @override
+  String get tryCountryName => 'Turquie';
+
+  @override
+  String get rubCurrencyName => 'Rouble Russe';
+
+  @override
+  String get rubCountryName => 'Russie';
+
+  @override
+  String get mxnCurrencyName => 'Peso Mexicain';
+
+  @override
+  String get mxnCountryName => 'Mexique';
+
+  @override
+  String get brlCurrencyName => 'Réal Brésilien';
+
+  @override
+  String get brlCountryName => 'Brésil';
+
+  @override
+  String get clpCurrencyName => 'Peso Chilien';
+
+  @override
+  String get clpCountryName => 'Chili';
+
+  @override
+  String get copCurrencyName => 'Peso Colombien';
+
+  @override
+  String get copCountryName => 'Colombie';
+
+  @override
+  String get penCurrencyName => 'Sol Péruvien';
+
+  @override
+  String get penCountryName => 'Pérou';
+
+  @override
+  String get nzdCurrencyName => 'Dollar Néo-Zélandais';
+
+  @override
+  String get nzdCountryName => 'Nouvelle-Zélande';
+
+  @override
+  String get zarCurrencyName => 'Rand Sud-Africain';
+
+  @override
+  String get zarCountryName => 'Afrique du Sud';
+
+  @override
+  String get ilsCurrencyName => 'Nouveau Shekel Israélien';
+
+  @override
+  String get ilsCountryName => 'Israël';
+
+  @override
+  String get aedCurrencyName => 'Dirham des EAU';
+
+  @override
+  String get aedCountryName => 'Émirats Arabes Unis';
+
+  @override
+  String get sarCurrencyName => 'Riyal Saoudien';
+
+  @override
+  String get sarCountryName => 'Arabie Saoudite';
+
+  @override
+  String get selectCurrency => 'Sélectionner une devise';
+
+  @override
+  String get convertedAmount => 'Montant converti';
+
+  @override
+  String get exchangeRate => 'Taux de change';
+
+  @override
+  String get currencyConversion => 'Conversion de devise';
+
+  @override
+  String get conversionRate => 'Taux de conversion';
+
+  @override
+  String get originalAmount => 'Montant original';
+
+  @override
+  String get convertedTo => 'Converti en';
+
+  @override
+  String get exchangeRateLastUpdated => 'Taux de change mis à jour';
+
+  @override
+  String get exchangeRateExpired => 'Taux de change expiré';
+
+  @override
+  String get exchangeRateUnavailable => 'Taux de change indisponible';
+
+  @override
+  String get currencyNotSupported => 'Devise non supportée';
+
+  @override
+  String get conversionFailed => 'Échec de la conversion';
+
+  @override
+  String get updatingExchangeRates => 'Mise à jour des taux de change...';
+
+  @override
+  String get exchangeRatesUpdated => 'Taux de change mis à jour';
 }

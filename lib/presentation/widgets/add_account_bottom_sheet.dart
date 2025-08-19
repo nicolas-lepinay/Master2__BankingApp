@@ -1,10 +1,10 @@
+import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/core/theme/app_text_styles.dart';
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/presentation/providers/actions_provider.dart';
-import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AddAccountBottomSheet extends ConsumerStatefulWidget {
@@ -199,9 +199,10 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
     });
 
     try {
-      final accountActions = ref.read(accountActionsProvider);
+      final accountViewModel = ref.read(accountViewModelProvider.notifier);
 
-      await accountActions.createAccount(
+      // Utiliser le ViewModel pour créer le compte
+      await accountViewModel.createAccount(
         name: _nameController.text.trim(),
         currency: _selectedCurrency,
         initialBalance: double.parse(_balanceController.text),

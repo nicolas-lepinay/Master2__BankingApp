@@ -1,13 +1,12 @@
+import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/core/theme/app_text_styles.dart';
+import 'package:bankapp/core/utils/formatters.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/presentation/providers/actions_provider.dart';
-import 'package:bankapp/presentation/providers/database_provider.dart';
-import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/core/utils/formatters.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
-import 'package:bankapp/data/database/database.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class EditTransactionBottomSheet extends ConsumerStatefulWidget {
@@ -26,13 +25,13 @@ class _EditTransactionBottomSheetState
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _commentController = TextEditingController();
-  final _counterpartyController = TextEditingController(); // Nouveau contrôleur
+  int? _selectedCounterpartyId;
 
-  String _transactionType = AppConstants.transactionTypeDebit;
+  domain.TransactionType _transactionType = domain.TransactionType.expense;
   String _selectedCurrency = 'EUR';
   int? _selectedAccountId;
   DateTime _selectedDate = DateTime.now();
-  int _status = 1;
+  domain.TransactionStatus _status = domain.TransactionStatus.completed;
   bool _isLoading = false;
   bool _isInitialized = false;
 
@@ -41,24 +40,21 @@ class _EditTransactionBottomSheetState
     _titleController.dispose();
     _amountController.dispose();
     _commentController.dispose();
-    _counterpartyController.dispose(); // Disposer du nouveau contrôleur
     super.dispose();
   }
 
   void _initializeFromTransaction(
-    TransactionWithCounterparty transactionWithCounterparty,
+    domain.TransactionWithBalance transactionWithBalance,
   ) {
     if (_isInitialized) return;
 
-    final transaction = transactionWithCounterparty.transaction;
-    final counterparty = transactionWithCounterparty.counterparty;
+    final transaction = transactionWithBalance.transaction;
 
     _titleController.text = transaction.title ?? '';
     _amountController.text = transaction.amount.toString();
     _commentController.text = transaction.comment ?? '';
-    _counterpartyController.text =
-        counterparty?.name ?? ''; // Initialiser avec le nom du tiers
-    _transactionType = transaction.transactionType;
+    _selectedCounterpartyId = transaction.counterpartyId;
+    _transactionType = transaction.type;
     _selectedCurrency = transaction.currency;
     _selectedAccountId = transaction.accountId;
     _selectedDate = transaction.date;
@@ -69,335 +65,346 @@ class _EditTransactionBottomSheetState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final transactionWithCounterpartyAsync = ref.watch(
-      transactionWithCounterpartyProvider(widget.transactionId),
+    final transactionAsync = ref.watch(
+      transactionByIdProvider(widget.transactionId),
     );
-    final accountsAsync = ref.watch(accountsProvider);
+    final accounts = ref.watch(accountsProvider);
 
-    return transactionWithCounterpartyAsync.when(
-      data: (transactionWithCounterparty) {
-        if (transactionWithCounterparty == null) {
-          return const Center(child: Text('Transaction non trouvée'));
-        }
+    final transactionWithBalance = transactionAsync;
 
-        _initializeFromTransaction(transactionWithCounterparty);
+    if (transactionWithBalance == null) {
+      return const Center(child: Text('Transaction non trouvée'));
+    }
 
-        return Container(
-          padding: EdgeInsets.only(
-            left: AppConstants.defaultPadding.w,
-            right: AppConstants.defaultPadding.w,
-            top: AppConstants.defaultPadding.h,
-            bottom:
-                MediaQuery.of(context).viewInsets.bottom +
-                AppConstants.defaultPadding.h,
-          ),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(AppConstants.cardBorderRadius.r),
+    _initializeFromTransaction(transactionWithBalance);
+
+    return Container(
+      padding: EdgeInsets.only(
+        left: AppConstants.defaultPadding.w,
+        right: AppConstants.defaultPadding.w,
+        top: AppConstants.defaultPadding.h,
+        bottom:
+            MediaQuery.of(context).viewInsets.bottom +
+            AppConstants.defaultPadding.h,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppConstants.cardBorderRadius.r),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Handle bar
+          Center(
+            child: Container(
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2.r),
+              ),
             ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Handle bar
-              Center(
-                child: Container(
-                  width: 40.w,
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2.r),
-                  ),
-                ),
-              ),
 
-              SizedBox(height: AppConstants.defaultPadding.h),
+          SizedBox(height: AppConstants.defaultPadding.h),
 
-              // Titre
-              Text(
-                'Modifier la transaction',
-                style: AppTextStyles.h5,
-                textAlign: TextAlign.center,
-              ),
+          // Titre
+          Text(
+            'Modifier la transaction',
+            style: AppTextStyles.h5,
+            textAlign: TextAlign.center,
+          ),
 
-              SizedBox(height: AppConstants.largePadding.h),
+          SizedBox(height: AppConstants.largePadding.h),
 
-              // Formulaire
-              Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      // Sélecteur de compte
-                      accountsAsync.when(
-                        data: (accounts) {
-                          if (accounts.isEmpty) {
-                            return const Text('Aucun compte disponible');
-                          }
+          // Formulaire
+          Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Sélecteur de compte
+                  accounts.isEmpty
+                      ? const Text('Aucun compte disponible')
+                      : DropdownButtonFormField<int>(
+                          value: _selectedAccountId,
+                          decoration: const InputDecoration(
+                            labelText: 'Compte',
+                          ),
+                          items: accounts.map((account) {
+                            return DropdownMenuItem(
+                              value: account.id,
+                              child: Text(account.name),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedAccountId = value;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Veuillez sélectionner un compte';
+                            }
+                            return null;
+                          },
+                        ),
 
-                          return DropdownButtonFormField<int>(
-                            value: _selectedAccountId,
-                            decoration: const InputDecoration(
-                              labelText: 'Compte',
-                            ),
-                            items: accounts.map((account) {
-                              return DropdownMenuItem(
-                                value: account.id,
-                                child: Text(account.name),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedAccountId = value;
-                              });
-                            },
-                            validator: (value) {
-                              if (value == null) {
-                                return 'Veuillez sélectionner un compte';
-                              }
-                              return null;
-                            },
-                          );
-                        },
-                        loading: () => const CircularProgressIndicator(),
-                        error: (error, stack) => Text('Erreur: $error'),
-                      ),
+                  SizedBox(height: AppConstants.defaultPadding.h),
 
-                      SizedBox(height: AppConstants.defaultPadding.h),
-
-                      // Tiers
-                      TextFormField(
-                        controller: _counterpartyController,
+                  // Tiers (Counterparty)
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final counterpartyState = ref.watch(counterpartyViewModelProvider);
+                      final counterparties = counterpartyState.counterparties;
+                      
+                      // Charger les contreparties si nécessaire
+                      if (counterparties.isEmpty && !counterpartyState.isLoading) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          ref.read(counterpartyViewModelProvider.notifier).loadCounterparties();
+                        });
+                      }
+                      
+                      if (counterpartyState.isLoading) {
+                        return const CircularProgressIndicator();
+                      }
+                      
+                      return DropdownButtonFormField<int>(
+                        value: _selectedCounterpartyId,
                         decoration: InputDecoration(
                           labelText: l10n.counterparty,
-                          hintText: 'Ex: Netflix, Apple, Intermarché...',
+                          hintText: 'Sélectionnez un tiers',
                           suffixIcon: const Icon(Icons.business),
                         ),
-                        textCapitalization: TextCapitalization.words,
-                      ),
-
-                      SizedBox(height: AppConstants.defaultPadding.h),
-
-                      // Type de transaction
-                      DropdownButtonFormField<String>(
-                        value: _transactionType,
-                        decoration: const InputDecoration(labelText: 'Type'),
                         items: [
-                          DropdownMenuItem(
-                            value: AppConstants.transactionTypeDebit,
-                            child: Text(
-                              AppFormatters.getTransactionTypeLabel(
-                                AppConstants.transactionTypeDebit,
-                                context,
-                              ),
-                            ),
+                          const DropdownMenuItem<int>(
+                            value: null,
+                            child: Text('Aucun tiers'),
                           ),
-                          DropdownMenuItem(
-                            value: AppConstants.transactionTypeCredit,
-                            child: Text(
-                              AppFormatters.getTransactionTypeLabel(
-                                AppConstants.transactionTypeCredit,
-                                context,
-                              ),
-                            ),
-                          ),
+                          ...counterparties.map((counterparty) {
+                            return DropdownMenuItem<int>(
+                              value: counterparty.id,
+                              child: Text(counterparty.name),
+                            );
+                          }),
                         ],
                         onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _transactionType = value;
-                            });
-                          }
+                          setState(() {
+                            _selectedCounterpartyId = value;
+                          });
                         },
+                      );
+                    },
+                  ),
+
+                  SizedBox(height: AppConstants.defaultPadding.h),
+
+                  // Type de transaction
+                  DropdownButtonFormField<domain.TransactionType>(
+                    value: _transactionType,
+                    decoration: const InputDecoration(labelText: 'Type'),
+                    items: [
+                      DropdownMenuItem(
+                        value: domain.TransactionType.expense,
+                        child: Text(l10n.expense),
                       ),
-
-                      SizedBox(height: AppConstants.defaultPadding.h),
-
-                      // Titre
-                      TextFormField(
-                        controller: _titleController,
-                        decoration: InputDecoration(
-                          labelText: l10n.title,
-                          hintText: 'Ex: Abonnement Netflix',
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Le titre est requis';
-                          }
-                          return null;
-                        },
+                      DropdownMenuItem(
+                        value: domain.TransactionType.income,
+                        child: Text(l10n.income),
                       ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _transactionType = value;
+                        });
+                      }
+                    },
+                  ),
 
-                      SizedBox(height: AppConstants.defaultPadding.h),
+                  SizedBox(height: AppConstants.defaultPadding.h),
 
-                      // Montant
-                      TextFormField(
-                        controller: _amountController,
-                        decoration: InputDecoration(
-                          labelText: l10n.amount,
-                          hintText: '0.00',
-                          suffixText:
-                              AppConstants.currencySymbols[_selectedCurrency],
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d*\.?\d{0,2}'),
-                          ),
-                        ],
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Le montant est requis';
-                          }
-                          final amount = double.tryParse(value);
-                          if (amount == null || amount <= 0) {
-                            return 'Veuillez entrer un montant valide';
-                          }
-                          return null;
-                        },
+                  // Titre
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                      labelText: l10n.title,
+                      hintText: 'Ex: Abonnement Netflix',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Le titre est requis';
+                      }
+                      return null;
+                    },
+                  ),
+
+                  SizedBox(height: AppConstants.defaultPadding.h),
+
+                  // Montant
+                  TextFormField(
+                    controller: _amountController,
+                    decoration: InputDecoration(
+                      labelText: l10n.amount,
+                      hintText: '0.00',
+                      suffixText:
+                          AppConstants.currencySymbols[_selectedCurrency],
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d*\.?\d{0,2}'),
                       ),
+                    ],
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Le montant est requis';
+                      }
+                      final amount = double.tryParse(value);
+                      if (amount == null || amount <= 0) {
+                        return 'Veuillez entrer un montant valide';
+                      }
+                      return null;
+                    },
+                  ),
 
-                      SizedBox(height: AppConstants.defaultPadding.h),
+                  SizedBox(height: AppConstants.defaultPadding.h),
 
-                      // Devise
-                      DropdownButtonFormField<String>(
-                        value: _selectedCurrency,
-                        decoration: InputDecoration(labelText: l10n.currency),
-                        items: AppConstants.supportedCurrencies.map((currency) {
-                          final symbol =
-                              AppConstants.currencySymbols[currency] ??
-                              currency;
-                          return DropdownMenuItem(
-                            value: currency,
-                            child: Text('$currency ($symbol)'),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _selectedCurrency = value;
-                            });
-                          }
-                        },
-                      ),
+                  // Devise
+                  DropdownButtonFormField<String>(
+                    value: _selectedCurrency,
+                    decoration: InputDecoration(labelText: l10n.currency),
+                    items: AppConstants.supportedCurrencies.map((currency) {
+                      final symbol =
+                          AppConstants.currencySymbols[currency] ?? currency;
+                      return DropdownMenuItem(
+                        value: currency,
+                        child: Text('$currency ($symbol)'),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _selectedCurrency = value;
+                        });
+                      }
+                    },
+                  ),
 
-                      SizedBox(height: AppConstants.defaultPadding.h),
+                  SizedBox(height: AppConstants.defaultPadding.h),
 
-                      // Date
-                      InkWell(
-                        onTap: _selectDate,
-                        child: InputDecorator(
-                          decoration: InputDecoration(labelText: l10n.date),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                AppFormatters.formatDateShort(
-                                  _selectedDate,
-                                  context,
-                                ),
-                              ),
-                              const Icon(Icons.calendar_today),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(height: AppConstants.defaultPadding.h),
-
-                      // Statut
-                      DropdownButtonFormField<int>(
-                        value: _status,
-                        decoration: InputDecoration(labelText: l10n.status),
-                        items: [
-                          DropdownMenuItem(
-                            value: AppConstants.transactionStatusPending,
-                            child: Text(
-                              AppFormatters.getTransactionStatusLabel(
-                                AppConstants.transactionStatusPending,
-                                context,
-                              ),
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: AppConstants.transactionStatusConfirmed,
-                            child: Text(
-                              AppFormatters.getTransactionStatusLabel(
-                                AppConstants.transactionStatusConfirmed,
-                                context,
-                              ),
-                            ),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _status = value;
-                            });
-                          }
-                        },
-                      ),
-
-                      SizedBox(height: AppConstants.defaultPadding.h),
-
-                      // Commentaire
-                      TextFormField(
-                        controller: _commentController,
-                        decoration: InputDecoration(
-                          labelText: l10n.comment,
-                          hintText: 'Commentaire optionnel',
-                        ),
-                        maxLines: 2,
-                      ),
-
-                      SizedBox(height: AppConstants.largePadding.h),
-
-                      // Boutons
-                      Row(
+                  // Date
+                  InkWell(
+                    onTap: _selectDate,
+                    child: InputDecorator(
+                      decoration: InputDecoration(labelText: l10n.date),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: _isLoading
-                                  ? null
-                                  : () => Navigator.of(context).pop(),
-                              child: Text(l10n.cancel),
+                          Text(
+                            AppFormatters.formatDateShort(
+                              _selectedDate,
+                              context,
                             ),
                           ),
-
-                          SizedBox(width: AppConstants.defaultPadding.w),
-
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _updateTransaction,
-                              child: _isLoading
-                                  ? SizedBox(
-                                      width: 20.w,
-                                      height: 20.h,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.w,
-                                      ),
-                                    )
-                                  : Text(l10n.save),
-                            ),
-                          ),
+                          const Icon(Icons.calendar_today),
                         ],
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: AppConstants.defaultPadding.h),
+
+                  // Statut
+                  DropdownButtonFormField<domain.TransactionStatus>(
+                    value: _status,
+                    decoration: InputDecoration(labelText: l10n.status),
+                    items: [
+                      DropdownMenuItem(
+                        value: domain.TransactionStatus.pending,
+                        child: Text(
+                          AppFormatters.getTransactionStatusLabel(
+                            domain.TransactionStatus.pending,
+                            context,
+                          ),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: domain.TransactionStatus.completed,
+                        child: Text(
+                          AppFormatters.getTransactionStatusLabel(
+                            domain.TransactionStatus.completed,
+                            context,
+                          ),
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _status = value;
+                        });
+                      }
+                    },
+                  ),
+
+                  SizedBox(height: AppConstants.defaultPadding.h),
+
+                  // Commentaire
+                  TextFormField(
+                    controller: _commentController,
+                    decoration: InputDecoration(
+                      labelText: l10n.comment,
+                      hintText: 'Commentaire optionnel',
+                    ),
+                    maxLines: 2,
+                  ),
+
+                  SizedBox(height: AppConstants.largePadding.h),
+
+                  // Boutons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _isLoading
+                              ? null
+                              : () => Navigator.of(context).pop(),
+                          child: Text(l10n.cancel),
+                        ),
+                      ),
+
+                      SizedBox(width: AppConstants.defaultPadding.w),
+
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _updateTransaction,
+                          child: _isLoading
+                              ? SizedBox(
+                                  width: 20.w,
+                                  height: 20.h,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.w,
+                                  ),
+                                )
+                              : Text(l10n.save),
+                        ),
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(child: Text('Erreur: $error')),
+        ],
+      ),
     );
   }
 
@@ -424,23 +431,24 @@ class _EditTransactionBottomSheetState
     });
 
     try {
-      final transactionActions = ref.read(transactionActionsProvider);
+      final transactionViewModel = ref.read(
+        transactionViewModelProvider.notifier,
+      );
 
-      await transactionActions.updateTransaction(
-        id: widget.transactionId,
+      // Créer la transaction mise à jour avec les nouvelles valeurs
+      await transactionViewModel.updateTransaction(
+        transactionId: widget.transactionId,
         accountId: _selectedAccountId!,
-        transactionType: _transactionType,
+        type: _transactionType,
         currency: _selectedCurrency,
         amount: double.parse(_amountController.text),
         title: _titleController.text.trim(),
         comment: _commentController.text.trim().isEmpty
             ? null
             : _commentController.text.trim(),
-        counterpartyName: _counterpartyController.text.trim().isEmpty
-            ? null
-            : _counterpartyController.text.trim(), // Nouveau paramètre
         date: _selectedDate,
         status: _status,
+        counterpartyId: _selectedCounterpartyId,
       );
 
       if (mounted) {

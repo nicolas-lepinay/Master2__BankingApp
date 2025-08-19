@@ -140,6 +140,18 @@ abstract class AppLocalizations {
   /// **'Incomes'**
   String get incomes;
 
+  /// No description provided for @expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get expense;
+
+  /// No description provided for @income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get income;
+
   /// No description provided for @addAccount.
   ///
   /// In en, this message translates to:
@@ -236,6 +248,12 @@ abstract class AppLocalizations {
   /// **'Credit'**
   String get credit;
 
+  /// No description provided for @balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Solde'**
+  String get balance;
+
   /// No description provided for @expectedBalance.
   ///
   /// In en, this message translates to:
@@ -265,6 +283,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirmed'**
   String get confirmed;
+
+  /// No description provided for @canceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Annulé'**
+  String get canceled;
 
   /// No description provided for @unknown.
   ///
@@ -337,6 +361,558 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get close;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get retry;
+
+  /// No description provided for @searchTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for transaction'**
+  String get searchTransactions;
+
+  /// No description provided for @searchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get searchResults;
+
+  /// No description provided for @resultsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'results found'**
+  String get resultsFound;
+
+  /// No description provided for @filtered.
+  ///
+  /// In en, this message translates to:
+  /// **'Filtered'**
+  String get filtered;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @euroCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Euro'**
+  String get euroCurrencyName;
+
+  /// No description provided for @euroCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'European Union'**
+  String get euroCountryName;
+
+  /// No description provided for @usdCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'US Dollar'**
+  String get usdCurrencyName;
+
+  /// No description provided for @usdCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'United States'**
+  String get usdCountryName;
+
+  /// No description provided for @gbpCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'British Pound'**
+  String get gbpCurrencyName;
+
+  /// No description provided for @gbpCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'United Kingdom'**
+  String get gbpCountryName;
+
+  /// No description provided for @jpyCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese Yen'**
+  String get jpyCurrencyName;
+
+  /// No description provided for @jpyCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Japan'**
+  String get jpyCountryName;
+
+  /// No description provided for @cadCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Canadian Dollar'**
+  String get cadCurrencyName;
+
+  /// No description provided for @cadCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Canada'**
+  String get cadCountryName;
+
+  /// No description provided for @audCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Australian Dollar'**
+  String get audCurrencyName;
+
+  /// No description provided for @audCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Australia'**
+  String get audCountryName;
+
+  /// No description provided for @chfCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Swiss Franc'**
+  String get chfCurrencyName;
+
+  /// No description provided for @chfCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Switzerland'**
+  String get chfCountryName;
+
+  /// No description provided for @cnyCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese Yuan'**
+  String get cnyCurrencyName;
+
+  /// No description provided for @cnyCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'China'**
+  String get cnyCountryName;
+
+  /// No description provided for @hkdCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Hong Kong Dollar'**
+  String get hkdCurrencyName;
+
+  /// No description provided for @hkdCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Hong Kong'**
+  String get hkdCountryName;
+
+  /// No description provided for @sgdCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Singapore Dollar'**
+  String get sgdCurrencyName;
+
+  /// No description provided for @sgdCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Singapore'**
+  String get sgdCountryName;
+
+  /// No description provided for @krwCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'South Korean Won'**
+  String get krwCurrencyName;
+
+  /// No description provided for @krwCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'South Korea'**
+  String get krwCountryName;
+
+  /// No description provided for @inrCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Indian Rupee'**
+  String get inrCurrencyName;
+
+  /// No description provided for @inrCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'India'**
+  String get inrCountryName;
+
+  /// No description provided for @twdCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'New Taiwan Dollar'**
+  String get twdCurrencyName;
+
+  /// No description provided for @twdCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Taiwan'**
+  String get twdCountryName;
+
+  /// No description provided for @thbCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Thai Baht'**
+  String get thbCurrencyName;
+
+  /// No description provided for @thbCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Thailand'**
+  String get thbCountryName;
+
+  /// No description provided for @idrCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Indonesian Rupiah'**
+  String get idrCurrencyName;
+
+  /// No description provided for @idrCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Indonesia'**
+  String get idrCountryName;
+
+  /// No description provided for @phpCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Philippine Peso'**
+  String get phpCurrencyName;
+
+  /// No description provided for @phpCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Philippines'**
+  String get phpCountryName;
+
+  /// No description provided for @myrCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Malaysian Ringgit'**
+  String get myrCurrencyName;
+
+  /// No description provided for @myrCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Malaysia'**
+  String get myrCountryName;
+
+  /// No description provided for @sekCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Swedish Krona'**
+  String get sekCurrencyName;
+
+  /// No description provided for @sekCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Sweden'**
+  String get sekCountryName;
+
+  /// No description provided for @nokCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Norwegian Krone'**
+  String get nokCurrencyName;
+
+  /// No description provided for @nokCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Norway'**
+  String get nokCountryName;
+
+  /// No description provided for @dkkCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Danish Krone'**
+  String get dkkCurrencyName;
+
+  /// No description provided for @dkkCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Denmark'**
+  String get dkkCountryName;
+
+  /// No description provided for @plnCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Polish Złoty'**
+  String get plnCurrencyName;
+
+  /// No description provided for @plnCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Poland'**
+  String get plnCountryName;
+
+  /// No description provided for @czkCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Czech Koruna'**
+  String get czkCurrencyName;
+
+  /// No description provided for @czkCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Czech Republic'**
+  String get czkCountryName;
+
+  /// No description provided for @hufCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Hungarian Forint'**
+  String get hufCurrencyName;
+
+  /// No description provided for @hufCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Hungary'**
+  String get hufCountryName;
+
+  /// No description provided for @ronCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Romanian Leu'**
+  String get ronCurrencyName;
+
+  /// No description provided for @ronCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Romania'**
+  String get ronCountryName;
+
+  /// No description provided for @tryCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Turkish Lira'**
+  String get tryCurrencyName;
+
+  /// No description provided for @tryCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Turkey'**
+  String get tryCountryName;
+
+  /// No description provided for @rubCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Russian Ruble'**
+  String get rubCurrencyName;
+
+  /// No description provided for @rubCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Russia'**
+  String get rubCountryName;
+
+  /// No description provided for @mxnCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Mexican Peso'**
+  String get mxnCurrencyName;
+
+  /// No description provided for @mxnCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Mexico'**
+  String get mxnCountryName;
+
+  /// No description provided for @brlCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Brazilian Real'**
+  String get brlCurrencyName;
+
+  /// No description provided for @brlCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Brazil'**
+  String get brlCountryName;
+
+  /// No description provided for @clpCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Chilean Peso'**
+  String get clpCurrencyName;
+
+  /// No description provided for @clpCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Chile'**
+  String get clpCountryName;
+
+  /// No description provided for @copCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Colombian Peso'**
+  String get copCurrencyName;
+
+  /// No description provided for @copCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Colombia'**
+  String get copCountryName;
+
+  /// No description provided for @penCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Peruvian Sol'**
+  String get penCurrencyName;
+
+  /// No description provided for @penCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Peru'**
+  String get penCountryName;
+
+  /// No description provided for @nzdCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'New Zealand Dollar'**
+  String get nzdCurrencyName;
+
+  /// No description provided for @nzdCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'New Zealand'**
+  String get nzdCountryName;
+
+  /// No description provided for @zarCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'South African Rand'**
+  String get zarCurrencyName;
+
+  /// No description provided for @zarCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'South Africa'**
+  String get zarCountryName;
+
+  /// No description provided for @ilsCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Israeli New Shekel'**
+  String get ilsCurrencyName;
+
+  /// No description provided for @ilsCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Israel'**
+  String get ilsCountryName;
+
+  /// No description provided for @aedCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'UAE Dirham'**
+  String get aedCurrencyName;
+
+  /// No description provided for @aedCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'United Arab Emirates'**
+  String get aedCountryName;
+
+  /// No description provided for @sarCurrencyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Saudi Riyal'**
+  String get sarCurrencyName;
+
+  /// No description provided for @sarCountryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Saudi Arabia'**
+  String get sarCountryName;
+
+  /// No description provided for @selectCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Select currency'**
+  String get selectCurrency;
+
+  /// No description provided for @convertedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Converted amount'**
+  String get convertedAmount;
+
+  /// No description provided for @exchangeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange rate'**
+  String get exchangeRate;
+
+  /// No description provided for @currencyConversion.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency conversion'**
+  String get currencyConversion;
+
+  /// No description provided for @conversionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversion rate'**
+  String get conversionRate;
+
+  /// No description provided for @originalAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Original amount'**
+  String get originalAmount;
+
+  /// No description provided for @convertedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Converted to'**
+  String get convertedTo;
+
+  /// No description provided for @exchangeRateLastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange rate last updated'**
+  String get exchangeRateLastUpdated;
+
+  /// No description provided for @exchangeRateExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange rate expired'**
+  String get exchangeRateExpired;
+
+  /// No description provided for @exchangeRateUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange rate unavailable'**
+  String get exchangeRateUnavailable;
+
+  /// No description provided for @currencyNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency not supported'**
+  String get currencyNotSupported;
+
+  /// No description provided for @conversionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversion failed'**
+  String get conversionFailed;
+
+  /// No description provided for @updatingExchangeRates.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating exchange rates...'**
+  String get updatingExchangeRates;
+
+  /// No description provided for @exchangeRatesUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange rates updated'**
+  String get exchangeRatesUpdated;
 }
 
 class _AppLocalizationsDelegate

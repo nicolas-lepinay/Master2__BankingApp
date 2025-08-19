@@ -1,12 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/presentation/providers/theme_provider.dart'
-    as theme_provider;
-import 'package:bankapp/presentation/providers/settings_provider.dart';
+import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
-import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/presentation/providers/settings_provider.dart';
+import 'package:bankapp/presentation/providers/theme_provider.dart'
+    as theme_provider;
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -14,7 +13,6 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
     final currentTheme = ref.watch(theme_provider.themeProvider);
     final currentLanguage = ref.watch(languageProvider);
 
@@ -144,14 +142,16 @@ class SettingsScreen extends ConsumerWidget {
                 trailing: currentTheme == theme
                     ? Icon(Icons.check, color: AppColors.primary, size: 16.sp)
                     : null,
-                onTap: () {
-                  ref
+                onTap: () async {
+                  await ref
                       .read(theme_provider.themeProvider.notifier)
                       .setTheme(theme);
-                  Navigator.of(context).pop();
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
                 },
               );
-            }).toList(),
+            }),
           ],
         ),
       ),
@@ -188,24 +188,28 @@ class SettingsScreen extends ConsumerWidget {
                 trailing: currentLanguage == language
                     ? Icon(Icons.check, color: AppColors.primary, size: 16.sp)
                     : null,
-                onTap: () {
-                  ref.read(languageProvider.notifier).setLanguage(language);
-                  Navigator.of(context).pop();
+                onTap: () async {
+                  await ref
+                      .read(languageProvider.notifier)
+                      .setLanguage(language);
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
 
-                  // Afficher un message de confirmation
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        language == AppLanguage.french
-                            ? 'Langue changée vers ${language.displayName}'
-                            : 'Language changed to ${language.displayName}',
+                    // Afficher un message de confirmation
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          language == AppLanguage.french
+                              ? 'Langue changée vers ${language.displayName}'
+                              : 'Language changed to ${language.displayName}',
+                        ),
+                        backgroundColor: Colors.green,
                       ),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
+                    );
+                  }
                 },
               );
-            }).toList(),
+            }),
           ],
         ),
       ),
@@ -247,12 +251,12 @@ class SettingsScreen extends ConsumerWidget {
         ),
         SizedBox(height: 16.h),
         const Text(
-          'Fonctionnalités:\n' +
-              '• Gestion des comptes\n' +
-              '• Suivi des transactions\n' +
-              '• Calcul automatique des soldes\n' +
-              '• Interface multilingue\n' +
-              '• Thème clair/sombre',
+          'Fonctionnalités:\n'
+          '• Gestion des comptes\n'
+          '• Suivi des transactions\n'
+          '• Calcul automatique des soldes\n'
+          '• Interface multilingue\n'
+          '• Thème clair/sombre',
         ),
       ],
     );

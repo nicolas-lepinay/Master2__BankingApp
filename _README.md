@@ -1,0 +1,1395 @@
+# Banking App - Migration vers Architecture MVVM
+
+## 📋 Contexte du Projet
+
+**Application Flutter de banque** en cours de migration depuis une architecture centralisée vers une architecture **MVVM** avec cache en mémoire pour optimiser les performances et préparer l'intégration future avec **Turso.tech**.
+
+### 🎯 Objectifs Principaux
+1. **Résoudre les problèmes de performance O(n²)** dans le calcul des soldes
+2. **Implémenter l'architecture MVVM** avec repositories et cache
+3. **Charger toutes les données au démarrage** (cache-first)
+4. **Préparer l'intégration Turso** pour le multi-utilisateur
+5. **Séparer le fichier monolithique** `database.dart` (822 lignes)
+
+---
+
+## 🏗️ Architecture Technique
+
+### Stack Technologique
+- **Flutter** + **Dart**
+- **Drift ORM** pour SQLite
+- **Riverpod** pour la gestion d'état
+- **MVVM Pattern** avec repositories
+- **Cache en mémoire** avec CacheManager singleton
+- **Localisation i18n** avec package l10n
+
+### Structure des Dossiers
+```
+lib/
+├── core/
+│   ├── l10n/                 # Localisation (EN/FR)
+│   ├── services/             # UserPreferencesService
+│   ├── theme/                # AppColors, AppTextStyles
+│   └── utils/                # Formatters, CardColorUtils
+├── data/
+│   ├── cache/                # CacheManager (singleton)
+│   ├── datasources/local/    # LocalDataSources (Drift)
+│   ├── models/               # Data models (Drift)
+│   └── repositories/         # Repository implementations
+├── domain/
+│   ├── entities/             # Domain entities (business logic)
+│   ├── repositories/         # Repository interfaces
+│   └── value_objects/        # Money, DateRange
+└── presentation/
+    ├── providers/            # Riverpod providers
+    ├── screens/              # UI screens
+    ├── viewmodels/           # MVVM ViewModels
+    └── widgets/              # UI components
+```
+
+---
+
+## 📊 État d'Avancement - TODO List Complète
+
+### ✅ ÉTAPES TERMINÉES
+
+### Étape 1: Entités Domain ✅
+- [x] `lib/domain/entities/account.dart` - Entité compte avec logique métier
+- [x] `lib/domain/entities/transaction.dart` - Entité transaction avec enums
+- [x] `lib/domain/entities/transaction_with_balance.dart` - Transaction enrichie
+- [x] `lib/domain/value_objects/money.dart` - Value object monétaire
+- [x] Suppression de l'entité User (remplacée par UserPreferencesService)
+
+### Étape 2: Repositories et DataSources ✅
+- [x] Interfaces repository dans `domain/repositories/`
+- [x] Implémentations dans `data/repositories/`
+- [x] DataSources locales pour Drift
+- [x] Modèles avec mapping Drift ↔ Domain
+
+### Étape 3: Cache et Optimisations ✅
+- [x] `lib/data/cache/cache_manager.dart` - Cache singleton O(n)
+- [x] Repositories utilisant le cache
+- [x] Calculs de soldes optimisés
+
+### Étape 4: ViewModels MVVM ✅
+- [x] `lib/presentation/viewmodels/base_view_model.dart` - Classe de base
+- [x] `lib/presentation/viewmodels/account_view_model.dart` - Gestion comptes
+- [x] `lib/presentation/viewmodels/transaction_view_model.dart` - Gestion transactions
+- [x] `lib/presentation/viewmodels/search_view_model.dart` - Recherche avancée
+- [x] `lib/presentation/viewmodels/app_view_model.dart` - Initialisation app
+
+### Étape 5: Migration Widgets (EN COURS)
+- [x] **5.1** `lib/presentation/providers/viewmodel_providers.dart` - Providers Riverpod
+- [x] **5.2** `lib/presentation/screens/home_screen_mvvm.dart` - HomeScreen migré
+- [x] **5.3** Widgets de transaction migrés :
+  - [x] `lib/presentation/widgets/transaction_item_mvvm.dart`
+  - [x] `lib/presentation/widgets/transactions_list_mvvm.dart`
+  - [x] `lib/presentation/widgets/add_transaction_bottom_sheet_mvvm.dart`
+  - [x] `lib/presentation/widgets/bank_card_widget_mvvm.dart`
+
+#### Étape 5.4: Écrans de Recherche ✅
+- [x] `lib/presentation/widgets/search_field_mvvm.dart` - Champ de recherche avec suggestions
+- [x] `lib/presentation/widgets/search_suggestions_overlay_mvvm.dart` - Overlay de suggestions
+- [x] `lib/presentation/screens/search_results_screen_mvvm.dart` - Écran de résultats
+- [x] Intégration SearchField dans HomeScreen MVVM
+- [x] Filtres avancés avec dates et montants
+
+#### Étape 5.5: Finalisation l10n ✅
+- [x] Ajout de 24 nouvelles clés de localisation
+- [x] Traductions EN/FR pour toutes les fonctionnalités de recherche
+- [x] Correction des hardcoded strings dans HomeScreen MVVM
+- [x] Support complet l10n pour widgets MVVM
+
+### Étape 6: Refactorisation Database.dart ✅
+- [x] **6.1** Analysé le fichier monolithique `database.dart` (750+ lignes)
+- [x] **6.2** Créé la nouvelle structure modulaire :
+  - [x] `lib/data/database/app_database.dart` (24 lignes vs 750)
+  - [x] `lib/data/database/tables/*.dart` (6 modules séparés)
+  - [x] `lib/data/database/models/*.dart` (modèles organisés)
+  - [x] `lib/data/repositories/database/*.dart` (6 repositories spécialisés)
+- [x] **6.3** Migration des providers critiques vers nouveau système
+- [x] **6.4** Suppression des conflits Drift (ancien database.dart supprimé)
+- [x] **6.5** Migration des imports dans DataSources et Models
+- [x] **6.6** Finalisation Migration Database (100% terminé) :
+  - [x] **6.6a** Corrigé tous imports database.dart restants (17 fichiers)
+  - [x] **6.6b** Résolu types manquants (TransactionWithBalance, TransactionWithCounterparty)
+  - [x] **6.6c** Ajouté méthodes AppDatabase manquantes (findOrCreateCounterparty, removeFollowedTransaction)
+  - [x] **6.6d** Corrigé toutes erreurs de nullability
+  - [x] **6.6e** Projet compile maintenant sans erreurs critiques
+
+### Étape 9: Finalisation Migration MVVM
+- [x] **9A** Résolution erreurs critiques suivies transactions
+  - [x] **9A.1** Implémenté 5 méthodes manquantes dans transaction_repository_impl.dart
+  - [x] **9A.2** Corrigé erreurs compilation followed transactions (getFollowedTransactionsWithDetails, etc.)
+- [x] **9B** Migration complète widgets vers MVVM
+  - [x] **9B.1** Migré full_transactions_bottom_sheet.dart vers MVVM
+  - [x] **9B.2** Migré edit_transaction_bottom_sheet.dart vers MVVM
+  - [x] **9B.3** Migré draggable_black_container.dart vers MVVM
+  - [x] **9B.4** Migré floating_navbar.dart et followed_transactions_carousel.dart vers MVVM
+- [x] **9C** Audit database_provider.dart
+  - [x] **9C.1** Analyse utilisation database_provider.dart
+  - [x] **9C.2** **DÉCISION** : database_provider.dart **DOIT être conservé** (utilisé par datasources)
+- [x] **9D** Résolution problème initialisation critique
+  - [x] **9D.1** Diagnostiqué isAppReady bloqué à false
+  - [x] **9D.2** Corrigé splash_screen.dart - migration vers AppViewModel MVVM
+  - [x] **9D.3** Implémenté chargement complet données au démarrage (cache-first)
+- [x] **9F.1** Corrigé erreurs compilation draggable_black_container.dart
+- [x] **9F.2** Corrigé erreurs compilation followed_transactions_carousel.dart
+- [x] **9F.3** Migré transaction_detail_screen.dart vers MVVM
+- [x] **9G.1** Implémenté updateTransaction dans TransactionRepositoryImpl
+- [x] **9G.2** Implémenté deleteTransaction dans TransactionRepositoryImpl (était déjà fait)
+- [x] **9G.3** Implémenté toggleTransactionStatus dans TransactionRepositoryImpl
+- [x] **9G.4** Migré add_account_bottom_sheet.dart vers MVVM (remplacé accountActionsProvider)
+- [x] **9G.5** Analysé actions_provider.dart - aucune autre utilisation trouvée
+
+#### Étape 9H: Architecture MVVM 100% TERMINÉE ! 🎉
+- [x] **Tous les widgets** migré vers architecture MVVM
+- [x] **Tous les providers actions** remplacés par repositories
+- [x] **Toutes les méthodes CRUD** implémentées dans repositories
+- [x] **Cache-first architecture** entièrement opérationnelle
+- [x] **Aucune erreur de compilation** dans l'architecture MVVM
+
+#### Étape 9J: Résolution TODOs et Amélioration Recherche
+- [x] **9J.1** Corrigé TODO edit_transaction_bottom_sheet.dart - utilise `transactionWithBalance.counterparty?.name`
+- [x] **9J.2** Corrigé TODO perspective_transaction_item.dart - utilise `transactionWithCounterparty.counterparty`
+- [x] **9J.3** Supprimé provider inutilisé transactionWithCounterpartyProvider
+- [x] **9J.4** Migré transaction_search_provider.dart vers domain.TransactionWithBalance
+- [x] **9J.5** Implémenté recherche dans nom des Counterparties
+- [x] **9J.6** Implémenté recherche dans nom des Categories
+- [x] **9J.7** Confirmé utilisation repositories (pas de requêtage direct BDD)
+
+#### Étape 9K: Finalisation Migration Architecture Async
+- [x] **9K.1** Migré full_transactions_bottom_sheet.dart vers MVVM (supprimé transactionsAsync.when)
+- [x] **9K.2** Migré draggable_black_container.dart vers MVVM (supprimé transactionsAsync.when)
+- [x] **9K.3** Migré followed_transactions_carousel.dart vers MVVM (supprimé followedTransactionsAsync.when)
+- [x] **9K.4** Supprimé tous les imports data/database inutiles
+- [x] **9K.5** Confirmé 0 occurrence de .when() restante dans widgets/screens
+
+#### Étape 9L: Correction Erreur Riverpod SplashScreen
+- [x] **9L.1** Identifié erreur "Tried to modify a provider while widget tree was building"
+- [x] **9L.2** Cause : appViewModel.initializeApp() appelé dans initState()
+- [x] **9L.3** Solution : Future(() => _initializeApp()) pour délayer l'exécution
+- [x] **9L.4** Test : flutter analyze splash_screen.dart - 0 erreur
+
+#### Étape 9M: Correction Erreur FollowedTransactionsCarousel
+- [x] **9M.1** Identifié erreur _buildErrorState() affiché dans followed_transactions_carousel
+- [x] **9M.2** Cause : getFollowedTransactionsWithDetails() échoue (pas de gestion dans cache MVVM)
+- [x] **9M.3** Solution temporaire : Afficher _buildEmptyState() en attendant implémentation complète
+- [x] **9M.4** TODO ajouté : Implémenter transactions suivies dans cache MVVM
+
+#### Étape 9N: Implémentation Complète Transactions Suivies MVVM
+- [x] **9N.1** Ajouté méthodes followed transactions dans CacheManager
+  - [x] **9N.1a** `_loadFollowedTransactionIds()` pour charger les IDs au démarrage
+  - [x] **9N.1b** `_calculateFollowedTransactionsWithBalance()` pour calculer les transactions suivies enrichies
+  - [x] **9N.1c** `followTransaction()` et `unfollowTransaction()` pour gérer le cache
+  - [x] **9N.1d** `getFollowedTransactionsWithBalance()` et `isTransactionFollowed()` pour l'accès
+- [x] **9N.2** Modifié l'initialisation du cache pour inclure les transactions suivies
+  - [x] **9N.2a** Ajouté paramètre `followedTransactionIds` dans `CacheManager.initialize()`
+  - [x] **9N.2b** Ajouté méthode `getFollowedTransactionIds()` dans TransactionLocalDataSource
+  - [x] **9N.2c** Modifié `AppViewModel._initializeCache()` pour charger les IDs suivis
+- [x] **9N.3** Mis à jour TransactionRepositoryImpl pour utiliser le cache MVVM
+  - [x] **9N.3a** `getFollowedTransactionsWithDetails()` utilise maintenant le cache
+  - [x] **9N.3b** `getFollowedTransactionIds()` et `isTransactionFollowed()` utilisent le cache
+  - [x] **9N.3c** `followTransaction()` et `unfollowTransaction()` mettent à jour le cache
+- [x] **9N.4** Restauré fonctionnalité complète dans followed_transactions_carousel.dart
+  - [x] **9N.4a** Supprimé l'affichage temporaire vide
+  - [x] **9N.4b** Restauré le FutureBuilder avec repository MVVM
+  - [x] **9N.4c** Corrigé la gestion des erreurs et actualisation
+
+#### Étape 9O: Migration Complète AppDatabase vers MVVM
+- [x] **9O.1** Analysé et identifié méthodes obsolètes dans app_database.dart
+  - [x] **9O.1a** `findOrCreateCounterparty()` - Requête directe contournant l'architecture
+  - [x] **9O.1b** `removeFollowedTransaction()` - Requête directe contournant l'architecture
+- [x] **9O.2** Migré findOrCreateCounterparty vers CounterpartyRepository
+  - [x] **9O.2a** Ajouté `findOrCreateCounterpartyByName()` dans domain CounterpartyRepository
+  - [x] **9O.2b** Implémenté dans CounterpartyRepositoryImpl avec cache-first
+  - [x] **9O.2c** Logique : Recherche exacte puis création si non trouvé
+- [x] **9O.3** Supprimé méthodes obsolètes de app_database.dart
+  - [x] **9O.3a** Supprimé `findOrCreateCounterparty()` et `removeFollowedTransaction()`
+  - [x] **9O.3b** Supprimé TODO "Migrer vers les repositories spécialisés"
+  - [x] **9O.3c** App_database.dart maintenant 100% respecte l'architecture MVVM
+- [x] **9O.4** Nettoyage des fichiers obsolètes
+  - [x] **9O.4a** Confirmé actions_provider.dart non utilisé (sauf README)
+  - [x] **9O.4b** Supprimé actions_provider.dart du projet
+  - [x] **9O.4c** Confirmé 0 erreur de compilation après nettoyage
+
+#### Étape 9P: Implémentation Fallback Robuste Production
+- [x] **9P.1** Analysé et identifié fallback insuffisant dans TransactionRepositoryImpl
+  - [x] **9P.1a** TODO ligne 128 : "En production, il faudrait recalculer les soldes ici"
+  - [x] **9P.1b** Fallback actuel : Soldes à 0 pour toutes les transactions (incorrect)
+  - [x] **9P.1c** Risque : App non-fonctionnelle en cas de problème de cache
+- [x] **9P.2** Implémenté fallback robuste inspiré du code V1
+  - [x] **9P.2a** Créé `_calculateTransactionsWithBalanceFallback()` - Calcul manuel des soldes
+  - [x] **9P.2b** Ajouté DataSources nécessaires au constructor (Account, Counterparty, Category)
+  - [x] **9P.2c** Logique identique au cache : tri chronologique + calcul séquentiel
+  - [x] **9P.2d** Récupération complète des données (contreparties, catégories)
+- [x] **9P.3** Sécurité et logging du fallback
+  - [x] **9P.3a** Logs détaillés pour identifier quand le fallback s'exécute
+  - [x] **9P.3b** Gestion d'erreurs robuste avec try-catch
+  - [x] **9P.3c** Messages d'avertissement pour débogage
+- [x] **9P.4** Tests et validation
+  - [x] **9P.4a** Compilation sans erreur critique (5 warnings print attendus)
+  - [x] **9P.4b** Provider mis à jour avec nouvelles dépendances
+  - [x] **9P.4c** Fallback prêt pour production en cas de cache défaillant
+
+#### Étape 9Q: Restauration Interface Utilisateur Originale MVVM
+- [x] **9Q.1** Analysé et identifié modifications UI non-demandées lors migration MVVM
+  - [x] **9Q.1a** transaction_item_mvvm.dart : Couleurs hardcodées, méthodes privées inutiles
+  - [x] **9Q.1b** transactions_list_mvvm.dart : Fonctionnalités supplémentaires non-désirées
+  - [x] **9Q.1c** Perte de l'UI originale : AppColorsExtended, AppTextStyles, AppFormatters
+- [x] **9Q.2** Restauré UI originale transaction_item_mvvm.dart
+  - [x] **9Q.2a** Supprimé méthodes privées _formatAmount() et _getAmountColor()
+  - [x] **9Q.2b** Restauré AppColorsExtended : appTheme.text1, appTheme.textCredit, appTheme.textDebit
+  - [x] **9Q.2c** Restauré AppTextStyles : transactionTitle, transactionAmount, transactionBalance
+  - [x] **9Q.2d** Restauré AppFormatters.formatAmountClean() et formatCurrency()
+  - [x] **9Q.2e** Restauré layout exact : icône 50x50, Row avec colonnes, padding defaults
+- [x] **9Q.3** Restauré UI originale transactions_list_mvvm.dart
+  - [x] **9Q.3a** Supprimé fonctionnalités supplémentaires : barre de recherche, statistiques, pagination
+  - [x] **9Q.3b** Restauré headers animés _buildAnimatedDateHeader() avec animation de glissement
+  - [x] **9Q.3c** Restauré logique scroll to today exacte avec calcul précis
+  - [x] **9Q.3d** Restauré _calculateDayTotals() avec expenses/revenues et _formatNetAmount()
+  - [x] **9Q.3e** Restauré TransactionGroup et _groupTransactionsByDate() originaux
+- [x] **9Q.4** Validation et tests
+  - [x] **9Q.4a** Compilation sans erreur critique (5 warnings style mineurs)
+  - [x] **9Q.4b** UI identique à l'original avec architecture MVVM conservée
+  - [x] **9Q.4c** Intégration full_transactions_bottom_sheet.dart fonctionnelle
+
+### Étape 10: Implémentation Persistance des Préférences Utilisateur ✅
+
+#### 10A: Migration add_transaction_bottom_sheet vers CounterpartyViewModel ✅
+- [x] **10A.1** Analysé l'utilisation de FutureBuilder dans add_transaction_bottom_sheet_mvvm.dart
+- [x] **10A.2** Migré vers CounterpartyViewModel avec gestion d'état MVVM
+- [x] **10A.3** Harmonisé la logique avec edit_transaction_bottom_sheet.dart
+- [x] **10A.4** Implémenté chargement conditionnel des contreparties
+- [x] **10A.5** Ajouté gestion d'erreurs avec UI de retry
+
+#### 10B: Système de Persistance des Préférences
+- [x] **10B.1** Étendu UserPreferencesService pour thème et langue
+  - [x] **10B.1a** Ajouté constantes `_themeKey` et `_languageKey`
+  - [x] **10B.1b** Implémenté `getThemeMode()` (default: 'light')
+  - [x] **10B.1c** Implémenté `getLanguage()` (default: 'system')
+  - [x] **10B.1d** Ajouté `setThemeMode()` et `setLanguage()` avec SharedPreferences
+- [x] **10B.2** Migré ThemeProvider vers persistance
+  - [x] **10B.2a** Ajouté extension `ThemeModeExtension` pour conversion String ↔ Enum
+  - [x] **10B.2b** Implémenté `_loadTheme()` au démarrage
+  - [x] **10B.2c** Modifié `setTheme()` pour sauvegarder automatiquement
+  - [x] **10B.2d** Injecté UserPreferencesService dans constructor
+- [x] **10B.3** Migré LanguageProvider vers persistance
+  - [x] **10B.3a** Ajouté `AppLanguageExtension.fromString()` pour conversion
+  - [x] **10B.3b** Implémenté `_loadLanguage()` au démarrage
+  - [x] **10B.3c** Modifié `setLanguage()` pour sauvegarder automatiquement
+  - [x] **10B.3d** Injecté UserPreferencesService dans constructor
+- [x] **10B.4** Mis à jour SettingsScreen pour persistance
+  - [x] **10B.4a** Modifié sélecteur de thème pour appels async
+  - [x] **10B.4b** Modifié sélecteur de langue pour appels async
+  - [x] **10B.4c** Ajouté vérification `context.mounted` pour sécurité
+- [x] **10B.5** Configuré initialisation dans main.dart
+  - [x] **10B.5a** Ajouté `WidgetsFlutterBinding.ensureInitialized()`
+  - [x] **10B.5b** Ajouté `await UserPreferencesService.instance.init()`
+  - [x] **10B.5c** Assuré chargement des préférences avant démarrage UI
+
+#### 10C: Comportement Implémenté selon Spécifications ✅
+- [x] **10C.1** Valeurs par défaut respectées
+  - [x] **10C.1a** Thème par défaut : `light` (pas `system` comme demandé)
+  - [x] **10C.1b** Langue par défaut : `system` (suit la langue du système)
+- [x] **10C.2** Persistance complète fonctionnelle
+  - [x] **10C.2a** Sauvegarde automatique lors des changements dans Settings
+  - [x] **10C.2b** Chargement automatique au démarrage de l'application
+  - [x] **10C.2c** Conservation des choix utilisateur entre les sessions
+- [x] **10C.3** Flow utilisateur optimal
+  - [x] **10C.3a** Premier lancement : Thème `light`, Langue `system`
+  - [x] **10C.3b** Changements sauvés immédiatement dans SharedPreferences
+  - [x] **10C.3c** Redémarrage app : Préférences utilisateur restaurées
+
+#### 10D: Architecture Technique Finale ✅
+**Stack de Persistance** :
+```dart
+UserPreferencesService (SharedPreferences)
+    ↓
+ThemeProvider & LanguageProvider (avec persistance)
+    ↓
+SettingsScreen (sauvegarde automatique)
+    ↓
+main.dart (chargement au démarrage)
+```
+
+**Fichiers Modifiés** :
+- `lib/core/services/user_preferences_service.dart` : Étendu pour thème/langue
+- `lib/presentation/providers/theme_provider.dart` : Persistance avec extensions
+- `lib/presentation/providers/settings_provider.dart` : Persistance avec extensions
+- `lib/presentation/screens/settings_screen.dart` : Appels async pour sauvegarde
+- `lib/presentation/widgets/add_transaction_bottom_sheet_mvvm.dart` : Migration MVVM
+- `lib/main.dart` : Initialisation UserPreferencesService
+
+**Points Techniques Critiques** :
+- **Extensions Enum** : `ThemeModeExtension` et `AppLanguageExtension` pour conversions
+- **Chargement Asynchrone** : `_loadTheme()` et `_loadLanguage()` dans constructeurs
+- **Sauvegarde Immédiate** : Chaque `setTheme()` et `setLanguage()` persiste
+- **Défauts Personnalisés** : Thème `light` (pas `system`) selon spécifications
+- **Logique MVVM Cohérente** : Chargement conditionnel des contreparties
+
+### 📋 ÉTAPES À VENIR
+
+#### Étape X : Tests et Validation
+- [ ] **X.1** Tests complets nouvelle architecture
+- [ ] **X.2** Validation performances O(n) vs O(n²)
+- [ ] **X.3** Préparation intégration Turso
+
+---
+
+## 🔧 Détails Techniques Critiques
+
+### 1. **Gestion des Couleurs de Cartes**
+**Problème identifié** : L'algorithme `colors[id % colors.length]` ne fonctionne pas avec des IDs non-consécutifs.
+
+**Solution implémentée** :
+```dart
+// lib/core/utils/card_color_utils_mvvm.dart
+static Color getCardColor(domain.Account account, List<domain.Account> allAccounts) {
+  // Tri par ID pour ordre stable
+  final sortedAccounts = List<domain.Account>.from(allAccounts)
+    ..sort((a, b) => a.id.compareTo(b.id));
+  
+  // Index dans liste triée = couleur cohérente
+  final accountIndex = sortedAccounts.indexWhere((a) => a.id == account.id);
+  return cardColors[accountIndex % cardColors.length];
+}
+```
+
+### 2. **Localisation i18n**
+**Règle critique** : Aucune string codée en dur autorisée.
+
+**Pattern à respecter** :
+```dart
+@override
+Widget build(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  // Utiliser l10n.keyName au lieu de "String"
+}
+```
+
+### 3. **Architecture Cache-First**
+**Principe** : Toutes les données sont chargées au démarrage dans le CacheManager.
+
+**Flow de données** :
+```
+UI → ViewModel → Repository → Cache (+ DataSource si nécessaire)
+```
+
+**Problème identifié** : Certains widgets utilisent encore directement la DB :
+- `full_transactions_bottom_sheet.dart` ligne 244
+- `followed_transactions_carousel.dart`
+- `draggable_black_container.dart`
+
+### 4. **ViewModels et State Management**
+**BaseViewModel** avec gestion d'erreurs intégrée :
+```dart
+abstract class BaseViewModel<T extends BaseViewState> extends StateNotifier<T> {
+  Future<void> executeWithErrorHandling(Future<void> Function() action) async {
+    try {
+      await action();
+    } catch (e) {
+      state = state.failure(e.toString()) as T;
+    }
+  }
+}
+```
+
+### 5. **Providers Riverpod**
+**Structure hiérarchique** :
+- DataSources → Repositories → ViewModels → UI
+- Providers utilitaires pour l'UI (convenience providers)
+- Family providers pour paramètres dynamiques
+
+### 6. **Initialisation Application (Critique)**
+**Problème résolu** : L'app était bloquée sur `isAppReady = false` car `splash_screen.dart` utilisait l'ancien `accountsProvider` au lieu du nouveau `AppViewModel`.
+
+**Solution implémentée** :
+```dart
+// Avant (PROBLÉMATIQUE)
+await ref.read(accountsProvider.future);
+
+// Après (MVVM CORRECT)
+final appViewModel = ref.read(appViewModelProvider.notifier);
+await appViewModel.initializeApp();
+while (!appViewModel.isAppReady) {
+  await Future.delayed(const Duration(milliseconds: 100));
+}
+```
+
+### 7. **Followed Transactions Architecture**
+**Nouvelles méthodes implémentées** dans `TransactionRepositoryImpl` :
+```dart
+Future<List<TransactionWithBalance>> getFollowedTransactionsWithDetails();
+Future<List<int>> getFollowedTransactionIds();
+Future<bool> isTransactionFollowed(int transactionId);
+Future<void> followTransaction(int transactionId);
+Future<void> unfollowTransaction(int transactionId);
+```
+
+### 8. **Migration des Types de Données**
+**Conversion critique** : `TransactionWithCounterparty` (ancienne) → `TransactionWithBalance` (MVVM)
+
+**Fonctions de conversion** nécessaires pour certains widgets :
+```dart
+domain.TransactionWithBalance _convertToDomainModel(data_models.TransactionWithBalance dataTx);
+data_models.TransactionWithBalance _convertToDataModel(domain.TransactionWithBalance domainTx);
+```
+
+### 9. **Implémentation CRUD Complète**
+**Méthodes implémentées** dans les repositories MVVM :
+```dart
+// TransactionRepository
+Future<Transaction> updateTransaction(Transaction transaction);
+Future<void> deleteTransaction(int id);
+Future<void> toggleTransactionStatus(int transactionId);
+
+// AccountRepository
+Future<Account> createAccount(Account account);
+Future<Account> updateAccount(Account account);
+Future<void> deleteAccount(int id);
+```
+
+### 10. **Architecture Actions → Repositories**
+**Migration complète** : Les widgets utilisent maintenant les repositories au lieu des actions_provider :
+```dart
+// Avant (OBSOLÈTE)
+final accountActions = ref.read(accountActionsProvider);
+await accountActions.createAccount(name: name, currency: currency);
+
+// Après (MVVM CORRECT)
+final accountRepository = ref.read(accountRepositoryProvider);
+await accountRepository.createAccount(newAccount);
+ref.invalidate(accountsProvider);
+```
+
+### 11. **Optimisation CopyWith Pattern**
+**Amélioration critique** : Utilisation de `copyWith()` pour les mises à jour d'entités immutables :
+```dart
+// Avant (VERBEUX)
+final updatedTransaction = Transaction(
+  id: transaction.id,
+  accountId: transaction.accountId,
+  // ... tous les autres champs
+  status: newStatus,
+);
+
+// Après (OPTIMISÉ avec copyWith)
+final updatedTransaction = transaction.copyWith(status: newStatus);
+```
+
+**Implémentations complétées** :
+- ✅ **TransactionRepositoryImpl.toggleTransactionStatus()** - Utilise `copyWith(status: newStatus)`
+- ✅ **EditTransactionBottomSheet** - Utilise `copyWith()` pour tous les champs modifiés
+- ✅ **TransactionViewModel.updateTransaction()** - Récupère l'entité existante et utilise `copyWith()`
+- ✅ **AccountViewModel.updateAccount()** - Déjà optimisé avec `copyWith()`
+
+**Avantages** :
+- **Code plus concis** et moins prone aux erreurs
+- **Préservation automatique** des champs non modifiés
+- **Meilleure maintenabilité** lors d'ajouts de champs
+- **Performance optimisée** (pas de reconstruction complète)
+- **Cohérence architecturale** avec le pattern immutable
+
+---
+
+## 🚨 Points d'Attention Techniques
+
+### ✅ Widgets Migrés vers MVVM
+```
+TOUS CORRIGÉS - Architecture MVVM 100% :
+✅ draggable_black_container.dart (types corrigés)
+✅ followed_transactions_carousel.dart (TransactionWithBalance)
+✅ transaction_detail_screen.dart (utilise repositories)
+✅ add_account_bottom_sheet.dart (utilise accountRepository)
+✅ edit_transaction_bottom_sheet.dart (utilise transactionRepository)
+✅ full_transactions_bottom_sheet.dart (utilise MVVM providers)
+```
+
+### Database Provider Status
+```
+DÉCISION CRITIQUE : database_provider.dart ne peut PAS être supprimé
+RAISON : Utilisé par les datasources dans viewmodel_providers.dart
+- AccountLocalDataSource → databaseProvider
+- TransactionLocalDataSource → databaseProvider  
+- CategoryLocalDataSource → databaseProvider
+- CounterpartyLocalDataSource → databaseProvider
+
+STATUS : Nécessaire pour l'architecture MVVM (couche DataSources)
+```
+
+### Actions Provider Status
+```
+DÉCISION : actions_provider.dart SUPPRIMÉ ✅
+RAISON : Toutes les utilisations ont été migrées vers repositories
+- add_account_bottom_sheet.dart → accountRepository
+- edit_transaction_bottom_sheet.dart → transactionRepository
+- transaction_detail_screen.dart → transactionRepository
+
+STATUS : SUPPRIMÉ - entièrement remplacé par repositories MVVM
+```
+
+### Calculs de Soldes
+**Critique** : Le solde après chaque transaction doit être recalculé en cascade si une transaction antérieure est modifiée.
+
+**Implémentation** : Via CacheManager.updateTransactionBalances()
+
+### Providers à Nettoyer
+```
+À SUPPRIMER après migration complète :
+- Anciens providers de database_provider.dart
+- Providers de transactions directs
+- Providers redondants
+```
+
+---
+
+## 📝 Commandes de Développement
+
+### Analyse du Code
+```bash
+flutter analyze --no-fatal-infos
+```
+
+### Génération Drift
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+### Tests Architecture
+```bash
+flutter test test/architecture/
+```
+
+---
+
+## 🔗 Fichiers Clés Modifiés
+
+### Nouveaux Fichiers MVVM
+- `lib/presentation/viewmodels/*.dart` (5 fichiers)
+- `lib/presentation/providers/viewmodel_providers.dart`
+- `lib/presentation/screens/home_screen_mvvm.dart`
+- `lib/presentation/screens/search_results_screen_mvvm.dart`
+- `lib/presentation/widgets/*_mvvm.dart` (7 fichiers)
+- `lib/core/utils/card_color_utils_mvvm.dart`
+
+### Architecture Domain
+- `lib/domain/entities/*.dart` (4 entités)
+- `lib/domain/repositories/*.dart` (4 interfaces)
+- `lib/domain/value_objects/*.dart` (2 value objects)
+
+### Cache et Repositories
+- `lib/data/cache/cache_manager.dart`
+- `lib/data/repositories/*_impl.dart` (4 implémentations)
+
+---
+
+## 🎖️ Métriques de Qualité
+
+- **0 erreurs** de compilation dans les ViewModels
+- **Architecture MVVM** respectée
+- **Cache O(n)** au lieu de O(n²)
+- **Séparation des responsabilités** claire
+- **Prêt pour Turso** multi-utilisateur
+
+### 11. **Architecture Transactions Suivies MVVM**
+**Implémentation complète** : Les transactions suivies sont maintenant entièrement intégrées dans l'architecture MVVM avec cache-first :
+```dart
+// lib/data/cache/cache_manager.dart - Gestion cache des transactions suivies
+final Set<int> _followedTransactionIds = {};
+List<TransactionWithBalance> _followedTransactionsWithBalance = [];
+
+// Chargement au démarrage
+await _loadFollowedTransactionIds(followedTransactionIds);
+
+// Calcul des transactions suivies enrichies avec soldes
+Future<void> _calculateFollowedTransactionsWithBalance() async {
+  _followedTransactionsWithBalance.clear();
+  for (final transactionId in _followedTransactionIds) {
+    // Rechercher dans tous les comptes pour construire TransactionWithBalance
+  }
+}
+
+// Méthodes de gestion
+Future<void> followTransaction(int transactionId);
+Future<void> unfollowTransaction(int transactionId);
+bool isTransactionFollowed(int transactionId);
+List<TransactionWithBalance> getFollowedTransactionsWithBalance();
+```
+
+**Avantages de l'implémentation** :
+- **Cache-first** : Plus de requêtes directes à la DB pour l'affichage
+- **Performances O(n)** : Calcul optimisé des transactions suivies avec soldes
+- **Réactivité** : Mise à jour automatique du cache lors des modifications
+- **Cohérence** : Intégration parfaite avec l'architecture MVVM existante
+- **Fallback robuste** : Utilise l'ancienne méthode si le cache n'est pas initialisé
+
+### 12. **Migration AppDatabase.dart vers MVVM **
+**Problème résolu** : Le fichier `app_database.dart` contenait encore des méthodes qui contournaient l'architecture MVVM :
+```dart
+// AVANT (PROBLÉMATIQUE) - Requêtes directes contournant les repositories
+Future<int> findOrCreateCounterparty(String name) async {
+  final existing = await (select(counterparties)..where((tbl) => tbl.name.equals(name))).getSingleOrNull();
+  // ... requête directe à la DB
+}
+
+Future<void> removeFollowedTransaction(int transactionId) async {
+  await (delete(followedTransactions)..where((tbl) => tbl.transactionId.equals(transactionId))).go();
+  // ... requête directe à la DB
+}
+
+// APRÈS (MVVM CORRECT) - Migration vers repositories
+// app_database.dart : Plus de méthodes métier, seulement configuration
+// CounterpartyRepository : findOrCreateCounterpartyByName() avec cache-first
+// TransactionRepository : utilise _followedTransactionRepository approprié
+```
+
+**Méthodes migrées** :
+- **`findOrCreateCounterparty()`** → `CounterpartyRepository.findOrCreateCounterpartyByName()`
+- **`removeFollowedTransaction()`** → Déjà géré par `FollowedTransactionDatabaseRepository`
+
+**Fichiers nettoyés** :
+- ✅ `app_database.dart` : Plus de TODO, 100% respecte MVVM
+- ✅ `actions_provider.dart` : Supprimé (obsolète, remplacé par repositories)
+
+### 13. **Fallback Robuste Production**
+**Problème critique résolu** : Le fallback de `TransactionRepositoryImpl.getTransactionsWithBalance()` était insuffisant pour la production :
+```dart
+// AVANT (PROBLÉMATIQUE) - Fallback avec soldes incorrects
+return transactionModels.map((model) {
+  return TransactionWithBalance(
+    transaction: model.toEntity(),
+    account: Account(id: accountId, name: 'Account', currency: model.currency, initialBalance: 0),
+    balanceAfter: AccountBalance(balance: Money(amount: 0, currency: model.currency)), // ❌ FAUX
+  );
+}).toList();
+
+// APRÈS (ROBUSTE) - Fallback avec calcul correct des soldes
+Future<List<TransactionWithBalance>> _calculateTransactionsWithBalanceFallback(int accountId) async {
+  // Récupération du compte réel
+  final accountModel = await _accountLocalDataSource.getAccountById(accountId);
+  final account = accountModel.toEntity();
+  
+  // Tri chronologique des transactions
+  transactionModels.sort((a, b) => a.date.compareTo(b.date));
+  
+  // Calcul séquentiel des soldes (identique au cache)
+  double currentBalance = account.initialBalance;
+  for (final transactionModel in transactionModels) {
+    final signedAmount = transaction.type == TransactionType.income ? transaction.amount : -transaction.amount;
+    currentBalance += signedAmount;
+    
+    // Création TransactionWithBalance avec solde correct
+    final transactionWithBalance = TransactionWithBalance(
+      transaction: transaction,
+      account: account,
+      balanceAfter: AccountBalance(balance: Money(amount: currentBalance, currency: account.currency)),
+      counterparty: /* récupération depuis DB */,
+      categories: /* récupération depuis DB */,
+    );
+  }
+}
+```
+
+**Avantages du fallback robuste** :
+- **Fonctionnalité préservée** : App utilisable même si cache défaillant
+- **Calculs corrects** : Soldes identiques au cache (logique V1 éprouvée)
+- **Données complètes** : Contreparties et catégories récupérées
+- **Logging détaillé** : Identification immédiate des problèmes de cache
+- **Production-ready** : Gestion d'erreurs robuste avec try-catch
+
+**Utilisation** : Se déclenche automatiquement si `_cacheManager.isInitialized == false`
+
+### 14. **Restauration Interface Utilisateur Originale**
+**Problème identifié** : Lors de la migration MVVM, l'interface utilisateur des widgets `transaction_item_mvvm.dart` et `transactions_list_mvvm.dart` avait été modifiée sans demande explicite.
+
+**Modifications non-demandées détectées** :
+```dart
+// ❌ PROBLÉMATIQUE - Couleurs hardcodées au lieu du thème
+Color _getAmountColor(bool isIncome, bool isExpense) {
+  if (isIncome) return Colors.green;        // Hardcodé !
+  else if (isExpense) return Colors.red;   // Hardcodé !
+  else return AppColors.textSecondary;     // Hardcodé !
+}
+
+// ❌ PROBLÉMATIQUE - Méthodes privées inutiles
+String _formatAmount(double amount, String currency, bool isIncome) {
+  final formattedAmount = AppFormatters.formatAmount(amount, currency);
+  return isIncome ? '+$formattedAmount' : '-$formattedAmount';
+}
+
+// ❌ PROBLÉMATIQUE - Fonctionnalités supplémentaires non-demandées
+_buildSearchBar(), _buildQuickStats(), _buildPaginationControls()
+```
+
+**Restauration complète effectuée** :
+```dart
+// ✅ CORRECT - Respect du thème original
+final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+style: AppTextStyles.transactionAmount.copyWith(
+  color: isDebit ? appTheme.text1 : appTheme.textCredit,
+),
+
+// ✅ CORRECT - Utilisation formatters originaux
+Text(
+  AppFormatters.formatAmountClean(
+    isDebit ? -transaction.amount : transaction.amount,
+    transaction.currency,
+    context: context,
+  ),
+),
+
+// ✅ CORRECT - Headers animés restaurés
+Widget _buildAnimatedDateHeader() {
+  return AnimatedAlign(
+    alignment: isExpanded ? Alignment.centerLeft : Alignment.center,
+    // Animation de glissement exacte
+  );
+}
+```
+
+**Éléments restaurés** :
+- ✅ **AppColorsExtended** : `appTheme.text1`, `appTheme.textCredit`, `appTheme.textDebit`
+- ✅ **AppTextStyles** : `transactionTitle`, `transactionAmount`, `transactionBalance`
+- ✅ **AppFormatters** : `formatAmountClean()`, `formatCurrency()`
+- ✅ **Layout exact** : Icône 50x50, padding defaults, Row avec colonnes
+- ✅ **Headers animés** : `_buildAnimatedDateHeader()` avec animation de glissement
+- ✅ **Scroll to today** : Logique exacte avec calcul précis des offsets
+
+**Résultat** : Interface utilisateur identique à l'original avec architecture MVVM préservée
+
+---
+
+## 🌍 Étape 11: Service de Conversion des Devises
+
+### 📋 Contexte et Objectifs
+
+**Fonctionnalité** : Permettre aux utilisateurs de saisir des transactions dans une devise différente de la devise du compte, avec conversion automatique.
+
+**Exemple d'usage** :
+- Compte en EUR, transaction de 15.00 USD
+- Saisie : "15.00 USD" → Conversion automatique → Stockage : `amount: 15.00`, `currency: USD`, `amountConverted: 13.85`
+- Affichage : "13.85 €" (devise du compte)
+- Calcul solde : Utilise `amountConverted` (13.85 €)
+
+### 🏗️ Architecture Hybride Retenue
+
+**✅ APPROCHE HYBRIDE OPTIMISÉE :**
+1. **Pas de table Currency** dans la DB (évite les Foreign Keys)
+2. **CurrencyService statique** pour les devises supportées
+3. **Table ExchangeRates** séparée pour le cache des taux
+4. **Validation métier** au niveau repository
+5. **Colonnes currency actuelles** conservées (pas de FK)
+
+### 🔧 Stack Technique
+
+**API de Taux de Change** :
+- **ExchangeRate-API** : `https://api.exchangerate-api.com/v4/latest/EUR`
+- **Gratuit illimité** (pas de clé API requise)
+- **Mise à jour quotidienne** des taux
+
+**Stratégie de Cache** :
+1. **Cache mémoire** : Intégré au CacheManager existant
+2. **Cache local** : SQLite avec expiration (6 heures)
+3. **Cache de secours** : Derniers taux connus (30 jours)
+
+### 📁 Structure d'Architecture
+
+```
+lib/
+├── core/
+│   ├── services/
+│   │   ├── currency_service.dart           # Devises supportées (statique)
+│   │   └── currency_conversion_service.dart # Conversion avec cache
+│   └── constants/
+│       └── supported_currencies.dart       # Constantes des devises
+├── domain/
+│   ├── entities/
+│   │   ├── currency.dart                  # Entité Currency
+│   │   └── exchange_rate.dart             # Entité ExchangeRate
+│   └── repositories/
+│       └── exchange_rate_repository.dart  # Interface repository
+├── data/
+│   ├── models/
+│   │   └── exchange_rate_model.dart       # Modèle Drift pour cache
+│   ├── datasources/
+│   │   ├── local/
+│   │   │   └── exchange_rate_local_datasource.dart
+│   │   └── remote/
+│   │       └── exchange_rate_remote_datasource.dart
+│   └── repositories/
+│       └── exchange_rate_repository_impl.dart
+└── presentation/
+    └── viewmodels/
+        └── currency_viewmodel.dart        # ViewModel pour UI
+```
+
+### 🚀 Plan d'Implémentation Détaillé
+
+#### **Phase 1 : Foundation (Entities & Constants)**
+- **1.1** Créer `lib/domain/entities/currency.dart`
+  - **1.1a** Entité Currency avec code, symbole, nameKey, countryKey
+  - **1.1b** Méthodes utilitaires (formatAmount, getDisplayName)
+  - **1.1c** Support i18n intégré
+- **1.2** Créer `lib/domain/entities/exchange_rate.dart`
+  - **1.2a** Entité ExchangeRate avec fromCurrency, toCurrency, rate
+  - **1.2b** Méthodes de validation et expiration
+  - **1.2c** Méthodes de conversion (convertAmount)
+- **1.3** Créer `lib/core/constants/supported_currencies.dart`
+  - **1.3a** Liste des devises supportées (EUR, USD, GBP, JPY, etc.)
+  - **1.3b** Métadonnées complètes (symboles, décimales, drapeaux)
+  - **1.3c** Constantes pour validation
+- **1.4** Étendre les fichiers de localisation
+  - **1.4a** Ajouter clés de traduction dans `app_en.arb`
+  - **1.4b** Ajouter traductions françaises dans `app_fr.arb`
+  - **1.4c** Générer nouvelles localisations
+
+#### **Phase 2 : Services & Models**
+- **2.1** Créer `lib/core/services/currency_service.dart`
+  - **2.1a** Service statique pour gestion des devises
+  - **2.1b** Méthodes getCurrency, isValidCurrency, getAllCurrencies
+  - **2.1c** Validation centralisée des codes devises
+- **2.2** Créer `lib/data/models/exchange_rate_model.dart`
+  - **2.2a** Modèle Drift pour table ExchangeRates
+  - **2.2b** Colonnes : fromCurrency, toCurrency, rate, lastUpdated, expiresAt
+  - **2.2c** Méthodes de conversion vers/depuis entité domain
+- **2.3** Ajouter table ExchangeRates à la base de données
+  - **2.3a** Étendre `lib/data/database/tables/exchange_rates_table.dart`
+  - **2.3b** Ajouter à `lib/data/database/app_database.dart`
+  - **2.3c** Générer migration Drift avec `build_runner`
+
+#### **Phase 3 : Data Layer (DataSources & Repositories)**
+- **3.1** Créer `lib/data/datasources/remote/exchange_rate_remote_datasource.dart`
+  - **3.1a** Interface et implémentation pour API calls
+  - **3.1b** Intégration avec ExchangeRate-API
+  - **3.1c** Gestion d'erreurs et timeouts
+- **3.2** Créer `lib/data/datasources/local/exchange_rate_local_datasource.dart`
+  - **3.2a** Interface et implémentation pour cache SQLite
+  - **3.2b** Méthodes CRUD pour ExchangeRates
+  - **3.2c** Logique d'expiration et nettoyage
+- **3.3** Créer `lib/domain/repositories/exchange_rate_repository.dart`
+  - **3.3a** Interface repository avec méthodes métier
+  - **3.3b** Méthodes : getRates, getRate, updateRates, convertAmount
+  - **3.3c** Définition des contrats d'erreur
+- **3.4** Créer `lib/data/repositories/exchange_rate_repository_impl.dart`
+  - **3.4a** Implémentation avec stratégie cache 3 niveaux
+  - **3.4b** Logique fallback et gestion d'erreurs
+  - **3.4c** Optimisations performance et requêtes
+
+#### **Phase 4 : Integration avec CacheManager**
+- **4.1** Étendre `lib/data/cache/cache_manager.dart`
+  - **4.1a** Ajouter cache mémoire pour ExchangeRates
+  - **4.1b** Méthodes de conversion intégrées
+  - **4.1c** Streams pour réactivité des taux
+- **4.2** Créer `lib/core/services/currency_conversion_service.dart`
+  - **4.2a** Service de conversion haut niveau
+  - **4.2b** Intégration avec CacheManager et repositories
+  - **4.2c** Gestion des conversions batch et optimisées
+- **4.3** Modifier calculs de soldes dans CacheManager
+  - **4.3a** Utiliser `amountConverted` si disponible
+  - **4.3b** Maintenir compatibilité avec transactions existantes
+  - **4.3c** Optimiser performance des calculs
+
+#### **Phase 5 : ViewModels & UI**
+- **5.1** Créer `lib/presentation/viewmodels/currency_viewmodel.dart`
+  - **5.1a** ViewModel pour gestion des devises dans l'UI
+  - **5.1b** États : loading, error, loaded avec liste des devises
+  - **5.1c** Méthodes de conversion temps réel
+- **5.2** Étendre `lib/presentation/viewmodels/transaction_viewmodel.dart`
+  - **5.2a** Ajouter support pour devises multiples
+  - **5.2b** Conversion automatique lors de la saisie
+  - **5.2c** Validation des devises dans les formulaires
+- **5.3** Modifier `lib/presentation/widgets/add_transaction_bottom_sheet_mvvm.dart`
+  - **5.3a** Ajouter sélecteur de devise
+  - **5.3b** Affichage conversion temps réel
+  - **5.3c** Validation et UX optimisée
+- **5.4** Mettre à jour affichage des transactions
+  - **5.4a** Afficher montant converti dans les listes
+  - **5.4b** Indicateur visuel pour transactions converties
+  - **5.4c** Détails de conversion dans les écrans de détail
+
+#### **Phase 6 : Tests & Optimisations**
+- **6.1** Tests unitaires
+  - **6.1a** Tests des services de conversion
+  - **6.1b** Tests des repositories avec mocks
+  - **6.1c** Tests des ViewModels et logique métier
+- **6.2** Tests d'intégration
+  - **6.2a** Tests des flows complets de conversion
+  - **6.2b** Tests des fallbacks et gestion d'erreurs
+  - **6.2c** Tests de performance et cache
+- **6.3** Optimisations finales
+  - **6.3a** Profiling et optimisation performance
+  - **6.3b** Réduction des requêtes API
+  - **6.3c** Optimisation UX et feedback utilisateur
+
+### 📊 Avantages de cette Architecture
+
+1. **🚀 Performance** :
+   - Pas de JOIN requis pour les transactions
+   - Cache intelligent à 3 niveaux
+   - Conversion O(1) via HashMap
+
+2. **🛡️ Robustesse** :
+   - Fallbacks multiples en cas d'erreur
+   - Validation centralisée des devises
+   - Gestion d'erreurs comprehensive
+
+3. **🔧 Maintenabilité** :
+   - Code découplé et modulaire
+   - Respect de l'architecture MVVM existante
+   - Ajout facile de nouvelles devises
+
+4. **🌍 Scalabilité** :
+   - Support de milliers d'utilisateurs
+   - Cache partagé optimisé
+   - Requêtes API minimales
+
+### 🎯 Critères de Réussite
+
+- [ ] **Phase 1** : Compilation sans erreur après ajout des entités
+- [ ] **Phase 2** : Services fonctionnels avec validation
+- [ ] **Phase 3** : Cache local opérationnel avec API
+- [ ] **Phase 4** : Conversion intégrée au CacheManager
+- [ ] **Phase 5** : UI complète avec sélection de devises
+- [ ] **Phase 6** : Tests complets et optimisations
+
+---
+
+## 🔥 Étape 12: Architecture Firebase Cloud Functions pour Conversion de Devises
+
+### 📋 Contexte et Contraintes Critiques
+
+**Problème identifié** : La clé API exchangerate-api.com est limitée à **1000 requêtes/mois**, insuffisant pour une app mobile avec des dizaines de milliers d'utilisateurs.
+
+**Objectif** : Créer une architecture Firebase Cloud Functions comme **proxy intelligent** entre l'API de conversion et toutes les instances de l'app Flutter.
+
+### 🏗️ Architecture de Solution Retenue
+
+**✅ SOLUTION FIREBASE CLOUD FUNCTIONS :**
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Flutter App   │───▶│  Cloud Function  │───▶│  ExchangeRate   │
+│   (Cache 24h)   │    │  (Cache + Logic) │    │      API        │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                                │
+                                ▼
+                       ┌──────────────────┐
+                       │    Firestore     │
+                       │  (Cache 24h+)    │
+                       └──────────────────┘
+                                ▲
+                                │
+                       ┌──────────────────┐
+                       │ Cloud Scheduler  │
+                       │   (Daily 00:30)  │
+                       └──────────────────┘
+```
+
+### 🎯 Avantages Économiques et Techniques
+
+1. **Scalabilité optimale** :
+   - **1000 API calls/mois** → **2M cloud functions calls/mois** = facteur x2000
+   - Support de dizaines de milliers d'utilisateurs simultanés
+
+2. **Architecture de cache intelligente** :
+   - **Double cache** : Local Flutter (24h) + Cloud Firestore (24h+)
+   - **Réduction drastique** des appels réseau et API
+   - **Performance optimale** avec latences minimisées
+
+3. **Sécurité et isolation** :
+   - **Clé API cachée** côté serveur (excellente pratique)
+   - **Point d'accès unique** contrôlé et monitored
+   - **Pas d'exposition** de credentials dans les apps mobiles
+
+4. **Économie et efficacité** :
+   - **Mutualisation des coûts** entre tous les utilisateurs
+   - **Plan Blaze Firebase** rentable pour ce volume
+   - **Optimisation automatique** des requêtes API
+
+### 📊 Spécifications Techniques Détaillées
+
+#### **Contraintes API ExchangeRate :**
+- **Limite** : 1000 requêtes/mois maximum
+- **Fréquence de mise à jour** : Une fois par jour (probablement minuit UTC)
+- **Clé API** : Privée, doit rester côté serveur uniquement
+
+#### **Firebase Cloud Functions :**
+- **Runtime** : Node.js (dernière version LTS)
+- **Déclenchement** : HTTP Callable + Cloud Scheduler quotidien
+- **Plan** : Blaze (2M invocations gratuites/mois)
+- **Monitoring** : Cloud Logging + Alertes automatiques
+
+#### **Firestore Cache Structure :**
+```javascript
+// Collection: exchangeRates
+// Document: {baseCurrency}_{date}
+{
+  baseCurrency: 'USD',
+  rates: { EUR: 0.85, GBP: 0.73, JPY: 110.32, ... },
+  lastUpdated: timestamp,
+  expiresAt: timestamp + 24h,
+  apiCallsUsed: 1,
+  source: 'exchangerate-api'
+}
+```
+
+### 🚀 Plan d'Implémentation en Étapes
+
+#### **ÉTAPE 1 : Configuration Firebase (Console Web)**
+- **1.1** Créer projet Firebase sur https://console.firebase.google.com
+- **1.2** Activer Firestore Database avec règles de sécurité
+- **1.3** Activer Cloud Functions avec plan Blaze
+- **1.4** Configurer Cloud Scheduler pour déclenchement quotidien
+- **1.5** Récupérer clés de configuration et service account
+
+#### **ÉTAPE 2 : Développement Cloud Function (Node.js)**
+- **2.1** Initialiser projet dans `/firebase-cloud-function/`
+- **2.2** Installer dépendances : firebase-functions, firebase-admin
+- **2.3** Développer fonction principale `getExchangeRates(baseCurrency)`
+- **2.4** Implémenter logique de cache avec Firestore
+- **2.5** Ajouter gestion d'erreurs et fallbacks robustes
+- **2.6** Configurer Cloud Scheduler pour mise à jour quotidienne
+
+#### **ÉTAPE 3 : Intégration Flutter App**
+- **3.1** Modifier `CurrencyConversionService` pour appeler Cloud Function
+- **3.2** Remplacer appels directs à exchangerate-api.com
+- **3.3** Conserver cache local Flutter (24h) pour performance
+- **3.4** Ajouter gestion d'erreurs et fallbacks côté client
+- **3.5** Implémenter retry logic intelligent
+
+### 🔧 Détails Techniques Critiques
+
+#### **Gestion de la Concurrence :**
+```javascript
+// Problème : Plusieurs utilisateurs simultanés = multiple API calls
+// Solution : Mutex/lock Firestore pour éviter appels redondants
+const updateLock = await admin.firestore().doc('cache/updateLock').get();
+if (updateLock.exists && updateLock.data().updating) {
+  // Attendre ou retourner cache existant
+}
+```
+
+#### **Stratégie de Fallback Robuste :**
+```javascript
+// Si API exchangerate-api est down : utiliser dernier cache valide
+if (cacheAge > 24h && apiCallFailed) {
+  return { 
+    data: lastValidCache, 
+    warning: 'Using cached data due to API unavailability',
+    cacheAge: cacheAge 
+  };
+}
+```
+
+#### **Cloud Scheduler Optimisé :**
+- **Heure de déclenchement** : 00:30 UTC (éviter pics 00:00)
+- **Retry logic** : 3 tentatives avec backoff exponentiel
+- **Monitoring** : Logs structurés pour Cloud Monitoring
+- **Alertes** : Notifications en cas d'échec répété
+
+### 📁 Structure de Fichiers Prévue
+
+```
+firebase-cloud-function/
+├── package.json
+├── index.js                    # Point d'entrée principal
+├── functions/
+│   ├── exchangeRates.js       # Logique métier conversion
+│   ├── cacheManager.js        # Gestion cache Firestore
+│   └── scheduler.js           # Tâches programmées
+├── config/
+│   ├── firestore.rules       # Règles sécurité Firestore
+│   └── environment.js        # Variables d'environnement
+└── tests/
+    ├── unit/                 # Tests unitaires
+    └── integration/          # Tests d'intégration
+```
+
+**Flutter App - Modifications prévues :**
+```
+lib/core/services/
+├── currency_conversion_service.dart  # ✏️ Modifier pour Firebase
+└── firebase_functions_service.dart   # 🆕 Nouveau service
+
+lib/data/repositories/
+└── exchange_rate_repository_impl.dart # ✏️ Remplacer API directe
+```
+
+### 🎖️ Critères de Réussite et Métriques
+
+#### **Performance Cible :**
+- **Latence** : < 500ms pour récupération cache Firestore
+- **Disponibilité** : > 99.9% uptime Cloud Functions
+- **Économie** : < 50 appels API/mois (vs 1000 limite)
+
+#### **Monitoring et Alertes :**
+```javascript
+// Métriques à surveiller
+{
+  apiCallsPerMonth: number,     // < 1000 (alerte à 800)
+  cachehitRatio: percentage,    // > 95% (alerte si < 90%)
+  averageLatency: ms,          // < 500ms
+  errorRate: percentage,       // < 1%
+  dailyActiveUsers: number     // Croissance tracking
+}
+```
+
+### ⚠️ Points d'Attention Techniques
+
+1. **Gestion des time zones** : Toutes les timestamps en UTC
+2. **Rate limiting** : Protection contre abus côté Cloud Function
+3. **Compression données** : Optimiser coûts Firestore et bande passante
+4. **Versioning API** : Compatibilité ascendante pour mises à jour
+5. **Logging structuré** : JSON format pour Cloud Monitoring
+6. **Sécurité** : Validation inputs, authentification optional
+
+### 🏁 Résultat Attendu Final
+
+**Avant (Problématique)** :
+- Flutter App → ExchangeRate API directement
+- 1000 requêtes/mois pour TOUS les utilisateurs
+- Clé API exposée côté client
+
+**Après (Solution Firebase)** :
+- Flutter App → Firebase Cloud Function → ExchangeRate API
+- 1000 requêtes/mois pour Cloud Function uniquement
+- 2M requêtes/mois vers Cloud Function (utilisateurs)
+- Cache intelligent double niveau
+- Clé API sécurisée côté serveur
+- Support de dizaines de milliers d'utilisateurs
+
+### 🔄 Mises à Jour et Corrections Importantes
+
+#### **Correction Cloud Scheduler - onSchedule → onRequest**
+
+**Problème identifié** : Firebase ne permet pas de changer le type d'une fonction existante (de `onSchedule` vers `onRequest`).
+
+**Solution appliquée** :
+```typescript
+// AVANT (Problématique) : onSchedule + Cloud Scheduler externe = Permission denied
+export const updateExchangeRatesCache = onSchedule({
+  schedule: "30 0 * * *", // Cron interne Firebase
+}, async (event) => { ... });
+
+// APRÈS (Fonctionnel) : onRequest + Cloud Scheduler externe = ✅
+export const updateExchangeRatesCacheHTTP = onRequest({
+  maxInstances: 1,
+  secrets: [exchangeRateApiKey.name],
+}, async (req, res) => {
+  // Vérification sécurité : GoogleCloudScheduler User-Agent
+  if (!userAgent.includes('GoogleCloudScheduler')) {
+    return res.status(403).json({ error: 'Unauthorized' });
+  }
+  // ... logique mise à jour cache
+});
+```
+
+**Actions nécessaires** :
+1. **Déployer** nouvelle fonction : `updateExchangeRatesCacheHTTP`
+2. **Supprimer** ancienne fonction : `firebase functions:delete updateExchangeRatesCache`
+3. **Mettre à jour** URL Cloud Scheduler :
+   ```
+   https://europe-west6-exchange-rate-fetcher-app.cloudfunctions.net/updateExchangeRatesCacheHTTP
+   ```
+
+#### **Règles de Sécurité Firestore - Mode Production**
+
+**Problème** : Règles de test expirant le 17 août 2025.
+
+**Solution sécurisée** :
+```javascript
+// Mode Test (DANGEREUX - Expire)
+allow read, write: if request.time < timestamp.date(2025, 8, 17);
+
+// Mode Production (SÉCURISÉ - Permanent)
+match /exchangeRates/{currencyCode} {
+  allow read: if true;        // Cache public
+  allow write: if false;      // Cloud Functions uniquement
+}
+```
+
+**Avantages** :
+- ✅ **Sécurité permanente** : Plus d'expiration à 30 jours
+- ✅ **Accès contrôlé** : Lecture publique, écriture Cloud Functions uniquement
+- ✅ **Principe deny-by-default** : Autres collections interdites par défaut
+
+#### **Optimisation Clés Cache Firestore**
+
+**Problème** : Accumulation historique avec clés `${currency}_${date}`.
+
+**Solution** : Clés fixes par devise `${currency}` :
+```typescript
+// AVANT (Problématique) : Historique croissant
+const docId = `${baseCurrency}_${currentDate}`; // EUR_2025-07-20, EUR_2025-07-21...
+
+// APRÈS (Optimisé) : Clé fixe par devise
+const docId = baseCurrency.toUpperCase(); // EUR, USD, GBP (overwrite automatique)
+```
+
+**Résultat** : Stockage constant (45 devises max) au lieu d'historique croissant.
+
+#### **Logging Professionnel Intégré**
+
+**Implémentation** : Système de logging structuré dans tous les services :
+```dart
+// AppLogger avec catégories visuelles
+[12:34:56.789] 🔥 FirebaseFunction | FirebaseFunctionsService.getExchangeRates() → Firebase success: 168 rates for EUR (cached, 125ms)
+[12:34:56.790] ✅ CacheHit | ExchangeRateLocalDataSource.getExchangeRate() → Found EUR→USD, rate: 1.0924, age: 2.3h
+[12:34:56.791] 🧠 SmartLogic | CurrencyLocaleService.getLocalCurrency() → Detected locale: FR → EUR
+```
+
+**Avantages** :
+- 📊 **Visibilité complète** des opérations Firebase et cache
+- 🐛 **Debug facilité** avec timestamps et contexte détaillé
+- 📈 **Métriques performance** avec durées et statuts
+
+### 📝 Informations de Session Importante
+
+**Contexte technique à retenir** :
+- **App Flutter** : Architecture MVVM avec Riverpod + cache local + logging
+- **Service actuel** : `CurrencyConversionService` avec Firebase Functions primary
+- **API actuelle** : Firebase Cloud Function → ExchangeRate-API (fallback direct)
+- **Limitation critique** : 1000 req/mois max optimisé via cache intelligent
+- **Objectif utilisateurs** : Dizaines de milliers (2M Firebase calls/mois)
+- **Dossier final** : `/firebase-cloud-function/` configuré et déployé
+
+---
+
+---
+
+## 🧠 Étape 13: Gestion Intelligente des Taux de Change
+
+### 📋 Contexte et Fonctionnalités
+
+**Objectif** : Implémenter une gestion intelligente des taux de change au démarrage et lors de la création de comptes, optimisée pour l'expérience utilisateur et l'efficacité réseau.
+
+### 🎯 Fonctionnalités Principales
+
+#### **Cas 1 : Cache Obsolète (Mise à jour Sélective)**
+- **Contexte** : Au démarrage, cache existant mais taux expirés (>24h)
+- **Logique** : 
+  - Analyser les devises de base déjà utilisées (`fromCurrency` uniques)
+  - Mettre à jour uniquement les devises pertinentes pour l'utilisateur
+  - **Timeout intelligent** : Abandon au premier échec (éviter 4×10s = 40s d'attente)
+- **Avantage** : Économise les invocations Firebase et améliore la réactivité
+
+#### **Cas 2 : Cache Vide (Détection Locale)**
+- **Contexte** : Premier lancement ou jamais de connexion internet
+- **Logique** :
+  - Détecter le pays via `PlatformDispatcher.instance.locale.countryCode`
+  - Mapper pays → devise principale (FR→EUR, US→USD, etc.)
+  - Fallback : USD si pays non supporté
+  - **Pas de blocage** : Si échec, afficher message + bouton refresh
+- **Avantage** : Une seule devise pertinente au lieu d'une liste statique
+
+#### **Cas 3 : Création de Compte (Mise à jour Contextuelle)**  
+- **Contexte** : Après création d'un nouveau compte
+- **Logique** :
+  - Vérifier cache pour la devise du compte créé
+  - Si obsolète ou absent : mettre à jour via Firebase Cloud Function
+  - **Non-bloquant** : Échec n'empêche pas la création du compte
+- **Avantage** : Cache prêt pour les conversions futures
+
+### 🔧 Composants Techniques à Implémenter
+
+#### **13A: Service de Détection Locale**
+```dart
+class CurrencyLocaleService {
+  static const Map<String, String> _countryToCurrency = {
+    'FR': 'EUR', 'DE': 'EUR', 'IT': 'EUR', 'ES': 'EUR',
+    'US': 'USD', 'CA': 'CAD', 'AU': 'AUD', 'GB': 'GBP',
+    'JP': 'JPY', 'CN': 'CNY', 'CH': 'CHF',
+    // ... mapping complet
+  };
+  
+  String getLocalCurrency() => _countryToCurrency[
+    PlatformDispatcher.instance.locale.countryCode
+  ] ?? 'USD';
+}
+```
+
+#### **13B: Service de Cache Intelligent**
+```dart
+class SmartExchangeRateService {
+  Future<List<String>> getExpiredBaseCurrencies();
+  Future<void> updateExpiredRatesWithTimeout();
+  Future<void> ensureCurrencyAvailable(String currency);
+}
+```
+
+#### **13C: Modifications AppViewModel**
+- Étape 4.1 : Détection cache vide vs obsolète
+- Étape 4.2 : Appel service approprié avec timeout
+- Étape 4.3 : Gestion d'erreurs gracieuse
+
+#### **13D: Modifications AccountViewModel**
+- Hook après création de compte
+- Vérification cache pour devise du compte
+- Mise à jour asynchrone en arrière-plan
+
+### 🚦 Stratégies de Timeout et Performance
+
+#### **Timeout Intelligent** 
+- **Parallélisation limitée** : Max 3 devises simultanément
+- **Timeout global** : 10 secondes maximum
+- **Abandon progressif** : Premier échec → arrêt immédiat
+- **Retry arrière-plan** : Nouvelle tentative discrète 30s plus tard
+
+#### **Indicateurs Visuels**
+- Âge des taux : "Mis à jour il y a 2h"
+- État de synchronisation : "Synchronisation..." / "Hors ligne"
+- Bouton refresh manuel en cas d'échec
+
+### ✅ Avantages de l'Approche
+
+1. **UX Optimisée** : Pas d'attente excessive au démarrage
+2. **Économie Firebase** : Seulement les devises nécessaires 
+3. **Personnalisation** : Basé sur historique utilisateur et géolocalisation
+4. **Robustesse** : Fonctionne même sans connexion (cache obsolète)
+5. **Performance** : Timeout intelligent évite les blocages
+
+### Étape 14: Documentation Technique Complète ✅
+
+#### 14A: Rédaction Documentation Technique Professionnelle
+- [x] **14A.1** Analyse complète du code source et architecture
+  - [x] **14A.1a** Analyse de l'architecture MVVM avec Riverpod
+  - [x] **14A.1b** Étude des 36 devises supportées et conversion automatique
+  - [x] **14A.1c** Documentation du système de cache multi-niveaux
+  - [x] **14A.1d** Analyse des Firebase Cloud Functions
+- [x] **14A.2** Rédaction des 10 sections principales (validation des 9 compétences)
+  - [x] **14A.2a** Section 1 - Présentation générale du projet
+  - [x] **14A.2b** Section 2 - Architecture logicielle (Compétence 2.1)
+  - [x] **14A.2c** Section 3 - Environnement de développement (Compétence 1.1)
+  - [x] **14A.2d** Section 4 - Intégration continue (Compétence 1.2)
+  - [x] **14A.2e** Section 5 - Stratégie de tests (Compétence 2.2)
+  - [x] **14A.2f** Section 6 - Sécurité et accessibilité (Compétence 2.3)
+  - [x] **14A.2g** Section 7 - Gestion des versions (Compétence 2.4)
+  - [x] **14A.2h** Section 8 - Cahier de recettes (Compétence 3.1)
+  - [x] **14A.2i** Section 9 - Gestion des anomalies (Compétence 3.2)
+  - [x] **14A.2j** Section 10 - Documentation d'exploitation (Compétence 4.1)
+
+#### 14B: Finalisation avec Annexes Techniques et Exemples Concrets
+- [x] **14B.1** Annexe A - Configuration Firebase Cloud Functions complète
+  - [x] **14B.1a** Code source de la fonction de conversion de devises
+  - [x] **14B.1b** Scripts de déploiement et configuration
+- [x] **14B.2** Annexe B - Pipeline CI/CD GitHub Actions détaillé
+  - [x] **14B.2a** Workflow complet de validation et tests
+  - [x] **14B.2b** Jobs de build Android/iOS et déploiement progressif
+- [x] **14B.3** Annexe C - Patterns d'architecture avec exemples de code
+  - [x] **14B.3a** Pattern Repository avec cache et exemples concrets
+  - [x] **14B.3b** Pattern ViewModel avec Riverpod et gestion d'état
+- [x] **14B.4** Annexe D - Configuration des outils de développement
+  - [x] **14B.4a** Configuration VS Code optimisée pour Flutter
+  - [x] **14B.4b** Scripts de développement et automatisation
+
+#### 14C: Relecture Finale et Mise en Forme Professionnelle
+- [x] **14C.1** Ajout page de couverture avec métadonnées complètes
+- [x] **14C.2** Table des matières détaillée avec liens d'ancrage
+- [x] **14C.3** Validation de la couverture des 9 compétences requises
+- [x] **14C.4** Ajout des références techniques et historique des versions
+- [x] **14C.5** Finalisation du document - 23 pages - Prêt pour évaluation mentor
+
+*Dernière mise à jour : Après étape 14 - DOCUMENTATION TECHNIQUE COMPLÈTE ! 📚*
+*Statut : Architecture MVVM + Firebase + Documentation 23 pages finalisée*
+*Prochaine étape : Évaluation par le mentor - Toutes compétences validées*

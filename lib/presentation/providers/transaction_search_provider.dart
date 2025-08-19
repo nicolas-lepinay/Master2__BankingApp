@@ -1,12 +1,11 @@
-import 'package:flutter/cupertino.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:bankapp/data/database/database.dart';
 
 // État de recherche
 class TransactionSearchState {
   final String amountQuery;
   final String keywordQuery;
-  final List<TransactionWithBalance> filteredTransactions;
+  final List<domain.TransactionWithBalance> filteredTransactions;
   final bool isSearchActive;
 
   TransactionSearchState({
@@ -19,7 +18,7 @@ class TransactionSearchState {
   TransactionSearchState copyWith({
     String? amountQuery,
     String? keywordQuery,
-    List<TransactionWithBalance>? filteredTransactions,
+    List<domain.TransactionWithBalance>? filteredTransactions,
     bool? isSearchActive,
   }) {
     return TransactionSearchState(
@@ -35,10 +34,10 @@ class TransactionSearchState {
 class TransactionSearchNotifier extends StateNotifier<TransactionSearchState> {
   TransactionSearchNotifier() : super(TransactionSearchState());
 
-  List<TransactionWithBalance> _originalTransactions = [];
+  List<domain.TransactionWithBalance> _originalTransactions = [];
 
   // Initialiser avec la liste complète des transactions
-  void setOriginalTransactions(List<TransactionWithBalance> transactions) {
+  void setOriginalTransactions(List<domain.TransactionWithBalance> transactions) {
     _originalTransactions = transactions;
     if (!state.isSearchActive) {
       state = state.copyWith(filteredTransactions: transactions);
@@ -80,7 +79,7 @@ class TransactionSearchNotifier extends StateNotifier<TransactionSearchState> {
     }
 
     // Filtrer les transactions
-    List<TransactionWithBalance> filteredTransactions = _originalTransactions;
+    List<domain.TransactionWithBalance> filteredTransactions = _originalTransactions;
 
     // Filtrage par montant
     if (amountQuery.isNotEmpty) {
@@ -102,8 +101,8 @@ class TransactionSearchNotifier extends StateNotifier<TransactionSearchState> {
   }
 
   // Filtrage par montant avec logique spécifique
-  List<TransactionWithBalance> _filterByAmount(
-    List<TransactionWithBalance> transactions,
+  List<domain.TransactionWithBalance> _filterByAmount(
+    List<domain.TransactionWithBalance> transactions,
     String amountQuery,
   ) {
     // Remplacer les virgules par des points
@@ -134,8 +133,8 @@ class TransactionSearchNotifier extends StateNotifier<TransactionSearchState> {
   }
 
   // Filtrage par mot-clé dans plusieurs champs
-  List<TransactionWithBalance> _filterByKeyword(
-    List<TransactionWithBalance> transactions,
+  List<domain.TransactionWithBalance> _filterByKeyword(
+    List<domain.TransactionWithBalance> transactions,
     String keywordQuery,
   ) {
     return transactions.where((transactionWithBalance) {
@@ -151,12 +150,16 @@ class TransactionSearchNotifier extends StateNotifier<TransactionSearchState> {
         return true;
       }
 
-      // TODO: Recherche dans le nom du tiers (counterparty)
-      // Note: Il faudrait récupérer les counterparties depuis la base de données
-      // pour avoir accès au nom. Pour l'instant, on se concentre sur title et comment.
+      // Recherche dans le nom du counterparty (MVVM - données déjà disponibles)
+      if (transactionWithBalance.counterparty?.name.toLowerCase().contains(keywordQuery) == true) {
+        return true;
+      }
 
-      // TODO: Recherche dans les catégories
-      // Note: Même chose pour les catégories, il faudrait les récupérer depuis la base.
+      // Recherche dans les catégories (MVVM - données déjà disponibles)
+      if (transactionWithBalance.categories.any((category) => 
+          category.label.toLowerCase().contains(keywordQuery))) {
+        return true;
+      }
 
       return false;
     }).toList();

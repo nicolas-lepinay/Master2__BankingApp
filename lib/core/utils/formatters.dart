@@ -1,7 +1,8 @@
-import 'package:intl/intl.dart';
-import 'package:flutter/widgets.dart';
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
+import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 class AppFormatters {
   // Helper method to get proper locale string from Locale
@@ -95,44 +96,24 @@ class AppFormatters {
       final formattedNumber = formatter.format(amount.abs());
 
       switch (languageCode) {
+        // English: $10.50, £15.75
+        // Chinese: ¥10.50, $15.75
         case 'en':
-          // English: $10.50, £15.75
+        case 'zh':
           return amount >= 0
               ? '$symbol$formattedNumber'
               : '-$symbol$formattedNumber';
 
         case 'fr':
-          // French: 10,50€, 15,75€
+          // French: 10,50€, 15,75$
           return amount >= 0
               ? '$formattedNumber$symbol'
               : '-$formattedNumber$symbol';
 
-        case 'es':
-          // Spanish: 10,50€, $15,75
-          if (currency == 'EUR') {
-            return amount >= 0
-                ? '$formattedNumber$symbol'
-                : '-$formattedNumber$symbol';
-          } else {
-            return amount >= 0
-                ? '$symbol$formattedNumber'
-                : '-$symbol$formattedNumber';
-          }
-
-        case 'it':
-          // Italian: 10,50€, $15,75
-          if (currency == 'EUR') {
-            return amount >= 0
-                ? '$formattedNumber$symbol'
-                : '-$formattedNumber$symbol';
-          } else {
-            return amount >= 0
-                ? '$symbol$formattedNumber'
-                : '-$symbol$formattedNumber';
-          }
-
         case 'de':
-          // German: 10,50€, $15,75
+        case 'it':
+        case 'es':
+          // Spanish, Italian, German: 10,50€, $15,75
           if (currency == 'EUR') {
             return amount >= 0
                 ? '$formattedNumber$symbol'
@@ -188,12 +169,6 @@ class AppFormatters {
                 ? '$symbol$formattedNumber'
                 : '-$symbol$formattedNumber';
           }
-
-        case 'zh':
-          // Chinese: ¥10.50, $15.75
-          return amount >= 0
-              ? '$symbol$formattedNumber'
-              : '-$symbol$formattedNumber';
 
         case 'ar':
           // Arabic: 10.50 ر.س, $15.75
@@ -638,27 +613,29 @@ class AppFormatters {
   }
 
   // Transaction type and status helpers with localization
-  static String getTransactionTypeLabel(String type, BuildContext context) {
+  static String getTransactionTypeLabel(
+    domain.TransactionType type,
+    BuildContext context,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     switch (type) {
-      case AppConstants.transactionTypeDebit:
-        return l10n.debit;
-      case AppConstants.transactionTypeCredit:
-        return l10n.credit;
-      default:
-        return type;
+      case domain.TransactionType.expense:
+        return l10n.expense;
+      case domain.TransactionType.income:
+        return l10n.income;
     }
   }
 
-  static String getTransactionStatusLabel(int status, BuildContext context) {
+  static String getTransactionStatusLabel(
+    domain.TransactionStatus status,
+    BuildContext context,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     switch (status) {
-      case AppConstants.transactionStatusPending:
+      case domain.TransactionStatus.pending:
         return l10n.pending;
-      case AppConstants.transactionStatusConfirmed:
+      case domain.TransactionStatus.completed:
         return l10n.confirmed;
-      default:
-        return l10n.unknown;
     }
   }
 }

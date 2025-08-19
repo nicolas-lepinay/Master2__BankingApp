@@ -1,15 +1,33 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/core/services/user_preferences_service.dart';
 import 'package:bankapp/core/theme/app_theme.dart';
+import 'package:bankapp/core/utils/app_logger.dart';
+import 'package:bankapp/presentation/providers/settings_provider.dart';
 import 'package:bankapp/presentation/providers/theme_provider.dart'
     as theme_provider;
-import 'package:bankapp/presentation/providers/settings_provider.dart';
 import 'package:bankapp/presentation/screens/splash_screen.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialiser les variables d'environnement
+  await dotenv.load(fileName: ".env");
+
+  // Initialiser les préférences utilisateur au démarrage
+  await UserPreferencesService.instance.init();
+
+  // Test de logging au démarrage
+  AppLogger.info(
+    'MainApp',
+    'main',
+    '🚀 Application starting with logging system',
+  );
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -49,7 +67,7 @@ class MyApp extends ConsumerWidget {
           // Disable debug banner
           debugShowCheckedModeBanner: false,
 
-          // Home screen
+          // First screen launched
           home: const SplashScreen(),
         );
       },
