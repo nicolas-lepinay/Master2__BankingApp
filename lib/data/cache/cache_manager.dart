@@ -160,9 +160,8 @@ class CacheManager {
       double currentBalance = account.initialBalance;
 
       for (final transaction in transactions) {
-        // Calculer le nouveau solde en utilisant le montant converti si disponible
-        final effectiveAmount =
-            transaction.amountBeforeConversion ?? transaction.amount;
+        // NOUVELLE SÉMANTIQUE : amount est toujours dans la devise du compte
+        final effectiveAmount = transaction.amount;
         final signedAmount = transaction.type == TransactionType.income
             ? effectiveAmount
             : -effectiveAmount;

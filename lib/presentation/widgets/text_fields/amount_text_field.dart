@@ -102,10 +102,9 @@ class _AmountTextFieldState extends State<AmountTextField> {
         if (isSymbolLeft) ...[
           Text(
             currencySymbol,
-            style: TextStyle(
+            style: AppTextStyles.h1.copyWith(
               fontSize: 44.sp,
               fontWeight: FontWeight.w600,
-              fontFamily: AppTextStyles.robotoFontFamily,
               color: widget.gradient != null
                   ? widget.gradient!.colors.first
                   : widget.textColor,
@@ -166,10 +165,9 @@ class _AmountTextFieldState extends State<AmountTextField> {
           SizedBox(width: 10.w),
           Text(
             currencySymbol,
-            style: TextStyle(
+            style: AppTextStyles.h1.copyWith(
               fontSize: 44.sp,
               fontWeight: FontWeight.w600,
-              fontFamily: AppTextStyles.robotoFontFamily,
               color: widget.gradient != null
                   ? widget.gradient!.colors.last
                   : widget.textColor,

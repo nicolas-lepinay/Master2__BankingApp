@@ -15,6 +15,7 @@ class AppTextStyles {
   // Welcome message avec Pacifico
   static TextStyle welcomeMessage = TextStyle(
     fontFamily: pacificoFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 20.sp,
     fontWeight: FontWeight.normal,
     color: AppColors.textDark100,
@@ -23,6 +24,7 @@ class AppTextStyles {
   // Card account name avec Outfit
   static TextStyle cardAccountName = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 18.sp,
     fontWeight: FontWeight.w300,
     color: AppColors.textLight100,
@@ -36,6 +38,7 @@ class AppTextStyles {
   // Card balance label
   static TextStyle cardBalanceLabel = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 10.sp,
     fontWeight: FontWeight.w500,
     color: AppColors.textLight100,
@@ -45,6 +48,7 @@ class AppTextStyles {
   // Card balance amount avec Overpass Mono
   static TextStyle cardBalanceAmount = TextStyle(
     fontFamily: overpassMonoFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 26.sp,
     fontWeight: FontWeight.bold,
     color: AppColors.textLight100,
@@ -58,6 +62,7 @@ class AppTextStyles {
   // Card balance real amount (smaller)
   static TextStyle cardBalanceRealAmount = TextStyle(
     fontFamily: overpassMonoFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 20.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.textLight100,
@@ -71,6 +76,7 @@ class AppTextStyles {
   // Section headers avec Playfair
   static TextStyle sectionHeader = TextStyle(
     fontFamily: playfairFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 24.sp,
     fontWeight: FontWeight.w400,
   );
@@ -78,6 +84,7 @@ class AppTextStyles {
   // Section headers medium
   static TextStyle sectionHeaderMedium = TextStyle(
     fontFamily: playfairFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 20.sp,
     fontWeight: FontWeight.w600,
   );
@@ -85,6 +92,7 @@ class AppTextStyles {
   // Transaction amounts (format spécial sans décimales si entier)
   static TextStyle transactionAmountLarge = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 18.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurfaceLight,
@@ -92,6 +100,7 @@ class AppTextStyles {
 
   static TextStyle transactionAmountMedium = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 16.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurfaceLight,
@@ -99,7 +108,8 @@ class AppTextStyles {
 
   // Transaction amount for perspective list
   static TextStyle transactionAmountPerspective = TextStyle(
-    fontFamily: robotoFontFamily,
+    fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 18.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurfaceLight,
@@ -108,6 +118,7 @@ class AppTextStyles {
   // Transaction name/counterparty in perspective list
   static TextStyle transactionNamePerspective = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 16.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.textDark50,
@@ -116,6 +127,7 @@ class AppTextStyles {
   // Transaction category in perspective list
   static TextStyle transactionCategoryPerspective = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 12.sp,
     fontWeight: FontWeight.normal,
     color: AppColors.textDark25,
@@ -124,6 +136,7 @@ class AppTextStyles {
   // Followed transactions styles
   static TextStyle followedTransactionName = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 16.sp,
     fontWeight: FontWeight.w500,
     color: AppColors.textLight100,
@@ -131,12 +144,14 @@ class AppTextStyles {
 
   static TextStyle followedTransactionDate = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 12.sp,
     fontWeight: FontWeight.normal,
   );
 
   static TextStyle followedTransactionAmount = TextStyle(
-    fontFamily: robotoFontFamily,
+    fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 18.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.textLight100,
@@ -144,6 +159,7 @@ class AppTextStyles {
 
   static TextStyle h1 = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 32.sp,
     fontWeight: FontWeight.w500,
     height: 1.2,
@@ -152,6 +168,7 @@ class AppTextStyles {
 
   static TextStyle h2 = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 28.sp,
     fontWeight: FontWeight.w500,
     height: 1.2,
@@ -160,6 +177,7 @@ class AppTextStyles {
 
   static TextStyle h3 = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 24.sp,
     fontWeight: FontWeight.w500,
     height: 1.3,
@@ -167,6 +185,7 @@ class AppTextStyles {
 
   static TextStyle h4 = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 20.sp,
     fontWeight: FontWeight.w500,
     height: 1.3,
@@ -174,6 +193,7 @@ class AppTextStyles {
 
   static TextStyle h5 = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 18.sp,
     fontWeight: FontWeight.w500,
     height: 1.4,
@@ -181,6 +201,7 @@ class AppTextStyles {
 
   static TextStyle h6 = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 16.sp,
     fontWeight: FontWeight.w500,
     height: 1.4,
@@ -188,6 +209,7 @@ class AppTextStyles {
 
   static TextStyle bodyLarge = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 16.sp,
     fontWeight: FontWeight.normal,
     height: 1.5,
@@ -195,6 +217,7 @@ class AppTextStyles {
 
   static TextStyle bodyMedium = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 14.sp,
     fontWeight: FontWeight.normal,
     height: 1.5,
@@ -202,6 +225,7 @@ class AppTextStyles {
 
   static TextStyle bodySmall = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 12.sp,
     fontWeight: FontWeight.normal,
     height: 1.4,
@@ -210,6 +234,7 @@ class AppTextStyles {
   // Styles spécialisés V1 (mis à jour avec nouvelles polices)
   static TextStyle accountName = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 18.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurfaceDark,
@@ -217,6 +242,7 @@ class AppTextStyles {
 
   static TextStyle accountBalance = TextStyle(
     fontFamily: overpassMonoFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 32.sp,
     fontWeight: FontWeight.bold,
     color: AppColors.onSurfaceDark,
@@ -224,30 +250,35 @@ class AppTextStyles {
 
   static TextStyle transactionTitle = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 16.sp,
     fontWeight: FontWeight.w500,
   );
 
   static TextStyle transactionDescription = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 14.sp,
     fontWeight: FontWeight.normal,
   );
 
   static TextStyle dateHeader = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 14.sp,
     fontWeight: FontWeight.w600,
   );
 
   static const TextStyle buttonText = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 23,
     fontWeight: FontWeight.w400,
   );
 
   static TextStyle buttonTextSmall = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 16.sp,
     fontWeight: FontWeight.w300,
   );
@@ -255,6 +286,7 @@ class AppTextStyles {
   // Search bar placeholder text
   static TextStyle searchPlaceholder = TextStyle(
     fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
     fontSize: 14.sp,
     fontWeight: FontWeight.normal,
     letterSpacing: 1.4,

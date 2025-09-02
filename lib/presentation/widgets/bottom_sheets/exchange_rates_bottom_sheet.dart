@@ -249,16 +249,14 @@ class _ExchangeRatesBottomSheetState
               width: 52.r,
               height: 52.r,
               decoration: BoxDecoration(
-                color: appTheme.text2!.withValues(alpha: 0.1),
+                color: appTheme.text2!.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(16.r),
               ),
               alignment: Alignment.center,
               child: Text(
                 currency.symbol,
-                style: TextStyle(
+                style: AppTextStyles.h6.copyWith(
                   fontSize: currency.symbol.length < 3 ? 22.sp : 16.sp,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: AppTextStyles.robotoFontFamily,
                   color: appTheme.textInvert,
                 ),
               ),
@@ -293,7 +291,6 @@ class _ExchangeRatesBottomSheetState
                         : '1 ${widget.baseCurrency} = ${AppFormatters.formatAmount(exchangeRate, currencyCode, showSign: false, context: context)}',
                     style: AppTextStyles.bodyLarge.copyWith(
                       color: appTheme.text4,
-                      fontFamily: AppTextStyles.robotoFontFamily,
                     ),
                   ),
                 ],

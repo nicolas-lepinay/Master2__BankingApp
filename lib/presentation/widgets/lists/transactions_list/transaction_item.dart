@@ -102,7 +102,6 @@ class TransactionItem extends StatelessWidget {
                   style: AppTextStyles.h4.copyWith(
                     color: appTheme.text1,
                     //color: isDebit ? appTheme.text1 : appTheme.textCredit,
-                    fontFamily: AppTextStyles.robotoFontFamily,
                   ),
                 ),
 
@@ -114,7 +113,6 @@ class TransactionItem extends StatelessWidget {
                     context,
                   ),
                   style: AppTextStyles.bodyMedium.copyWith(
-                    fontFamily: AppTextStyles.robotoFontFamily,
                     fontWeight: FontWeight.w500,
                     color:
                         transactionWithBalance.balanceAfter.balance.amount < 0

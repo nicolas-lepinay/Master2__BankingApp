@@ -3,6 +3,7 @@ import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/domain/entities/account.dart';
+import 'package:bankapp/domain/entities/counterparty.dart';
 import 'package:bankapp/domain/entities/transaction.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/widgets/buttons/floating_action_button_custom.dart';
@@ -56,6 +57,7 @@ class _AddTransactionBottomSheetMvvmV2State
   String _transactionTitle = '';
   String _transactionComment = '';
   int? _selectedCounterpartyId;
+  String? _selectedCounterpartyName;
   List<int> _selectedCategoryIds = [];
   TransactionStatus _selectedStatus = TransactionStatus.completed;
 
@@ -76,10 +78,12 @@ class _AddTransactionBottomSheetMvvmV2State
       _selectedAccount != null && _targetCurrency != _selectedAccount!.currency;
 
   String get _finalAmountForTransaction {
-    if (_hasConversion && _convertedAmount.isNotEmpty) {
-      return _convertedAmount; // Montant converti = amount dans nouvelle sémantique
+    if (_hasConversion) {
+      // Si conversion nécessaire, OBLIGATOIRE d'avoir le montant converti
+      return _convertedAmount.isNotEmpty ? _convertedAmount : '';
     } else {
-      return _transactionAmount; // Montant direct = amount dans nouvelle sémantique
+      // Si pas de conversion, utiliser le montant direct
+      return _transactionAmount;
     }
   }
 
@@ -228,51 +232,47 @@ class _AddTransactionBottomSheetMvvmV2State
     }
   }
 
-  void _validateTransaction() {
+  Future<void> _validateTransaction() async {
     if (!_isFormValid) return;
 
     // Créer transaction avec nouvelle sémantique
     final finalAmount = double.tryParse(_finalAmountForTransaction);
     if (finalAmount == null) return;
 
-    final newTransaction = Transaction(
-      id: 0, // Sera assigné par la DB
-      accountId: _selectedAccount!.id,
-      type: _transactionType,
-      // NOUVELLE SÉMANTIQUE : amount est toujours dans devise du compte
-      amount: finalAmount,
-      currency: _selectedAccount!.currency, // Toujours devise du compte
-      // Si conversion : garder montant et devise originaux
-      amountBeforeConversion: _hasConversion
-          ? double.tryParse(_transactionAmount)
-          : null,
-      currencyBeforeConversion: _hasConversion ? _targetCurrency : null,
-      // Champs de la page 2 (optionnels)
-      date:
-          _selectedDate, // Utiliser la date sélectionnée ou DateTime.now() par défaut
-      title: _transactionTitle.isEmpty ? null : _transactionTitle,
-      comment: _transactionComment.isEmpty ? null : _transactionComment,
-      counterpartyId: _selectedCounterpartyId,
-      category1Id: _selectedCategoryIds.isNotEmpty
-          ? _selectedCategoryIds[0]
-          : null,
-      category2Id: _selectedCategoryIds.length > 1
-          ? _selectedCategoryIds[1]
-          : null,
-      category3Id: _selectedCategoryIds.length > 2
-          ? _selectedCategoryIds[2]
-          : null,
-      category4Id: _selectedCategoryIds.length > 3
-          ? _selectedCategoryIds[3]
-          : null,
-      status: _selectedStatus,
-    );
+    try {
+      // Utiliser le TransactionViewModel comme dans l'ancienne version pour une invalidation complète
+      final transactionViewModel = ref.read(
+        transactionViewModelProvider.notifier,
+      );
 
-    // TODO: Appeler le repository pour créer la transaction
-    // final transactionRepository = ref.read(transactionRepositoryProvider);
-    // await transactionRepository.createTransaction(newTransaction);
+      await transactionViewModel.createTransaction(
+        accountId: _selectedAccount!.id,
+        type: _transactionType,
+        amount: finalAmount,
+        currency: _selectedAccount!.currency,
+        date: _selectedDate,
+        title: _transactionTitle.isEmpty ? null : _transactionTitle,
+        comment: _transactionComment.isEmpty ? null : _transactionComment,
+        counterpartyId: _selectedCounterpartyId,
+        categoryIds: _selectedCategoryIds,
+        status: _selectedStatus,
+        amountBeforeConversion: _hasConversion
+            ? double.tryParse(_transactionAmount)
+            : null,
+        currencyBeforeConversion: _hasConversion ? _targetCurrency : null,
+      );
 
-    Navigator.of(context).pop();
+      // Fermer la bottomsheet après sauvegarde réussie
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      // TODO: Afficher un message d'erreur à l'utilisateur
+      // Pour l'instant, fermer quand même la bottomsheet
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    }
   }
 
   @override
@@ -697,8 +697,7 @@ class _AddTransactionBottomSheetMvvmV2State
         SizedBox(height: 8.h),
         GestureDetector(
           onTap: () {
-            // TODO: Ouvrir sélecteur de counterparty
-            // showCounterpartySelector();
+            _showCounterpartySelector();
           },
           child: Container(
             width: double.infinity,
@@ -715,9 +714,7 @@ class _AddTransactionBottomSheetMvvmV2State
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  _selectedCounterpartyId != null
-                      ? 'Counterparty sélectionnée' // TODO: Récupérer le nom réel
-                      : 'Sélectionner une contrepartie',
+                  _selectedCounterpartyName ?? 'Sélectionner une contrepartie',
                   style: TextStyle(
                     fontSize: 16.sp,
                     color: _selectedCounterpartyId != null
@@ -872,6 +869,316 @@ class _AddTransactionBottomSheetMvvmV2State
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showCounterpartySelector() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.0,
+        maxChildSize: 0.8,
+        builder: (context, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: Theme.of(
+              context,
+            ).extension<AppColorsExtended>()!.background2,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Handle pour drag
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                height: 4,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).extension<AppColorsExtended>()!.text2,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+
+              // Header
+              Padding(
+                padding: EdgeInsets.all(20.w),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Sélectionner une contrepartie',
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(
+                          context,
+                        ).extension<AppColorsExtended>()!.text1,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close),
+                      color: Theme.of(
+                        context,
+                      ).extension<AppColorsExtended>()!.text2,
+                    ),
+                  ],
+                ),
+              ),
+
+              // Liste des counterparties
+              Expanded(
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final counterpartyRepository = ref.read(
+                      counterpartyRepositoryProvider,
+                    );
+
+                    return FutureBuilder<List<Counterparty>>(
+                      future: counterpartyRepository.getAllCounterparties(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              'Erreur de chargement',
+                              style: TextStyle(
+                                color: Theme.of(
+                                  context,
+                                ).extension<AppColorsExtended>()!.text3,
+                              ),
+                            ),
+                          );
+                        }
+
+                        final counterparties = snapshot.data ?? [];
+
+                        return ListView.builder(
+                          controller: scrollController,
+                          padding: EdgeInsets.symmetric(horizontal: 20.w),
+                          itemCount:
+                              counterparties.length +
+                              1, // +1 pour "Ajouter nouveau"
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              // Option "Ajouter une nouvelle contrepartie"
+                              return _buildAddNewCounterpartyTile();
+                            }
+
+                            final counterparty = counterparties[index - 1];
+                            return _buildCounterpartyTile(counterparty);
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddNewCounterpartyTile() {
+    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 8.h),
+      child: ListTile(
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        tileColor: appTheme.buttonBackground1!.withValues(alpha: 0.1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        leading: Container(
+          padding: EdgeInsets.all(8.w),
+          decoration: BoxDecoration(
+            color: appTheme.buttonBackground1,
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Icon(Icons.add, size: 20.sp, color: Colors.white),
+        ),
+        title: Text(
+          'Ajouter une nouvelle contrepartie',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: appTheme.text1,
+          ),
+        ),
+        subtitle: Text(
+          'Créer une nouvelle contrepartie',
+          style: TextStyle(fontSize: 14.sp, color: appTheme.text3),
+        ),
+        onTap: () {
+          _showAddCounterpartyDialog();
+        },
+      ),
+    );
+  }
+
+  Widget _buildCounterpartyTile(Counterparty counterparty) {
+    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+    final isSelected = _selectedCounterpartyId == counterparty.id;
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 8.h),
+      child: ListTile(
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        tileColor: isSelected
+            ? appTheme.buttonBackground1!.withValues(alpha: 0.2)
+            : appTheme.background3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          side: isSelected
+              ? BorderSide(color: appTheme.buttonBackground1!, width: 2)
+              : BorderSide.none,
+        ),
+        leading: Container(
+          padding: EdgeInsets.all(8.w),
+          decoration: BoxDecoration(
+            color: appTheme.buttonBackgroundDisabled!.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Icon(Icons.person, size: 20.sp, color: appTheme.text2),
+        ),
+        title: Text(
+          counterparty.name,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: appTheme.text1,
+          ),
+        ),
+        trailing: isSelected
+            ? Icon(
+                Icons.check_circle,
+                color: appTheme.buttonBackground1,
+                size: 24.sp,
+              )
+            : null,
+        onTap: () {
+          setState(() {
+            _selectedCounterpartyId = counterparty.id;
+            _selectedCounterpartyName = counterparty.name;
+          });
+          Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
+
+  void _showAddCounterpartyDialog() {
+    final textController = TextEditingController();
+    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: appTheme.background2,
+        title: Text(
+          'Ajouter une contrepartie',
+          style: TextStyle(
+            color: appTheme.text1,
+            fontSize: 18.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: TextField(
+          controller: textController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: 'Nom de la contrepartie',
+            hintStyle: TextStyle(color: appTheme.text3),
+            filled: true,
+            fillColor: appTheme.buttonBackgroundDisabled!.withValues(
+              alpha: 0.1,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(
+                color: appTheme.text5!.withValues(alpha: 0.3),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(
+                color: appTheme.text5!.withValues(alpha: 0.3),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(
+                color: appTheme.buttonBackground1!,
+                width: 2,
+              ),
+            ),
+          ),
+          style: TextStyle(color: appTheme.text1),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Annuler', style: TextStyle(color: appTheme.text3)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final name = textController.text.trim();
+              if (name.isNotEmpty) {
+                try {
+                  final counterpartyRepository = ref.read(
+                    counterpartyRepositoryProvider,
+                  );
+                  final counterpartyToCreate = Counterparty(
+                    id: 0, // Sera assigné par la DB
+                    name: name,
+                  );
+                  final newCounterparty = await counterpartyRepository
+                      .createCounterparty(counterpartyToCreate);
+
+                  if (mounted) {
+                    setState(() {
+                      _selectedCounterpartyId = newCounterparty.id;
+                      _selectedCounterpartyName = newCounterparty.name;
+                    });
+
+                    Navigator.of(context).pop(); // Dialog
+                    Navigator.of(context).pop(); // BottomSheet
+                  }
+                } catch (e) {
+                  // TODO: Afficher erreur
+                  if (mounted) {
+                    Navigator.of(context).pop();
+                  }
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: appTheme.buttonBackground1,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+            child: const Text('Ajouter'),
+          ),
+        ],
       ),
     );
   }

@@ -264,11 +264,12 @@ class _TransactionsListState extends State<TransactionsList> {
                 child: Text(
                   _formatNetAmount(dayTotals, dayTransactions),
                   style: AppTextStyles.bodyMedium.copyWith(
-                    fontStyle: FontStyle.italic,
-                    fontFamily: AppTextStyles.robotoFontFamily,
+                    fontFamily: AppTextStyles.overpassMonoFontFamily,
+                    fontWeight: FontWeight.w700,
+                    //fontStyle: FontStyle.italic,
                     color: Theme.of(
                       context,
-                    ).extension<AppColorsExtended>()!.text4,
+                    ).extension<AppColorsExtended>()!.text5,
                   ),
                 ),
               ),
