@@ -16,6 +16,7 @@
   "cancel": "Annuler",
   "addTransaction": "Ajouter une transaction",
   "transactionDetails": "Détails de la transaction",
+  "validateTransaction": "Valider la transaction",
   "amount": "Montant",
   "title": "Titre",
   "comment": "Commentaire",
@@ -147,5 +148,10 @@
   "currencyNotSupported": "Devise non supportée",
   "conversionFailed": "Échec de la conversion",
   "updatingExchangeRates": "Mise à jour des taux de change...",
-  "exchangeRatesUpdated": "Taux de change mis à jour"
+  "exchangeRatesUpdated": "Taux de change mis à jour",
+  "equivalent": "Équivalent",
+  "loadingConversion": "Chargement de la conversion...",
+  "otherCurrencies": "Autres devises",
+  "accountCurrency": "Devise du compte",
+  "baseCurrency": "Devise de base"
 }

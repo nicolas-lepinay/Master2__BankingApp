@@ -294,11 +294,13 @@ class _AddTransactionBottomSheetMVVMState
       builder: (context, ref, child) {
         final counterpartyViewState = ref.watch(counterpartyViewModelProvider);
         final counterparties = counterpartyViewState.counterparties;
-        
+
         // Charger les contreparties si nécessaire (logique cohérente avec edit_transaction_bottom_sheet.dart)
         if (counterparties.isEmpty && !counterpartyViewState.isLoading) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.read(counterpartyViewModelProvider.notifier).loadCounterparties();
+            ref
+                .read(counterpartyViewModelProvider.notifier)
+                .loadCounterparties();
           });
         }
 
@@ -311,9 +313,7 @@ class _AddTransactionBottomSheetMVVMState
               ),
               borderRadius: BorderRadius.circular(12.r),
             ),
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: const Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -346,7 +346,7 @@ class _AddTransactionBottomSheetMVVMState
         }
 
         return DropdownButtonFormField<int>(
-          value: _selectedCounterpartyId,
+          initialValue: _selectedCounterpartyId,
           decoration: InputDecoration(
             labelText: 'Contrepartie (optionnel)',
             border: OutlineInputBorder(
@@ -452,7 +452,7 @@ class _AddTransactionBottomSheetMVVMState
         ),
         SizedBox(height: 8.h),
         DropdownButtonFormField<domain.TransactionStatus>(
-          value: _selectedStatus,
+          initialValue: _selectedStatus,
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
@@ -606,5 +606,4 @@ class _AddTransactionBottomSheetMVVMState
       }
     }
   }
-
 }

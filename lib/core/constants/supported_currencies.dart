@@ -134,7 +134,7 @@ class SupportedCurrencies {
   /// Dollar Australien (Australie)
   static const Currency _aud = Currency(
     code: 'AUD',
-    symbol: 'A\$',
+    symbol: '\$',
     nameKey: 'audCurrencyName',
     countryKey: 'audCountryName',
     decimalPlaces: 2,
@@ -144,7 +144,7 @@ class SupportedCurrencies {
   /// Dollar Canadien (Canada)
   static const Currency _cad = Currency(
     code: 'CAD',
-    symbol: 'C\$',
+    symbol: '\$',
     nameKey: 'cadCurrencyName',
     countryKey: 'cadCountryName',
     decimalPlaces: 2,
@@ -166,7 +166,7 @@ class SupportedCurrencies {
   /// Dollar de Hong Kong (Hong Kong)
   static const Currency _hkd = Currency(
     code: 'HKD',
-    symbol: 'HK\$',
+    symbol: '\$',
     nameKey: 'hkdCurrencyName',
     countryKey: 'hkdCountryName',
     decimalPlaces: 2,
@@ -409,7 +409,7 @@ class SupportedCurrencies {
   /// Dollar Néo-Zélandais (Nouvelle-Zélande)
   static const Currency _nzd = Currency(
     code: 'NZD',
-    symbol: 'NZ\$',
+    symbol: '\$',
     nameKey: 'nzdCurrencyName',
     countryKey: 'nzdCountryName',
     decimalPlaces: 2,

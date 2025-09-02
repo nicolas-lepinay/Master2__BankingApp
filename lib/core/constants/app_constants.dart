@@ -1,26 +1,4 @@
 class AppConstants {
-  // Supported currencies
-  static const List<String> supportedCurrencies = [
-    'EUR',
-    'USD',
-    'GBP',
-    'JPY',
-    'CHF',
-    'CAD',
-    'AUD',
-  ];
-
-  // Currency symbols
-  static const Map<String, String> currencySymbols = {
-    'EUR': '€',
-    'USD': '\$',
-    'GBP': '£',
-    'JPY': '¥',
-    'CHF': 'CHF',
-    'CAD': 'CAD',
-    'AUD': 'AUD',
-  };
-
   // Date formats
   static const String dateFormat = 'dd/MM/yyyy';
   static const String dateTimeFormat = 'dd/MM/yyyy HH:mm';
@@ -41,4 +19,8 @@ class AppConstants {
   static const Duration shortAnimation = Duration(milliseconds: 200);
   static const Duration mediumAnimation = Duration(milliseconds: 300);
   static const Duration longAnimation = Duration(milliseconds: 500);
+
+  // SVG Icons
+  static const String downLeftArrow = 'assets/icons/system/down-left-arrow.svg';
+  static const String convertIcon = 'assets/icons/system/convert.svg';
 }

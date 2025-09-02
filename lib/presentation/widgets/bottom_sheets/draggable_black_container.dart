@@ -2,18 +2,16 @@ import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
-// import 'package:bankapp/data/database/app_database.dart'; // Supprimé avec MVVM
 import 'package:bankapp/domain/entities/entities.dart' as domain;
-import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
 import 'package:bankapp/presentation/providers/transaction_search_provider.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
-import 'package:bankapp/presentation/widgets/add_transaction_bottom_sheet_mvvm.dart';
-import 'package:bankapp/presentation/widgets/dashed_button.dart';
-import 'package:bankapp/presentation/widgets/followed_transactions_carousel.dart';
-import 'package:bankapp/presentation/widgets/full_transactions_bottom_sheet.dart';
-import 'package:bankapp/presentation/widgets/perspective_list_view.dart';
-import 'package:bankapp/presentation/widgets/perspective_transaction_item.dart';
+import 'package:bankapp/presentation/widgets/bottom_sheets/add_transaction_bottom_sheet_mvvm_v2.dart';
+import 'package:bankapp/presentation/widgets/bottom_sheets/full_transactions_bottom_sheet.dart';
+import 'package:bankapp/presentation/widgets/buttons/dashed_button.dart';
+import 'package:bankapp/presentation/widgets/carousels/followed_transactions/followed_transactions_carousel.dart';
+import 'package:bankapp/presentation/widgets/lists/perspective_list/perspective_list_view.dart';
+import 'package:bankapp/presentation/widgets/lists/perspective_list/perspective_transaction_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -188,8 +186,8 @@ class _DraggableBlackContainerState
   }
 
   Widget _buildTransactionsContainer(AppLocalizations l10n) {
-    final selectedCardIndex = ref.watch(selectedCardProvider);
     final accounts = ref.watch(accountsProvider);
+    final selectedAccount = ref.watch(selectedAccountProvider);
 
     // Configuration centralisée de la liste perspective
     const int perspectiveVisualizedItems = 3; // Nombre d'items visibles
@@ -204,10 +202,8 @@ class _DraggableBlackContainerState
       );
     }
 
-    // Récupérer le compte sélectionné
-    final selectedAccount = selectedCardIndex < accounts.length
-        ? accounts[selectedCardIndex]
-        : accounts.first;
+    // Utiliser le compte sélectionné du provider ou fallback sur le premier
+    final accountToUse = selectedAccount ?? accounts.first;
 
     // Récupérer les transactions via TransactionViewModel (MVVM)
     final transactionViewModel = ref.watch(transactionViewModelProvider);
@@ -215,15 +211,15 @@ class _DraggableBlackContainerState
 
     // Vérifier si des transactions sont chargées pour ce compte
     final bool hasTransactionsForAccount =
-        transactionViewModel.selectedAccountId == selectedAccount.id &&
+        transactionViewModel.selectedAccountId == accountToUse.id &&
         transactions.isNotEmpty;
 
     // Charger les transactions si nécessaire
-    if (transactionViewModel.selectedAccountId != selectedAccount.id) {
+    if (transactionViewModel.selectedAccountId != accountToUse.id) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref
             .read(transactionViewModelProvider.notifier)
-            .loadTransactionsAroundToday(selectedAccount.id);
+            .loadTransactionsAroundToday(accountToUse.id);
       });
     }
 
@@ -576,7 +572,7 @@ class _DraggableBlackContainerState
       backgroundColor: Colors.transparent,
       isDismissible: true,
       enableDrag: true,
-      builder: (context) => const AddTransactionBottomSheetMVVM(),
+      builder: (context) => const AddTransactionBottomSheetMvvmV2(),
     ).then((_) {
       // Invalider les providers liés aux transactions après fermeture
       if (mounted) {

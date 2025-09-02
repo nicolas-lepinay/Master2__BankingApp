@@ -60,6 +60,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get transactionDetails => 'Détails de la transaction';
 
   @override
+  String get validateTransaction => 'Valider la transaction';
+
+  @override
   String get amount => 'Montant';
 
   @override
@@ -416,4 +419,19 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get exchangeRatesUpdated => 'Taux de change mis à jour';
+
+  @override
+  String get equivalent => 'Équivalent';
+
+  @override
+  String get loadingConversion => 'Chargement de la conversion...';
+
+  @override
+  String get otherCurrencies => 'Autres devises';
+
+  @override
+  String get accountCurrency => 'Devise du compte';
+
+  @override
+  String get baseCurrency => 'Devise de base';
 }

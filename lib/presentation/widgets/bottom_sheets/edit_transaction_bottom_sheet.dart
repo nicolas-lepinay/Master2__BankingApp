@@ -1,4 +1,5 @@
 import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/constants/supported_currencies.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
@@ -132,7 +133,7 @@ class _EditTransactionBottomSheetState
                   accounts.isEmpty
                       ? const Text('Aucun compte disponible')
                       : DropdownButtonFormField<int>(
-                          value: _selectedAccountId,
+                          initialValue: _selectedAccountId,
                           decoration: const InputDecoration(
                             labelText: 'Compte',
                           ),
@@ -160,22 +161,27 @@ class _EditTransactionBottomSheetState
                   // Tiers (Counterparty)
                   Consumer(
                     builder: (context, ref, child) {
-                      final counterpartyState = ref.watch(counterpartyViewModelProvider);
+                      final counterpartyState = ref.watch(
+                        counterpartyViewModelProvider,
+                      );
                       final counterparties = counterpartyState.counterparties;
-                      
+
                       // Charger les contreparties si nécessaire
-                      if (counterparties.isEmpty && !counterpartyState.isLoading) {
+                      if (counterparties.isEmpty &&
+                          !counterpartyState.isLoading) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                          ref.read(counterpartyViewModelProvider.notifier).loadCounterparties();
+                          ref
+                              .read(counterpartyViewModelProvider.notifier)
+                              .loadCounterparties();
                         });
                       }
-                      
+
                       if (counterpartyState.isLoading) {
                         return const CircularProgressIndicator();
                       }
-                      
+
                       return DropdownButtonFormField<int>(
-                        value: _selectedCounterpartyId,
+                        initialValue: _selectedCounterpartyId,
                         decoration: InputDecoration(
                           labelText: l10n.counterparty,
                           hintText: 'Sélectionnez un tiers',
@@ -206,7 +212,7 @@ class _EditTransactionBottomSheetState
 
                   // Type de transaction
                   DropdownButtonFormField<domain.TransactionType>(
-                    value: _transactionType,
+                    initialValue: _transactionType,
                     decoration: const InputDecoration(labelText: 'Type'),
                     items: [
                       DropdownMenuItem(
@@ -252,8 +258,9 @@ class _EditTransactionBottomSheetState
                     decoration: InputDecoration(
                       labelText: l10n.amount,
                       hintText: '0.00',
-                      suffixText:
-                          AppConstants.currencySymbols[_selectedCurrency],
+                      suffixText: AppFormatters.getCurrencySymbol(
+                        _selectedCurrency,
+                      ),
                     ),
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
@@ -279,11 +286,10 @@ class _EditTransactionBottomSheetState
 
                   // Devise
                   DropdownButtonFormField<String>(
-                    value: _selectedCurrency,
+                    initialValue: _selectedCurrency,
                     decoration: InputDecoration(labelText: l10n.currency),
-                    items: AppConstants.supportedCurrencies.map((currency) {
-                      final symbol =
-                          AppConstants.currencySymbols[currency] ?? currency;
+                    items: SupportedCurrencies.allCodes.map((currency) {
+                      final symbol = AppFormatters.getCurrencySymbol(currency);
                       return DropdownMenuItem(
                         value: currency,
                         child: Text('$currency ($symbol)'),
@@ -324,7 +330,7 @@ class _EditTransactionBottomSheetState
 
                   // Statut
                   DropdownButtonFormField<domain.TransactionStatus>(
-                    value: _status,
+                    initialValue: _status,
                     decoration: InputDecoration(labelText: l10n.status),
                     items: [
                       DropdownMenuItem(

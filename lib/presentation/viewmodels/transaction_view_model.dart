@@ -212,7 +212,7 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
 
       // Invalider les providers d'account summary pour une réactivité automatique
       if (_ref != null) {
-        _ref!.invalidate(accountSummaryByIdProvider);
+        _ref.invalidate(accountSummaryByIdProvider);
       }
 
       // Recharger les transactions
@@ -271,7 +271,7 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
 
       // Invalider les providers d'account summary pour une réactivité automatique
       if (_ref != null) {
-        _ref!.invalidate(accountSummaryByIdProvider);
+        _ref.invalidate(accountSummaryByIdProvider);
       }
 
       // Recharger les transactions
@@ -288,7 +288,7 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
 
       // Invalider les providers d'account summary pour une réactivité automatique
       if (_ref != null) {
-        _ref!.invalidate(accountSummaryByIdProvider);
+        _ref.invalidate(accountSummaryByIdProvider);
       }
 
       // Recharger les transactions si un compte est sélectionné
@@ -504,7 +504,7 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
       if (originalCurrency != accountCurrency) {
         // Utiliser le CurrencyConversionService via le provider
         if (_ref != null) {
-          final conversionService = _ref!.read(
+          final conversionService = _ref.read(
             currencyConversionServiceProvider,
           );
           convertedAmount = await conversionService.convertAmountSafe(

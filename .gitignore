@@ -51,5 +51,10 @@ app.*.map.json
 # Firebase Cloud Function
 /firebase-cloud-function
 
+# Prototype Screenshots
+/screenshots
+
 # Claude README
 _README.md
+CLAUDE.md
+INSTRUCTIONS.md

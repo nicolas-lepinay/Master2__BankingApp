@@ -3,7 +3,7 @@ import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
-import 'package:bankapp/presentation/widgets/transaction_item_mvvm.dart';
+import 'package:bankapp/presentation/widgets/lists/transactions_list/transaction_item_mvvm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -264,6 +264,8 @@ class _TransactionsListMVVMState extends State<TransactionsListMVVM> {
                 child: Text(
                   _formatNetAmount(dayTotals, dayTransactions),
                   style: AppTextStyles.bodyMedium.copyWith(
+                    fontStyle: FontStyle.italic,
+                    fontFamily: AppTextStyles.robotoFontFamily,
                     color: Theme.of(
                       context,
                     ).extension<AppColorsExtended>()!.text4,

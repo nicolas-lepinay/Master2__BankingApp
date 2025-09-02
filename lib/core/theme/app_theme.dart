@@ -84,11 +84,15 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColorsExtended.light.buttonBackground1!,
           foregroundColor: AppColorsExtended.light.buttonForeground1!,
+          disabledBackgroundColor:
+              AppColorsExtended.light.buttonBackgroundDisabled!,
+          disabledForegroundColor:
+              AppColorsExtended.light.buttonForegroundDisabled!,
           textStyle: AppTextStyles.buttonText,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 34, vertical: 20),
         ),
       ),
 
@@ -190,6 +194,10 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColorsExtended.dark.buttonBackground1!,
           foregroundColor: AppColorsExtended.dark.buttonForeground1!,
+          disabledBackgroundColor:
+              AppColorsExtended.dark.buttonBackgroundDisabled!,
+          disabledForegroundColor:
+              AppColorsExtended.dark.buttonForegroundDisabled!,
           textStyle: AppTextStyles.buttonText,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),

@@ -2,7 +2,7 @@ import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/presentation/providers/navigation_provider.dart';
 import 'package:bankapp/presentation/screens/home_screen_mvvm.dart';
 import 'package:bankapp/presentation/screens/settings_screen.dart';
-import 'package:bankapp/presentation/widgets/floating_navbar.dart';
+import 'package:bankapp/presentation/widgets/navbar/floating_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

@@ -196,7 +196,10 @@ class _CardsSwiperWidgetState<T> extends State<CardsSwiperWidget<T>>
 
           // Trigger the callback with the new top card index
           if (widget.onCardChange != null) {
-            widget.onCardChange?.call(widget.cardData.indexOf(_cardData[0]));
+            // Trouver l'index correct dans la liste originale
+            final topCard = _cardData[0];
+            final originalIndex = widget.cardData.indexOf(topCard);
+            widget.onCardChange?.call(originalIndex);
           }
 
           _debounceTimer = Timer(const Duration(milliseconds: 300), () {});

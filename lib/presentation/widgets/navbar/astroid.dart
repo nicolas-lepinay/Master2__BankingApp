@@ -90,12 +90,12 @@ class AdjustableStarWidget extends StatelessWidget {
   final Gradient? gradient; // Nouveau paramètre
 
   const AdjustableStarWidget({
-    Key? key,
+    super.key,
     this.size = 100.0,
     this.color = Colors.black,
     this.curvature = 0.3,
     this.gradient,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

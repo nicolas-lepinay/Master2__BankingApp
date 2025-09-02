@@ -16,6 +16,7 @@
   "cancel": "Cancel",
   "addTransaction": "Add a transaction",
   "transactionDetails": "Transaction Details",
+  "validateTransaction": "Confirm transaction",
   "amount": "Amount",
   "title": "Title",
   "comment": "Comment",
@@ -24,14 +25,14 @@
   "counterparty": "Counterparty",
   "debit": "Debit",
   "credit": "Credit",
-      "balance": "Solde",
+  "balance": "Solde",
 
   "expectedBalance": "Expected Balance",
   "actualBalance": "Actual Balance",
   "status": "Status",
   "pending": "Pending",
   "confirmed": "Confirmed",
-      "canceled": "Annulé",
+  "canceled": "Annulé",
   "unknown": "Unknown",
   "hello": "Hello",
    "transactions": "Transactions",
@@ -148,5 +149,10 @@
     "currencyNotSupported": "Currency not supported",
     "conversionFailed": "Conversion failed",
     "updatingExchangeRates": "Updating exchange rates...",
-    "exchangeRatesUpdated": "Exchange rates updated"
+    "exchangeRatesUpdated": "Exchange rates updated",
+    "equivalent": "Equivalent",
+    "loadingConversion": "Loading conversion...",
+    "otherCurrencies": "Other currencies",
+    "accountCurrency": "Account currency",
+    "baseCurrency": "Base currency"
 }

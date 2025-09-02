@@ -8,6 +8,7 @@ class AppTextStyles {
   static const String pacificoFontFamily = 'Pacifico';
   static const String overpassMonoFontFamily = 'OverpassMono';
   static const String playfairFontFamily = 'Playfair';
+  static const String robotoFontFamily = 'Roboto';
 
   // V2 Design System Text Styles
 
@@ -79,14 +80,6 @@ class AppTextStyles {
     fontFamily: playfairFontFamily,
     fontSize: 20.sp,
     fontWeight: FontWeight.w600,
-    color: AppColors.onSurfaceDark,
-  );
-
-  static TextStyle sectionHeaderMediumDark = TextStyle(
-    fontFamily: playfairFontFamily,
-    fontSize: 26.sp,
-    fontWeight: FontWeight.w600,
-    color: AppColors.onSurfaceLight,
   );
 
   // Transaction amounts (format spécial sans décimales si entier)
@@ -106,7 +99,7 @@ class AppTextStyles {
 
   // Transaction amount for perspective list
   static TextStyle transactionAmountPerspective = TextStyle(
-    fontFamily: defaultFontFamily,
+    fontFamily: robotoFontFamily,
     fontSize: 18.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurfaceLight,
@@ -143,7 +136,7 @@ class AppTextStyles {
   );
 
   static TextStyle followedTransactionAmount = TextStyle(
-    fontFamily: defaultFontFamily,
+    fontFamily: robotoFontFamily,
     fontSize: 18.sp,
     fontWeight: FontWeight.w600,
     color: AppColors.textLight100,
@@ -229,18 +222,6 @@ class AppTextStyles {
     color: AppColors.onSurfaceDark,
   );
 
-  static TextStyle transactionAmount = TextStyle(
-    fontFamily: defaultFontFamily,
-    fontSize: 20.sp,
-    fontWeight: FontWeight.w500,
-  );
-
-  static TextStyle transactionBalance = TextStyle(
-    fontFamily: defaultFontFamily,
-    fontSize: 14.sp,
-    fontWeight: FontWeight.w500,
-  );
-
   static TextStyle transactionTitle = TextStyle(
     fontFamily: defaultFontFamily,
     fontSize: 16.sp,
@@ -261,8 +242,8 @@ class AppTextStyles {
 
   static const TextStyle buttonText = TextStyle(
     fontFamily: defaultFontFamily,
-    fontSize: 22,
-    fontWeight: FontWeight.w300,
+    fontSize: 23,
+    fontWeight: FontWeight.w400,
   );
 
   static TextStyle buttonTextSmall = TextStyle(

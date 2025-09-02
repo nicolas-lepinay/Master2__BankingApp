@@ -4,7 +4,7 @@ import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
-import 'package:bankapp/presentation/widgets/followed_transaction_item.dart';
+import 'package:bankapp/presentation/widgets/carousels/followed_transactions/followed_transaction_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -36,19 +36,19 @@ class _FollowedTransactionsCarouselState
   @override
   Widget build(BuildContext context) {
     final transactionRepository = ref.watch(transactionRepositoryProvider);
-    
+
     return FutureBuilder<List<domain.TransactionWithBalance>>(
       future: transactionRepository.getFollowedTransactionsWithDetails(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return _buildLoadingState();
         }
-        
+
         if (snapshot.hasError) {
           print('FollowedTransactionsCarousel Error: ${snapshot.error}');
           return _buildErrorState();
         }
-        
+
         final transactions = snapshot.data ?? [];
         if (transactions.isEmpty) {
           return _buildEmptyState();

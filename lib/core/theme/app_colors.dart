@@ -117,4 +117,6 @@ class AppColors {
   static const Color surfaceBrightLight = light100;
   static const Color surfaceLight = light87;
   static const Color surfaceDimLight = light75;
+
+  static const Color greyCard = Color(0xFFA3A3A3);
 }

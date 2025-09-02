@@ -1,6 +1,8 @@
 import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/constants/supported_currencies.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
+import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -106,7 +108,9 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
                   decoration: InputDecoration(
                     labelText: l10n.initialBalance,
                     hintText: '0.00',
-                    suffixText: AppConstants.currencySymbols[_selectedCurrency],
+                    suffixText: AppFormatters.getCurrencySymbol(
+                      _selectedCurrency,
+                    ),
                   ),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -132,11 +136,10 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
 
                 // Sélecteur de devise
                 DropdownButtonFormField<String>(
-                  value: _selectedCurrency,
+                  initialValue: _selectedCurrency,
                   decoration: InputDecoration(labelText: l10n.currency),
-                  items: AppConstants.supportedCurrencies.map((currency) {
-                    final symbol =
-                        AppConstants.currencySymbols[currency] ?? currency;
+                  items: SupportedCurrencies.allCodes.map((currency) {
+                    final symbol = AppFormatters.getCurrencySymbol(currency);
                     return DropdownMenuItem(
                       value: currency,
                       child: Text('$currency ($symbol)'),

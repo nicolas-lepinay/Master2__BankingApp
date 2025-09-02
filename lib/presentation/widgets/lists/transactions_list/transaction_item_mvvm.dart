@@ -99,8 +99,10 @@ class TransactionItemMVVM extends StatelessWidget {
                     transaction.currency,
                     context: context,
                   ),
-                  style: AppTextStyles.transactionAmount.copyWith(
-                    color: isDebit ? appTheme.text1 : appTheme.textCredit,
+                  style: AppTextStyles.h4.copyWith(
+                    color: appTheme.text1,
+                    //color: isDebit ? appTheme.text1 : appTheme.textCredit,
+                    fontFamily: AppTextStyles.robotoFontFamily,
                   ),
                 ),
 
@@ -111,8 +113,11 @@ class TransactionItemMVVM extends StatelessWidget {
                     transaction.currency,
                     context,
                   ),
-                  style: AppTextStyles.transactionBalance.copyWith(
-                    color: transactionWithBalance.balanceAfter.balance.amount < 0
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontFamily: AppTextStyles.robotoFontFamily,
+                    fontWeight: FontWeight.w500,
+                    color:
+                        transactionWithBalance.balanceAfter.balance.amount < 0
                         ? appTheme.textDebit
                         : appTheme.text4,
                   ),

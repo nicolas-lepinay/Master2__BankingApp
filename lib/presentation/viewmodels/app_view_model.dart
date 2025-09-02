@@ -213,7 +213,7 @@ class AppViewModel extends BaseViewModel<AppViewState> {
     if (_smartExchangeRateService == null) return;
 
     try {
-      final service = _smartExchangeRateService!;
+      final service = _smartExchangeRateService;
 
       if (service.isCacheEmpty()) {
         // Cas 1 : Cache vide → Charger devise locale

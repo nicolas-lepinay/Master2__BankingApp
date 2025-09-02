@@ -3,19 +3,12 @@ import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
-// Imports supprimés car plus nécessaires avec MVVM
-// import 'package:bankapp/data/database/app_database.dart';
-// import 'package:bankapp/data/database/models/transaction_models.dart' as data_models;
 import 'package:bankapp/domain/entities/entities.dart' as domain;
-// Imports supprimés car plus nécessaires avec MVVM
-// import 'package:bankapp/domain/value_objects/money.dart';
-// import 'package:bankapp/domain/value_objects/account_balance.dart';
-import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
 import 'package:bankapp/presentation/providers/transaction_search_provider.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
-import 'package:bankapp/presentation/widgets/half_search_field.dart';
-import 'package:bankapp/presentation/widgets/transactions_list_mvvm.dart';
+import 'package:bankapp/presentation/widgets/lists/transactions_list/transactions_list_mvvm.dart';
+import 'package:bankapp/presentation/widgets/text_fields/half_search_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -103,7 +96,6 @@ class _FullTransactionsBottomSheetState
     final Brightness brightness = Theme.of(context).brightness;
     final bool isDarkMode = brightness == Brightness.dark;
 
-    final selectedCardIndex = ref.watch(selectedCardProvider);
     final accounts = ref.watch(accountsProvider);
 
     return DraggableScrollableSheet(
@@ -242,10 +234,11 @@ class _FullTransactionsBottomSheetState
                       : Builder(
                           builder: (context) {
                             // Récupérer le compte sélectionné
+                            final selectedAccountFromProvider = ref.watch(
+                              selectedAccountProvider,
+                            );
                             final selectedAccount =
-                                selectedCardIndex < accounts.length
-                                ? accounts[selectedCardIndex]
-                                : accounts.first;
+                                selectedAccountFromProvider ?? accounts.first;
 
                             // Récupérer les transactions via TransactionViewModel (MVVM)
                             final transactionViewModel = ref.watch(
