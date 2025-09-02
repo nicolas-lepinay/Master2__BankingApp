@@ -941,7 +941,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountCurrency.
   ///
   /// In en, this message translates to:
-  /// **'Account currency'**
+  /// **'Account\'s currency'**
   String get accountCurrency;
 
   /// No description provided for @baseCurrency.

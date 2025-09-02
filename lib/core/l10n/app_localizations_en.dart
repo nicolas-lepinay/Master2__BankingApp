@@ -430,7 +430,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otherCurrencies => 'Other currencies';
 
   @override
-  String get accountCurrency => 'Account currency';
+  String get accountCurrency => 'Account\'s currency';
 
   @override
   String get baseCurrency => 'Base currency';

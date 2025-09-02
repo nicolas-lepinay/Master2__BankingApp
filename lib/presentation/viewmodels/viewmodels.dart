@@ -6,5 +6,6 @@ export 'base_view_model.dart';
 export 'common/ui_state.dart';
 export 'counterparty_view_model.dart';
 export 'currency_view_model.dart';
+export 'followed_transaction_view_model.dart';
 export 'search_view_model.dart';
 export 'transaction_view_model.dart';

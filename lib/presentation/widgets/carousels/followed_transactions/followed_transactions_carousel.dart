@@ -1,6 +1,5 @@
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
-// import 'package:bankapp/data/database/app_database.dart'; // Supprimé avec MVVM
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
@@ -35,28 +34,38 @@ class _FollowedTransactionsCarouselState
 
   @override
   Widget build(BuildContext context) {
-    final transactionRepository = ref.watch(transactionRepositoryProvider);
-
-    return FutureBuilder<List<domain.TransactionWithBalance>>(
-      future: transactionRepository.getFollowedTransactionsWithDetails(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingState();
-        }
-
-        if (snapshot.hasError) {
-          print('FollowedTransactionsCarousel Error: ${snapshot.error}');
-          return _buildErrorState();
-        }
-
-        final transactions = snapshot.data ?? [];
-        if (transactions.isEmpty) {
-          return _buildEmptyState();
-        }
-
-        return _buildCarousel(transactions);
-      },
+    final followedTransactionState = ref.watch(
+      followedTransactionViewModelProvider,
     );
+
+    // Charger les transactions si nécessaire
+    if (followedTransactionState.followedTransactions.isEmpty &&
+        !followedTransactionState.isLoading &&
+        !followedTransactionState.hasError) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(followedTransactionViewModelProvider.notifier)
+            .loadFollowedTransactions();
+      });
+    }
+
+    if (followedTransactionState.isLoading) {
+      return _buildLoadingState();
+    }
+
+    if (followedTransactionState.hasError) {
+      print(
+        'FollowedTransactionsCarousel Error: ${followedTransactionState.error}',
+      );
+      return _buildErrorState();
+    }
+
+    final transactions = followedTransactionState.followedTransactions;
+    if (transactions.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return _buildCarousel(transactions);
   }
 
   Widget _buildEmptyState() {
@@ -220,12 +229,10 @@ class _FollowedTransactionsCarouselState
       // Démarrer l'animation de glissement
       await _animationControllers[index].forward();
 
-      // Retirer de la base de données via le repository MVVM
-      final transactionRepository = ref.read(transactionRepositoryProvider);
-      await transactionRepository.unfollowTransaction(transactionId);
-
-      // Rafraîchir l'écran en rechargant la widget
-      if (mounted) setState(() {});
+      // Utiliser le ViewModel pour retirer la transaction du suivi
+      await ref
+          .read(followedTransactionViewModelProvider.notifier)
+          .unfollowTransaction(transactionId);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

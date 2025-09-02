@@ -153,6 +153,6 @@
     "equivalent": "Equivalent",
     "loadingConversion": "Loading conversion...",
     "otherCurrencies": "Other currencies",
-    "accountCurrency": "Account currency",
+    "accountCurrency": "Account's currency",
     "baseCurrency": "Base currency"
 }

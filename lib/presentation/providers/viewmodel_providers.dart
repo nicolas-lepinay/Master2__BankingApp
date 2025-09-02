@@ -194,6 +194,13 @@ final currencyViewModelProvider =
       return CurrencyViewModel(ref.watch(currencyConversionServiceProvider));
     });
 
+final followedTransactionViewModelProvider = StateNotifierProvider<
+    FollowedTransactionViewModel, FollowedTransactionViewState>((ref) {
+  return FollowedTransactionViewModel(
+    ref.watch(transactionRepositoryProvider),
+  );
+});
+
 // ============================================================================
 // CONVENIENCE PROVIDERS
 // ============================================================================
@@ -285,6 +292,12 @@ final counterpartiesProvider = Provider<List<domain.Counterparty>>((ref) {
 final selectedCounterpartyProvider = Provider<domain.Counterparty?>((ref) {
   final counterpartyState = ref.watch(counterpartyViewModelProvider);
   return counterpartyState.selectedCounterparty;
+});
+
+/// Provider pour les transactions suivies
+final followedTransactionsListProvider = Provider<List<domain.TransactionWithBalance>>((ref) {
+  final followedState = ref.watch(followedTransactionViewModelProvider);
+  return followedState.followedTransactions;
 });
 
 // ============================================================================
