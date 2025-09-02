@@ -63,11 +63,12 @@ class _AmountInputWidgetV2State extends ConsumerState<AmountInputWidgetV2> {
     super.didUpdateWidget(oldWidget);
 
     // Si le montant initial a changé depuis l'extérieur, mettre à jour
-    if (oldWidget.initialAmount != widget.initialAmount &&
-        widget.initialAmount != null &&
-        _controller.text != widget.initialAmount) {
-      _controller.text = widget.initialAmount!;
-      _currentAmount = widget.initialAmount!;
+    if (oldWidget.initialAmount != widget.initialAmount) {
+      final newAmount = widget.initialAmount ?? '';
+      if (_controller.text != newAmount) {
+        _controller.text = newAmount;
+        _currentAmount = newAmount;
+      }
     }
   }
 

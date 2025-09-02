@@ -17,8 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-// import '../../data/database/models/transaction_models.dart'; // Supprimé avec MVVM
-
 class DraggableBlackContainer extends ConsumerStatefulWidget {
   final Function(double)? onDragUpdate;
   final VoidCallback? onStatisticsPressed;

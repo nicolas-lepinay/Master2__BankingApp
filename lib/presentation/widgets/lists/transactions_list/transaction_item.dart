@@ -6,11 +6,11 @@ import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class TransactionItemMVVM extends StatelessWidget {
+class TransactionItem extends StatelessWidget {
   final domain.TransactionWithBalance transactionWithBalance;
   final VoidCallback? onTap;
 
-  const TransactionItemMVVM({
+  const TransactionItem({
     super.key,
     required this.transactionWithBalance,
     this.onTap,

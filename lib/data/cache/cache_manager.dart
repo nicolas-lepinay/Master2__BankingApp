@@ -162,7 +162,7 @@ class CacheManager {
       for (final transaction in transactions) {
         // Calculer le nouveau solde en utilisant le montant converti si disponible
         final effectiveAmount =
-            transaction.amountConverted ?? transaction.amount;
+            transaction.amountBeforeConversion ?? transaction.amount;
         final signedAmount = transaction.type == TransactionType.income
             ? effectiveAmount
             : -effectiveAmount;

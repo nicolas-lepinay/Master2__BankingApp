@@ -3,17 +3,17 @@ import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
-import 'package:bankapp/presentation/widgets/lists/transactions_list/transaction_item_mvvm.dart';
+import 'package:bankapp/presentation/widgets/lists/transactions_list/transaction_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class TransactionsListMVVM extends StatefulWidget {
+class TransactionsList extends StatefulWidget {
   final List<domain.TransactionWithBalance> transactions;
   final Function(domain.Transaction)? onTransactionTap;
   final bool scrollToToday;
   final String? accountCurrency;
 
-  const TransactionsListMVVM({
+  const TransactionsList({
     super.key,
     required this.transactions,
     this.onTransactionTap,
@@ -22,10 +22,10 @@ class TransactionsListMVVM extends StatefulWidget {
   });
 
   @override
-  State<TransactionsListMVVM> createState() => _TransactionsListMVVMState();
+  State<TransactionsList> createState() => _TransactionsListState();
 }
 
-class _TransactionsListMVVMState extends State<TransactionsListMVVM> {
+class _TransactionsListState extends State<TransactionsList> {
   final ScrollController _scrollController = ScrollController();
   bool _areHeadersExpanded = true; // Tous les headers sont expanded par défaut
   bool _hasScrolledToToday = false; // Flag pour éviter les scrolls répétés
@@ -37,7 +37,7 @@ class _TransactionsListMVVMState extends State<TransactionsListMVVM> {
   }
 
   @override
-  void didUpdateWidget(TransactionsListMVVM oldWidget) {
+  void didUpdateWidget(TransactionsList oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     // Si les transactions ont changé et qu'on doit scroller vers aujourd'hui
@@ -207,7 +207,7 @@ class _TransactionsListMVVMState extends State<TransactionsListMVVM> {
             SizedBox(height: AppConstants.verySmallPadding.h / 4),
             // Liste des transactions pour cette date
             ...group.transactions.map((transactionWithBalance) {
-              return TransactionItemMVVM(
+              return TransactionItem(
                 transactionWithBalance: transactionWithBalance,
                 onTap: widget.onTransactionTap != null
                     ? () => widget.onTransactionTap!(

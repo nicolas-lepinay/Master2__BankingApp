@@ -44,7 +44,7 @@ class AccountDatabaseRepository {
 
     double balance = account.initialBalance;
     for (final transaction in transactionsList) {
-      final amount = transaction.amountConverted ?? transaction.amount;
+      final amount = transaction.amountBeforeConversion ?? transaction.amount;
       if (transaction.transactionType == 'DEBIT') {
         balance -= amount;
       } else {
@@ -72,7 +72,7 @@ class AccountDatabaseRepository {
 
     double balance = account.initialBalance;
     for (final transaction in transactionsList) {
-      final amount = transaction.amountConverted ?? transaction.amount;
+      final amount = transaction.amountBeforeConversion ?? transaction.amount;
       if (transaction.transactionType == 'DEBIT') {
         balance -= amount;
       } else {

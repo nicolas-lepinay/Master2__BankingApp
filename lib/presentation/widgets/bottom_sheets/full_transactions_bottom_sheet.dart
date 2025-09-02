@@ -7,7 +7,7 @@ import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/presentation/providers/transaction_search_provider.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
-import 'package:bankapp/presentation/widgets/lists/transactions_list/transactions_list_mvvm.dart';
+import 'package:bankapp/presentation/widgets/lists/transactions_list/transactions_list.dart';
 import 'package:bankapp/presentation/widgets/text_fields/half_search_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -303,7 +303,7 @@ class _FullTransactionsBottomSheetState
                               return _buildNoResultsState(l10n, appTheme);
                             }
 
-                            return TransactionsListMVVM(
+                            return TransactionsList(
                               transactions: transactionsToDisplay,
                               onTransactionTap: _navigateToTransactionDetail,
                               scrollToToday: !searchState

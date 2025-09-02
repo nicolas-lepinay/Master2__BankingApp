@@ -7,12 +7,12 @@ import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class BankCardWidgetMVVM extends StatefulWidget {
+class BankCardWidget extends StatefulWidget {
   final domain.AccountSummary accountSummary;
   final List<domain.Account> allAccounts;
   final Function(double)? onBalancePositionChanged;
 
-  const BankCardWidgetMVVM({
+  const BankCardWidget({
     super.key,
     required this.accountSummary,
     required this.allAccounts,
@@ -20,10 +20,10 @@ class BankCardWidgetMVVM extends StatefulWidget {
   });
 
   @override
-  State<BankCardWidgetMVVM> createState() => _BankCardWidgetMVVMState();
+  State<BankCardWidget> createState() => _BankCardWidgetState();
 }
 
-class _BankCardWidgetMVVMState extends State<BankCardWidgetMVVM> {
+class _BankCardWidgetState extends State<BankCardWidget> {
   bool _isBalanceVisible = true;
   final GlobalKey _balanceKey = GlobalKey();
   bool _positionAlreadyMeasured = false;

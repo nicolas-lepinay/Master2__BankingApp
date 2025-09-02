@@ -177,8 +177,8 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
     int? counterpartyId,
     List<int>? categoryIds,
     domain.TransactionStatus status = domain.TransactionStatus.completed,
-    double? amountConverted,
-    String? originalCurrency,
+    double? amountBeforeConversion,
+    String? currencyBeforeConversion,
   }) async {
     await executeWithErrorHandling(() async {
       state = state.loading();
@@ -204,8 +204,8 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
         comment: comment,
         date: date,
         status: status,
-        amountConverted: amountConverted,
-        originalCurrency: originalCurrency,
+        amountBeforeConversion: amountBeforeConversion,
+        currencyBeforeConversion: currencyBeforeConversion,
       );
 
       await _transactionRepository.createTransaction(newTransaction);
@@ -488,7 +488,7 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
     required int accountId,
     required domain.TransactionType type,
     required double amount,
-    required String originalCurrency,
+    required String currencyBeforeConversion,
     required String accountCurrency,
     required DateTime date,
     String? title,
@@ -501,7 +501,7 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
       double? convertedAmount;
 
       // Convertir uniquement si les devises sont différentes
-      if (originalCurrency != accountCurrency) {
+      if (currencyBeforeConversion != accountCurrency) {
         // Utiliser le CurrencyConversionService via le provider
         if (_ref != null) {
           final conversionService = _ref.read(
@@ -509,7 +509,7 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
           );
           convertedAmount = await conversionService.convertAmountSafe(
             amount: amount,
-            fromCurrency: originalCurrency,
+            fromCurrency: currencyBeforeConversion,
             toCurrency: accountCurrency,
           );
         }
@@ -527,9 +527,9 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
         counterpartyId: counterpartyId,
         categoryIds: categoryIds,
         status: status,
-        amountConverted: convertedAmount,
-        originalCurrency: originalCurrency != accountCurrency
-            ? originalCurrency
+        amountBeforeConversion: convertedAmount,
+        currencyBeforeConversion: currencyBeforeConversion != accountCurrency
+            ? currencyBeforeConversion
             : null,
       );
     });
@@ -537,15 +537,15 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
 
   /// Vérifie si une transaction a été convertie
   bool isTransactionConverted(domain.TransactionWithBalance transaction) {
-    return transaction.transaction.amountConverted != null &&
-        transaction.transaction.originalCurrency != null;
+    return transaction.transaction.amountBeforeConversion != null &&
+        transaction.transaction.currencyBeforeConversion != null;
   }
 
   /// Obtient le montant original d'une transaction
   double getOriginalAmount(domain.TransactionWithBalance transaction) {
     if (isTransactionConverted(transaction)) {
       // Si la transaction a été convertie, calculer le montant original
-      final convertedAmount = transaction.transaction.amountConverted!;
+      final convertedAmount = transaction.transaction.amountBeforeConversion!;
       final accountAmount = transaction.transaction.amount;
 
       // Si les montants sont différents, utiliser le montant converti
@@ -556,7 +556,7 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
 
   /// Obtient la devise originale d'une transaction
   String getOriginalCurrency(domain.TransactionWithBalance transaction) {
-    return transaction.transaction.originalCurrency ??
+    return transaction.transaction.currencyBeforeConversion ??
         transaction.transaction.currency;
   }
 

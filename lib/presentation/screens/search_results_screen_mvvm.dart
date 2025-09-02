@@ -3,7 +3,7 @@ import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
-import 'package:bankapp/presentation/widgets/lists/transactions_list/transactions_list_mvvm.dart';
+import 'package:bankapp/presentation/widgets/lists/transactions_list/transactions_list.dart';
 import 'package:bankapp/presentation/widgets/text_fields/search_field_mvvm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -202,7 +202,7 @@ class _SearchResultsScreenMVVMState
       return _buildEmptyState(l10n, appTheme);
     }
 
-    return TransactionsListMVVM(
+    return TransactionsList(
       transactions: searchState.searchResults,
       onTransactionTap: (transaction) {
         // TODO: Ouvrir les détails de la transaction

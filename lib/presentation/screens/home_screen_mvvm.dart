@@ -8,7 +8,7 @@ import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/widgets/bottom_sheets/add_account_bottom_sheet.dart';
 import 'package:bankapp/presentation/widgets/bottom_sheets/draggable_black_container.dart';
 import 'package:bankapp/presentation/widgets/buttons/dashed_button.dart';
-import 'package:bankapp/presentation/widgets/carousels/cards_swiper/bank_card_widget_mvvm.dart';
+import 'package:bankapp/presentation/widgets/carousels/cards_swiper/bank_card_widget.dart';
 import 'package:bankapp/presentation/widgets/carousels/cards_swiper/cards_swiper_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -245,7 +245,7 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
 
         return accountSummaryAsync.when(
           data: (accountSummary) {
-            return BankCardWidgetMVVM(
+            return BankCardWidget(
               accountSummary: accountSummary,
               allAccounts: allAccounts,
             );

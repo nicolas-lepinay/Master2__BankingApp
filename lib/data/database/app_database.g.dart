@@ -1362,6 +1362,15 @@ class $TransactionsTable extends Transactions
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _currencyMeta = const VerificationMeta(
     'currency',
   );
@@ -1373,37 +1382,28 @@ class $TransactionsTable extends Transactions
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  static const VerificationMeta _amountBeforeConversionMeta =
+      const VerificationMeta('amountBeforeConversion');
   @override
-  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
-    'amount',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _amountConvertedMeta = const VerificationMeta(
-    'amountConverted',
-  );
+  late final GeneratedColumn<double> amountBeforeConversion =
+      GeneratedColumn<double>(
+        'amount_before_conversion',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _currencyBeforeConversionMeta =
+      const VerificationMeta('currencyBeforeConversion');
   @override
-  late final GeneratedColumn<double> amountConverted = GeneratedColumn<double>(
-    'amount_converted',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _originalCurrencyMeta = const VerificationMeta(
-    'originalCurrency',
-  );
-  @override
-  late final GeneratedColumn<String> originalCurrency = GeneratedColumn<String>(
-    'original_currency',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
+  late final GeneratedColumn<String> currencyBeforeConversion =
+      GeneratedColumn<String>(
+        'currency_before_conversion',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
@@ -1452,10 +1452,10 @@ class $TransactionsTable extends Transactions
     category3Id,
     category4Id,
     transactionType,
-    currency,
     amount,
-    amountConverted,
-    originalCurrency,
+    currency,
+    amountBeforeConversion,
+    currencyBeforeConversion,
     title,
     comment,
     date,
@@ -1540,14 +1540,6 @@ class $TransactionsTable extends Transactions
     } else if (isInserting) {
       context.missing(_transactionTypeMeta);
     }
-    if (data.containsKey('currency')) {
-      context.handle(
-        _currencyMeta,
-        currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_currencyMeta);
-    }
     if (data.containsKey('amount')) {
       context.handle(
         _amountMeta,
@@ -1556,21 +1548,29 @@ class $TransactionsTable extends Transactions
     } else if (isInserting) {
       context.missing(_amountMeta);
     }
-    if (data.containsKey('amount_converted')) {
+    if (data.containsKey('currency')) {
       context.handle(
-        _amountConvertedMeta,
-        amountConverted.isAcceptableOrUnknown(
-          data['amount_converted']!,
-          _amountConvertedMeta,
+        _currencyMeta,
+        currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    if (data.containsKey('amount_before_conversion')) {
+      context.handle(
+        _amountBeforeConversionMeta,
+        amountBeforeConversion.isAcceptableOrUnknown(
+          data['amount_before_conversion']!,
+          _amountBeforeConversionMeta,
         ),
       );
     }
-    if (data.containsKey('original_currency')) {
+    if (data.containsKey('currency_before_conversion')) {
       context.handle(
-        _originalCurrencyMeta,
-        originalCurrency.isAcceptableOrUnknown(
-          data['original_currency']!,
-          _originalCurrencyMeta,
+        _currencyBeforeConversionMeta,
+        currencyBeforeConversion.isAcceptableOrUnknown(
+          data['currency_before_conversion']!,
+          _currencyBeforeConversionMeta,
         ),
       );
     }
@@ -1643,21 +1643,21 @@ class $TransactionsTable extends Transactions
         DriftSqlType.string,
         data['${effectivePrefix}transaction_type'],
       )!,
-      currency: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}currency'],
-      )!,
       amount: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}amount'],
       )!,
-      amountConverted: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}amount_converted'],
-      ),
-      originalCurrency: attachedDatabase.typeMapping.read(
+      currency: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}original_currency'],
+        data['${effectivePrefix}currency'],
+      )!,
+      amountBeforeConversion: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount_before_conversion'],
+      ),
+      currencyBeforeConversion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency_before_conversion'],
       ),
       title: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -1693,10 +1693,10 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   final int? category3Id;
   final int? category4Id;
   final String transactionType;
-  final String currency;
   final double amount;
-  final double? amountConverted;
-  final String? originalCurrency;
+  final String currency;
+  final double? amountBeforeConversion;
+  final String? currencyBeforeConversion;
   final String? title;
   final String? comment;
   final DateTime date;
@@ -1710,10 +1710,10 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     this.category3Id,
     this.category4Id,
     required this.transactionType,
-    required this.currency,
     required this.amount,
-    this.amountConverted,
-    this.originalCurrency,
+    required this.currency,
+    this.amountBeforeConversion,
+    this.currencyBeforeConversion,
     this.title,
     this.comment,
     required this.date,
@@ -1740,13 +1740,17 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       map['category4_id'] = Variable<int>(category4Id);
     }
     map['transaction_type'] = Variable<String>(transactionType);
-    map['currency'] = Variable<String>(currency);
     map['amount'] = Variable<double>(amount);
-    if (!nullToAbsent || amountConverted != null) {
-      map['amount_converted'] = Variable<double>(amountConverted);
+    map['currency'] = Variable<String>(currency);
+    if (!nullToAbsent || amountBeforeConversion != null) {
+      map['amount_before_conversion'] = Variable<double>(
+        amountBeforeConversion,
+      );
     }
-    if (!nullToAbsent || originalCurrency != null) {
-      map['original_currency'] = Variable<String>(originalCurrency);
+    if (!nullToAbsent || currencyBeforeConversion != null) {
+      map['currency_before_conversion'] = Variable<String>(
+        currencyBeforeConversion,
+      );
     }
     if (!nullToAbsent || title != null) {
       map['title'] = Variable<String>(title);
@@ -1779,14 +1783,14 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           ? const Value.absent()
           : Value(category4Id),
       transactionType: Value(transactionType),
-      currency: Value(currency),
       amount: Value(amount),
-      amountConverted: amountConverted == null && nullToAbsent
+      currency: Value(currency),
+      amountBeforeConversion: amountBeforeConversion == null && nullToAbsent
           ? const Value.absent()
-          : Value(amountConverted),
-      originalCurrency: originalCurrency == null && nullToAbsent
+          : Value(amountBeforeConversion),
+      currencyBeforeConversion: currencyBeforeConversion == null && nullToAbsent
           ? const Value.absent()
-          : Value(originalCurrency),
+          : Value(currencyBeforeConversion),
       title: title == null && nullToAbsent
           ? const Value.absent()
           : Value(title),
@@ -1812,10 +1816,14 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       category3Id: serializer.fromJson<int?>(json['category3Id']),
       category4Id: serializer.fromJson<int?>(json['category4Id']),
       transactionType: serializer.fromJson<String>(json['transactionType']),
-      currency: serializer.fromJson<String>(json['currency']),
       amount: serializer.fromJson<double>(json['amount']),
-      amountConverted: serializer.fromJson<double?>(json['amountConverted']),
-      originalCurrency: serializer.fromJson<String?>(json['originalCurrency']),
+      currency: serializer.fromJson<String>(json['currency']),
+      amountBeforeConversion: serializer.fromJson<double?>(
+        json['amountBeforeConversion'],
+      ),
+      currencyBeforeConversion: serializer.fromJson<String?>(
+        json['currencyBeforeConversion'],
+      ),
       title: serializer.fromJson<String?>(json['title']),
       comment: serializer.fromJson<String?>(json['comment']),
       date: serializer.fromJson<DateTime>(json['date']),
@@ -1834,10 +1842,14 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       'category3Id': serializer.toJson<int?>(category3Id),
       'category4Id': serializer.toJson<int?>(category4Id),
       'transactionType': serializer.toJson<String>(transactionType),
-      'currency': serializer.toJson<String>(currency),
       'amount': serializer.toJson<double>(amount),
-      'amountConverted': serializer.toJson<double?>(amountConverted),
-      'originalCurrency': serializer.toJson<String?>(originalCurrency),
+      'currency': serializer.toJson<String>(currency),
+      'amountBeforeConversion': serializer.toJson<double?>(
+        amountBeforeConversion,
+      ),
+      'currencyBeforeConversion': serializer.toJson<String?>(
+        currencyBeforeConversion,
+      ),
       'title': serializer.toJson<String?>(title),
       'comment': serializer.toJson<String?>(comment),
       'date': serializer.toJson<DateTime>(date),
@@ -1854,10 +1866,10 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     Value<int?> category3Id = const Value.absent(),
     Value<int?> category4Id = const Value.absent(),
     String? transactionType,
-    String? currency,
     double? amount,
-    Value<double?> amountConverted = const Value.absent(),
-    Value<String?> originalCurrency = const Value.absent(),
+    String? currency,
+    Value<double?> amountBeforeConversion = const Value.absent(),
+    Value<String?> currencyBeforeConversion = const Value.absent(),
     Value<String?> title = const Value.absent(),
     Value<String?> comment = const Value.absent(),
     DateTime? date,
@@ -1873,14 +1885,14 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     category3Id: category3Id.present ? category3Id.value : this.category3Id,
     category4Id: category4Id.present ? category4Id.value : this.category4Id,
     transactionType: transactionType ?? this.transactionType,
-    currency: currency ?? this.currency,
     amount: amount ?? this.amount,
-    amountConverted: amountConverted.present
-        ? amountConverted.value
-        : this.amountConverted,
-    originalCurrency: originalCurrency.present
-        ? originalCurrency.value
-        : this.originalCurrency,
+    currency: currency ?? this.currency,
+    amountBeforeConversion: amountBeforeConversion.present
+        ? amountBeforeConversion.value
+        : this.amountBeforeConversion,
+    currencyBeforeConversion: currencyBeforeConversion.present
+        ? currencyBeforeConversion.value
+        : this.currencyBeforeConversion,
     title: title.present ? title.value : this.title,
     comment: comment.present ? comment.value : this.comment,
     date: date ?? this.date,
@@ -1908,14 +1920,14 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       transactionType: data.transactionType.present
           ? data.transactionType.value
           : this.transactionType,
-      currency: data.currency.present ? data.currency.value : this.currency,
       amount: data.amount.present ? data.amount.value : this.amount,
-      amountConverted: data.amountConverted.present
-          ? data.amountConverted.value
-          : this.amountConverted,
-      originalCurrency: data.originalCurrency.present
-          ? data.originalCurrency.value
-          : this.originalCurrency,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      amountBeforeConversion: data.amountBeforeConversion.present
+          ? data.amountBeforeConversion.value
+          : this.amountBeforeConversion,
+      currencyBeforeConversion: data.currencyBeforeConversion.present
+          ? data.currencyBeforeConversion.value
+          : this.currencyBeforeConversion,
       title: data.title.present ? data.title.value : this.title,
       comment: data.comment.present ? data.comment.value : this.comment,
       date: data.date.present ? data.date.value : this.date,
@@ -1934,10 +1946,10 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           ..write('category3Id: $category3Id, ')
           ..write('category4Id: $category4Id, ')
           ..write('transactionType: $transactionType, ')
-          ..write('currency: $currency, ')
           ..write('amount: $amount, ')
-          ..write('amountConverted: $amountConverted, ')
-          ..write('originalCurrency: $originalCurrency, ')
+          ..write('currency: $currency, ')
+          ..write('amountBeforeConversion: $amountBeforeConversion, ')
+          ..write('currencyBeforeConversion: $currencyBeforeConversion, ')
           ..write('title: $title, ')
           ..write('comment: $comment, ')
           ..write('date: $date, ')
@@ -1956,10 +1968,10 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     category3Id,
     category4Id,
     transactionType,
-    currency,
     amount,
-    amountConverted,
-    originalCurrency,
+    currency,
+    amountBeforeConversion,
+    currencyBeforeConversion,
     title,
     comment,
     date,
@@ -1977,10 +1989,10 @@ class Transaction extends DataClass implements Insertable<Transaction> {
           other.category3Id == this.category3Id &&
           other.category4Id == this.category4Id &&
           other.transactionType == this.transactionType &&
-          other.currency == this.currency &&
           other.amount == this.amount &&
-          other.amountConverted == this.amountConverted &&
-          other.originalCurrency == this.originalCurrency &&
+          other.currency == this.currency &&
+          other.amountBeforeConversion == this.amountBeforeConversion &&
+          other.currencyBeforeConversion == this.currencyBeforeConversion &&
           other.title == this.title &&
           other.comment == this.comment &&
           other.date == this.date &&
@@ -1996,10 +2008,10 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<int?> category3Id;
   final Value<int?> category4Id;
   final Value<String> transactionType;
-  final Value<String> currency;
   final Value<double> amount;
-  final Value<double?> amountConverted;
-  final Value<String?> originalCurrency;
+  final Value<String> currency;
+  final Value<double?> amountBeforeConversion;
+  final Value<String?> currencyBeforeConversion;
   final Value<String?> title;
   final Value<String?> comment;
   final Value<DateTime> date;
@@ -2013,10 +2025,10 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.category3Id = const Value.absent(),
     this.category4Id = const Value.absent(),
     this.transactionType = const Value.absent(),
-    this.currency = const Value.absent(),
     this.amount = const Value.absent(),
-    this.amountConverted = const Value.absent(),
-    this.originalCurrency = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.amountBeforeConversion = const Value.absent(),
+    this.currencyBeforeConversion = const Value.absent(),
     this.title = const Value.absent(),
     this.comment = const Value.absent(),
     this.date = const Value.absent(),
@@ -2031,18 +2043,18 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     this.category3Id = const Value.absent(),
     this.category4Id = const Value.absent(),
     required String transactionType,
-    required String currency,
     required double amount,
-    this.amountConverted = const Value.absent(),
-    this.originalCurrency = const Value.absent(),
+    required String currency,
+    this.amountBeforeConversion = const Value.absent(),
+    this.currencyBeforeConversion = const Value.absent(),
     this.title = const Value.absent(),
     this.comment = const Value.absent(),
     required DateTime date,
     required int status,
   }) : accountId = Value(accountId),
        transactionType = Value(transactionType),
-       currency = Value(currency),
        amount = Value(amount),
+       currency = Value(currency),
        date = Value(date),
        status = Value(status);
   static Insertable<Transaction> custom({
@@ -2054,10 +2066,10 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     Expression<int>? category3Id,
     Expression<int>? category4Id,
     Expression<String>? transactionType,
-    Expression<String>? currency,
     Expression<double>? amount,
-    Expression<double>? amountConverted,
-    Expression<String>? originalCurrency,
+    Expression<String>? currency,
+    Expression<double>? amountBeforeConversion,
+    Expression<String>? currencyBeforeConversion,
     Expression<String>? title,
     Expression<String>? comment,
     Expression<DateTime>? date,
@@ -2072,10 +2084,12 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       if (category3Id != null) 'category3_id': category3Id,
       if (category4Id != null) 'category4_id': category4Id,
       if (transactionType != null) 'transaction_type': transactionType,
-      if (currency != null) 'currency': currency,
       if (amount != null) 'amount': amount,
-      if (amountConverted != null) 'amount_converted': amountConverted,
-      if (originalCurrency != null) 'original_currency': originalCurrency,
+      if (currency != null) 'currency': currency,
+      if (amountBeforeConversion != null)
+        'amount_before_conversion': amountBeforeConversion,
+      if (currencyBeforeConversion != null)
+        'currency_before_conversion': currencyBeforeConversion,
       if (title != null) 'title': title,
       if (comment != null) 'comment': comment,
       if (date != null) 'date': date,
@@ -2092,10 +2106,10 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     Value<int?>? category3Id,
     Value<int?>? category4Id,
     Value<String>? transactionType,
-    Value<String>? currency,
     Value<double>? amount,
-    Value<double?>? amountConverted,
-    Value<String?>? originalCurrency,
+    Value<String>? currency,
+    Value<double?>? amountBeforeConversion,
+    Value<String?>? currencyBeforeConversion,
     Value<String?>? title,
     Value<String?>? comment,
     Value<DateTime>? date,
@@ -2110,10 +2124,12 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
       category3Id: category3Id ?? this.category3Id,
       category4Id: category4Id ?? this.category4Id,
       transactionType: transactionType ?? this.transactionType,
-      currency: currency ?? this.currency,
       amount: amount ?? this.amount,
-      amountConverted: amountConverted ?? this.amountConverted,
-      originalCurrency: originalCurrency ?? this.originalCurrency,
+      currency: currency ?? this.currency,
+      amountBeforeConversion:
+          amountBeforeConversion ?? this.amountBeforeConversion,
+      currencyBeforeConversion:
+          currencyBeforeConversion ?? this.currencyBeforeConversion,
       title: title ?? this.title,
       comment: comment ?? this.comment,
       date: date ?? this.date,
@@ -2148,17 +2164,21 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     if (transactionType.present) {
       map['transaction_type'] = Variable<String>(transactionType.value);
     }
-    if (currency.present) {
-      map['currency'] = Variable<String>(currency.value);
-    }
     if (amount.present) {
       map['amount'] = Variable<double>(amount.value);
     }
-    if (amountConverted.present) {
-      map['amount_converted'] = Variable<double>(amountConverted.value);
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
     }
-    if (originalCurrency.present) {
-      map['original_currency'] = Variable<String>(originalCurrency.value);
+    if (amountBeforeConversion.present) {
+      map['amount_before_conversion'] = Variable<double>(
+        amountBeforeConversion.value,
+      );
+    }
+    if (currencyBeforeConversion.present) {
+      map['currency_before_conversion'] = Variable<String>(
+        currencyBeforeConversion.value,
+      );
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
@@ -2186,10 +2206,10 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
           ..write('category3Id: $category3Id, ')
           ..write('category4Id: $category4Id, ')
           ..write('transactionType: $transactionType, ')
-          ..write('currency: $currency, ')
           ..write('amount: $amount, ')
-          ..write('amountConverted: $amountConverted, ')
-          ..write('originalCurrency: $originalCurrency, ')
+          ..write('currency: $currency, ')
+          ..write('amountBeforeConversion: $amountBeforeConversion, ')
+          ..write('currencyBeforeConversion: $currencyBeforeConversion, ')
           ..write('title: $title, ')
           ..write('comment: $comment, ')
           ..write('date: $date, ')
@@ -3945,10 +3965,10 @@ typedef $$TransactionsTableCreateCompanionBuilder =
       Value<int?> category3Id,
       Value<int?> category4Id,
       required String transactionType,
-      required String currency,
       required double amount,
-      Value<double?> amountConverted,
-      Value<String?> originalCurrency,
+      required String currency,
+      Value<double?> amountBeforeConversion,
+      Value<String?> currencyBeforeConversion,
       Value<String?> title,
       Value<String?> comment,
       required DateTime date,
@@ -3964,10 +3984,10 @@ typedef $$TransactionsTableUpdateCompanionBuilder =
       Value<int?> category3Id,
       Value<int?> category4Id,
       Value<String> transactionType,
-      Value<String> currency,
       Value<double> amount,
-      Value<double?> amountConverted,
-      Value<String?> originalCurrency,
+      Value<String> currency,
+      Value<double?> amountBeforeConversion,
+      Value<String?> currencyBeforeConversion,
       Value<String?> title,
       Value<String?> comment,
       Value<DateTime> date,
@@ -4143,23 +4163,23 @@ class $$TransactionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get currency => $composableBuilder(
-    column: $table.currency,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<double> get amount => $composableBuilder(
     column: $table.amount,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get amountConverted => $composableBuilder(
-    column: $table.amountConverted,
+  ColumnFilters<String> get currency => $composableBuilder(
+    column: $table.currency,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get originalCurrency => $composableBuilder(
-    column: $table.originalCurrency,
+  ColumnFilters<double> get amountBeforeConversion => $composableBuilder(
+    column: $table.amountBeforeConversion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currencyBeforeConversion => $composableBuilder(
+    column: $table.currencyBeforeConversion,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4366,23 +4386,23 @@ class $$TransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get currency => $composableBuilder(
-    column: $table.currency,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<double> get amount => $composableBuilder(
     column: $table.amount,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get amountConverted => $composableBuilder(
-    column: $table.amountConverted,
+  ColumnOrderings<String> get currency => $composableBuilder(
+    column: $table.currency,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get originalCurrency => $composableBuilder(
-    column: $table.originalCurrency,
+  ColumnOrderings<double> get amountBeforeConversion => $composableBuilder(
+    column: $table.amountBeforeConversion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currencyBeforeConversion => $composableBuilder(
+    column: $table.currencyBeforeConversion,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -4562,19 +4582,19 @@ class $$TransactionsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get currency =>
-      $composableBuilder(column: $table.currency, builder: (column) => column);
-
   GeneratedColumn<double> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
 
-  GeneratedColumn<double> get amountConverted => $composableBuilder(
-    column: $table.amountConverted,
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<double> get amountBeforeConversion => $composableBuilder(
+    column: $table.amountBeforeConversion,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get originalCurrency => $composableBuilder(
-    column: $table.originalCurrency,
+  GeneratedColumn<String> get currencyBeforeConversion => $composableBuilder(
+    column: $table.currencyBeforeConversion,
     builder: (column) => column,
   );
 
@@ -4799,10 +4819,10 @@ class $$TransactionsTableTableManager
                 Value<int?> category3Id = const Value.absent(),
                 Value<int?> category4Id = const Value.absent(),
                 Value<String> transactionType = const Value.absent(),
-                Value<String> currency = const Value.absent(),
                 Value<double> amount = const Value.absent(),
-                Value<double?> amountConverted = const Value.absent(),
-                Value<String?> originalCurrency = const Value.absent(),
+                Value<String> currency = const Value.absent(),
+                Value<double?> amountBeforeConversion = const Value.absent(),
+                Value<String?> currencyBeforeConversion = const Value.absent(),
                 Value<String?> title = const Value.absent(),
                 Value<String?> comment = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
@@ -4816,10 +4836,10 @@ class $$TransactionsTableTableManager
                 category3Id: category3Id,
                 category4Id: category4Id,
                 transactionType: transactionType,
-                currency: currency,
                 amount: amount,
-                amountConverted: amountConverted,
-                originalCurrency: originalCurrency,
+                currency: currency,
+                amountBeforeConversion: amountBeforeConversion,
+                currencyBeforeConversion: currencyBeforeConversion,
                 title: title,
                 comment: comment,
                 date: date,
@@ -4835,10 +4855,10 @@ class $$TransactionsTableTableManager
                 Value<int?> category3Id = const Value.absent(),
                 Value<int?> category4Id = const Value.absent(),
                 required String transactionType,
-                required String currency,
                 required double amount,
-                Value<double?> amountConverted = const Value.absent(),
-                Value<String?> originalCurrency = const Value.absent(),
+                required String currency,
+                Value<double?> amountBeforeConversion = const Value.absent(),
+                Value<String?> currencyBeforeConversion = const Value.absent(),
                 Value<String?> title = const Value.absent(),
                 Value<String?> comment = const Value.absent(),
                 required DateTime date,
@@ -4852,10 +4872,10 @@ class $$TransactionsTableTableManager
                 category3Id: category3Id,
                 category4Id: category4Id,
                 transactionType: transactionType,
-                currency: currency,
                 amount: amount,
-                amountConverted: amountConverted,
-                originalCurrency: originalCurrency,
+                currency: currency,
+                amountBeforeConversion: amountBeforeConversion,
+                currencyBeforeConversion: currencyBeforeConversion,
                 title: title,
                 comment: comment,
                 date: date,

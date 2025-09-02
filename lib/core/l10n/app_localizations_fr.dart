@@ -367,7 +367,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ilsCountryName => 'Israël';
 
   @override
-  String get aedCurrencyName => 'Dirham des EAU';
+  String get aedCurrencyName => 'Dirham des E.A.U';
 
   @override
   String get aedCountryName => 'Émirats Arabes Unis';

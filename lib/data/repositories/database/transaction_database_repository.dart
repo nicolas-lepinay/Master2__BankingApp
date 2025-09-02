@@ -132,7 +132,7 @@ class TransactionDatabaseRepository {
     required String transactionType,
     required String currency,
     required double amount,
-    double? amountConverted,
+    double? amountBeforeConversion,
     String? title,
     String? comment,
     required DateTime date,
@@ -151,7 +151,7 @@ class TransactionDatabaseRepository {
             transactionType: Value(transactionType),
             currency: Value(currency),
             amount: Value(amount),
-            amountConverted: Value(amountConverted),
+            amountBeforeConversion: Value(amountBeforeConversion),
             title: Value(title),
             comment: Value(comment),
             date: Value(date),
@@ -172,7 +172,7 @@ class TransactionDatabaseRepository {
     String? transactionType,
     String? currency,
     double? amount,
-    double? amountConverted,
+    double? amountBeforeConversion,
     String? title,
     String? comment,
     DateTime? date,
@@ -200,8 +200,8 @@ class TransactionDatabaseRepository {
           : const Value.absent(),
       currency: currency != null ? Value(currency) : const Value.absent(),
       amount: amount != null ? Value(amount) : const Value.absent(),
-      amountConverted: amountConverted != null
-          ? Value(amountConverted)
+      amountBeforeConversion: amountBeforeConversion != null
+          ? Value(amountBeforeConversion)
           : const Value.absent(),
       title: title != null ? Value(title) : const Value.absent(),
       comment: comment != null ? Value(comment) : const Value.absent(),

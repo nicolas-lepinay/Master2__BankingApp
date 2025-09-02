@@ -1,6 +1,7 @@
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
+import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/domain/entities/account.dart';
 import 'package:bankapp/domain/entities/transaction.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
@@ -40,16 +41,47 @@ class _AddTransactionBottomSheetMvvmV2State
   int _currentPageIndex = 0;
   final int _totalPages = 2;
 
-  // État de validation du formulaire
-  String _transactionAmount = '';
-  String _convertedAmount = '';
+  // État de validation du formulaire - Nouvelle sémantique
+  String _transactionAmount =
+      ''; // Montant saisi par utilisateur (dans devise sélectionnée)
+  String _convertedAmount = ''; // Montant converti (dans devise du compte)
   String _targetCurrency =
-      ''; // Devise cible pour conversion (initialisée avec la devise du compte)
+      ''; // Devise sélectionnée par utilisateur (initialisée avec devise du compte)
   bool _isLoadingConversion = false;
   TransactionType _transactionType = TransactionType.expense;
   Account? _selectedAccount;
-  bool get _isFormValid =>
-      _transactionAmount.isNotEmpty && _selectedAccount != null;
+
+  // Champs de la page 2 (optionnels)
+  DateTime _selectedDate = DateTime.now();
+  String _transactionTitle = '';
+  String _transactionComment = '';
+  int? _selectedCounterpartyId;
+  List<int> _selectedCategoryIds = [];
+  TransactionStatus _selectedStatus = TransactionStatus.completed;
+
+  bool get _isFormValid {
+    if (_selectedAccount == null) return false;
+
+    // Si pas de conversion : seul le montant original doit être rempli
+    if (!_hasConversion) {
+      return _transactionAmount.isNotEmpty;
+    }
+
+    // Si conversion : les deux montants doivent être remplis
+    return _transactionAmount.isNotEmpty && _convertedAmount.isNotEmpty;
+  }
+
+  // Helpers pour la nouvelle sémantique
+  bool get _hasConversion =>
+      _selectedAccount != null && _targetCurrency != _selectedAccount!.currency;
+
+  String get _finalAmountForTransaction {
+    if (_hasConversion && _convertedAmount.isNotEmpty) {
+      return _convertedAmount; // Montant converti = amount dans nouvelle sémantique
+    } else {
+      return _transactionAmount; // Montant direct = amount dans nouvelle sémantique
+    }
+  }
 
   // Utilisation de _convertedAmount pour éviter le warning
   String get displayConvertedAmount =>
@@ -101,10 +133,13 @@ class _AddTransactionBottomSheetMvvmV2State
   void _onAmountChanged(String amount) {
     setState(() {
       _transactionAmount = amount;
-      // TODO: Déclencher la conversion en temps réel
-      if (amount.isNotEmpty &&
-          _selectedAccount != null &&
+
+      // Si le montant original est vide, vider le montant converti
+      if (amount.isEmpty) {
+        _convertedAmount = '';
+      } else if (_selectedAccount != null &&
           _selectedAccount!.currency != _targetCurrency) {
+        // Déclencher la conversion en temps réel
         _performCurrencyConversion(amount);
       } else {
         _convertedAmount = '';
@@ -194,7 +229,49 @@ class _AddTransactionBottomSheetMvvmV2State
   }
 
   void _validateTransaction() {
-    // TODO: Implémenter la validation et création de transaction
+    if (!_isFormValid) return;
+
+    // Créer transaction avec nouvelle sémantique
+    final finalAmount = double.tryParse(_finalAmountForTransaction);
+    if (finalAmount == null) return;
+
+    final newTransaction = Transaction(
+      id: 0, // Sera assigné par la DB
+      accountId: _selectedAccount!.id,
+      type: _transactionType,
+      // NOUVELLE SÉMANTIQUE : amount est toujours dans devise du compte
+      amount: finalAmount,
+      currency: _selectedAccount!.currency, // Toujours devise du compte
+      // Si conversion : garder montant et devise originaux
+      amountBeforeConversion: _hasConversion
+          ? double.tryParse(_transactionAmount)
+          : null,
+      currencyBeforeConversion: _hasConversion ? _targetCurrency : null,
+      // Champs de la page 2 (optionnels)
+      date:
+          _selectedDate, // Utiliser la date sélectionnée ou DateTime.now() par défaut
+      title: _transactionTitle.isEmpty ? null : _transactionTitle,
+      comment: _transactionComment.isEmpty ? null : _transactionComment,
+      counterpartyId: _selectedCounterpartyId,
+      category1Id: _selectedCategoryIds.isNotEmpty
+          ? _selectedCategoryIds[0]
+          : null,
+      category2Id: _selectedCategoryIds.length > 1
+          ? _selectedCategoryIds[1]
+          : null,
+      category3Id: _selectedCategoryIds.length > 2
+          ? _selectedCategoryIds[2]
+          : null,
+      category4Id: _selectedCategoryIds.length > 3
+          ? _selectedCategoryIds[3]
+          : null,
+      status: _selectedStatus,
+    );
+
+    // TODO: Appeler le repository pour créer la transaction
+    // final transactionRepository = ref.read(transactionRepositoryProvider);
+    // await transactionRepository.createTransaction(newTransaction);
+
     Navigator.of(context).pop();
   }
 
@@ -247,7 +324,7 @@ class _AddTransactionBottomSheetMvvmV2State
                   Expanded(
                     child: PageView(
                       controller: _pageController,
-                      scrollDirection: Axis.vertical,
+                      scrollDirection: Axis.horizontal,
                       onPageChanged: _onPageChanged,
                       children: [
                         // Page 1 - Transaction Details (selon maquette)
@@ -345,6 +422,7 @@ class _AddTransactionBottomSheetMvvmV2State
                   // Reset de la devise et de la conversion lors du changement de compte
                   _targetCurrency = account.currency;
                   _convertedAmount = '';
+                  // Note: _transactionAmount reste inchangé pour préserver la saisie utilisateur
                 });
               },
               accountSummaries: accountSummaries,
@@ -364,10 +442,8 @@ class _AddTransactionBottomSheetMvvmV2State
           onAmountChanged: _onAmountChanged,
           onConvertedAmountChanged: _onConvertedAmountChanged,
           onConversionCurrencyChanged: _onConversionCurrencyChanged,
-          initialAmount: _transactionAmount.isEmpty ? null : _transactionAmount,
-          convertedAmount: _convertedAmount.isNotEmpty
-              ? _convertedAmount
-              : null,
+          initialAmount: _transactionAmount,
+          convertedAmount: _convertedAmount,
           conversionCurrency: _targetCurrency != _selectedAccount?.currency
               ? _targetCurrency
               : null,
@@ -383,30 +459,419 @@ class _AddTransactionBottomSheetMvvmV2State
     final l10n = AppLocalizations.of(context)!;
     final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Titre de section
           Text(
-            'Page ${_currentPageIndex + 1} - ${l10n.transactionDetails}',
+            l10n.transactionDetails,
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
               color: appTheme.text1,
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 16.h),
+
           Text(
-            '${l10n.date}, ${l10n.counterparty}, ${l10n.category}',
-            style: TextStyle(fontSize: 16, color: appTheme.text2),
+            'Champs optionnels',
+            style: TextStyle(fontSize: 14.sp, color: appTheme.text3),
           ),
-          const SizedBox(height: 20),
-          Text(
-            'Total pages: $_totalPages',
-            style: TextStyle(fontSize: 12, color: appTheme.text3),
-          ),
+          SizedBox(height: 24.h),
+
+          // Champ Date
+          _buildDateField(),
+          SizedBox(height: 20.h),
+
+          // Champ Titre
+          _buildTitleField(),
+          SizedBox(height: 20.h),
+
+          // Champ Commentaire
+          _buildCommentField(),
+          SizedBox(height: 20.h),
+
+          // Champ Counterparty
+          _buildCounterpartyField(),
+          SizedBox(height: 20.h),
+
+          // Champ Catégories
+          _buildCategoryField(),
+          SizedBox(height: 20.h),
+
+          // Champ Statut
+          _buildStatusField(),
+          SizedBox(height: 200.h), // Espace pour le bouton flottant
         ],
+      ),
+    );
+  }
+
+  Widget _buildDateField() {
+    final l10n = AppLocalizations.of(context)!;
+    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.date,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: appTheme.text1,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        GestureDetector(
+          onTap: () async {
+            final date = await showDatePicker(
+              context: context,
+              initialDate: _selectedDate,
+              firstDate: DateTime(2020),
+              lastDate: DateTime(2030),
+            );
+            if (date != null) {
+              setState(() {
+                _selectedDate = date;
+              });
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              color: appTheme.buttonBackgroundDisabled!.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(
+                color: appTheme.text5!.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Text(
+              AppFormatters.formatDate(_selectedDate, context),
+              style: TextStyle(fontSize: 16.sp, color: appTheme.text1),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTitleField() {
+    final l10n = AppLocalizations.of(context)!;
+    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.title,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: appTheme.text1,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        TextField(
+          onChanged: (value) {
+            setState(() {
+              _transactionTitle = value;
+            });
+          },
+          decoration: InputDecoration(
+            hintText: 'Ex: Achat supermarché',
+            hintStyle: TextStyle(color: appTheme.text3, fontSize: 16.sp),
+            filled: true,
+            fillColor: appTheme.buttonBackgroundDisabled!.withValues(
+              alpha: 0.1,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(
+                color: appTheme.text5!.withValues(alpha: 0.3),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(
+                color: appTheme.text5!.withValues(alpha: 0.3),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(
+                color: appTheme.buttonBackground1!,
+                width: 2,
+              ),
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 12.h,
+            ),
+          ),
+          style: TextStyle(fontSize: 16.sp, color: appTheme.text1),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCommentField() {
+    final l10n = AppLocalizations.of(context)!;
+    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.comment,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: appTheme.text1,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        TextField(
+          onChanged: (value) {
+            setState(() {
+              _transactionComment = value;
+            });
+          },
+          maxLines: 3,
+          decoration: InputDecoration(
+            hintText: 'Notes supplémentaires...',
+            hintStyle: TextStyle(color: appTheme.text3, fontSize: 16.sp),
+            filled: true,
+            fillColor: appTheme.buttonBackgroundDisabled!.withValues(
+              alpha: 0.1,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(
+                color: appTheme.text5!.withValues(alpha: 0.3),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(
+                color: appTheme.text5!.withValues(alpha: 0.3),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: BorderSide(
+                color: appTheme.buttonBackground1!,
+                width: 2,
+              ),
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 12.h,
+            ),
+          ),
+          style: TextStyle(fontSize: 16.sp, color: appTheme.text1),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCounterpartyField() {
+    final l10n = AppLocalizations.of(context)!;
+    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.counterparty,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: appTheme.text1,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        GestureDetector(
+          onTap: () {
+            // TODO: Ouvrir sélecteur de counterparty
+            // showCounterpartySelector();
+          },
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              color: appTheme.buttonBackgroundDisabled!.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(
+                color: appTheme.text5!.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _selectedCounterpartyId != null
+                      ? 'Counterparty sélectionnée' // TODO: Récupérer le nom réel
+                      : 'Sélectionner une contrepartie',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: _selectedCounterpartyId != null
+                        ? appTheme.text1
+                        : appTheme.text3,
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16.sp,
+                  color: appTheme.text3,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategoryField() {
+    final l10n = AppLocalizations.of(context)!;
+    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.category,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: appTheme.text1,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        GestureDetector(
+          onTap: () {
+            // TODO: Ouvrir sélecteur de catégories
+            // showCategorySelector();
+          },
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              color: appTheme.buttonBackgroundDisabled!.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(
+                color: appTheme.text5!.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _selectedCategoryIds.isNotEmpty
+                      ? '${_selectedCategoryIds.length} catégories sélectionnées'
+                      : 'Sélectionner des catégories',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: _selectedCategoryIds.isNotEmpty
+                        ? appTheme.text1
+                        : appTheme.text3,
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16.sp,
+                  color: appTheme.text3,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusField() {
+    final l10n = AppLocalizations.of(context)!;
+    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.status,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: appTheme.text1,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatusOption(
+                'Terminée',
+                TransactionStatus.completed,
+                Colors.green,
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: _buildStatusOption(
+                'En attente',
+                TransactionStatus.pending,
+                Colors.orange,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusOption(
+    String label,
+    TransactionStatus status,
+    Color color,
+  ) {
+    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+    final isSelected = _selectedStatus == status;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedStatus = status;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? color.withValues(alpha: 0.1)
+              : appTheme.buttonBackgroundDisabled!.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: isSelected ? color : appTheme.text5!.withValues(alpha: 0.3),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              color: isSelected ? color : appTheme.text2,
+            ),
+          ),
+        ),
       ),
     );
   }

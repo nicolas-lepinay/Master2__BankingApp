@@ -244,11 +244,11 @@ class TransactionDetailScreen extends ConsumerWidget {
 
             _buildDetailRow('ID Transaction', '#${transaction.id}', Icons.tag),
 
-            if (transaction.amountConverted != null) ...[
+            if (transaction.amountBeforeConversion != null) ...[
               _buildDetailRow(
                 'Montant converti',
                 AppFormatters.formatCurrency(
-                  transaction.amountConverted!,
+                  transaction.amountBeforeConversion!,
                   transaction.currency,
                   context,
                 ),

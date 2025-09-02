@@ -274,6 +274,8 @@ class _ExchangeRatesBottomSheetState
                   // Nom de la devise
                   Text(
                     currency.getDisplayName(l10n).toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 17.sp,
                       fontWeight: FontWeight.w400,
@@ -297,6 +299,8 @@ class _ExchangeRatesBottomSheetState
                 ],
               ),
             ),
+
+            SizedBox(width: AppConstants.largePadding.w),
 
             // Indicateur de sélection
             Container(
