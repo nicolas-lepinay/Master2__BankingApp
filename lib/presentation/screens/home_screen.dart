@@ -1,6 +1,7 @@
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
+import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/presentation/providers/card_swiper_provider.dart';
@@ -15,14 +16,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class HomeScreenMVVM extends ConsumerStatefulWidget {
-  const HomeScreenMVVM({super.key});
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreenMVVM> createState() => _HomeScreenMVVMState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
+class _HomeScreenState extends ConsumerState<HomeScreen>
     with TickerProviderStateMixin {
   bool _shouldPlayCardAnimation = false;
   late AnimationController _containerAnimationController;
@@ -68,42 +69,46 @@ class _HomeScreenMVVMState extends ConsumerState<HomeScreenMVVM>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return _buildMainScreen(context, l10n);
+    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+
+    return _buildMainScreen(context, l10n, appTheme);
   }
 
-  Widget _buildMainScreen(BuildContext context, AppLocalizations l10n) {
+  Widget _buildMainScreen(
+    BuildContext context,
+    AppLocalizations l10n,
+    AppColorsExtended appTheme,
+  ) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarBrightness: Brightness.light,
         statusBarIconBrightness: Brightness.dark,
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.black,
-        systemNavigationBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.light, //
       ),
       child: Scaffold(
         backgroundColor: AppColors.surfaceLight,
-        body: SafeArea(
-          child: Stack(
-            children: [
-              Column(
+        body: Stack(
+          children: [
+            SafeArea(
+              child: Column(
                 children: [
                   _buildHeader(context, l10n),
                   SizedBox(height: 40.h),
                   _buildCardsSection(context, l10n),
                 ],
               ),
-              DraggableBlackContainer(
-                onDragUpdate: _onContainerDragUpdate,
-                onStatisticsPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Statistiques - À implémenter'),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
+            ),
+            DraggableBlackContainer(
+              onDragUpdate: _onContainerDragUpdate,
+              onStatisticsPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Statistiques - À implémenter')),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

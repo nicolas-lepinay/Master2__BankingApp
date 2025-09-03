@@ -72,8 +72,7 @@ class DashedButton extends StatelessWidget {
                             AppTextStyles.buttonTextLarge.fontWeight),
                         fontSize:
                             (textStyle?.fontSize ??
-                                    AppTextStyles.buttonTextLarge.fontSize)!
-                                .sp,
+                            AppTextStyles.buttonTextLarge.fontSize)!,
                       ),
                       textAlign: TextAlign.start,
                     ),

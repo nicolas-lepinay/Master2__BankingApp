@@ -29,7 +29,8 @@ class AppTheme {
         onPrimary: AppColors.onSurfaceDark,
         onSecondary: AppColors.onSurfaceLight,
         onError: AppColors.onSurfaceDark,
-        surface: AppColorsExtended.light.background2!,
+        surface:
+            AppColorsExtended.light.background2!, // Default Scaffold background
         onSurface: AppColorsExtended.light.text1!,
       ),
 
@@ -140,7 +141,8 @@ class AppTheme {
         onPrimary: AppColors.onSurfaceDark,
         onSecondary: AppColors.onSurfaceLight,
         onError: AppColors.onSurfaceDark,
-        surface: AppColorsExtended.dark.background2!,
+        surface:
+            AppColorsExtended.dark.background2!, // Default Scaffold background
         onSurface: AppColorsExtended.dark.text1!,
       ),
 

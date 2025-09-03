@@ -80,7 +80,7 @@ class _ExchangeRatesBottomSheetState
               horizontal: AppConstants.defaultPadding.w,
             ),
             child: Text(
-              'Autres devises', // TODO: l10n.otherCurrencies
+              l10n.otherCurrencies,
               style: AppTextStyles.sectionHeader.copyWith(
                 color: appTheme.textInvert,
               ),
@@ -198,8 +198,12 @@ class _ExchangeRatesBottomSheetState
 
     return ListView.builder(
       shrinkWrap: true,
-      physics: const BouncingScrollPhysics(),
-      padding: EdgeInsets.symmetric(horizontal: AppConstants.defaultPadding.w),
+      physics: const BouncingScrollPhysics(), //
+      padding: EdgeInsets.only(
+        left: AppConstants.defaultPadding.w,
+        right: AppConstants.defaultPadding.w,
+        bottom: AppConstants.veryLargePadding.h,
+      ),
       itemCount: availableCurrencies.length,
       itemBuilder: (context, index) {
         final currency = availableCurrencies[index];
@@ -292,8 +296,7 @@ class _ExchangeRatesBottomSheetState
                   // Taux de change
                   Text(
                     isAccountCurrency
-                        ? 'Devise du compte'
-                              .toUpperCase() // TODO: l10n.baseCurrency
+                        ? l10n.accountCurrency.toUpperCase()
                         : '1 ${widget.baseCurrency} = ${AppFormatters.formatAmount(exchangeRate, currencyCode, showSign: false, context: context)}',
                     style: AppTextStyles.bodyLarge.copyWith(
                       color: appTheme.text4,

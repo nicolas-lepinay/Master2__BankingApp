@@ -25,6 +25,7 @@ class FloatingNavbar extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      useSafeArea: true,
       builder: (context) => const AddTransactionBottomSheet(),
     ).then((_) {
       // Invalider les providers liés aux transactions après fermeture

@@ -260,6 +260,18 @@ abstract class AppLocalizations {
   /// **'Solde'**
   String get balance;
 
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @display.
+  ///
+  /// In en, this message translates to:
+  /// **'Display'**
+  String get display;
+
   /// No description provided for @expectedBalance.
   ///
   /// In en, this message translates to:

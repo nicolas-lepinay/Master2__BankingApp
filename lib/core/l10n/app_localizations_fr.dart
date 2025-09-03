@@ -90,6 +90,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get balance => 'Solde';
 
   @override
+  String get settings => 'Paramètres';
+
+  @override
+  String get display => 'Apparence';
+
+  @override
   String get expectedBalance => 'Solde attendu';
 
   @override

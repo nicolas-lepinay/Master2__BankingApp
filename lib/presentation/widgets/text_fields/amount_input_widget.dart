@@ -159,7 +159,7 @@ class _AmountInputWidgetV2State extends ConsumerState<AmountInputWidget> {
     final baseCurrency = widget.selectedAccount!.currency;
     final selectedCurrency = widget.conversionCurrency ?? baseCurrency;
 
-    // Forcer la fermeture du clavier AVANT d'ouvrir la BottomSheet
+    // Forcer la fermeture du clavier AVANT d'ouvrir la BottomSheets
     _dismissKeyboard();
 
     setState(() {

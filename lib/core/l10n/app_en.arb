@@ -27,6 +27,10 @@
   "credit": "Credit",
   "balance": "Solde",
 
+  "@_SETTINGS_SCREEN": {},
+  "settings": "Settings",
+  "display": "Display",
+
   "expectedBalance": "Expected Balance",
   "actualBalance": "Actual Balance",
   "status": "Status",

@@ -35,7 +35,7 @@ class DraggableBlackContainer extends ConsumerStatefulWidget {
 class _DraggableBlackContainerState
     extends ConsumerState<DraggableBlackContainer> {
   late DraggableScrollableController _dragController;
-  double _currentExtent = 0.72; // Position initiale
+  double _currentExtent = 0.68; // Position initiale
 
   @override
   void initState() {
@@ -70,11 +70,11 @@ class _DraggableBlackContainerState
 
     return DraggableScrollableSheet(
       controller: _dragController,
-      initialChildSize: 0.72,
-      minChildSize: 0.17,
-      maxChildSize: 0.86,
+      initialChildSize: 0.68,
+      minChildSize: 0.20,
+      maxChildSize: 0.81,
       snap: true,
-      snapSizes: const [0.17, 0.72, 0.86], // Points d'accroche
+      snapSizes: const [0.20, 0.68, 0.81], // Points d'accroche
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
@@ -149,7 +149,7 @@ class _DraggableBlackContainerState
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text("Statistiques"),
+          Text(l10n.statistics),
           Icon(
             CupertinoIcons.arrow_up_right,
             color: AppColors.textLight100,

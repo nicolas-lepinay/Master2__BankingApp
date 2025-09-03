@@ -86,12 +86,12 @@ class HalfSearchField extends StatelessWidget {
           ),
         ),
         contentPadding: EdgeInsets.symmetric(
-          horizontal: AppConstants.veryLargePadding.r,
+          horizontal: AppConstants.mediumPadding.r,
           vertical: AppConstants.mediumPadding.r,
         ),
         prefixIcon: isLeftSide && iconData != null
             ? Padding(
-                padding: EdgeInsets.only(left: AppConstants.mediumPadding.r),
+                padding: EdgeInsets.only(left: AppConstants.smallPadding.r),
                 child: Icon(
                   iconData,
                   color: appTheme.text5!.withValues(alpha: 0.5),
@@ -101,7 +101,7 @@ class HalfSearchField extends StatelessWidget {
             : null,
         suffixIcon: !isLeftSide && iconData != null
             ? Padding(
-                padding: EdgeInsets.only(right: AppConstants.mediumPadding.r),
+                padding: EdgeInsets.only(right: AppConstants.smallPadding.r),
                 child: Icon(
                   iconData,
                   color: appTheme.text5!.withValues(alpha: 0.5),

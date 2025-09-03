@@ -90,6 +90,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get balance => 'Solde';
 
   @override
+  String get settings => 'Settings';
+
+  @override
+  String get display => 'Display';
+
+  @override
   String get expectedBalance => 'Expected Balance';
 
   @override

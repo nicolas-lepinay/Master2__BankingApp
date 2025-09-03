@@ -52,6 +52,10 @@
   "filtered": "Filtrés",
   "error": "Erreur",
 
+  "@_SETTINGS_SCREEN": {},
+  "settings": "Paramètres",
+  "display": "Apparence",
+
   "@_CURRENCIES": {},
   "euroCurrencyName": "Euro",
   "euroCountryName": "Union Européenne",

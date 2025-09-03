@@ -19,17 +19,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class AddTransactionBottomSheet extends ConsumerStatefulWidget {
   const AddTransactionBottomSheet({super.key});
 
-  static void show(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      enableDrag: true,
-      isDismissible: true,
-      builder: (context) => const AddTransactionBottomSheet(),
-    );
-  }
-
   @override
   ConsumerState<AddTransactionBottomSheet> createState() =>
       _AddTransactionBottomSheet();
@@ -102,7 +91,7 @@ class _AddTransactionBottomSheet
   }
 
   void _initializeDefaultAccount() {
-    // Récupérer le compte sélectionné depuis home_screen_mvvm.dart
+    // Récupérer le compte sélectionné depuis home_screen.dart
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final selectedAccount = ref.read(selectedAccountProvider);
       final accounts = ref.read(accountsProvider);
