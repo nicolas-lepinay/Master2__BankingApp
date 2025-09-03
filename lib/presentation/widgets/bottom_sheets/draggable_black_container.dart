@@ -382,7 +382,9 @@ class _DraggableBlackContainerState
               child: DashedButton(
                 text: l10n.addTransaction,
                 icon: Icons.add,
-                textStyle: AppTextStyles.buttonText.copyWith(fontSize: 18.sp),
+                textStyle: AppTextStyles.buttonTextLarge.copyWith(
+                  fontSize: 18.sp,
+                ),
                 dashColor: Colors.white,
                 onTap: onAddTransaction,
               ),

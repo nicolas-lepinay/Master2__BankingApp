@@ -69,6 +69,20 @@ class _AmountTextFieldState extends State<AmountTextField> {
     return widget.transactionType == TransactionType.expense ? '-' : '+';
   }
 
+  Widget _buildCurrencySymbol(String currencySymbol) {
+    return Text(
+      currencySymbol,
+      style: AppTextStyles.h1.copyWith(
+        fontSize: 44.sp,
+        fontWeight: FontWeight.w600,
+        color: widget.gradient != null
+            ? widget.gradient!.colors.first
+            : widget.textColor,
+        height: 1.0,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final sign = _getTransactionSign();
@@ -100,17 +114,7 @@ class _AmountTextFieldState extends State<AmountTextField> {
 
         // Symbole de devise à gauche si nécessaire
         if (isSymbolLeft) ...[
-          Text(
-            currencySymbol,
-            style: AppTextStyles.h1.copyWith(
-              fontSize: 44.sp,
-              fontWeight: FontWeight.w600,
-              color: widget.gradient != null
-                  ? widget.gradient!.colors.first
-                  : widget.textColor,
-              height: 1.0,
-            ),
-          ),
+          _buildCurrencySymbol(currencySymbol),
           SizedBox(width: 10.w),
         ],
 
@@ -163,17 +167,7 @@ class _AmountTextFieldState extends State<AmountTextField> {
         // Symbole de devise à droite si nécessaire
         if (!isSymbolLeft) ...[
           SizedBox(width: 10.w),
-          Text(
-            currencySymbol,
-            style: AppTextStyles.h1.copyWith(
-              fontSize: 44.sp,
-              fontWeight: FontWeight.w600,
-              color: widget.gradient != null
-                  ? widget.gradient!.colors.last
-                  : widget.textColor,
-              height: 1.0,
-            ),
-          ),
+          _buildCurrencySymbol(currencySymbol),
         ],
       ],
     );

@@ -36,6 +36,9 @@ dependencies:
   flutter_animate: ^4.5.2
   http: ^1.4.0
   flutter_dotenv: ^5.2.1
+  lottie: ^3.3.1
+  video_player: ^2.10.0
+  dotlottie_loader: ^0.0.5
 
 dev_dependencies:
   flutter_test:
@@ -51,13 +54,16 @@ flutter:
   # Assets
   assets:
     - assets/icons/system/
+    - assets/animations/lottie/
+    - assets/animations/lottie/apple_hex18181D.mp4
+    - assets/animations/lottie/apple_hexF5F7FA.mp4
+
     - .env
   # Custom fonts
   fonts:
     - family: Pacifico
       fonts:
         - asset: assets/fonts/Pacifico-Regular.ttf
-
     - family: Outfit
       fonts:
         - asset: assets/fonts/Outfit-Black.ttf

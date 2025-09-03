@@ -23,7 +23,7 @@ class DashedButton extends StatelessWidget {
     super.key,
     this.text,
     this.icon,
-    this.textStyle = AppTextStyles.buttonText,
+    this.textStyle,
     this.dashColor = AppColors.defaultGray,
     this.onTap,
     this.width,
@@ -65,10 +65,15 @@ class DashedButton extends StatelessWidget {
                   Expanded(
                     child: Text(
                       text!,
-                      style: AppTextStyles.buttonText.copyWith(
+                      style: AppTextStyles.buttonTextLarge.copyWith(
                         color: dashColor,
-                        fontWeight: (textStyle?.fontWeight ?? FontWeight.w300),
-                        fontSize: (textStyle?.fontSize ?? 22).sp,
+                        fontWeight:
+                            (textStyle?.fontWeight ??
+                            AppTextStyles.buttonTextLarge.fontWeight),
+                        fontSize:
+                            (textStyle?.fontSize ??
+                                    AppTextStyles.buttonTextLarge.fontSize)!
+                                .sp,
                       ),
                       textAlign: TextAlign.start,
                     ),
@@ -79,7 +84,11 @@ class DashedButton extends StatelessWidget {
                   Icon(
                     icon,
                     color: dashColor,
-                    size: ((textStyle?.fontSize ?? 22) * 1.4).sp,
+                    size:
+                        ((textStyle?.fontSize ??
+                                    AppTextStyles.buttonTextLarge.fontSize)! *
+                                1.4)
+                            .sp,
                   ),
                 ],
               ],

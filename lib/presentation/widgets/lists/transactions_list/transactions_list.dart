@@ -227,7 +227,7 @@ class _TransactionsListState extends State<TransactionsList> {
     String dateLabel,
     bool isExpanded,
     Map<String, double> dayTotals,
-    List<domain.TransactionWithBalance> dayTransactions, // Nouveau paramètre
+    List<domain.TransactionWithBalance> dayTransactions,
   ) {
     return GestureDetector(
       onTap: _toggleAllHeaders, // Toggle tous les headers

@@ -75,9 +75,10 @@ class _FullTransactionsBottomSheetState
   }
 
   void _dismissKeyboard() {
-    FocusScope.of(context).unfocus();
     // Alternativement, on peut aussi utiliser :
     // FocusManager.instance.primaryFocus?.unfocus();
+    FocusScopeNode currentFocus = FocusScope.of(context);
+    if (!currentFocus.hasPrimaryFocus) currentFocus.unfocus();
   }
 
   void _navigateToTransactionDetail(domain.Transaction transaction) {

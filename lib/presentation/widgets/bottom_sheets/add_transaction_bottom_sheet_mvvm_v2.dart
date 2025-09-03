@@ -275,6 +275,11 @@ class _AddTransactionBottomSheetMvvmV2State
     }
   }
 
+  void _dismissKeyboard() {
+    FocusScopeNode currentFocus = FocusScope.of(context);
+    if (!currentFocus.hasPrimaryFocus) currentFocus.unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
     final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
@@ -286,71 +291,74 @@ class _AddTransactionBottomSheetMvvmV2State
       initialChildSize: 0.89,
       expand: false,
       builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: appTheme.background2,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+        return GestureDetector(
+          onTap: _dismissKeyboard,
+          child: Container(
+            decoration: BoxDecoration(
+              color: appTheme.background2,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
             ),
-          ),
-          child: Stack(
-            children: [
-              // Contenu principal avec PageView
-              Column(
-                children: [
-                  // Handle pour drag
-                  /*
-                  Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    height: 4,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      color: appTheme.text2,
-                      borderRadius: BorderRadius.circular(2),
+            child: Stack(
+              children: [
+                // Contenu principal avec PageView
+                Column(
+                  children: [
+                    // Handle pour drag
+                    /*
+                    Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      height: 4,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        color: appTheme.text2,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                  ),
-                  */
-                  SizedBox(height: 24.h),
+                    */
+                    SizedBox(height: 24.h),
 
-                  // PageIndicators
-                  PageIndicators(
-                    currentIndex: _currentPageIndex,
-                    totalPages: _totalPages,
-                  ),
-                  SizedBox(height: 24.h),
-
-                  // PageView qui prend toute la hauteur disponible
-                  Expanded(
-                    child: PageView(
-                      controller: _pageController,
-                      scrollDirection: Axis.horizontal,
-                      onPageChanged: _onPageChanged,
-                      children: [
-                        // Page 1 - Transaction Details (selon maquette)
-                        _buildPage1(),
-                        // Page 2 - Additional Fields (minimaliste)
-                        _buildPage2(),
-                      ],
+                    // PageIndicators
+                    PageIndicators(
+                      currentIndex: _currentPageIndex,
+                      totalPages: _totalPages,
                     ),
-                  ),
-                ],
-              ),
+                    SizedBox(height: 24.h),
 
-              // Bouton flottant en bas (par-dessus PageView)
-              Positioned(
-                bottom: 20,
-                left: 0,
-                right: 0,
-                child: FloatingActionButtonCustom(
-                  text: l10n.validateTransaction,
-                  iconData: CupertinoIcons.checkmark_alt,
-                  margin: 32.sp,
-                  isEnabled: _isFormValid,
-                  onPressed: _isFormValid ? _validateTransaction : null,
+                    // PageView qui prend toute la hauteur disponible
+                    Expanded(
+                      child: PageView(
+                        controller: _pageController,
+                        scrollDirection: Axis.horizontal,
+                        onPageChanged: _onPageChanged,
+                        children: [
+                          // Page 1 - Transaction Details (selon maquette)
+                          _buildPage1(),
+                          // Page 2 - Additional Fields (minimaliste)
+                          _buildPage2(),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+
+                // Bouton flottant en bas (par-dessus PageView)
+                Positioned(
+                  bottom: 60.h,
+                  left: 0,
+                  right: 0,
+                  child: FloatingActionButtonCustom(
+                    text: l10n.validateTransaction,
+                    iconData: CupertinoIcons.checkmark_alt,
+                    margin: 32.sp,
+                    isEnabled: _isFormValid,
+                    onPressed: _isFormValid ? _validateTransaction : null,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

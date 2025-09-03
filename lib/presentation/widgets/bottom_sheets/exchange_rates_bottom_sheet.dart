@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../helpers/superellipse_clipper.dart';
+
 class ExchangeRatesBottomSheet extends ConsumerStatefulWidget {
   final String baseCurrency;
   final String selectedCurrency;
@@ -70,6 +72,8 @@ class _ExchangeRatesBottomSheetState
           ),
 
           SizedBox(height: AppConstants.defaultPadding.h),
+
+          //Container(width: 200, height: 200, child: VideoAssetPlayer()),
 
           // Header
           Padding(
@@ -244,20 +248,23 @@ class _ExchangeRatesBottomSheetState
         margin: EdgeInsets.only(bottom: AppConstants.smallPadding.h),
         child: Row(
           children: [
-            // Symbole de devise dans un carré
-            Container(
-              width: 52.r,
-              height: 52.r,
-              decoration: BoxDecoration(
-                color: appTheme.text2!.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(16.r),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                currency.symbol,
-                style: AppTextStyles.h6.copyWith(
-                  fontSize: currency.symbol.length < 3 ? 22.sp : 16.sp,
-                  color: appTheme.textInvert,
+            // Symbole de devise dans un squircle
+            ClipPath(
+              clipper: SuperellipseClipper(n: 2.9),
+              child: Container(
+                width: 52.r,
+                height: 52.r,
+                decoration: BoxDecoration(
+                  color: appTheme.text2!.withValues(alpha: 0.11),
+                  //borderRadius: BorderRadius.circular(16.r),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  currency.symbol,
+                  style: AppTextStyles.h6.copyWith(
+                    fontSize: currency.symbol.length < 3 ? 22.sp : 16.sp,
+                    color: appTheme.textInvert,
+                  ),
                 ),
               ),
             ),

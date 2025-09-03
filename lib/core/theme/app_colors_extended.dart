@@ -163,7 +163,7 @@ class AppColorsExtended extends ThemeExtension<AppColorsExtended> {
     background1: AppColors.surfaceBrightLight,
     background2: AppColors.surfaceLight,
     background3: AppColors.surfaceDimLight,
-    backgroundInvert: AppColors.surfaceBrightDark,
+    backgroundInvert: AppColors.surfaceDark,
     // ✍️ Typography
     text1: AppColors.textDark100,
     text2: AppColors.textDark50,

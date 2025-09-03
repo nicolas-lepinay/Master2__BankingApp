@@ -269,10 +269,17 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
   );
 
-  static const TextStyle buttonText = TextStyle(
+  static TextStyle buttonTextLarge = TextStyle(
     fontFamily: defaultFontFamily,
     fontFamilyFallback: [robotoFontFamily],
-    fontSize: 23,
+    fontSize: 23.sp,
+    fontWeight: FontWeight.w400,
+  );
+
+  static TextStyle buttonTextMedium = TextStyle(
+    fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
+    fontSize: 20.sp,
     fontWeight: FontWeight.w400,
   );
 

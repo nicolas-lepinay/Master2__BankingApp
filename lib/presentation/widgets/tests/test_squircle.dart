@@ -7,7 +7,7 @@ class TestSquircle extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        minimumSize: const Size(400, 240), // width, height
+        minimumSize: const Size(240, 240), // width, height
         shape: ContinuousRectangleBorder(
           side: BorderSide.none,
           borderRadius: BorderRadius.all(Radius.circular(125)),

@@ -4,6 +4,7 @@ import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {
@@ -64,15 +65,15 @@ class AppTheme {
       // Input decoration theme
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(22.r),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(22.r),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(22.r),
           borderSide: BorderSide.none,
         ),
         filled: true,
@@ -88,11 +89,12 @@ class AppTheme {
               AppColorsExtended.light.buttonBackgroundDisabled!,
           disabledForegroundColor:
               AppColorsExtended.light.buttonForegroundDisabled!,
-          textStyle: AppTextStyles.buttonText,
+          textStyle: AppTextStyles.buttonTextLarge,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(24.r),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 34, vertical: 20),
+          padding: EdgeInsets.symmetric(horizontal: 34.sp, vertical: 20.sp),
+          elevation: 0,
         ),
       ),
 
@@ -174,15 +176,15 @@ class AppTheme {
       // Input decoration theme
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(22.r),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(22.r),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(22.r),
           borderSide: BorderSide.none,
         ),
         filled: true,
@@ -198,11 +200,12 @@ class AppTheme {
               AppColorsExtended.dark.buttonBackgroundDisabled!,
           disabledForegroundColor:
               AppColorsExtended.dark.buttonForegroundDisabled!,
-          textStyle: AppTextStyles.buttonText,
+          textStyle: AppTextStyles.buttonTextLarge,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(24.r),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          padding: EdgeInsets.symmetric(horizontal: 24.sp, vertical: 20.sp),
+          elevation: 0,
         ),
       ),
 
