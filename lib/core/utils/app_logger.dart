@@ -45,11 +45,11 @@ class AppLogger {
       debugPrint(logMessage);
       // Force print pour IntelliJ debugging
       // ignore: avoid_print
-      print(logMessage);
+      //print(logMessage);
       if (error != null) {
         debugPrint('  ❌ Error: $error');
         // ignore: avoid_print
-        print('  ❌ Error: $error');
+        //print('  ❌ Error: $error');
       }
     }
   }

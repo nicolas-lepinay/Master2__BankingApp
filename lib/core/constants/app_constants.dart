@@ -7,13 +7,19 @@ class AppConstants {
   static const String databaseName = 'bankapp.db';
 
   // UI Constants
-  static const double cardBorderRadius = 32.0;
   static const double verySmallPadding = 8.0;
   static const double smallPadding = 12.0;
   static const double defaultPadding = 16.0;
   static const double mediumPadding = 20.0;
   static const double largePadding = 24.0;
   static const double veryLargePadding = 32.0;
+
+  // Bank Card Swiper
+  static const double cardBorderRadius = 32.0;
+
+  // Account Carousel
+  static const double accountCarouselViewport = 0.45;
+  static const double accountCarouselSpacing = 14.0;
 
   // Animation durations
   static const Duration shortAnimation = Duration(milliseconds: 200);

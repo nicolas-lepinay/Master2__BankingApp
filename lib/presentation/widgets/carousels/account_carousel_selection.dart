@@ -16,14 +16,16 @@ class AccountCarouselSelection extends ConsumerStatefulWidget {
   final List<domain.AccountSummary> accountSummaries;
   final double cardSize;
   final double spacing;
+  final double viewportFraction;
 
   const AccountCarouselSelection({
     super.key,
     required this.selectedAccount,
     required this.onAccountSelected,
     required this.accountSummaries,
-    this.cardSize = 125.0,
-    this.spacing = 16.0,
+    this.cardSize = 175.0,
+    this.spacing = 14.0,
+    this.viewportFraction = 0.45,
   });
 
   @override
@@ -41,7 +43,7 @@ class _AccountCarouselSelectionState
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    _pageController = PageController(viewportFraction: 0.42);
+    _pageController = PageController(viewportFraction: widget.viewportFraction);
     // Auto scroll vers l'élément sélectionné après le premier build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToSelectedAccount();

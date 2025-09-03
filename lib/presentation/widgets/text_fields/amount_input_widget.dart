@@ -11,7 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class AmountInputWidgetV2 extends ConsumerStatefulWidget {
+class AmountInputWidget extends ConsumerStatefulWidget {
   final TransactionType transactionType;
   final Account? selectedAccount;
   final Function(String) onAmountChanged;
@@ -20,8 +20,9 @@ class AmountInputWidgetV2 extends ConsumerStatefulWidget {
   final String? initialAmount;
   final String? convertedAmount;
   final String? conversionCurrency;
+  final Function(bool hasFocus)? onFocusChanged;
 
-  const AmountInputWidgetV2({
+  const AmountInputWidget({
     super.key,
     required this.transactionType,
     required this.selectedAccount,
@@ -31,35 +32,42 @@ class AmountInputWidgetV2 extends ConsumerStatefulWidget {
     this.initialAmount,
     this.convertedAmount,
     this.conversionCurrency,
+    this.onFocusChanged,
   });
 
   @override
-  ConsumerState<AmountInputWidgetV2> createState() =>
-      _AmountInputWidgetV2State();
+  ConsumerState<AmountInputWidget> createState() => _AmountInputWidgetV2State();
 }
 
-class _AmountInputWidgetV2State extends ConsumerState<AmountInputWidgetV2> {
+class _AmountInputWidgetV2State extends ConsumerState<AmountInputWidget> {
   late TextEditingController _controller;
-  late FocusNode _focusNode;
   String _currentAmount = '';
+  bool _mainTextFieldHasFocus = false;
+  bool _convertedTextFieldHasFocus = false;
+  // Flag pour détecter si une BottomSheet est ouverte
+  bool _isBottomSheetOpen = false;
+  // Timestamp de fermeture de BottomSheet
+  DateTime? _bottomSheetClosedAt;
+  // Flag pour interaction utilisateur avec TextField converti
+  bool _userIsInteractingWithConverted = false;
+  // Empêcher le focus automatique du TextField principal
+  bool _preventMainTextFieldAutoFocus = false;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialAmount ?? '');
-    _focusNode = FocusNode();
     _currentAmount = widget.initialAmount ?? '';
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _focusNode.dispose();
     super.dispose();
   }
 
   @override
-  void didUpdateWidget(AmountInputWidgetV2 oldWidget) {
+  void didUpdateWidget(AmountInputWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     // Si le montant initial a changé depuis l'extérieur, mettre à jour
@@ -72,6 +80,76 @@ class _AmountInputWidgetV2State extends ConsumerState<AmountInputWidgetV2> {
     }
   }
 
+  void _onMainTextFieldFocusChange(bool hasFocus) {
+    setState(() {
+      _mainTextFieldHasFocus = hasFocus;
+    });
+
+    // Vérifier si c'est un focus automatique juste après fermeture BottomSheet
+    if (_shouldIgnoreAutomaticFocus(hasFocus)) {
+      return;
+    }
+    // Vérifier si l'utilisateur interagit avec le TextField converti
+    if (_userIsInteractingWithConverted && hasFocus) {
+      return;
+    }
+    // Empêcher le focus automatique dans certains cas
+    if (_preventMainTextFieldAutoFocus && hasFocus) {
+      return;
+    }
+
+    // Utiliser WidgetsBinding pour s'assurer que le callback est exécuté après la mise à jour du widget
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _handleFocusChange();
+    });
+  }
+
+  void _onConvertedTextFieldFocusChange(bool hasFocus) {
+    // Marquer l'interaction utilisateur avec le TextField converti
+    if (hasFocus) {
+      _userIsInteractingWithConverted = true;
+    } else {
+      // Délai avant de réinitialiser le flag pour éviter les conflits
+      Future.delayed(const Duration(milliseconds: 100), () {
+        _userIsInteractingWithConverted = false;
+      });
+    }
+
+    setState(() {
+      _convertedTextFieldHasFocus = hasFocus;
+    });
+
+    // Vérifier si c'est un focus automatique juste après fermeture BottomSheet
+    if (_shouldIgnoreAutomaticFocus(hasFocus)) {
+      return;
+    }
+    // Utiliser WidgetsBinding pour s'assurer que le callback est exécuté après la mise à jour du widget
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _handleFocusChange();
+    });
+  }
+
+  /// Détermine si un focus doit être ignoré (focus automatique après fermeture BottomSheet)
+  bool _shouldIgnoreAutomaticFocus(bool hasFocus) {
+    if (!hasFocus || _bottomSheetClosedAt == null) return false;
+
+    final now = DateTime.now();
+    final timeSinceBottomSheetClosed = now.difference(_bottomSheetClosedAt!);
+
+    // Ignorer seulement le focus automatique dans les 200ms après fermeture BottomSheet
+    final shouldIgnore = timeSinceBottomSheetClosed.inMilliseconds < 200;
+    return shouldIgnore;
+  }
+
+  void _handleFocusChange() {
+    if (widget.onFocusChanged != null) {
+      // Si l'un des deux a le focus, signaler true
+      // Si aucun des deux n'a le focus, signaler false
+      final anyHasFocus = _mainTextFieldHasFocus || _convertedTextFieldHasFocus;
+      widget.onFocusChanged!(anyHasFocus);
+    }
+  }
+
   void _showExchangeRatesBottomSheet() {
     if (widget.selectedAccount == null ||
         widget.onConversionCurrencyChanged == null ||
@@ -80,6 +158,13 @@ class _AmountInputWidgetV2State extends ConsumerState<AmountInputWidgetV2> {
 
     final baseCurrency = widget.selectedAccount!.currency;
     final selectedCurrency = widget.conversionCurrency ?? baseCurrency;
+
+    // Forcer la fermeture du clavier AVANT d'ouvrir la BottomSheet
+    _dismissKeyboard();
+
+    setState(() {
+      _isBottomSheetOpen = true;
+    });
 
     showModalBottomSheet(
       context: context,
@@ -95,7 +180,35 @@ class _AmountInputWidgetV2State extends ConsumerState<AmountInputWidgetV2> {
           onCurrencySelected: widget.onConversionCurrencyChanged!,
         ),
       ),
-    );
+    ).then((_) {
+      // Forcer la fermeture du clavier DEUX fois pour s'assurer qu'il reste fermé
+      _dismissKeyboard();
+      Future.delayed(const Duration(milliseconds: 50), () {
+        _dismissKeyboard();
+      });
+
+      // Marquer le timestamp de fermeture de la BottomSheet et empêcher l'auto-focus
+      setState(() {
+        _isBottomSheetOpen = false;
+        _bottomSheetClosedAt = DateTime.now();
+        _preventMainTextFieldAutoFocus =
+            true; // Empêcher le focus automatique temporairement
+      });
+
+      // Réinitialiser la prévention après un délai plus long pour être sûr
+      Future.delayed(const Duration(milliseconds: 3000), () {
+        if (mounted) {
+          setState(() {
+            _preventMainTextFieldAutoFocus = false;
+          });
+        }
+      });
+    });
+  }
+
+  void _dismissKeyboard() {
+    FocusScopeNode currentFocus = FocusScope.of(context);
+    currentFocus.unfocus();
   }
 
   @override
@@ -125,6 +238,7 @@ class _AmountInputWidgetV2State extends ConsumerState<AmountInputWidgetV2> {
             gradient: LinearGradient(
               colors: [AppColors.gradientPinkStart, AppColors.gradientPinkEnd],
             ),
+            onFocusChanged: _onConvertedTextFieldFocusChange,
           ),
 
           SizedBox(height: AppConstants.defaultPadding.h),
@@ -181,6 +295,7 @@ class _AmountInputWidgetV2State extends ConsumerState<AmountInputWidgetV2> {
           initialAmount: widget.initialAmount,
           onAmountChanged: widget.onAmountChanged,
           textColor: appTheme.text1!,
+          onFocusChanged: _onMainTextFieldFocusChange,
         ),
 
         SizedBox(height: AppConstants.largePadding.r),

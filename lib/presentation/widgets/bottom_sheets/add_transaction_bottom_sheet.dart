@@ -10,7 +10,7 @@ import 'package:bankapp/presentation/widgets/buttons/floating_action_button_cust
 import 'package:bankapp/presentation/widgets/buttons/transaction_type_toggle.dart';
 import 'package:bankapp/presentation/widgets/carousels/account_carousel_selection.dart';
 import 'package:bankapp/presentation/widgets/page_indicators.dart';
-import 'package:bankapp/presentation/widgets/text_fields/amount_input_widget_v2.dart';
+import 'package:bankapp/presentation/widgets/text_fields/amount_input_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,14 +32,16 @@ class AddTransactionBottomSheet extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<AddTransactionBottomSheet> createState() =>
-      _AddTransactionBottomSheetMvvmV2State();
+      _AddTransactionBottomSheet();
 }
 
-class _AddTransactionBottomSheetMvvmV2State
+class _AddTransactionBottomSheet
     extends ConsumerState<AddTransactionBottomSheet>
     with TickerProviderStateMixin {
   late PageController _pageController;
+  late ScrollController _scrollController;
   int _currentPageIndex = 0;
+  double _bottomPadding = 150;
   final int _totalPages = 2;
 
   // État de validation du formulaire - Nouvelle sémantique
@@ -95,6 +97,7 @@ class _AddTransactionBottomSheetMvvmV2State
   void initState() {
     super.initState();
     _pageController = PageController();
+    _scrollController = ScrollController();
     _initializeDefaultAccount();
   }
 
@@ -125,6 +128,7 @@ class _AddTransactionBottomSheetMvvmV2State
   @override
   void dispose() {
     _pageController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -132,6 +136,68 @@ class _AddTransactionBottomSheetMvvmV2State
     setState(() {
       _currentPageIndex = index;
     });
+  }
+
+  /// Gérer les changements de focus des TextFields pour auto-scroll
+  Future<void> _onTextFieldFocusChanged(bool hasFocus) async {
+    if (hasFocus) {
+      setState(() {
+        _bottomPadding = 435;
+      });
+      _scrollToBottom();
+    } else {
+      // Attendre un peu avant de scroller vers le début pour laisser le temps au clavier de se fermer
+      Future.delayed(const Duration(milliseconds: 200), () {
+        _scrollToInitialPosition();
+      });
+
+      // Attendre un peu pour éviter une animation "juttered"
+      Future.delayed(const Duration(milliseconds: 600), () {
+        setState(() {
+          _bottomPadding = 150;
+        });
+      });
+    }
+  }
+
+  /// Auto-scroll vers le haut pour s'assurer que les TextFields soient visibles
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      // Attendre un peu que le clavier apparaisse
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (_scrollController.hasClients) {
+          // Utiliser viewInsets.bottom pour calculer précisément la hauteur du clavier
+          final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+          final screenHeight = MediaQuery.of(context).size.height;
+
+          // On veut que les champs soient visibles au-dessus du clavier avec un peu de marge
+          final targetPosition = keyboardHeight > 0
+              ? (screenHeight - keyboardHeight) *
+                    0.3 // 30% de l'espace disponible au-dessus du clavier
+              : screenHeight * 0.15; // Fallback si pas de clavier détecté
+
+          _scrollController.animateTo(
+            targetPosition.clamp(
+              0.0,
+              _scrollController.position.maxScrollExtent,
+            ),
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+          );
+        }
+      });
+    }
+  }
+
+  /// Retour à la position initiale quand le clavier se ferme
+  void _scrollToInitialPosition() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0.0, // Retour au tout début
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   void _onAmountChanged(String amount) {
@@ -366,100 +432,105 @@ class _AddTransactionBottomSheetMvvmV2State
   }
 
   Widget _buildPage1() {
-    final l10n = AppLocalizations.of(context)!;
-    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+    return SingleChildScrollView(
+      controller: _scrollController,
+      padding: EdgeInsets.only(
+        //left: 20.w,
+        //right: 20.w,
+        top: 20.h,
+        bottom: _bottomPadding.h,
+      ),
+      child: Column(
+        children: [
+          SizedBox(height: 10.h),
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        SizedBox(height: 10.h),
-        //const Spacer(),
-
-        // Toggle Switch DÉPENSE/REVENU
-        Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppConstants.largePadding.sp * 2,
-          ),
-          child: TransactionTypeToggle(
-            initialType: _transactionType,
-            onChanged: (TransactionType newType) {
-              setState(() {
-                _transactionType = newType;
-              });
-            },
-          ),
-        ),
-
-        //SizedBox(height: 60.h),
-        const Spacer(),
-
-        // Account Carousel avec Consumer pour récupérer les AccountSummary
-        Consumer(
-          builder: (context, ref, child) {
-            final accounts = ref.watch(accountsProvider);
-            final accountSummariesAsync = accounts
-                .map(
-                  (account) =>
-                      ref.watch(accountSummaryByIdProvider(account.id)),
-                )
-                .toList();
-
-            // Vérifier si tous les AccountSummary sont chargés
-            final allLoaded = accountSummariesAsync.every(
-              (async) => async.hasValue,
-            );
-
-            if (!allLoaded) {
-              // Afficher un indicateur de chargement pendant que les données se chargent
-              return SizedBox(
-                height: 175.0.h,
-                child: const Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            // Extraire toutes les données chargées
-            final accountSummaries = accountSummariesAsync
-                .map((async) => async.value!)
-                .toList();
-
-            return AccountCarouselSelection(
-              selectedAccount: _selectedAccount,
-              onAccountSelected: (Account account) {
+          // Toggle Switch DÉPENSE/REVENU
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppConstants.veryLargePadding.sp,
+            ),
+            child: TransactionTypeToggle(
+              initialType: _transactionType,
+              onChanged: (TransactionType newType) {
                 setState(() {
-                  _selectedAccount = account;
-                  // Reset de la devise et de la conversion lors du changement de compte
-                  _targetCurrency = account.currency;
-                  _convertedAmount = '';
-                  // Note: _transactionAmount reste inchangé pour préserver la saisie utilisateur
+                  _transactionType = newType;
                 });
               },
-              accountSummaries: accountSummaries,
-              cardSize: 175.0,
-              spacing: 14.0,
-            );
-          },
-        ),
+            ),
+          ),
 
-        // Spacer pour centrer verticalement la section montant
-        const Spacer(flex: 2),
+          SizedBox(height: 50.h),
 
-        // Widget Amount Input
-        AmountInputWidgetV2(
-          transactionType: _transactionType,
-          selectedAccount: _selectedAccount,
-          onAmountChanged: _onAmountChanged,
-          onConvertedAmountChanged: _onConvertedAmountChanged,
-          onConversionCurrencyChanged: _onConversionCurrencyChanged,
-          initialAmount: _transactionAmount,
-          convertedAmount: _convertedAmount,
-          conversionCurrency: _targetCurrency != _selectedAccount?.currency
-              ? _targetCurrency
-              : null,
-        ),
+          // Account Carousel avec Consumer pour récupérer les AccountSummary
+          Consumer(
+            builder: (context, ref, child) {
+              final accounts = ref.watch(accountsProvider);
+              final accountSummariesAsync = accounts
+                  .map(
+                    (account) =>
+                        ref.watch(accountSummaryByIdProvider(account.id)),
+                  )
+                  .toList();
 
-        // Spacer pour centrer verticalement la section montant
-        const Spacer(flex: 4),
-      ],
+              // Vérifier si tous les AccountSummary sont chargés
+              final allLoaded = accountSummariesAsync.every(
+                (async) => async.hasValue,
+              );
+
+              if (!allLoaded) {
+                // Afficher un indicateur de chargement pendant que les données se chargent
+                return SizedBox(
+                  height: 175.0.h,
+                  child: const Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              // Extraire toutes les données chargées
+              final accountSummaries = accountSummariesAsync
+                  .map((async) => async.value!)
+                  .toList();
+
+              return AccountCarouselSelection(
+                selectedAccount: _selectedAccount,
+                onAccountSelected: (Account account) {
+                  setState(() {
+                    _selectedAccount = account;
+                    // Reset de la devise et de la conversion lors du changement de compte
+                    _targetCurrency = account.currency;
+                    _convertedAmount = '';
+                    // Note: _transactionAmount reste inchangé pour préserver la saisie utilisateur
+                  });
+                },
+                accountSummaries: accountSummaries,
+                cardSize:
+                    175, //(MediaQuery.sizeOf(context).width * AppConstants.accountCarouselViewport) - (AppConstants.accountCarouselSpacing * 2),
+                spacing: AppConstants.accountCarouselSpacing,
+                viewportFraction: AppConstants.accountCarouselViewport,
+              );
+            },
+          ),
+
+          _targetCurrency != _selectedAccount?.currency
+              ? SizedBox(height: 60.h)
+              : SizedBox(height: 120.h),
+
+          // Widget Amount Input avec callback pour auto-scroll
+          AmountInputWidget(
+            transactionType: _transactionType,
+            selectedAccount: _selectedAccount,
+            onAmountChanged: _onAmountChanged,
+            onConvertedAmountChanged: _onConvertedAmountChanged,
+            onConversionCurrencyChanged: _onConversionCurrencyChanged,
+            initialAmount: _transactionAmount,
+            convertedAmount: _convertedAmount,
+            conversionCurrency: _targetCurrency != _selectedAccount?.currency
+                ? _targetCurrency
+                : null,
+            onFocusChanged:
+                _onTextFieldFocusChanged, // Auto-scroll et retour position initiale
+          ),
+        ],
+      ),
     );
   }
 

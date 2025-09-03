@@ -14,6 +14,7 @@ class AmountTextField extends StatefulWidget {
   final Color textColor;
   final Gradient? gradient;
   final bool enabled;
+  final Function(bool hasFocus)? onFocusChanged;
 
   const AmountTextField({
     super.key,
@@ -24,6 +25,7 @@ class AmountTextField extends StatefulWidget {
     this.textColor = Colors.black,
     this.gradient,
     this.enabled = true,
+    this.onFocusChanged,
   });
 
   @override
@@ -39,6 +41,14 @@ class _AmountTextFieldState extends State<AmountTextField> {
     super.initState();
     _controller = TextEditingController(text: widget.initialAmount ?? '');
     _focusNode = FocusNode();
+
+    // Ajouter listener pour détecter les changements de focus
+    _focusNode.addListener(() {
+      print('🎯 AmountTextField FocusNode - hasFocus: ${_focusNode.hasFocus}');
+      if (widget.onFocusChanged != null) {
+        widget.onFocusChanged!(_focusNode.hasFocus);
+      }
+    });
   }
 
   @override
@@ -69,15 +79,16 @@ class _AmountTextFieldState extends State<AmountTextField> {
     return widget.transactionType == TransactionType.expense ? '-' : '+';
   }
 
-  Widget _buildCurrencySymbol(String currencySymbol) {
+  Widget _buildCurrencySymbol({
+    required String currencySymbol,
+    required Color color,
+  }) {
     return Text(
       currencySymbol,
       style: AppTextStyles.h1.copyWith(
         fontSize: 44.sp,
         fontWeight: FontWeight.w600,
-        color: widget.gradient != null
-            ? widget.gradient!.colors.first
-            : widget.textColor,
+        color: color,
         height: 1.0,
       ),
     );
@@ -114,7 +125,12 @@ class _AmountTextFieldState extends State<AmountTextField> {
 
         // Symbole de devise à gauche si nécessaire
         if (isSymbolLeft) ...[
-          _buildCurrencySymbol(currencySymbol),
+          _buildCurrencySymbol(
+            currencySymbol: currencySymbol,
+            color: widget.gradient != null
+                ? widget.gradient!.colors.first
+                : widget.textColor,
+          ),
           SizedBox(width: 10.w),
         ],
 
@@ -167,7 +183,12 @@ class _AmountTextFieldState extends State<AmountTextField> {
         // Symbole de devise à droite si nécessaire
         if (!isSymbolLeft) ...[
           SizedBox(width: 10.w),
-          _buildCurrencySymbol(currencySymbol),
+          _buildCurrencySymbol(
+            currencySymbol: currencySymbol,
+            color: widget.gradient != null
+                ? widget.gradient!.colors.last
+                : widget.textColor,
+          ),
         ],
       ],
     );
