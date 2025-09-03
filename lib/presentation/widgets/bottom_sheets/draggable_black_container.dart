@@ -6,7 +6,7 @@ import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/presentation/providers/transaction_search_provider.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
-import 'package:bankapp/presentation/widgets/bottom_sheets/add_transaction_bottom_sheet_mvvm_v2.dart';
+import 'package:bankapp/presentation/widgets/bottom_sheets/add_transaction_bottom_sheet.dart';
 import 'package:bankapp/presentation/widgets/bottom_sheets/full_transactions_bottom_sheet.dart';
 import 'package:bankapp/presentation/widgets/buttons/dashed_button.dart';
 import 'package:bankapp/presentation/widgets/carousels/followed_transactions/followed_transactions_carousel.dart';
@@ -572,7 +572,7 @@ class _DraggableBlackContainerState
       backgroundColor: Colors.transparent,
       isDismissible: true,
       enableDrag: true,
-      builder: (context) => const AddTransactionBottomSheetMvvmV2(),
+      builder: (context) => const AddTransactionBottomSheet(),
     ).then((_) {
       // Invalider les providers liés aux transactions après fermeture
       if (mounted) {

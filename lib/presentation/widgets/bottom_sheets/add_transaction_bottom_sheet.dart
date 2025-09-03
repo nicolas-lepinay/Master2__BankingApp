@@ -16,8 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class AddTransactionBottomSheetMvvmV2 extends ConsumerStatefulWidget {
-  const AddTransactionBottomSheetMvvmV2({super.key});
+class AddTransactionBottomSheet extends ConsumerStatefulWidget {
+  const AddTransactionBottomSheet({super.key});
 
   static void show(BuildContext context) {
     showModalBottomSheet(
@@ -26,17 +26,17 @@ class AddTransactionBottomSheetMvvmV2 extends ConsumerStatefulWidget {
       backgroundColor: Colors.transparent,
       enableDrag: true,
       isDismissible: true,
-      builder: (context) => const AddTransactionBottomSheetMvvmV2(),
+      builder: (context) => const AddTransactionBottomSheet(),
     );
   }
 
   @override
-  ConsumerState<AddTransactionBottomSheetMvvmV2> createState() =>
+  ConsumerState<AddTransactionBottomSheet> createState() =>
       _AddTransactionBottomSheetMvvmV2State();
 }
 
 class _AddTransactionBottomSheetMvvmV2State
-    extends ConsumerState<AddTransactionBottomSheetMvvmV2>
+    extends ConsumerState<AddTransactionBottomSheet>
     with TickerProviderStateMixin {
   late PageController _pageController;
   int _currentPageIndex = 0;

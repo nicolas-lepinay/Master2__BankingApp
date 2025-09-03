@@ -1,7 +1,7 @@
 import 'package:bankapp/core/constants/gradient_colors.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
-import 'package:bankapp/presentation/widgets/bottom_sheets/add_transaction_bottom_sheet_mvvm_v2.dart';
+import 'package:bankapp/presentation/widgets/bottom_sheets/add_transaction_bottom_sheet.dart';
 import 'package:bankapp/presentation/widgets/navbar/astroid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,7 +25,7 @@ class FloatingNavbar extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const AddTransactionBottomSheetMvvmV2(),
+      builder: (context) => const AddTransactionBottomSheet(),
     ).then((_) {
       // Invalider les providers liés aux transactions après fermeture
       if (context.mounted) {

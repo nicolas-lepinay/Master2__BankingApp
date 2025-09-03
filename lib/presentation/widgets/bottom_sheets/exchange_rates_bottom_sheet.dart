@@ -7,12 +7,11 @@ import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/viewmodels/currency_view_model.dart';
+import 'package:bankapp/presentation/widgets/helpers/superellipse_clipper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import '../helpers/superellipse_clipper.dart';
 
 class ExchangeRatesBottomSheet extends ConsumerStatefulWidget {
   final String baseCurrency;
