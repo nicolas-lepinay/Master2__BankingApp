@@ -60,6 +60,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get transactionDetails => 'Détails de la transaction';
 
   @override
+  String get validateTransaction => 'Valider la transaction';
+
+  @override
   String get amount => 'Montant';
 
   @override
@@ -85,6 +88,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get balance => 'Solde';
+
+  @override
+  String get settings => 'Paramètres';
+
+  @override
+  String get display => 'Apparence';
 
   @override
   String get expectedBalance => 'Solde attendu';
@@ -364,7 +373,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ilsCountryName => 'Israël';
 
   @override
-  String get aedCurrencyName => 'Dirham des EAU';
+  String get aedCurrencyName => 'Dirham des E.A.U';
 
   @override
   String get aedCountryName => 'Émirats Arabes Unis';
@@ -416,4 +425,34 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get exchangeRatesUpdated => 'Taux de change mis à jour';
+
+  @override
+  String get equivalent => 'Équivalent';
+
+  @override
+  String get loadingConversion => 'Chargement de la conversion...';
+
+  @override
+  String get otherCurrencies => 'Autres devises';
+
+  @override
+  String get accountCurrency => 'Devise du compte';
+
+  @override
+  String get baseCurrency => 'Devise de base';
+
+  @override
+  String get paidTo => 'Payé à...';
+
+  @override
+  String get receivedFrom => 'Reçu de...';
+
+  @override
+  String get counterpartySearchHint => 'Amazon';
+
+  @override
+  String get selectCounterparty => 'Sélectionner un tiers';
+
+  @override
+  String get createNewCounterparty => 'Créer un nouveau tiers';
 }

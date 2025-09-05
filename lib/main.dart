@@ -7,6 +7,7 @@ import 'package:bankapp/presentation/providers/theme_provider.dart'
     as theme_provider;
 import 'package:bankapp/presentation/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,6 +27,11 @@ void main() async {
     'MainApp',
     'main',
     '🚀 Application starting with logging system',
+  );
+
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(statusBarColor: Colors.transparent),
   );
 
   runApp(const ProviderScope(child: MyApp()));

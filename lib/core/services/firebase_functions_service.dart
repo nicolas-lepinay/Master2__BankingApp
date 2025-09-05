@@ -82,7 +82,7 @@ class FirebaseFunctionsService with AppLoggerMixin {
       logFirebaseError(
         'getExchangeRates',
         currency,
-        'No internet connection',
+        'No internet connection: ${e.message}.',
         duration,
       );
 

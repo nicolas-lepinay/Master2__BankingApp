@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class GradientColors {
@@ -16,6 +17,8 @@ class GradientColors {
     Color(0xFF9370DB), // Violet medium
     Color(0xFF87CEEB), // Bleu ciel clair
   ];
+
+  static List<Color> pink = [AppColors.primaryPink, AppColors.secondaryPink];
 
   // Durée de l'animation du dégradé
   static const Duration animationDuration = Duration(seconds: 2);

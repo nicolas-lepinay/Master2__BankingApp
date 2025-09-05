@@ -5,7 +5,7 @@ import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
-import 'package:bankapp/presentation/widgets/edit_transaction_bottom_sheet.dart';
+import 'package:bankapp/presentation/widgets/bottom_sheets/edit_transaction_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -244,12 +244,13 @@ class TransactionDetailScreen extends ConsumerWidget {
 
             _buildDetailRow('ID Transaction', '#${transaction.id}', Icons.tag),
 
-            if (transaction.amountConverted != null) ...[
+            if (transaction.amountBeforeConversion != null &&
+                transaction.currencyBeforeConversion != null) ...[
               _buildDetailRow(
                 'Montant converti',
                 AppFormatters.formatCurrency(
-                  transaction.amountConverted!,
-                  transaction.currency,
+                  transaction.amountBeforeConversion!,
+                  transaction.currencyBeforeConversion!,
                   context,
                 ),
                 Icons.currency_exchange,

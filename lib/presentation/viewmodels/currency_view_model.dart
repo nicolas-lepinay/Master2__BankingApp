@@ -42,7 +42,8 @@ class CurrencyViewState extends BaseViewState {
   }
 
   @override
-  String toString() => 'CurrencyViewState(currencies: ${availableCurrencies.length}, '
+  String toString() =>
+      'CurrencyViewState(currencies: ${availableCurrencies.length}, '
       'selected: ${selectedCurrency?.code}, rates: ${exchangeRates.length})';
 }
 
@@ -50,7 +51,8 @@ class CurrencyViewState extends BaseViewState {
 class CurrencyViewModel extends BaseViewModel<CurrencyViewState> {
   final CurrencyConversionService _conversionService;
 
-  CurrencyViewModel(this._conversionService) : super(const CurrencyViewState()) {
+  CurrencyViewModel(this._conversionService)
+    : super(const CurrencyViewState()) {
     _loadAvailableCurrencies();
     _subscribeToExchangeRates();
   }
@@ -93,10 +95,7 @@ class CurrencyViewModel extends BaseViewModel<CurrencyViewState> {
     required String toCurrency,
   }) async {
     await executeWithErrorHandling(() async {
-      state = state.copyWith(
-        isConversionLoading: true,
-        conversionError: null,
-      );
+      state = state.copyWith(isConversionLoading: true, conversionError: null);
 
       final result = await _conversionService.convertAmount(
         amount: amount,
@@ -119,13 +118,22 @@ class CurrencyViewModel extends BaseViewModel<CurrencyViewState> {
   }
 
   /// Obtient un taux de change
-  Future<ExchangeRate?> getExchangeRate(String fromCurrency, String toCurrency) async {
+  Future<ExchangeRate?> getExchangeRate(
+    String fromCurrency,
+    String toCurrency,
+  ) async {
     return await _conversionService.getExchangeRate(fromCurrency, toCurrency);
   }
 
   /// Vérifie si un taux de change est disponible
-  Future<bool> isExchangeRateAvailable(String fromCurrency, String toCurrency) async {
-    return await _conversionService.isExchangeRateAvailable(fromCurrency, toCurrency);
+  Future<bool> isExchangeRateAvailable(
+    String fromCurrency,
+    String toCurrency,
+  ) async {
+    return await _conversionService.isExchangeRateAvailable(
+      fromCurrency,
+      toCurrency,
+    );
   }
 
   /// Met à jour les taux de change pour une devise
@@ -164,19 +172,12 @@ class CurrencyViewModel extends BaseViewModel<CurrencyViewState> {
     return '${amount.toStringAsFixed(2)} $currencyCode';
   }
 
-  /// Obtient le nom localisé d'une devise
-  String getCurrencyName(String currencyCode, {String? languageCode}) {
-    final currency = getCurrencyByCode(currencyCode);
-    if (currency != null) {
-      return currency.getLocalizedName(languageCode: languageCode);
-    }
-    return currencyCode;
-  }
-
   /// Obtient les statistiques des taux de change
   Map<String, dynamic> getExchangeRateStats() {
     final total = state.exchangeRates.length;
-    final validRates = state.exchangeRates.values.where((rate) => rate.isValid).length;
+    final validRates = state.exchangeRates.values
+        .where((rate) => rate.isValid)
+        .length;
     final expiredRates = total - validRates;
 
     return {

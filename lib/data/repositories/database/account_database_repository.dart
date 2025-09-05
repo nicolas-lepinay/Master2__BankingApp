@@ -44,7 +44,8 @@ class AccountDatabaseRepository {
 
     double balance = account.initialBalance;
     for (final transaction in transactionsList) {
-      final amount = transaction.amountConverted ?? transaction.amount;
+      // NOUVELLE SÉMANTIQUE : amount est toujours dans la devise du compte
+      final amount = transaction.amount;
       if (transaction.transactionType == 'DEBIT') {
         balance -= amount;
       } else {
@@ -72,7 +73,8 @@ class AccountDatabaseRepository {
 
     double balance = account.initialBalance;
     for (final transaction in transactionsList) {
-      final amount = transaction.amountConverted ?? transaction.amount;
+      // NOUVELLE SÉMANTIQUE : amount est toujours dans la devise du compte
+      final amount = transaction.amount;
       if (transaction.transactionType == 'DEBIT') {
         balance -= amount;
       } else {
@@ -128,13 +130,13 @@ class AccountDatabaseRepository {
     )..where((a) => a.id.equals(accountId))).getSingle();
 
     final expensesQuery = _database.customSelect(
-      'SELECT SUM(COALESCE(amount_converted, amount)) as total FROM transactions WHERE account_id = ? AND transaction_type = \'DEBIT\'',
+      'SELECT SUM(amount) as total FROM transactions WHERE account_id = ? AND transaction_type = \'DEBIT\'',
       variables: [Variable.withInt(accountId)],
       readsFrom: {_database.transactions},
     );
 
     final revenuesQuery = _database.customSelect(
-      'SELECT SUM(COALESCE(amount_converted, amount)) as total FROM transactions WHERE account_id = ? AND transaction_type = \'CREDIT\'',
+      'SELECT SUM(amount) as total FROM transactions WHERE account_id = ? AND transaction_type = \'CREDIT\'',
       variables: [Variable.withInt(accountId)],
       readsFrom: {_database.transactions},
     );

@@ -3,7 +3,7 @@ import 'package:bankapp/domain/repositories/repositories.dart';
 import 'package:bankapp/domain/value_objects/value_objects.dart';
 // Import pour l'invalidation
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart'
-    show accountSummaryByIdProvider, currencyConversionServiceProvider;
+    show accountSummaryByIdProvider;
 import 'package:bankapp/presentation/viewmodels/base_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -177,8 +177,8 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
     int? counterpartyId,
     List<int>? categoryIds,
     domain.TransactionStatus status = domain.TransactionStatus.completed,
-    double? amountConverted,
-    String? originalCurrency,
+    double? amountBeforeConversion,
+    String? currencyBeforeConversion,
   }) async {
     await executeWithErrorHandling(() async {
       state = state.loading();
@@ -204,15 +204,15 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
         comment: comment,
         date: date,
         status: status,
-        amountConverted: amountConverted,
-        originalCurrency: originalCurrency,
+        amountBeforeConversion: amountBeforeConversion,
+        currencyBeforeConversion: currencyBeforeConversion,
       );
 
       await _transactionRepository.createTransaction(newTransaction);
 
       // Invalider les providers d'account summary pour une réactivité automatique
       if (_ref != null) {
-        _ref!.invalidate(accountSummaryByIdProvider);
+        _ref.invalidate(accountSummaryByIdProvider);
       }
 
       // Recharger les transactions
@@ -271,7 +271,7 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
 
       // Invalider les providers d'account summary pour une réactivité automatique
       if (_ref != null) {
-        _ref!.invalidate(accountSummaryByIdProvider);
+        _ref.invalidate(accountSummaryByIdProvider);
       }
 
       // Recharger les transactions
@@ -288,7 +288,7 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
 
       // Invalider les providers d'account summary pour une réactivité automatique
       if (_ref != null) {
-        _ref!.invalidate(accountSummaryByIdProvider);
+        _ref.invalidate(accountSummaryByIdProvider);
       }
 
       // Recharger les transactions si un compte est sélectionné
@@ -482,81 +482,29 @@ class TransactionViewModel extends BaseViewModel<TransactionViewState>
   double get filteredNetAmount => filteredIncomeTotal - filteredExpenseTotal;
 
   // === MÉTHODES DE CONVERSION DE DEVISES ===
-
-  /// Crée une transaction avec conversion automatique
-  Future<void> createTransactionWithConversion({
-    required int accountId,
-    required domain.TransactionType type,
-    required double amount,
-    required String originalCurrency,
-    required String accountCurrency,
-    required DateTime date,
-    String? title,
-    String? comment,
-    int? counterpartyId,
-    List<int>? categoryIds,
-    domain.TransactionStatus status = domain.TransactionStatus.completed,
-  }) async {
-    await executeWithErrorHandling(() async {
-      double? convertedAmount;
-
-      // Convertir uniquement si les devises sont différentes
-      if (originalCurrency != accountCurrency) {
-        // Utiliser le CurrencyConversionService via le provider
-        if (_ref != null) {
-          final conversionService = _ref!.read(
-            currencyConversionServiceProvider,
-          );
-          convertedAmount = await conversionService.convertAmountSafe(
-            amount: amount,
-            fromCurrency: originalCurrency,
-            toCurrency: accountCurrency,
-          );
-        }
-      }
-
-      // Créer la transaction
-      await createTransaction(
-        accountId: accountId,
-        type: type,
-        amount: convertedAmount ?? amount,
-        currency: accountCurrency,
-        date: date,
-        title: title,
-        comment: comment,
-        counterpartyId: counterpartyId,
-        categoryIds: categoryIds,
-        status: status,
-        amountConverted: convertedAmount,
-        originalCurrency: originalCurrency != accountCurrency
-            ? originalCurrency
-            : null,
-      );
-    });
-  }
-
   /// Vérifie si une transaction a été convertie
+  ///
   bool isTransactionConverted(domain.TransactionWithBalance transaction) {
-    return transaction.transaction.amountConverted != null &&
-        transaction.transaction.originalCurrency != null;
+    return transaction.transaction.amountBeforeConversion != null &&
+        transaction.transaction.currencyBeforeConversion != null;
   }
 
   /// Obtient le montant original d'une transaction
   double getOriginalAmount(domain.TransactionWithBalance transaction) {
     if (isTransactionConverted(transaction)) {
       // Si la transaction a été convertie, calculer le montant original
-      final convertedAmount = transaction.transaction.amountConverted!;
+      final originalAmount = transaction.transaction.amountBeforeConversion!;
       final accountAmount = transaction.transaction.amount;
 
       // Si les montants sont différents, utiliser le montant converti
-      return convertedAmount != accountAmount ? convertedAmount : accountAmount;
+      return originalAmount != accountAmount ? originalAmount : accountAmount;
     }
     return transaction.transaction.amount;
   }
 
   /// Obtient la devise originale d'une transaction
   String getOriginalCurrency(domain.TransactionWithBalance transaction) {
-    return transaction.transaction.originalCurrency ??
+    return transaction.transaction.currencyBeforeConversion ??
         transaction.transaction.currency;
   }
 

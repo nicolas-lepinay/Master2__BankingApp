@@ -1,14 +1,11 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:bankapp/core/constants/supported_currencies.dart';
-import 'package:bankapp/core/services/currency_service.dart';
 import 'package:bankapp/core/services/currency_conversion_service.dart';
+import 'package:bankapp/core/services/currency_service.dart';
+import 'package:bankapp/data/cache/cache_manager.dart';
 import 'package:bankapp/domain/entities/currency.dart';
 import 'package:bankapp/domain/entities/exchange_rate.dart';
 import 'package:bankapp/domain/repositories/exchange_rate_repository.dart';
-import 'package:bankapp/data/cache/cache_manager.dart';
-import 'package:bankapp/data/repositories/exchange_rate_repository_impl.dart';
-import 'package:bankapp/data/datasources/local/exchange_rate_local_datasource.dart';
-import 'package:bankapp/data/datasources/remote/exchange_rate_remote_datasource.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Currency Conversion System Tests', () {
@@ -17,18 +14,21 @@ void main() {
 
     setUp(() async {
       cacheManager = CacheManager.instance;
-      
+
       // Create a mock repository since we can't easily test the full database setup
       final mockRepository = MockExchangeRateRepository();
-      conversionService = CurrencyConversionService(cacheManager, mockRepository);
+      conversionService = CurrencyConversionService(
+        cacheManager,
+        mockRepository,
+      );
     });
 
     group('SupportedCurrencies Tests', () {
       test('should have all expected currencies', () {
         final currencies = SupportedCurrencies.all;
-        
+
         expect(currencies.length, equals(36));
-        
+
         // Vérifier quelques devises principales
         expect(currencies.any((c) => c.code == 'EUR'), isTrue);
         expect(currencies.any((c) => c.code == 'USD'), isTrue);
@@ -38,7 +38,7 @@ void main() {
         expect(currencies.any((c) => c.code == 'AUD'), isTrue);
         expect(currencies.any((c) => c.code == 'CHF'), isTrue);
         expect(currencies.any((c) => c.code == 'CNY'), isTrue);
-        
+
         // Vérifier quelques nouvelles devises
         expect(currencies.any((c) => c.code == 'HKD'), isTrue);
         expect(currencies.any((c) => c.code == 'SGD'), isTrue);
@@ -53,10 +53,10 @@ void main() {
       test('should separate major and minor currencies correctly', () {
         final majorCurrencies = SupportedCurrencies.major;
         final minorCurrencies = SupportedCurrencies.minor;
-        
+
         expect(majorCurrencies.length, equals(8));
         expect(minorCurrencies.length, equals(28));
-        
+
         // Major currencies should include the top 8 global currencies
         expect(majorCurrencies.any((c) => c.code == 'EUR'), isTrue);
         expect(majorCurrencies.any((c) => c.code == 'USD'), isTrue);
@@ -66,7 +66,7 @@ void main() {
         expect(majorCurrencies.any((c) => c.code == 'AUD'), isTrue);
         expect(majorCurrencies.any((c) => c.code == 'CHF'), isTrue);
         expect(majorCurrencies.any((c) => c.code == 'CNY'), isTrue);
-        
+
         // Minor currencies should include regional currencies
         expect(minorCurrencies.any((c) => c.code == 'HKD'), isTrue);
         expect(minorCurrencies.any((c) => c.code == 'SGD'), isTrue);
@@ -79,9 +79,15 @@ void main() {
       test('should provide correct currency codes', () {
         final majorCodes = SupportedCurrencies.majorCodes;
         final minorCodes = SupportedCurrencies.minorCodes;
-        
-        expect(majorCodes, containsAll(['EUR', 'USD', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY']));
-        expect(minorCodes, containsAll(['HKD', 'SGD', 'KRW', 'INR', 'BRL', 'MXN', 'SEK', 'ZAR']));
+
+        expect(
+          majorCodes,
+          containsAll(['EUR', 'USD', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY']),
+        );
+        expect(
+          minorCodes,
+          containsAll(['HKD', 'SGD', 'KRW', 'INR', 'BRL', 'MXN', 'SEK', 'ZAR']),
+        );
       });
     });
 
@@ -106,9 +112,29 @@ void main() {
       test('should provide all supported currencies', () {
         final currencies = CurrencyService.getAllCurrencies();
         expect(currencies.length, equals(36));
-        
+
         final currencyCodes = currencies.map((c) => c.code).toList();
-        expect(currencyCodes, containsAll(['EUR', 'USD', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY', 'HKD', 'SGD', 'KRW', 'INR', 'BRL', 'MXN', 'SEK', 'ZAR']));
+        expect(
+          currencyCodes,
+          containsAll([
+            'EUR',
+            'USD',
+            'GBP',
+            'JPY',
+            'CAD',
+            'AUD',
+            'CHF',
+            'CNY',
+            'HKD',
+            'SGD',
+            'KRW',
+            'INR',
+            'BRL',
+            'MXN',
+            'SEK',
+            'ZAR',
+          ]),
+        );
       });
     });
 
@@ -181,7 +207,12 @@ void main() {
         expect(rate.toCurrency, equals('JPY'));
         expect(rate.rate, equals(150.0));
         expect(rate.isValid, isTrue);
-        expect(rate.expiresAt.isAfter(futureTime.subtract(const Duration(seconds: 1))), isTrue);
+        expect(
+          rate.expiresAt.isAfter(
+            futureTime.subtract(const Duration(seconds: 1)),
+          ),
+          isTrue,
+        );
       });
 
       test('should validate exchange rates correctly', () {
@@ -218,17 +249,23 @@ void main() {
       });
 
       test('should handle invalid rates in conversion', () {
-        expect(() => ExchangeRate.withDefaultExpiration(
-          fromCurrency: 'EUR',
-          toCurrency: 'USD',
-          rate: 0,
-        ), throwsArgumentError);
+        expect(
+          () => ExchangeRate.withDefaultExpiration(
+            fromCurrency: 'EUR',
+            toCurrency: 'USD',
+            rate: 0,
+          ),
+          throwsArgumentError,
+        );
 
-        expect(() => ExchangeRate.withDefaultExpiration(
-          fromCurrency: 'EUR',
-          toCurrency: 'USD',
-          rate: -1,
-        ), throwsArgumentError);
+        expect(
+          () => ExchangeRate.withDefaultExpiration(
+            fromCurrency: 'EUR',
+            toCurrency: 'USD',
+            rate: -1,
+          ),
+          throwsArgumentError,
+        );
       });
     });
 
@@ -360,7 +397,7 @@ void main() {
     group('Performance Tests', () {
       test('should handle multiple conversions efficiently', () async {
         final stopwatch = Stopwatch()..start();
-        
+
         // Perform multiple same-currency conversions
         for (int i = 0; i < 100; i++) {
           final result = await conversionService.convertAmount(
@@ -370,24 +407,24 @@ void main() {
           );
           expect(result.isSuccess, isTrue);
         }
-        
+
         stopwatch.stop();
-        
+
         // Should complete within reasonable time (less than 1 second)
         expect(stopwatch.elapsedMilliseconds, lessThan(1000));
       });
 
       test('should cache currency lookups efficiently', () {
         final stopwatch = Stopwatch()..start();
-        
+
         // Perform multiple currency lookups
         for (int i = 0; i < 1000; i++) {
           final currency = CurrencyService.getCurrency('EUR');
           expect(currency, isNotNull);
         }
-        
+
         stopwatch.stop();
-        
+
         // Should complete very quickly (less than 100ms)
         expect(stopwatch.elapsedMilliseconds, lessThan(100));
       });
@@ -442,7 +479,7 @@ void main() {
     group('Integration Tests', () {
       test('should validate all currency combinations', () {
         final currencies = SupportedCurrencies.all;
-        
+
         for (final currency in currencies) {
           expect(CurrencyService.isValidCurrency(currency.code), isTrue);
           expect(CurrencyService.getCurrency(currency.code), isNotNull);
@@ -455,14 +492,21 @@ void main() {
 /// Mock implementation for testing
 class MockExchangeRateRepository extends ExchangeRateRepository {
   @override
-  Future<double> convertAmount(double amount, String fromCurrency, String toCurrency) async {
+  Future<double> convertAmount(
+    double amount,
+    String fromCurrency,
+    String toCurrency,
+  ) async {
     if (fromCurrency == toCurrency) return amount;
     // Return a mock conversion rate
     return amount * 1.2;
   }
 
   @override
-  Future<ExchangeRate?> getExchangeRate(String fromCurrency, String toCurrency) async {
+  Future<ExchangeRate?> getExchangeRate(
+    String fromCurrency,
+    String toCurrency,
+  ) async {
     if (fromCurrency == toCurrency) {
       return ExchangeRate.withDefaultExpiration(
         fromCurrency: fromCurrency,
@@ -489,12 +533,18 @@ class MockExchangeRateRepository extends ExchangeRateRepository {
   }
 
   @override
-  Future<bool> isExchangeRateAvailable(String fromCurrency, String toCurrency) async {
+  Future<bool> isExchangeRateAvailable(
+    String fromCurrency,
+    String toCurrency,
+  ) async {
     return fromCurrency == toCurrency;
   }
 
   @override
-  Future<DateTime?> getLastUpdateTime(String fromCurrency, String toCurrency) async {
+  Future<DateTime?> getLastUpdateTime(
+    String fromCurrency,
+    String toCurrency,
+  ) async {
     return DateTime.now();
   }
 

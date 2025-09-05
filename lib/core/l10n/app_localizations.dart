@@ -200,6 +200,12 @@ abstract class AppLocalizations {
   /// **'Transaction Details'**
   String get transactionDetails;
 
+  /// No description provided for @validateTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm transaction'**
+  String get validateTransaction;
+
   /// No description provided for @amount.
   ///
   /// In en, this message translates to:
@@ -253,6 +259,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Solde'**
   String get balance;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @display.
+  ///
+  /// In en, this message translates to:
+  /// **'Display'**
+  String get display;
 
   /// No description provided for @expectedBalance.
   ///
@@ -913,6 +931,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Exchange rates updated'**
   String get exchangeRatesUpdated;
+
+  /// No description provided for @equivalent.
+  ///
+  /// In en, this message translates to:
+  /// **'Equivalent'**
+  String get equivalent;
+
+  /// No description provided for @loadingConversion.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading conversion...'**
+  String get loadingConversion;
+
+  /// No description provided for @otherCurrencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Other currencies'**
+  String get otherCurrencies;
+
+  /// No description provided for @accountCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Account\'s currency'**
+  String get accountCurrency;
+
+  /// No description provided for @baseCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Base currency'**
+  String get baseCurrency;
+
+  /// No description provided for @paidTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid to...'**
+  String get paidTo;
+
+  /// No description provided for @receivedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Received from...'**
+  String get receivedFrom;
+
+  /// No description provided for @counterpartySearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Amazon'**
+  String get counterpartySearchHint;
+
+  /// No description provided for @selectCounterparty.
+  ///
+  /// In en, this message translates to:
+  /// **'Select counterparty'**
+  String get selectCounterparty;
+
+  /// No description provided for @createNewCounterparty.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new counterparty'**
+  String get createNewCounterparty;
 }
 
 class _AppLocalizationsDelegate

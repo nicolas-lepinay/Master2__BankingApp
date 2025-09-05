@@ -4,6 +4,7 @@ import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/screens/main_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -43,53 +44,64 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Logo ou icône de l'app
-            Container(
-              width: 80.w,
-              height: 80.w,
-              decoration: BoxDecoration(
-                color: AppColors.onSurfaceDark,
-                borderRadius: BorderRadius.circular(20.r),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Logo ou icône de l'app
+              Container(
+                width: 80.w,
+                height: 80.w,
+                decoration: BoxDecoration(
+                  color: AppColors.onSurfaceDark,
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: Icon(
+                  Icons.account_balance,
+                  size: 40.sp,
+                  color: AppColors.primary,
+                ),
               ),
-              child: Icon(
-                Icons.account_balance,
-                size: 40.sp,
-                color: AppColors.primary,
+
+              SizedBox(height: 32.h),
+
+              // Nom de l'app
+              Text(
+                l10n.appTitle,
+                style: AppTextStyles.h2.copyWith(
+                  color: AppColors.onSurfaceDark,
+                ),
               ),
-            ),
 
-            SizedBox(height: 32.h),
+              SizedBox(height: 48.h),
 
-            // Nom de l'app
-            Text(
-              l10n.appTitle,
-              style: AppTextStyles.h2.copyWith(color: AppColors.onSurfaceDark),
-            ),
-
-            SizedBox(height: 48.h),
-
-            // Indicateur de chargement
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                AppColors.onSurfaceDark,
+              // Indicateur de chargement
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AppColors.onSurfaceDark,
+                ),
               ),
-            ),
 
-            SizedBox(height: 16.h),
+              SizedBox(height: 16.h),
 
-            Text(
-              l10n.loading,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.onSurfaceDark.withValues(alpha: 0.8),
+              Text(
+                l10n.loading,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.onSurfaceDark.withValues(alpha: 0.8),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

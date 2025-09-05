@@ -19,10 +19,10 @@ class Transactions extends Table {
   IntColumn get category4Id =>
       integer().nullable().references(Categories, #id)();
   TextColumn get transactionType => text()(); // 'DEBIT' or 'CREDIT'
-  TextColumn get currency => text()();
-  RealColumn get amount => real()();
-  RealColumn get amountConverted => real().nullable()();
-  TextColumn get originalCurrency => text().nullable()();
+  RealColumn get amount => real()(); // Montant toujours dans la devise du compte
+  TextColumn get currency => text()(); // Devise du compte (identique à account.currency)
+  RealColumn get amountBeforeConversion => real().nullable()(); // Montant original avant conversion (optionnel)
+  TextColumn get currencyBeforeConversion => text().nullable()(); // Devise originale avant conversion (optionnel)
   TextColumn get title => text().nullable()();
   TextColumn get comment => text().nullable()();
   DateTimeColumn get date => dateTime()();

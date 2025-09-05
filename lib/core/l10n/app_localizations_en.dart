@@ -60,6 +60,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionDetails => 'Transaction Details';
 
   @override
+  String get validateTransaction => 'Confirm transaction';
+
+  @override
   String get amount => 'Amount';
 
   @override
@@ -85,6 +88,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get balance => 'Solde';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get display => 'Display';
 
   @override
   String get expectedBalance => 'Expected Balance';
@@ -416,4 +425,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exchangeRatesUpdated => 'Exchange rates updated';
+
+  @override
+  String get equivalent => 'Equivalent';
+
+  @override
+  String get loadingConversion => 'Loading conversion...';
+
+  @override
+  String get otherCurrencies => 'Other currencies';
+
+  @override
+  String get accountCurrency => 'Account\'s currency';
+
+  @override
+  String get baseCurrency => 'Base currency';
+
+  @override
+  String get paidTo => 'Paid to...';
+
+  @override
+  String get receivedFrom => 'Received from...';
+
+  @override
+  String get counterpartySearchHint => 'Amazon';
+
+  @override
+  String get selectCounterparty => 'Select counterparty';
+
+  @override
+  String get createNewCounterparty => 'Create new counterparty';
 }

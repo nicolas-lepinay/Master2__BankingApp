@@ -23,8 +23,8 @@ class AppColors {
   static const Color tertiaryPink = Color(0xFFFFC4F9);
 
   // Gradient colors for Perspective Transaction List
-  static const Color gradientPinkStart = primaryPink;
-  static const Color gradientPinkEnd = secondaryPink;
+  //static const Color gradientPinkStart = primaryPink;
+  //static const Color gradientPinkEnd = secondaryPink;
 
   // Perspective Transaction item background
   static const Color transactionItemBg = tertiaryPink;
@@ -117,4 +117,6 @@ class AppColors {
   static const Color surfaceBrightLight = light100;
   static const Color surfaceLight = light87;
   static const Color surfaceDimLight = light75;
+
+  static const Color greyCard = Color(0xFFA3A3A3);
 }

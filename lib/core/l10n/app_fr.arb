@@ -16,6 +16,7 @@
   "cancel": "Annuler",
   "addTransaction": "Ajouter une transaction",
   "transactionDetails": "Détails de la transaction",
+  "validateTransaction": "Valider la transaction",
   "amount": "Montant",
   "title": "Titre",
   "comment": "Commentaire",
@@ -50,6 +51,10 @@
   "resultsFound": "résultats trouvés",
   "filtered": "Filtrés",
   "error": "Erreur",
+
+  "@_SETTINGS_SCREEN": {},
+  "settings": "Paramètres",
+  "display": "Apparence",
 
   "@_CURRENCIES": {},
   "euroCurrencyName": "Euro",
@@ -128,7 +133,7 @@
   "zarCountryName": "Afrique du Sud",
   "ilsCurrencyName": "Nouveau Shekel Israélien",
   "ilsCountryName": "Israël",
-  "aedCurrencyName": "Dirham des EAU",
+  "aedCurrencyName": "Dirham des E.A.U",
   "aedCountryName": "Émirats Arabes Unis",
   "sarCurrencyName": "Riyal Saoudien",
   "sarCountryName": "Arabie Saoudite",
@@ -147,5 +152,17 @@
   "currencyNotSupported": "Devise non supportée",
   "conversionFailed": "Échec de la conversion",
   "updatingExchangeRates": "Mise à jour des taux de change...",
-  "exchangeRatesUpdated": "Taux de change mis à jour"
+  "exchangeRatesUpdated": "Taux de change mis à jour",
+  "equivalent": "Équivalent",
+  "loadingConversion": "Chargement de la conversion...",
+  "otherCurrencies": "Autres devises",
+  "accountCurrency": "Devise du compte",
+  "baseCurrency": "Devise de base",
+
+  "@_COUNTERPARTY_SELECTION": {},
+  "paidTo": "Payé à...",
+  "receivedFrom": "Reçu de...",
+  "counterpartySearchHint": "Amazon",
+  "selectCounterparty": "Sélectionner un tiers",
+  "createNewCounterparty": "Créer un nouveau tiers"
 }

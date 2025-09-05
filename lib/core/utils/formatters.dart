@@ -1,4 +1,5 @@
 import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/constants/supported_currencies.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:flutter/widgets.dart';
@@ -89,7 +90,7 @@ class AppFormatters {
     String languageCode,
     String localeString,
   ) {
-    final symbol = AppConstants.currencySymbols[currency] ?? currency;
+    final symbol = getCurrencySymbol(currency);
 
     try {
       final formatter = NumberFormat('#,##0.00', localeString);
@@ -216,7 +217,7 @@ class AppFormatters {
     String localeString,
     bool showSign,
   ) {
-    final symbol = AppConstants.currencySymbols[currency] ?? currency;
+    final symbol = getCurrencySymbol(currency);
 
     try {
       final formatter = NumberFormat('#,##0.00', localeString);
@@ -417,7 +418,7 @@ class AppFormatters {
       // Use NumberFormat.currency which handles locale-specific formatting automatically
       final formatter = NumberFormat.currency(
         locale: localeString,
-        symbol: AppConstants.currencySymbols[currency] ?? currency,
+        symbol: getCurrencySymbol(currency),
         decimalDigits: _getDecimalDigits(currency),
       );
       return formatter.format(amount);
@@ -452,7 +453,7 @@ class AppFormatters {
       // Use NumberFormat.currency for consistent formatting
       final formatter = NumberFormat.currency(
         locale: localeString,
-        symbol: AppConstants.currencySymbols[currency] ?? currency,
+        symbol: getCurrencySymbol(currency),
         decimalDigits: _getDecimalDigits(currency),
       );
 
@@ -501,7 +502,7 @@ class AppFormatters {
       // Use NumberFormat.currency for consistent formatting
       final formatter = NumberFormat.currency(
         locale: localeString,
-        symbol: AppConstants.currencySymbols[currency] ?? currency,
+        symbol: getCurrencySymbol(currency),
         decimalDigits: decimalDigits,
       );
 
@@ -636,6 +637,89 @@ class AppFormatters {
         return l10n.pending;
       case domain.TransactionStatus.completed:
         return l10n.confirmed;
+    }
+  }
+
+  // ==================== CURRENCY UTILITIES ====================
+
+  /// Obtient le symbole d'une devise à partir de son code
+  static String getCurrencySymbol(String currencyCode) {
+    final currency = SupportedCurrencies.all.firstWhere(
+      (c) => c.code == currencyCode,
+      orElse: () => SupportedCurrencies.eur, // Fallback vers EUR
+    );
+    return currency.symbol;
+  }
+
+  /// Détermine si le symbole de devise doit être placé à gauche du montant
+  /// selon les conventions de localisation
+  static bool isCurrencySymbolLeft(String currencyCode, BuildContext context) {
+    final currentLocale = Localizations.localeOf(context);
+    final languageCode = currentLocale.languageCode;
+    
+    // Basé sur les conventions internationales de formatage monétaire
+    switch (languageCode) {
+      case 'en':
+      case 'zh':
+        return true; // $10.50, ¥10.50
+      
+      case 'fr':
+        return false; // 10,50€
+      
+      case 'de':
+      case 'it':
+      case 'es':
+        if (currencyCode == 'EUR') {
+          return false; // 10,50€
+        } else {
+          return true; // $10,50
+        }
+      
+      case 'pt':
+        if (currencyCode == 'BRL') {
+          return true; // R$ 10,50
+        } else if (currencyCode == 'EUR') {
+          return false; // 10,50€
+        } else {
+          return true; // $10,50
+        }
+      
+      case 'ja':
+      case 'ko':
+        return true; // ¥1,050, ₩1,050
+      
+      case 'ar':
+        if (currencyCode == 'SAR') {
+          return false; // 10.50 ر.س
+        } else {
+          return true; // $15.75
+        }
+      
+      case 'ru':
+        if (currencyCode == 'RUB') {
+          return false; // 10,50₽
+        } else {
+          return true; // $15.75
+        }
+      
+      default:
+        return true; // Default à l'anglais
+    }
+  }
+
+  /// Obtient la liste des codes de devises supportées
+  static List<String> getSupportedCurrencyCodes() {
+    return SupportedCurrencies.allCodes;
+  }
+
+  /// Obtient la devise par son code
+  static domain.Currency? getCurrencyByCode(String currencyCode) {
+    try {
+      return SupportedCurrencies.all.firstWhere(
+        (c) => c.code == currencyCode,
+      );
+    } catch (e) {
+      return null;
     }
   }
 }
