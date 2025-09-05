@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bankapp/core/extensions/string_extensions.dart';
 import 'package:bankapp/data/models/models.dart';
 import 'package:bankapp/domain/entities/entities.dart';
 import 'package:bankapp/domain/repositories/exchange_rate_repository.dart';
@@ -403,6 +404,64 @@ class CacheManager {
   /// Obtient toutes les contreparties
   List<Counterparty> getAllCounterparties() {
     return _counterparties.values.map((c) => c.toEntity()).toList();
+  }
+
+  /// Recherche les Counterparties par nom (insensible à la casse)
+  /// Limité aux [limit] premiers résultats (défaut: 20)
+  List<Counterparty> searchCounterpartiesByName(String query, {int limit = 20}) {
+    if (query.trim().isEmpty) return [];
+
+    final cleanQuery = query.cleanCounterpartyName();
+    final results = <Counterparty>[];
+
+    for (final counterpartyModel in _counterparties.values) {
+      if (results.length >= limit) break;
+
+      final counterparty = counterpartyModel.toEntity();
+      if (counterparty.name.containsIgnoreCase(cleanQuery)) {
+        results.add(counterparty);
+      }
+    }
+
+    // Trier par pertinence : nom exact d'abord, puis par ordre alphabétique
+    results.sort((a, b) {
+      final aExactMatch = a.name.cleanCounterpartyName().toLowerCase() == cleanQuery.toLowerCase();
+      final bExactMatch = b.name.cleanCounterpartyName().toLowerCase() == cleanQuery.toLowerCase();
+
+      if (aExactMatch && !bExactMatch) return -1;
+      if (bExactMatch && !aExactMatch) return 1;
+      return a.name.compareTo(b.name);
+    });
+
+    return results;
+  }
+
+  /// Trouve un Counterparty par nom exact (insensible à la casse)
+  /// Retourne null si aucun match exact
+  Counterparty? findCounterpartyByExactName(String name) {
+    final cleanName = name.cleanCounterpartyName().toLowerCase();
+    
+    for (final counterpartyModel in _counterparties.values) {
+      final counterparty = counterpartyModel.toEntity();
+      if (counterparty.name.cleanCounterpartyName().toLowerCase() == cleanName) {
+        return counterparty;
+      }
+    }
+    return null;
+  }
+
+  /// Ajoute un nouveau Counterparty au cache
+  /// Utilisé après création en base de données
+  void addCounterpartyToCache(CounterpartyModel counterpartyModel) {
+    _counterparties[counterpartyModel.id] = counterpartyModel;
+    _notifyCounterpartiesStream();
+  }
+
+  /// Notifie le stream des Counterparties (méthode helper privée)
+  void _notifyCounterpartiesStream() {
+    _counterpartiesController.add(
+      _counterparties.values.map((c) => c.toEntity()).toList(),
+    );
   }
 
   /// Obtient les transactions suivies avec balance

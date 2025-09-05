@@ -440,4 +440,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get baseCurrency => 'Base currency';
+
+  @override
+  String get paidTo => 'Paid to...';
+
+  @override
+  String get receivedFrom => 'Received from...';
+
+  @override
+  String get counterpartySearchHint => 'Amazon';
+
+  @override
+  String get selectCounterparty => 'Select counterparty';
+
+  @override
+  String get createNewCounterparty => 'Create new counterparty';
 }

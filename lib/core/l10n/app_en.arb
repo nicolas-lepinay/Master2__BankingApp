@@ -158,5 +158,12 @@
     "loadingConversion": "Loading conversion...",
     "otherCurrencies": "Other currencies",
     "accountCurrency": "Account's currency",
-    "baseCurrency": "Base currency"
+    "baseCurrency": "Base currency",
+
+    "@_COUNTERPARTY_SELECTION": {},
+    "paidTo": "Paid to...",
+    "receivedFrom": "Received from...",
+    "counterpartySearchHint": "Amazon",
+    "selectCounterparty": "Select counterparty",
+    "createNewCounterparty": "Create new counterparty"
 }

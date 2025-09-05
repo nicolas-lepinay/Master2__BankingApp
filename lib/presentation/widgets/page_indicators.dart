@@ -37,7 +37,7 @@ class PageIndicators extends StatelessWidget {
                 ? appTheme
                       .text4 // Actif : couleur principale
                 : appTheme.text6, // Inactif : couleur secondaire
-            borderRadius: BorderRadius.circular(1.r),
+            borderRadius: BorderRadius.circular(10.r),
           ),
         ),
       ),

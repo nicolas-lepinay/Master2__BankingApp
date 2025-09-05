@@ -1,4 +1,5 @@
 import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/constants/gradient_colors.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
@@ -244,13 +245,10 @@ class _DraggableBlackContainerState
       child: Container(
         height: containerHeight.h,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              AppColors.gradientPinkStart, // #FE68E8
-              AppColors.gradientPinkEnd, // #FBA9ED
-            ],
+            colors: GradientColors.pink,
           ),
           borderRadius: BorderRadius.circular(28.r),
         ),
@@ -300,10 +298,10 @@ class _DraggableBlackContainerState
     return Container(
       height: containerHeight.h,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppColors.gradientPinkStart, AppColors.gradientPinkEnd],
+          colors: GradientColors.pink,
         ),
         borderRadius: BorderRadius.circular(28.r),
       ),
@@ -477,10 +475,10 @@ class _DraggableBlackContainerState
     return Container(
       height: containerHeight.h,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppColors.gradientPinkStart, AppColors.gradientPinkEnd],
+          colors: GradientColors.pink,
         ),
         borderRadius: BorderRadius.circular(28.r),
       ),
@@ -496,10 +494,10 @@ class _DraggableBlackContainerState
     return Container(
       height: containerHeight.h,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppColors.gradientPinkStart, AppColors.gradientPinkEnd],
+          colors: GradientColors.pink,
         ),
         borderRadius: BorderRadius.circular(28.r),
       ),

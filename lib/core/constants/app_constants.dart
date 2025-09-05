@@ -29,4 +29,12 @@ class AppConstants {
   // SVG Icons
   static const String downLeftArrow = 'assets/icons/system/down-left-arrow.svg';
   static const String convertIcon = 'assets/icons/system/convert.svg';
+
+  // Animations
+  static const String orbAnimationLight =
+      'assets/animations/gif/apple_image_playground_hexF5F7FA.gif';
+  static const String orbAnimationDark =
+      'assets/animations/gif/apple_image_playground_hex18181D.gif';
+  static const String orbStatic =
+      'assets/animations/gif/apple_image_playground_static.png';
 }

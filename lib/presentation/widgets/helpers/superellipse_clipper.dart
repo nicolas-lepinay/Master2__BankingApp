@@ -9,7 +9,7 @@ class SuperellipseClipper extends CustomClipper<Path> {
   final double n; // exponent (>= 2.0)
   final int steps; // nombres de segments (plus = plus lisse)
 
-  SuperellipseClipper({this.n = 4.0, this.steps = 256})
+  SuperellipseClipper({this.n = 2.9, this.steps = 256})
     : assert(n >= 2.0),
       assert(steps >= 16);
 

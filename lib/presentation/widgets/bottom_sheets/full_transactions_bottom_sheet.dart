@@ -134,7 +134,6 @@ class _FullTransactionsBottomSheetState
                   onTap: () => Navigator.pop(context),
                   child: Container(
                     width: double.infinity,
-                    //color: Colors.red,
                     height: AppConstants.veryLargePadding * 2,
                     alignment: Alignment.topCenter,
                     child: Container(

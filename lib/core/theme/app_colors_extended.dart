@@ -1,6 +1,8 @@
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
+import '../constants/app_constants.dart';
+
 @immutable
 class AppColorsExtended extends ThemeExtension<AppColorsExtended> {
   const AppColorsExtended({
@@ -26,6 +28,8 @@ class AppColorsExtended extends ThemeExtension<AppColorsExtended> {
     required this.buttonForeground1,
     required this.buttonForeground2,
     required this.buttonForegroundDisabled,
+
+    required this.orbAnimation,
   });
 
   final Color? background1;
@@ -52,6 +56,8 @@ class AppColorsExtended extends ThemeExtension<AppColorsExtended> {
   final Color? buttonForeground2;
   final Color? buttonForegroundDisabled;
 
+  final String? orbAnimation;
+
   @override
   AppColorsExtended copyWith({
     Color? background1,
@@ -77,6 +83,8 @@ class AppColorsExtended extends ThemeExtension<AppColorsExtended> {
     Color? buttonForeground1,
     Color? buttonForeground2,
     Color? buttonForegroundDisabled,
+
+    String? orbAnimation,
   }) {
     return AppColorsExtended(
       background1: background1 ?? this.background1,
@@ -103,6 +111,8 @@ class AppColorsExtended extends ThemeExtension<AppColorsExtended> {
       buttonForeground2: buttonForeground2 ?? this.buttonForeground2,
       buttonForegroundDisabled:
           buttonForegroundDisabled ?? this.buttonForegroundDisabled,
+
+      orbAnimation: orbAnimation ?? this.orbAnimation,
     );
   }
 
@@ -155,6 +165,7 @@ class AppColorsExtended extends ThemeExtension<AppColorsExtended> {
         other.buttonForegroundDisabled,
         t,
       ),
+      orbAnimation: t < 0.5 ? orbAnimation : other.orbAnimation,
     );
   }
 
@@ -178,10 +189,12 @@ class AppColorsExtended extends ThemeExtension<AppColorsExtended> {
     buttonBackground1: AppColors.surfaceBrightDark,
     buttonBackground2: AppColors.surfaceBrightLight,
     buttonBackgroundDisabled: AppColors.surfaceDimLight,
-
     buttonForeground1: AppColors.textLight100,
     buttonForeground2: AppColors.textDark100,
     buttonForegroundDisabled: AppColors.defaultGray,
+
+    // Animation
+    orbAnimation: AppConstants.orbAnimationLight,
   );
 
   static const dark = AppColorsExtended(
@@ -207,5 +220,8 @@ class AppColorsExtended extends ThemeExtension<AppColorsExtended> {
     buttonForeground1: AppColors.textDark100,
     buttonForeground2: AppColors.textLight100,
     buttonForegroundDisabled: AppColors.textDark12,
+
+    // Animation
+    orbAnimation: AppConstants.orbAnimationDark,
   );
 }

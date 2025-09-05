@@ -157,5 +157,12 @@
   "loadingConversion": "Chargement de la conversion...",
   "otherCurrencies": "Autres devises",
   "accountCurrency": "Devise du compte",
-  "baseCurrency": "Devise de base"
+  "baseCurrency": "Devise de base",
+
+  "@_COUNTERPARTY_SELECTION": {},
+  "paidTo": "Payé à...",
+  "receivedFrom": "Reçu de...",
+  "counterpartySearchHint": "Amazon",
+  "selectCounterparty": "Sélectionner un tiers",
+  "createNewCounterparty": "Créer un nouveau tiers"
 }

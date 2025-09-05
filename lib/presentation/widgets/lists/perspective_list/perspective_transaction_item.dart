@@ -1,4 +1,5 @@
 import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/constants/gradient_colors.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
@@ -35,7 +36,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(28.r),
           boxShadow: [
             BoxShadow(
-              color: AppColors.gradientPinkStart.withValues(alpha: 0.35),
+              color: GradientColors.pink.first.withValues(alpha: 0.35),
               blurRadius: 10.r,
               offset: Offset(0, -8.0.r), // Ombre vers le haut
             ),
@@ -53,7 +54,7 @@ class PerspectiveTransactionItem extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.gradientPinkStart.withValues(alpha: 0.35),
+                    color: GradientColors.pink.first.withValues(alpha: 0.35),
                     blurRadius: 6.r,
                     offset: Offset(0, 4.r),
                   ),

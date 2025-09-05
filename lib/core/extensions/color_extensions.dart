@@ -32,4 +32,34 @@ extension ColorContrast on Color {
     }
     return AppColors.textLight100;
   }
+
+  /// Éclaircit la couleur de [amount]%
+  Color lighten([double amount = .1]) {
+    assert(amount >= 0 && amount <= 1);
+    final hsl = HSLColor.fromColor(this);
+    final hslLight = hsl.withLightness(
+      (hsl.lightness + amount).clamp(0.0, 1.0),
+    );
+    return hslLight.toColor();
+  }
+
+  /// Assombrit la couleur de [amount]%
+  Color darken([double amount = .1]) {
+    assert(amount >= 0 && amount <= 1);
+    final hsl = HSLColor.fromColor(this);
+    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+    return hslDark.toColor();
+  }
+
+  /// Atténue la couleur en fonction du thème actuel
+  /// - Si mode clair → éclaircit
+  /// - Si mode sombre → assombrit
+  Color attenuate(BuildContext context, [double amount = .1]) {
+    final brightness = Theme.of(context).brightness;
+    if (brightness == Brightness.dark) {
+      return darken(amount);
+    } else {
+      return lighten(amount);
+    }
+  }
 }

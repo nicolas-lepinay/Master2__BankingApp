@@ -961,6 +961,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Base currency'**
   String get baseCurrency;
+
+  /// No description provided for @paidTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid to...'**
+  String get paidTo;
+
+  /// No description provided for @receivedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Received from...'**
+  String get receivedFrom;
+
+  /// No description provided for @counterpartySearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Amazon'**
+  String get counterpartySearchHint;
+
+  /// No description provided for @selectCounterparty.
+  ///
+  /// In en, this message translates to:
+  /// **'Select counterparty'**
+  String get selectCounterparty;
+
+  /// No description provided for @createNewCounterparty.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new counterparty'**
+  String get createNewCounterparty;
 }
 
 class _AppLocalizationsDelegate
