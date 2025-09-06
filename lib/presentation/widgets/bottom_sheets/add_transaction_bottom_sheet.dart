@@ -303,6 +303,7 @@ class _AddTransactionBottomSheet
         if (_selectedLogo != null) {
           finalCounterpartyId = await _createCounterpartyWithLogo(
             _selectedLogo!,
+            _counterpartySearchText,
           );
         }
         // Cas 2: Texte saisi mais pas de logo (créer counterparty simple)
@@ -349,13 +350,14 @@ class _AddTransactionBottomSheet
   }
 
   /// Crée un Counterparty avec téléchargement différé du logo
-  Future<int?> _createCounterpartyWithLogo(BrandLogo logo) async {
+  Future<int?> _createCounterpartyWithLogo(BrandLogo logo, String userInputText) async {
     try {
       // Étape 1: Créer le Counterparty immédiatement sans icône (non-bloquant)
       final counterpartyRepository = ref.read(counterpartyRepositoryProvider);
+      final cleanName = userInputText.cleanCounterpartyName();
       final counterpartyToCreate = Counterparty(
         id: 0, // Sera assigné par la DB
-        name: logo.name,
+        name: cleanName,
         // Pas d'icône pour l'instant - sera mise à jour en arrière-plan
       );
 
@@ -381,7 +383,7 @@ class _AddTransactionBottomSheet
       return newCounterparty.id;
     } catch (e) {
       // En cas d'erreur de création du Counterparty, fallback sur texte
-      return await _createCounterpartyFromText(logo.name);
+      return await _createCounterpartyFromText(userInputText);
     }
   }
 
