@@ -6,6 +6,7 @@ import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/data/cache/cache_manager.dart';
 import 'package:bankapp/data/models/models.dart';
 import 'package:bankapp/domain/entities/account.dart';
+import 'package:bankapp/domain/entities/brand_logo.dart';
 import 'package:bankapp/domain/entities/counterparty.dart';
 import 'package:bankapp/domain/entities/transaction.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
@@ -50,12 +51,12 @@ class _AddTransactionBottomSheet
   DateTime _selectedDate = DateTime.now();
   String _transactionTitle = '';
   String _transactionComment = '';
-  int? _selectedCounterpartyId;
-  String? _selectedCounterpartyName;
+  Counterparty? _selectedCounterparty;
   String _counterpartySearchText =
       ''; // Texte saisi dans le TextField counterparty
   List<int> _selectedCategoryIds = [];
   TransactionStatus _selectedStatus = TransactionStatus.completed;
+  BrandLogo? _selectedLogo; // Logo sélectionné pour nouveau counterparty
 
   bool get _isFormValid {
     if (_selectedAccount == null) return false;
@@ -294,41 +295,21 @@ class _AddTransactionBottomSheet
 
     try {
       // Gérer la logique de création automatique du Counterparty
-      int? finalCounterpartyId = _selectedCounterpartyId;
+      int? finalCounterpartyId = _selectedCounterparty?.id;
 
-      // Si aucun counterparty sélectionné mais du texte saisi, créer un nouveau counterparty
-      if (_selectedCounterpartyId == null &&
-          _counterpartySearchText.trim().isNotEmpty) {
-        final cleanName = _counterpartySearchText.cleanCounterpartyName();
-
-        // Vérifier une dernière fois qu'il n'existe pas déjà
-        final existing = CacheManager.instance.findCounterpartyByExactName(
-          cleanName,
-        );
-        if (existing != null) {
-          finalCounterpartyId = existing.id;
-        } else {
-          // Créer le nouveau Counterparty
-          final counterpartyRepository = ref.read(
-            counterpartyRepositoryProvider,
+      // Gérer la création de Counterparty avec ou sans logo
+      if (_selectedCounterparty == null) {
+        // Cas 1: Logo sélectionné (créer counterparty avec logo téléchargé)
+        if (_selectedLogo != null) {
+          finalCounterpartyId = await _createCounterpartyWithLogo(
+            _selectedLogo!,
           );
-          final counterpartyToCreate = Counterparty(
-            id: 0, // Sera assigné par la DB
-            name: cleanName,
+        }
+        // Cas 2: Texte saisi mais pas de logo (créer counterparty simple)
+        else if (_counterpartySearchText.trim().isNotEmpty) {
+          finalCounterpartyId = await _createCounterpartyFromText(
+            _counterpartySearchText,
           );
-
-          final newCounterparty = await counterpartyRepository
-              .createCounterparty(counterpartyToCreate);
-
-          // Ajouter au cache
-          final counterpartyModel = CounterpartyModel(
-            id: newCounterparty.id,
-            name: newCounterparty.name,
-            icon: newCounterparty.icon,
-          );
-          CacheManager.instance.addCounterpartyToCache(counterpartyModel);
-
-          finalCounterpartyId = newCounterparty.id;
         }
       }
 
@@ -364,6 +345,123 @@ class _AddTransactionBottomSheet
       if (mounted) {
         Navigator.of(context).pop();
       }
+    }
+  }
+
+  /// Crée un Counterparty avec téléchargement différé du logo
+  Future<int?> _createCounterpartyWithLogo(BrandLogo logo) async {
+    try {
+      // Étape 1: Créer le Counterparty immédiatement sans icône (non-bloquant)
+      final counterpartyRepository = ref.read(counterpartyRepositoryProvider);
+      final counterpartyToCreate = Counterparty(
+        id: 0, // Sera assigné par la DB
+        name: logo.name,
+        // Pas d'icône pour l'instant - sera mise à jour en arrière-plan
+      );
+
+      final newCounterparty = await counterpartyRepository.createCounterparty(
+        counterpartyToCreate,
+      );
+
+      // Étape 2: Ajouter au cache immédiatement
+      final counterpartyModel = CounterpartyModel(
+        id: newCounterparty.id,
+        name: newCounterparty.name,
+        icon: newCounterparty.icon,
+      );
+      CacheManager.instance.addCounterpartyToCache(counterpartyModel);
+
+      // Étape 3: Lancer le téléchargement en arrière-plan (non-bloquant)
+      _downloadLogoInBackground(
+        counterpartyId: newCounterparty.id,
+        logoUrl: logo.icon,
+        domain: logo.domain,
+      );
+
+      return newCounterparty.id;
+    } catch (e) {
+      // En cas d'erreur de création du Counterparty, fallback sur texte
+      return await _createCounterpartyFromText(logo.name);
+    }
+  }
+
+  /// Télécharge le logo en arrière-plan et met à jour le Counterparty
+  void _downloadLogoInBackground({
+    required int counterpartyId,
+    required String logoUrl,
+    required String domain,
+  }) async {
+    try {
+      // Télécharger l'image (peut prendre du temps)
+      final imageDownloadService = ref.read(imageDownloadServiceProvider);
+      final localImagePath = await imageDownloadService.downloadAndSaveLogo(
+        imageUrl: logoUrl,
+        domain: domain,
+      );
+
+      // Mettre à jour le Counterparty avec l'icône locale
+      final counterpartyRepository = ref.read(counterpartyRepositoryProvider);
+      final existingCounterparty = CacheManager.instance
+          .getAllCounterparties()
+          .firstWhere((c) => c.id == counterpartyId);
+
+      final updatedCounterparty = existingCounterparty.copyWith(
+        icon: localImagePath,
+      );
+
+      await counterpartyRepository.updateCounterparty(updatedCounterparty);
+
+      // Mettre à jour le cache
+      final updatedModel = CounterpartyModel(
+        id: updatedCounterparty.id,
+        name: updatedCounterparty.name,
+        icon: updatedCounterparty.icon,
+      );
+      CacheManager.instance.addCounterpartyToCache(updatedModel);
+
+      // Notifier les ViewModels pour rafraîchir l'UI
+      // (Le cache notifiera automatiquement les streams)
+    } catch (e) {
+      // Échec silencieux - le Counterparty reste sans icône
+      // TODO: Optionnellement, on pourrait logger l'erreur ou réessayer plus tard
+    }
+  }
+
+  /// Crée un Counterparty simple à partir du texte saisi
+  Future<int?> _createCounterpartyFromText(String searchText) async {
+    final cleanName = searchText.cleanCounterpartyName();
+
+    // Vérifier une dernière fois qu'il n'existe pas déjà
+    final existing = CacheManager.instance.findCounterpartyByExactName(
+      cleanName,
+    );
+    if (existing != null) {
+      return existing.id;
+    }
+
+    try {
+      // Créer le nouveau Counterparty
+      final counterpartyRepository = ref.read(counterpartyRepositoryProvider);
+      final counterpartyToCreate = Counterparty(
+        id: 0, // Sera assigné par la DB
+        name: cleanName,
+      );
+
+      final newCounterparty = await counterpartyRepository.createCounterparty(
+        counterpartyToCreate,
+      );
+
+      // Ajouter au cache
+      final counterpartyModel = CounterpartyModel(
+        id: newCounterparty.id,
+        name: newCounterparty.name,
+        icon: newCounterparty.icon,
+      );
+      CacheManager.instance.addCounterpartyToCache(counterpartyModel);
+
+      return newCounterparty.id;
+    } catch (e) {
+      return null;
     }
   }
 
@@ -560,10 +658,23 @@ class _AddTransactionBottomSheet
   Widget _buildCounterpartyPage() {
     return CounterpartySelectionWidget(
       transactionType: _transactionType,
+      initialSelectedLogo: _selectedLogo,
       onCounterpartySelected: (counterparty) {
         setState(() {
-          _selectedCounterpartyId = counterparty?.id;
-          _selectedCounterpartyName = counterparty?.name;
+          _selectedCounterparty = counterparty;
+          // Réinitialiser le logo sélectionné si un counterparty est sélectionné
+          if (counterparty != null) {
+            _selectedLogo = null;
+          }
+        });
+      },
+      onLogoSelected: (logo) {
+        setState(() {
+          _selectedLogo = logo;
+          // Réinitialiser la sélection de counterparty si un logo est sélectionné
+          if (logo != null) {
+            _selectedCounterparty = null;
+          }
         });
       },
       onSearchTextChanged: (text) {
@@ -571,13 +682,10 @@ class _AddTransactionBottomSheet
           _counterpartySearchText = text;
         });
       },
-      initialSelection: _selectedCounterpartyId != null
-          ? Counterparty(
-              id: _selectedCounterpartyId!,
-              name: _selectedCounterpartyName ?? '',
-            )
+      initialSelection: _selectedCounterparty,
+      initialSearchText: _counterpartySearchText.isNotEmpty
+          ? _counterpartySearchText
           : null,
-      initialSearchText: _counterpartySearchText.isNotEmpty ? _counterpartySearchText : null,
     );
   }
 

@@ -1,5 +1,7 @@
+import 'package:bankapp/core/services/brandfetch_service.dart';
 import 'package:bankapp/core/services/currency_conversion_service.dart';
 import 'package:bankapp/core/services/firebase_functions_service.dart';
+import 'package:bankapp/core/services/image_download_service.dart';
 import 'package:bankapp/core/services/smart_exchange_rate_service.dart';
 import 'package:bankapp/core/services/user_preferences_service.dart';
 import 'package:bankapp/data/cache/cache_manager.dart';
@@ -10,6 +12,7 @@ import 'package:bankapp/data/repositories/repositories.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/domain/repositories/repositories.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
+import 'package:bankapp/presentation/viewmodels/logo_search_view_model.dart';
 import 'package:bankapp/presentation/viewmodels/viewmodels.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -140,6 +143,14 @@ final smartExchangeRateServiceProvider = Provider<SmartExchangeRateService>((
   );
 });
 
+final brandfetchServiceProvider = Provider<BrandfetchService>((ref) {
+  return BrandfetchService();
+});
+
+final imageDownloadServiceProvider = Provider<ImageDownloadService>((ref) {
+  return ImageDownloadService();
+});
+
 // ============================================================================
 // VIEWMODELS PROVIDERS
 // ============================================================================
@@ -198,6 +209,12 @@ final followedTransactionViewModelProvider = StateNotifierProvider<
     FollowedTransactionViewModel, FollowedTransactionViewState>((ref) {
   return FollowedTransactionViewModel(
     ref.watch(transactionRepositoryProvider),
+  );
+});
+
+final logoSearchViewModelProvider = StateNotifierProvider<LogoSearchViewModel, LogoSearchViewState>((ref) {
+  return LogoSearchViewModel(
+    brandfetchService: ref.watch(brandfetchServiceProvider),
   );
 });
 

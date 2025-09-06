@@ -72,8 +72,6 @@ class _ExchangeRatesBottomSheetState
 
           SizedBox(height: AppConstants.defaultPadding.h),
 
-          //Container(width: 200, height: 200, child: VideoAssetPlayer()),
-
           // Header
           Padding(
             padding: EdgeInsets.symmetric(
@@ -107,7 +105,7 @@ class _ExchangeRatesBottomSheetState
           // Liste des devises disponibles
           Flexible(
             child: currencyState.isConversionLoading
-                ? _buildLoadingState(appTheme)
+                ? _buildLoadingState(appTheme, l10n)
                 : currencyState.conversionError != null
                 ? _buildErrorState(
                     appTheme,
@@ -117,13 +115,13 @@ class _ExchangeRatesBottomSheetState
                 : _buildCurrencyList(appTheme, l10n, currencyState),
           ),
 
-          SizedBox(height: AppConstants.largePadding.h),
+          SizedBox(height: AppConstants.veryLargePadding.h),
         ],
       ),
     );
   }
 
-  Widget _buildLoadingState(AppColorsExtended appTheme) {
+  Widget _buildLoadingState(AppColorsExtended appTheme, AppLocalizations l10n) {
     return Container(
       height: 200.h,
       alignment: Alignment.center,
@@ -133,7 +131,7 @@ class _ExchangeRatesBottomSheetState
           CircularProgressIndicator(color: appTheme.text6, strokeWidth: 2.w),
           SizedBox(height: AppConstants.defaultPadding.h),
           Text(
-            'Chargement des taux...',
+            l10n.loadingRates,
             style: TextStyle(fontSize: 14.sp, color: appTheme.text5),
           ),
         ],
@@ -155,7 +153,7 @@ class _ExchangeRatesBottomSheetState
           Icon(Icons.error_outline, color: appTheme.text6, size: 32.sp),
           SizedBox(height: AppConstants.veryLargePadding.h),
           Text(
-            'Erreur de connexion',
+            l10n.connectionError,
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,

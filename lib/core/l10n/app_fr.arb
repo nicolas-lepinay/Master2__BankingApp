@@ -164,5 +164,16 @@
   "receivedFrom": "Reçu de...",
   "counterpartySearchHint": "Amazon",
   "selectCounterparty": "Sélectionner un tiers",
-  "createNewCounterparty": "Créer un nouveau tiers"
+  "createNewCounterparty": "Créer un nouveau tiers",
+
+  "@_LOGO_SEARCH": {},
+  "findLogo": "Trouver un logo",
+  "searchForLogo": "Rechercher un logo",
+  "logoSearchError": "Oups ! Une erreur est survenue",
+  "searchLogoHint": "Saisis un nom d'entreprise pour trouver son logo",
+  "noLogo": "Aucun logo",
+  "removeCurrentLogo": "Effacer le logo actuel",
+  "searchError": "Une erreur inattendue est survenue pendant la recherche de logos.",
+  "loadingRates": "Chargement des taux...",
+  "connectionError": "Erreur de connexion"
 }

@@ -406,6 +406,13 @@ class CacheManager {
     return _counterparties.values.map((c) => c.toEntity()).toList();
   }
 
+  /// Récupère un Counterparty par son ID
+  /// Retourne null si aucun Counterparty n'est trouvé
+  Counterparty? getCounterpartyById(int id) {
+    final counterpartyModel = _counterparties[id];
+    return counterpartyModel?.toEntity();
+  }
+
   /// Recherche les Counterparties par nom (insensible à la casse)
   /// Limité aux [limit] premiers résultats (défaut: 20)
   List<Counterparty> searchCounterpartiesByName(String query, {int limit = 20}) {

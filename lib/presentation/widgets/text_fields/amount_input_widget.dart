@@ -171,14 +171,18 @@ class _AmountInputWidgetV2State extends ConsumerState<AmountInputWidget> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.0,
-        maxChildSize: 0.9,
-        builder: (context, scrollController) => ExchangeRatesBottomSheet(
-          baseCurrency: baseCurrency,
-          selectedCurrency: selectedCurrency,
-          onCurrencySelected: widget.onConversionCurrencyChanged!,
+      builder: (context) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => Navigator.pop(context),
+        child: DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          minChildSize: 0.0,
+          maxChildSize: 0.9,
+          builder: (context, scrollController) => ExchangeRatesBottomSheet(
+            baseCurrency: baseCurrency,
+            selectedCurrency: selectedCurrency,
+            onCurrencySelected: widget.onConversionCurrencyChanged!,
+          ),
         ),
       ),
     ).then((_) {

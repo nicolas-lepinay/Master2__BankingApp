@@ -1,6 +1,7 @@
 // Domain entities barrel file
 export 'account.dart';
 export 'account_summary.dart';
+export 'brand_logo.dart';
 export 'category.dart';
 export 'counterparty.dart';
 export 'currency.dart';

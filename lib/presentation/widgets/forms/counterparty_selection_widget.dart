@@ -1,13 +1,17 @@
-import 'package:bankapp/core/constants/app_constants.dart';
+import 'package:bankapp/core/extensions/color_extensions.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
+import 'package:bankapp/core/utils/image_utils.dart';
 import 'package:bankapp/data/cache/cache_manager.dart';
+import 'package:bankapp/domain/entities/brand_logo.dart';
 import 'package:bankapp/domain/entities/counterparty.dart';
 import 'package:bankapp/domain/entities/transaction.dart';
+import 'package:bankapp/presentation/widgets/bottom_sheets/logo_search_bottom_sheet.dart';
 import 'package:bankapp/presentation/widgets/forms/counterparty_search_field.dart';
 import 'package:bankapp/presentation/widgets/helpers/superellipse_clipper.dart';
 import 'package:bankapp/presentation/widgets/lists/counterparty_chips_list.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -16,9 +20,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 /// Utilisable dans le bottom sheet et dans un futur écran standalone
 class CounterpartySelectionWidget extends ConsumerStatefulWidget {
   final Function(Counterparty?) onCounterpartySelected;
+  final Function(BrandLogo?)
+  onLogoSelected; // Callback pour la sélection de logo
   final Function(String)? onSearchTextChanged; // Pour récupérer le texte saisi
   final TransactionType? transactionType; // null pour usage standalone
   final Counterparty? initialSelection;
+  final BrandLogo?
+  initialSelectedLogo; // Logo initialement sélectionné pour persistance
   final String? initialSearchText; // Texte initial pour persistance navigation
   final bool showCreateButton; // Pour écran standalone futur
   final String? customTitle; // Titre personnalisé pour usage standalone
@@ -26,9 +34,11 @@ class CounterpartySelectionWidget extends ConsumerStatefulWidget {
   const CounterpartySelectionWidget({
     super.key,
     required this.onCounterpartySelected,
+    required this.onLogoSelected,
     this.onSearchTextChanged,
     this.transactionType,
     this.initialSelection,
+    this.initialSelectedLogo,
     this.initialSearchText,
     this.showCreateButton = false,
     this.customTitle,
@@ -45,19 +55,23 @@ class _CounterpartySelectionWidgetState
   List<Counterparty> _searchResults = [];
   Counterparty? _selectedCounterparty;
   bool _isUserTyping = false;
+  BrandLogo? _selectedLogo;
 
   @override
   void initState() {
     super.initState();
     _selectedCounterparty = widget.initialSelection;
-    
+    _selectedLogo = widget.initialSelectedLogo;
+
     // Initialiser searchQuery : soit le nom du counterparty sélectionné, soit le texte initial
     if (_selectedCounterparty != null) {
       _searchQuery = _selectedCounterparty!.name;
     } else if (widget.initialSearchText?.isNotEmpty == true) {
       _searchQuery = widget.initialSearchText!;
       // Effectuer une recherche initiale si on a du texte mais pas de sélection
-      _searchResults = CacheManager.instance.searchCounterpartiesByName(_searchQuery);
+      _searchResults = CacheManager.instance.searchCounterpartiesByName(
+        _searchQuery,
+      );
     }
   }
 
@@ -85,12 +99,18 @@ class _CounterpartySelectionWidgetState
           widget.onCounterpartySelected(exactMatch);
         } else if (exactMatch == null && _selectedCounterparty != null) {
           // Désélectionner si plus de match exact ET si l'utilisateur tape vraiment
-          final isExactMatch = query.trim().toLowerCase() == 
+          final isExactMatch =
+              query.trim().toLowerCase() ==
               _selectedCounterparty!.name.toLowerCase();
           if (!isExactMatch) {
             _selectedCounterparty = null;
             widget.onCounterpartySelected(null);
           }
+        }
+
+        // Réinitialiser le logo si l'utilisateur modifie le texte et qu'un counterparty exact est trouvé
+        if (exactMatch != null && _selectedLogo != null) {
+          _selectedLogo = null;
         }
       }
     });
@@ -109,11 +129,16 @@ class _CounterpartySelectionWidgetState
       _selectedCounterparty = counterparty;
       _searchQuery = counterparty.name;
       _isUserTyping = false; // Important : marquer comme non-utilisateur
+      // Réinitialiser le logo sélectionné quand un counterparty est sélectionné
+      _selectedLogo = null;
       // NE PAS vider _searchResults - maintenir la liste visible avec sélection
     });
 
     // Notifier la sélection (mettra à jour le TextField via didUpdateWidget)
     widget.onCounterpartySelected(counterparty);
+
+    // Notifier que le logo est désélectionné
+    widget.onLogoSelected(null);
 
     // Notifier le changement de texte pour synchroniser
     widget.onSearchTextChanged?.call(counterparty.name);
@@ -155,7 +180,8 @@ class _CounterpartySelectionWidgetState
                 _onCounterpartyDeselected(),
             selectedCounterparty: _selectedCounterparty,
             isUserTyping: _isUserTyping,
-            initialText: _searchQuery, // Passer le texte initial pour persistance
+            initialText:
+                _searchQuery, // Passer le texte initial pour persistance
           ),
 
           SizedBox(height: 40.h),
@@ -197,7 +223,7 @@ class _CounterpartySelectionWidgetState
 
   Widget _buildOrbOrIcon(AppColorsExtended appTheme) {
     if (_selectedCounterparty != null) {
-      // Afficher l'icône du Counterparty dans un Superellipse
+      // Afficher l'icône du Counterparty dans un Superellipses
       return Container(
         width: 90.r,
         height: 90.r,
@@ -205,44 +231,123 @@ class _CounterpartySelectionWidgetState
         child: ClipPath(
           clipper: SuperellipseClipper(n: 3.1),
           child: Container(
-            color: appTheme.backgroundInvert,
+            color: appTheme.background2!.accentuate(context, 0.05),
             child:
                 _selectedCounterparty!.icon != null &&
                     _selectedCounterparty!.icon!.isNotEmpty
-                ? Image.network(
+                ? ImageUtils.buildImageFromPath(
                     _selectedCounterparty!.icon!,
                     width: 90.r,
                     height: 90.r,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      return _buildPlaceholderIcon(appTheme);
+                      return _buildErrorIcon(appTheme);
                     },
                   )
                 : _buildPlaceholderIcon(appTheme),
           ),
         ),
       );
+    } else if (_selectedLogo != null) {
+      // Afficher le logo sélectionné dans un Superellipse (tappable)
+      return GestureDetector(
+        onTap: () => _openLogoSearchBottomSheet(),
+        child: Container(
+          width: 90.r,
+          height: 90.r,
+          margin: EdgeInsets.symmetric(vertical: 45.h),
+          child: ClipPath(
+            clipper: SuperellipseClipper(n: 3.1),
+            child: Container(
+              color: appTheme.backgroundInvert,
+              child: _selectedLogo!.icon.isNotEmpty
+                  ? Image.network(
+                      _selectedLogo!.icon,
+                      width: 90.r,
+                      height: 90.r,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return _buildErrorIcon(appTheme);
+                      },
+                    )
+                  : _buildPlaceholderIcon(appTheme),
+            ),
+          ),
+        ),
+      );
     } else {
-      // Afficher le widget Orb animé
-      return SizedBox(
-        width: 180.r,
-        height: 180.r,
-        child: Center(child: Image.asset(appTheme.orbAnimation!)),
+      // Afficher le widget Orb animé (tappable si aucun counterparty exact trouvé)
+      final shouldShowLogoButton =
+          _searchQuery.trim().isNotEmpty &&
+          CacheManager.instance.findCounterpartyByExactName(_searchQuery) ==
+              null;
+
+      return GestureDetector(
+        onTap: shouldShowLogoButton ? () => _openLogoSearchBottomSheet() : null,
+        child: SizedBox(
+          width: 180.r,
+          height: 180.r,
+          child: Center(child: Image.asset(appTheme.orbAnimation!)),
+        ),
       );
     }
   }
 
-  Widget _buildPlaceholderIcon(AppColorsExtended appTheme) {
-    return Center(
-      child: Icon(Icons.person, size: 60.sp, color: appTheme.text3),
+  /// Ouvre la BottomSheet de recherche de logos
+  void _openLogoSearchBottomSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.pop(context),
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.65,
+            minChildSize: 0.0,
+            maxChildSize: 0.9,
+            builder: (context, scrollController) {
+              return LogoSearchBottomSheet(
+                initialQuery: _searchQuery,
+                currentlySelectedLogo: _selectedLogo,
+                onLogoSelected: _onLogoSelected,
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildOrbLoadingWidget() {
-    return SizedBox(
-      width: 120.r,
-      height: 120.r,
-      child: Center(child: Image.asset(AppConstants.orbStatic)),
+  /// Callback appelé quand un logo est sélectionné ou désélectionné
+  void _onLogoSelected(BrandLogo? logo) {
+    setState(() {
+      _selectedLogo = logo;
+      // Si un logo est sélectionné, s'assurer qu'aucun counterparty n'est sélectionné
+      if (logo != null) {
+        _selectedCounterparty = null;
+        widget.onCounterpartySelected(null);
+      }
+    });
+
+    // Notifier le parent de la sélection de logo
+    widget.onLogoSelected(logo);
+  }
+
+  Widget _buildErrorIcon(AppColorsExtended appTheme) {
+    return Center(
+      child: Icon(Icons.error, size: 48.sp, color: appTheme.text4),
+    );
+  }
+
+  Widget _buildPlaceholderIcon(AppColorsExtended appTheme) {
+    return Center(
+      child: Icon(
+        CupertinoIcons.question_circle_fill,
+        size: 48.sp,
+        color: appTheme.text4,
+      ),
     );
   }
 }

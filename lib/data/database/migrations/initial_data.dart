@@ -70,7 +70,7 @@ Future<void> insertInitialData(AppDatabase database) async {
       .insert(
         CounterpartiesCompanion(
           name: const Value('Netflix'),
-          icon: const Value('tv'),
+          //icon: const Value('tv'),
         ),
       );
 
@@ -79,7 +79,7 @@ Future<void> insertInitialData(AppDatabase database) async {
       .insert(
         CounterpartiesCompanion(
           name: const Value('Apple'),
-          icon: const Value('phone_iphone'),
+          //icon: const Value('phone_iphone'),
         ),
       );
 
@@ -88,7 +88,7 @@ Future<void> insertInitialData(AppDatabase database) async {
       .insert(
         CounterpartiesCompanion(
           name: const Value('Intermarché'),
-          icon: const Value('shopping_cart'),
+          //icon: const Value('shopping_cart'),
         ),
       );
 
@@ -97,7 +97,7 @@ Future<void> insertInitialData(AppDatabase database) async {
       .insert(
         CounterpartiesCompanion(
           name: const Value('Total Énergies'),
-          icon: const Value('local_gas_station'),
+          //icon: const Value('local_gas_station'),
         ),
       );
 
@@ -106,7 +106,7 @@ Future<void> insertInitialData(AppDatabase database) async {
       .insert(
         CounterpartiesCompanion(
           name: const Value('Spotify'),
-          icon: const Value('music_note'),
+          //icon: const Value('music_note'),
         ),
       );
 

@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- Permission pour accéder à Internet (requis pour télécharger les logos) -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="bankapp"
         android:name="${applicationName}"

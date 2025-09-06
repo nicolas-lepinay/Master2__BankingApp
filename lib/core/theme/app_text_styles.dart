@@ -207,6 +207,14 @@ class AppTextStyles {
     height: 1.4,
   );
 
+  static TextStyle bodyVeryLarge = TextStyle(
+    fontFamily: defaultFontFamily,
+    fontFamilyFallback: [robotoFontFamily],
+    fontSize: 18.sp,
+    fontWeight: FontWeight.normal,
+    height: 1.5,
+  );
+
   static TextStyle bodyLarge = TextStyle(
     fontFamily: defaultFontFamily,
     fontFamilyFallback: [robotoFontFamily],
