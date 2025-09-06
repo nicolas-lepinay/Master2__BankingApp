@@ -455,4 +455,33 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get createNewCounterparty => 'Créer un nouveau tiers';
+
+  @override
+  String get findLogo => 'Trouver un logo';
+
+  @override
+  String get searchForLogo => 'Rechercher un logo';
+
+  @override
+  String get logoSearchError => 'Oups ! Une erreur est survenue';
+
+  @override
+  String get searchLogoHint =>
+      'Saisis un nom d\'entreprise pour trouver son logo';
+
+  @override
+  String get noLogo => 'Aucun logo';
+
+  @override
+  String get removeCurrentLogo => 'Effacer le logo actuel';
+
+  @override
+  String get searchError =>
+      'Une erreur inattendue est survenue pendant la recherche de logos.';
+
+  @override
+  String get loadingRates => 'Chargement des taux...';
+
+  @override
+  String get connectionError => 'Erreur de connexion';
 }

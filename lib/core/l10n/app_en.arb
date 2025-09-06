@@ -165,5 +165,16 @@
     "receivedFrom": "Received from...",
     "counterpartySearchHint": "Amazon",
     "selectCounterparty": "Select counterparty",
-    "createNewCounterparty": "Create new counterparty"
+    "createNewCounterparty": "Create new counterparty",
+
+    "@_LOGO_SEARCH": {},
+    "findLogo": "Find a logo",
+    "searchForLogo": "Search for a logo",
+    "logoSearchError": "Oops! An error occurred",
+    "searchLogoHint": "Type in a company name to find their logo",
+    "noLogo": "None",
+    "removeCurrentLogo": "Erase the current logo",
+    "searchError": "An unexpected error occurred during the logo search.",
+    "loadingRates": "Loading rates...",
+    "connectionError": "Connection error"
 }

@@ -62,4 +62,16 @@ extension ColorContrast on Color {
       return lighten(amount);
     }
   }
+
+  /// Renforce la couleur en fonction du thème actuel
+  /// - Si mode clair → assombrit
+  /// - Si mode sombre → éclaircit
+  Color accentuate(BuildContext context, [double amount = .1]) {
+    final brightness = Theme.of(context).brightness;
+    if (brightness == Brightness.dark) {
+      return lighten(amount);
+    } else {
+      return darken(amount);
+    }
+  }
 }

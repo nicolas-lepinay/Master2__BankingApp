@@ -45,5 +45,36 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- Configuration réseau pour télécharger les logos -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Permet les connexions HTTPS vers les APIs de logos -->
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<!-- Configuration spécifique pour les domaines d'API utilisés -->
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>brandfetch.io</key>
+			<dict>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<false/>
+				<key>NSExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+			<!-- Ajoutez d'autres domaines de CDN si nécessaire -->
+			<key>cdn.brandfetch.io</key>
+			<dict>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<false/>
+				<key>NSExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 </dict>
 </plist>

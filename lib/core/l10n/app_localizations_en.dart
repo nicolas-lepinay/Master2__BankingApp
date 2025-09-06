@@ -455,4 +455,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createNewCounterparty => 'Create new counterparty';
+
+  @override
+  String get findLogo => 'Find a logo';
+
+  @override
+  String get searchForLogo => 'Search for a logo';
+
+  @override
+  String get logoSearchError => 'Oops! An error occurred';
+
+  @override
+  String get searchLogoHint => 'Type in a company name to find their logo';
+
+  @override
+  String get noLogo => 'None';
+
+  @override
+  String get removeCurrentLogo => 'Erase the current logo';
+
+  @override
+  String get searchError =>
+      'An unexpected error occurred during the logo search.';
+
+  @override
+  String get loadingRates => 'Loading rates...';
+
+  @override
+  String get connectionError => 'Connection error';
 }

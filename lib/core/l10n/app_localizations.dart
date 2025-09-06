@@ -991,6 +991,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create new counterparty'**
   String get createNewCounterparty;
+
+  /// No description provided for @findLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a logo'**
+  String get findLogo;
+
+  /// No description provided for @searchForLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a logo'**
+  String get searchForLogo;
+
+  /// No description provided for @logoSearchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Oops! An error occurred'**
+  String get logoSearchError;
+
+  /// No description provided for @searchLogoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type in a company name to find their logo'**
+  String get searchLogoHint;
+
+  /// No description provided for @noLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get noLogo;
+
+  /// No description provided for @removeCurrentLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase the current logo'**
+  String get removeCurrentLogo;
+
+  /// No description provided for @searchError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred during the logo search.'**
+  String get searchError;
+
+  /// No description provided for @loadingRates.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading rates...'**
+  String get loadingRates;
+
+  /// No description provided for @connectionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection error'**
+  String get connectionError;
 }
 
 class _AppLocalizationsDelegate
