@@ -3,8 +3,10 @@ import 'package:bankapp/core/constants/gradient_colors.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
+import 'package:bankapp/core/utils/image_utils.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
-import 'package:flutter/material.dart';
+import 'package:bankapp/presentation/widgets/helpers/superellipse_clipper.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PerspectiveTransactionItem extends StatelessWidget {
@@ -60,10 +62,20 @@ class PerspectiveTransactionItem extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Icon(
-                _getTransactionIcon(transactionWithCounterparty),
-                color: AppColors.textDark25,
-                size: 22.sp, // Réduire la taille de l'icône
+              child: ClipPath(
+                clipper: SuperellipseClipper(n: 2.0),
+                child:
+                    counterparty?.icon != null && counterparty!.icon!.isNotEmpty
+                    ? ImageUtils.buildImageFromPath(
+                        counterparty.icon!,
+                        width: 38.w,
+                        height: 38.w,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildPlaceholderIcon();
+                        },
+                      )
+                    : _buildPlaceholderIcon(),
               ),
             ),
 
@@ -114,17 +126,6 @@ class PerspectiveTransactionItem extends StatelessWidget {
     );
   }
 
-  /// Récupère l'icône à afficher pour la transaction
-  IconData _getTransactionIcon(domain.TransactionWithBalance transaction) {
-    // Si la transaction a un tiers avec une icône
-    if (transaction.counterparty?.icon != null) {
-      return _getIconFromString(transaction.counterparty!.icon!);
-    }
-
-    // Sinon, utiliser l'icône basée sur le titre
-    return _getIconFromTitle(transaction.transaction.title);
-  }
-
   /// Récupère le nom à afficher pour la transaction
   String _getTransactionDisplayName(domain.TransactionWithBalance transaction) {
     // Priorité 1: Nom du tiers
@@ -141,56 +142,12 @@ class PerspectiveTransactionItem extends StatelessWidget {
     return transaction.isExpense ? 'Dépense' : 'Revenu';
   }
 
-  /// Convertit une string d'icône en IconData
-  IconData _getIconFromString(String iconString) {
-    switch (iconString.toLowerCase()) {
-      case 'tv':
-        return Icons.tv;
-      case 'phone_iphone':
-        return Icons.phone_iphone;
-      case 'shopping_cart':
-        return Icons.shopping_cart;
-      case 'local_gas_station':
-        return Icons.local_gas_station;
-      case 'music_note':
-        return Icons.music_note;
-      case 'restaurant':
-        return Icons.restaurant;
-      case 'work':
-        return Icons.work;
-      case 'account_balance':
-        return Icons.account_balance;
-      case 'business':
-        return Icons.business;
-      default:
-        return Icons.payment;
-    }
-  }
-
-  /// Récupère une icône basée sur le titre de la transaction
-  IconData _getIconFromTitle(String? title) {
-    if (title == null) return Icons.payment;
-
-    final titleLower = title.toLowerCase();
-
-    if (titleLower.contains('netflix')) return Icons.tv;
-    if (titleLower.contains('spotify')) return Icons.music_note;
-    if (titleLower.contains('restaurant') || titleLower.contains('food')) {
-      return Icons.restaurant;
-    }
-    if (titleLower.contains('gas') || titleLower.contains('essence')) {
-      return Icons.local_gas_station;
-    }
-    if (titleLower.contains('shopping') || titleLower.contains('achat')) {
-      return Icons.shopping_cart;
-    }
-    if (titleLower.contains('salary') || titleLower.contains('salaire')) {
-      return Icons.work;
-    }
-    if (titleLower.contains('bank') || titleLower.contains('banque')) {
-      return Icons.account_balance;
-    }
-
-    return Icons.payment;
+  /// Widget placeholder quand il n'y a pas d'icône
+  Widget _buildPlaceholderIcon() {
+    return Icon(
+      CupertinoIcons.question_circle_fill,
+      color: AppColors.textDark25,
+      size: 22.sp,
+    );
   }
 }

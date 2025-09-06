@@ -2,7 +2,10 @@ import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
+import 'package:bankapp/core/utils/image_utils.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
+import 'package:bankapp/presentation/widgets/helpers/superellipse_clipper.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -20,6 +23,7 @@ class TransactionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
     final transaction = transactionWithBalance.transaction;
+    final counterparty = transactionWithBalance.counterparty;
     final isDebit = transactionWithBalance.isExpense;
 
     return InkWell(
@@ -30,7 +34,7 @@ class TransactionItem extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icône de catégorie (carré blanc pour l'instant)
+            // Icône de catégorie
             Container(
               width: 50.w,
               height: 50.w,
@@ -38,10 +42,20 @@ class TransactionItem extends StatelessWidget {
                 color: appTheme.background1,
                 borderRadius: BorderRadius.circular(50.r),
               ),
-              child: Icon(
-                _getTransactionIcon(transaction.title),
-                color: appTheme.text3,
-                size: 24.sp,
+              child: ClipPath(
+                clipper: SuperellipseClipper(n: 2.0),
+                child:
+                    counterparty?.icon != null && counterparty!.icon!.isNotEmpty
+                    ? ImageUtils.buildImageFromPath(
+                        counterparty.icon!,
+                        width: 50.w,
+                        height: 50.w,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildErrorIcon(appTheme);
+                        },
+                      )
+                    : _buildPlaceholderIcon(appTheme),
               ),
             ),
 
@@ -128,24 +142,16 @@ class TransactionItem extends StatelessWidget {
     );
   }
 
-  IconData _getTransactionIcon(String? title) {
-    if (title == null) return Icons.payment;
+  /// Widget placeholder quand il n'y a pas d'icône
+  Widget _buildPlaceholderIcon(AppColorsExtended appTheme) {
+    return Icon(
+      CupertinoIcons.question_circle_fill,
+      color: appTheme.text5,
+      size: 28.sp,
+    );
+  }
 
-    final titleLower = title.toLowerCase();
-
-    if (titleLower.contains('netflix')) return Icons.tv;
-    if (titleLower.contains('spotify')) return Icons.music_note;
-    if (titleLower.contains('restaurant') || titleLower.contains('food'))
-      return Icons.restaurant;
-    if (titleLower.contains('gas') || titleLower.contains('essence'))
-      return Icons.local_gas_station;
-    if (titleLower.contains('shopping') || titleLower.contains('achat'))
-      return Icons.shopping_cart;
-    if (titleLower.contains('salary') || titleLower.contains('salaire'))
-      return Icons.work;
-    if (titleLower.contains('bank') || titleLower.contains('banque'))
-      return Icons.account_balance;
-
-    return Icons.payment;
+  Widget _buildErrorIcon(AppColorsExtended appTheme) {
+    return Icon(Icons.error, color: appTheme.text5, size: 28.sp);
   }
 }
