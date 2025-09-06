@@ -6,7 +6,7 @@ import 'package:bankapp/domain/repositories/image_download_repository.dart';
 import 'package:flutter/foundation.dart';
 
 /// Implémentation du repository de téléchargement d'images
-/// 
+///
 /// Cette implémentation respecte l'architecture MVVM en découplant
 /// la logique de téléchargement du cycle de vie des widgets.
 class ImageDownloadRepositoryImpl implements ImageDownloadRepository {
@@ -47,9 +47,8 @@ class ImageDownloadRepositoryImpl implements ImageDownloadRepository {
       );
 
       // Étape 2: Récupérer le Counterparty existant via repository (architecture MVVM)
-      final existingCounterparty = await _counterpartyRepository.getCounterpartyById(
-        counterpartyId,
-      );
+      final existingCounterparty = await _counterpartyRepository
+          .getCounterpartyById(counterpartyId);
 
       if (existingCounterparty == null) {
         throw Exception('Counterparty not found: $counterpartyId');
@@ -61,16 +60,6 @@ class ImageDownloadRepositoryImpl implements ImageDownloadRepository {
       );
 
       await _counterpartyRepository.updateCounterparty(updatedCounterparty);
-
-      // Étape 4: Mettre à jour le cache directement pour la performance
-      // (Le repository devrait normalement gérer cela, mais pour la compatibilité...)
-      final updatedModel = CounterpartyModel(
-        id: updatedCounterparty.id,
-        name: updatedCounterparty.name,
-        icon: updatedCounterparty.icon,
-      );
-      CacheManager.instance.addCounterpartyToCache(updatedModel);
-
     } catch (e) {
       // Log l'erreur mais ne pas faire échouer l'opération principale
       // Le Counterparty reste simplement sans icône

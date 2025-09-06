@@ -464,19 +464,7 @@ class CacheManager {
     return null;
   }
 
-  /// Ajoute un nouveau Counterparty au cache
-  /// Utilisé après création en base de données
-  void addCounterpartyToCache(CounterpartyModel counterpartyModel) {
-    _counterparties[counterpartyModel.id] = counterpartyModel;
-    _notifyCounterpartiesStream();
-  }
-
-  /// Notifie le stream des Counterparties (méthode helper privée)
-  void _notifyCounterpartiesStream() {
-    _counterpartiesController.add(
-      _counterparties.values.map((c) => c.toEntity()).toList(),
-    );
-  }
+  
 
   /// Obtient les transactions suivies avec balance
   List<TransactionWithBalance> getFollowedTransactionsWithBalance() {
@@ -522,6 +510,22 @@ class CacheManager {
     _accountsController.add(getAllAccounts());
   }
 
+  /// Ajoute ou met à jour une contrepartie
+  Future<void> addCounterparty(CounterpartyModel counterparty) async {
+    _counterparties[counterparty.id] = counterparty;
+    await _calculateAllTransactionsWithBalance();
+    await _calculateAllAccountSummaries();
+    _counterpartiesController.add(getAllCounterparties());
+  }
+
+  /// Ajoute ou met à jour une catégorie
+  Future<void> addCategory(CategoryModel category) async {
+    _categories[category.id] = category;
+    await _calculateAllTransactionsWithBalance();
+    await _calculateAllAccountSummaries();
+    _categoriesController.add(getAllCategories());
+  }
+
   /// Ajoute une transaction
   Future<void> addTransaction(TransactionModel transaction) async {
     _transactions[transaction.id] = transaction;
@@ -538,6 +542,22 @@ class CacheManager {
     await _calculateAllAccountSummaries();
     _transactionsController.add(getAllTransactions());
     _accountsController.add(getAllAccounts());
+  }
+
+  /// Supprime une contrepartie
+  Future<void> removeCounterparty(int counterpartyId) async {
+    _counterparties.remove(counterpartyId);
+    await _calculateAllTransactionsWithBalance();
+    await _calculateAllAccountSummaries();
+    _counterpartiesController.add(getAllCounterparties());
+  }
+
+  /// Supprime une catégorie
+  Future<void> removeCategory(int categoryId) async {
+    _categories.remove(categoryId);
+    await _calculateAllTransactionsWithBalance();
+    await _calculateAllAccountSummaries();
+    _categoriesController.add(getAllCategories());
   }
 
   /// Invalide et recalcule tout
