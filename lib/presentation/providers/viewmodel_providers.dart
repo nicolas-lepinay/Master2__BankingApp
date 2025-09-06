@@ -151,6 +151,13 @@ final imageDownloadServiceProvider = Provider<ImageDownloadService>((ref) {
   return ImageDownloadService();
 });
 
+final imageDownloadRepositoryProvider = Provider<ImageDownloadRepository>((ref) {
+  return ImageDownloadRepositoryImpl(
+    ref.watch(imageDownloadServiceProvider),
+    ref.watch(counterpartyRepositoryProvider),
+  );
+});
+
 // ============================================================================
 // VIEWMODELS PROVIDERS
 // ============================================================================
@@ -215,6 +222,15 @@ final followedTransactionViewModelProvider = StateNotifierProvider<
 final logoSearchViewModelProvider = StateNotifierProvider<LogoSearchViewModel, LogoSearchViewState>((ref) {
   return LogoSearchViewModel(
     brandfetchService: ref.watch(brandfetchServiceProvider),
+  );
+});
+
+final transactionCreationViewModelProvider = StateNotifierProvider<
+    TransactionCreationViewModel, TransactionCreationViewState>((ref) {
+  return TransactionCreationViewModel(
+    ref.watch(transactionRepositoryProvider),
+    ref.watch(counterpartyRepositoryProvider),
+    ref.watch(imageDownloadRepositoryProvider),
   );
 });
 

@@ -51,16 +51,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
 
   @override
   Future<Transaction?> getTransactionById(int id) async {
-    // Si le cache est initialisé, utiliser le cache
+    // Si le cache est initialisé, utiliser la méthode optimisée O(1)
     if (_cacheManager.isInitialized) {
-      final allTransactions = _cacheManager.getAllTransactions();
-      try {
-        return allTransactions.firstWhere(
-          (transaction) => transaction.id == id,
-        );
-      } catch (e) {
-        return null;
-      }
+      return _cacheManager.getTransactionById(id);
     }
 
     // Sinon, charger depuis la base de données

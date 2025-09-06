@@ -378,6 +378,13 @@ class CacheManager {
     return _transactions.values.map((t) => t.toEntity()).toList();
   }
 
+  /// Récupère une Transaction par son ID
+  /// Retourne null si aucune Transaction n'est trouvée
+  Transaction? getTransactionById(int id) {
+    final transactionModel = _transactions[id];
+    return transactionModel?.toEntity();
+  }
+
   /// Obtient les transactions d'un compte
   List<Transaction> getTransactionsByAccountId(int accountId) {
     return _transactions.values
