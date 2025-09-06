@@ -36,8 +36,8 @@ class TransactionItem extends StatelessWidget {
           children: [
             // Icône de catégorie
             Container(
-              width: 50.w,
-              height: 50.w,
+              width: 45.r,
+              height: 45.r,
               decoration: BoxDecoration(
                 color: appTheme.background1,
                 borderRadius: BorderRadius.circular(50.r),
@@ -48,8 +48,8 @@ class TransactionItem extends StatelessWidget {
                     counterparty?.icon != null && counterparty!.icon!.isNotEmpty
                     ? ImageUtils.buildImageFromPath(
                         counterparty.icon!,
-                        width: 50.w,
-                        height: 50.w,
+                        width: 45.r,
+                        height: 45.r,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return _buildErrorIcon(appTheme);
@@ -68,7 +68,7 @@ class TransactionItem extends StatelessWidget {
                 children: [
                   // Titre/nom du tiers
                   Text(
-                    transaction.title ?? 'Transaction',
+                    counterparty?.name ?? transaction.title ?? 'Transaction',
                     style: AppTextStyles.transactionTitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
