@@ -8,4 +8,5 @@ export 'counterparty_view_model.dart';
 export 'currency_view_model.dart';
 export 'followed_transaction_view_model.dart';
 export 'search_view_model.dart';
+export 'transaction_creation_view_model.dart';
 export 'transaction_view_model.dart';

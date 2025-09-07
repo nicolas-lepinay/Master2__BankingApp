@@ -24,16 +24,9 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
 
   @override
   Future<Counterparty?> getCounterpartyById(int id) async {
-    // Si le cache est initialisé, utiliser le cache
+    // Si le cache est initialisé, utiliser la méthode optimisée O(1)
     if (_cacheManager.isInitialized) {
-      final allCounterparties = _cacheManager.getAllCounterparties();
-      try {
-        return allCounterparties.firstWhere(
-          (counterparty) => counterparty.id == id,
-        );
-      } catch (e) {
-        return null;
-      }
+      return _cacheManager.getCounterpartyById(id);
     }
 
     // Sinon, charger depuis la base de données
@@ -55,6 +48,17 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
 
   @override
   Future<Counterparty> createCounterparty(Counterparty counterparty) async {
+    // Vérifier si un Counterparty avec le même nom existe déjà
+    final existingCounterparties = await searchCounterpartiesByName(counterparty.name);
+    
+    // Chercher un match exact (insensible à la casse)
+    for (final existing in existingCounterparties) {
+      if (existing.name.toLowerCase() == counterparty.name.toLowerCase()) {
+        // Retourner le Counterparty existant plutôt que d'en créer un nouveau
+        return existing;
+      }
+    }
+
     // Créer le modèle pour la base de données
     final counterpartyModel = CounterpartyModel.fromEntity(counterparty);
 
@@ -65,7 +69,7 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
 
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
-      await _cacheManager.invalidateAll(); // Recalculer tout
+      await _cacheManager.addCounterparty(savedModel);
     }
 
     return savedModel.toEntity();
@@ -83,7 +87,7 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
 
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
-      await _cacheManager.invalidateAll(); // Recalculer tout
+      await _cacheManager.addCounterparty(savedModel);
     }
 
     return savedModel.toEntity();
@@ -96,7 +100,7 @@ class CounterpartyRepositoryImpl implements CounterpartyRepository {
 
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
-      await _cacheManager.invalidateAll(); // Recalculer tout
+      await _cacheManager.removeCounterparty(id);
     }
   }
 

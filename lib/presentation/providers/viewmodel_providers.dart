@@ -151,6 +151,13 @@ final imageDownloadServiceProvider = Provider<ImageDownloadService>((ref) {
   return ImageDownloadService();
 });
 
+final imageDownloadRepositoryProvider = Provider<ImageDownloadRepository>((ref) {
+  return ImageDownloadRepositoryImpl(
+    ref.watch(imageDownloadServiceProvider),
+    ref.watch(counterpartyRepositoryProvider),
+  );
+});
+
 // ============================================================================
 // VIEWMODELS PROVIDERS
 // ============================================================================
@@ -217,6 +224,20 @@ final logoSearchViewModelProvider = StateNotifierProvider<LogoSearchViewModel, L
     brandfetchService: ref.watch(brandfetchServiceProvider),
   );
 });
+
+/// Provider pour TransactionCreationViewModel avec WidgetRef
+/// Utilise .family pour passer le WidgetRef nécessaire à l'invalidation des providers
+final transactionCreationViewModelProvider = StateNotifierProvider
+    .family<TransactionCreationViewModel, TransactionCreationViewState, WidgetRef>(
+  (ref, widgetRef) {
+    return TransactionCreationViewModel(
+      ref.watch(transactionRepositoryProvider),
+      ref.watch(counterpartyRepositoryProvider),
+      ref.watch(imageDownloadRepositoryProvider),
+      widgetRef, // 🆕 Passer le WidgetRef pour l'invalidation
+    );
+  },
+);
 
 // ============================================================================
 // CONVENIENCE PROVIDERS

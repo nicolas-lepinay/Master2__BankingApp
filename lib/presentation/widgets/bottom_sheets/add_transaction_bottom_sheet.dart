@@ -1,10 +1,7 @@
 import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/core/extensions/string_extensions.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/utils/formatters.dart';
-import 'package:bankapp/data/cache/cache_manager.dart';
-import 'package:bankapp/data/models/models.dart';
 import 'package:bankapp/domain/entities/account.dart';
 import 'package:bankapp/domain/entities/brand_logo.dart';
 import 'package:bankapp/domain/entities/counterparty.dart';
@@ -294,31 +291,14 @@ class _AddTransactionBottomSheet
     if (finalAmount == null) return;
 
     try {
-      // Gérer la logique de création automatique du Counterparty
-      int? finalCounterpartyId = _selectedCounterparty?.id;
-
-      // Gérer la création de Counterparty avec ou sans logo
-      if (_selectedCounterparty == null) {
-        // Cas 1: Logo sélectionné (créer counterparty avec logo téléchargé)
-        if (_selectedLogo != null) {
-          finalCounterpartyId = await _createCounterpartyWithLogo(
-            _selectedLogo!,
-          );
-        }
-        // Cas 2: Texte saisi mais pas de logo (créer counterparty simple)
-        else if (_counterpartySearchText.trim().isNotEmpty) {
-          finalCounterpartyId = await _createCounterpartyFromText(
-            _counterpartySearchText,
-          );
-        }
-      }
-
-      // Utiliser le TransactionViewModel comme dans l'ancienne version pour une invalidation complète
-      final transactionViewModel = ref.read(
-        transactionViewModelProvider.notifier,
+      // ✅ ARCHITECTURE MVVM : Widget → ViewModel (pas Repository directement)
+      // 🆕 Utiliser le nouveau provider avec WidgetRef pour l'invalidation des providers
+      final transactionCreationViewModel = ref.read(
+        transactionCreationViewModelProvider(ref).notifier,
       );
 
-      await transactionViewModel.createTransaction(
+      // 🔥 LOGIQUE PRÉSERVÉE INTACTE : Tous les paramètres identiques
+      await transactionCreationViewModel.createTransactionWithCounterparty(
         accountId: _selectedAccount!.id,
         type: _transactionType,
         amount: finalAmount,
@@ -326,9 +306,14 @@ class _AddTransactionBottomSheet
         date: _selectedDate,
         title: _transactionTitle.isEmpty ? null : _transactionTitle,
         comment: _transactionComment.isEmpty ? null : _transactionComment,
-        counterpartyId: finalCounterpartyId,
+        selectedCounterpartyId: _selectedCounterparty?.id,
+        counterpartySearchText: _counterpartySearchText.trim().isEmpty
+            ? null
+            : _counterpartySearchText,
+        selectedLogo: _selectedLogo,
         categoryIds: _selectedCategoryIds,
         status: _selectedStatus,
+        // 🔥 PROPRIÉTÉS CRITIQUES : Conversion de devises préservées
         amountBeforeConversion: _hasConversion
             ? double.tryParse(_transactionAmount)
             : null,
@@ -348,122 +333,10 @@ class _AddTransactionBottomSheet
     }
   }
 
-  /// Crée un Counterparty avec téléchargement différé du logo
-  Future<int?> _createCounterpartyWithLogo(BrandLogo logo) async {
-    try {
-      // Étape 1: Créer le Counterparty immédiatement sans icône (non-bloquant)
-      final counterpartyRepository = ref.read(counterpartyRepositoryProvider);
-      final counterpartyToCreate = Counterparty(
-        id: 0, // Sera assigné par la DB
-        name: logo.name,
-        // Pas d'icône pour l'instant - sera mise à jour en arrière-plan
-      );
-
-      final newCounterparty = await counterpartyRepository.createCounterparty(
-        counterpartyToCreate,
-      );
-
-      // Étape 2: Ajouter au cache immédiatement
-      final counterpartyModel = CounterpartyModel(
-        id: newCounterparty.id,
-        name: newCounterparty.name,
-        icon: newCounterparty.icon,
-      );
-      CacheManager.instance.addCounterpartyToCache(counterpartyModel);
-
-      // Étape 3: Lancer le téléchargement en arrière-plan (non-bloquant)
-      _downloadLogoInBackground(
-        counterpartyId: newCounterparty.id,
-        logoUrl: logo.icon,
-        domain: logo.domain,
-      );
-
-      return newCounterparty.id;
-    } catch (e) {
-      // En cas d'erreur de création du Counterparty, fallback sur texte
-      return await _createCounterpartyFromText(logo.name);
-    }
-  }
-
-  /// Télécharge le logo en arrière-plan et met à jour le Counterparty
-  void _downloadLogoInBackground({
-    required int counterpartyId,
-    required String logoUrl,
-    required String domain,
-  }) async {
-    try {
-      // Télécharger l'image (peut prendre du temps)
-      final imageDownloadService = ref.read(imageDownloadServiceProvider);
-      final localImagePath = await imageDownloadService.downloadAndSaveLogo(
-        imageUrl: logoUrl,
-        domain: domain,
-      );
-
-      // Mettre à jour le Counterparty avec l'icône locale
-      final counterpartyRepository = ref.read(counterpartyRepositoryProvider);
-      final existingCounterparty = CacheManager.instance
-          .getAllCounterparties()
-          .firstWhere((c) => c.id == counterpartyId);
-
-      final updatedCounterparty = existingCounterparty.copyWith(
-        icon: localImagePath,
-      );
-
-      await counterpartyRepository.updateCounterparty(updatedCounterparty);
-
-      // Mettre à jour le cache
-      final updatedModel = CounterpartyModel(
-        id: updatedCounterparty.id,
-        name: updatedCounterparty.name,
-        icon: updatedCounterparty.icon,
-      );
-      CacheManager.instance.addCounterpartyToCache(updatedModel);
-
-      // Notifier les ViewModels pour rafraîchir l'UI
-      // (Le cache notifiera automatiquement les streams)
-    } catch (e) {
-      // Échec silencieux - le Counterparty reste sans icône
-      // TODO: Optionnellement, on pourrait logger l'erreur ou réessayer plus tard
-    }
-  }
-
-  /// Crée un Counterparty simple à partir du texte saisi
-  Future<int?> _createCounterpartyFromText(String searchText) async {
-    final cleanName = searchText.cleanCounterpartyName();
-
-    // Vérifier une dernière fois qu'il n'existe pas déjà
-    final existing = CacheManager.instance.findCounterpartyByExactName(
-      cleanName,
-    );
-    if (existing != null) {
-      return existing.id;
-    }
-
-    try {
-      // Créer le nouveau Counterparty
-      final counterpartyRepository = ref.read(counterpartyRepositoryProvider);
-      final counterpartyToCreate = Counterparty(
-        id: 0, // Sera assigné par la DB
-        name: cleanName,
-      );
-
-      final newCounterparty = await counterpartyRepository.createCounterparty(
-        counterpartyToCreate,
-      );
-
-      // Ajouter au cache
-      final counterpartyModel = CounterpartyModel(
-        id: newCounterparty.id,
-        name: newCounterparty.name,
-        icon: newCounterparty.icon,
-      );
-      CacheManager.instance.addCounterpartyToCache(counterpartyModel);
-
-      return newCounterparty.id;
-    } catch (e) {
-      return null;
-    }
-  }
+  // ✅ Fonctions supprimées : logique déplacée dans TransactionCreationViewModel
+  // - _createCounterpartyWithLogo() → TransactionCreationViewModel._createCounterpartyWithLogo()
+  // - _downloadLogoInBackground() → ImageDownloadRepository.updateCounterpartyIconBackground()
+  // - _createCounterpartyFromText() → TransactionCreationViewModel._createCounterpartyFromText()
 
   void _dismissKeyboard() {
     FocusScopeNode currentFocus = FocusScope.of(context);

@@ -68,7 +68,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
 
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
-      await _cacheManager.invalidateAll(); // Recalculer tout
+      await _cacheManager.addCategory(savedModel);
     }
 
     return savedModel.toEntity();
@@ -84,7 +84,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
 
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
-      await _cacheManager.invalidateAll(); // Recalculer tout
+      await _cacheManager.addCategory(savedModel);
     }
 
     return savedModel.toEntity();
@@ -97,7 +97,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
 
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
-      await _cacheManager.invalidateAll(); // Recalculer tout
+      await _cacheManager.removeCategory(id);
     }
   }
 
