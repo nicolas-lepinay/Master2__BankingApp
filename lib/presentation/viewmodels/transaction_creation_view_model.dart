@@ -123,6 +123,7 @@ class TransactionCreationViewModel
           finalCounterpartyId = await _createCounterpartyWithLogo(
             selectedLogo,
             counterpartySearchText,
+            accountId, // 🆕 Passer accountId pour rechargement après logo
           );
         }
         // Cas 2: Texte saisi mais pas de logo (créer counterparty simple)
@@ -202,6 +203,7 @@ class TransactionCreationViewModel
   Future<int?> _createCounterpartyWithLogo(
     BrandLogo logo,
     String userInputText,
+    int accountId, // 🆕 Pour rechargement après téléchargement logo
   ) async {
     try {
       // Étape 1: Créer le Counterparty immédiatement sans icône
@@ -227,6 +229,8 @@ class TransactionCreationViewModel
         counterpartyId: newCounterparty.id,
         logoUrl: logo.icon,
         domain: logo.domain,
+        accountId:
+            accountId, // 🆕 Passer l'accountId pour rechargement après téléchargement
       );
 
       return newCounterparty.id;
@@ -241,6 +245,8 @@ class TransactionCreationViewModel
     required int counterpartyId,
     required String logoUrl,
     required String domain,
+    required int
+    accountId, // 🆕 Pour rechargement des transactions après téléchargement
   }) {
     // ✅ Cette méthode survit à la fermeture du widget car elle est dans le ViewModel
     _imageDownloadRepository
@@ -257,6 +263,14 @@ class TransactionCreationViewModel
             );
           }
           state = state.copyWith(isDownloadingLogo: false);
+
+          // 🆕 RECHARGEMENT après téléchargement logo pour afficher l'icône
+          if (_ref != null) {
+            final transactionViewModel = _ref.read(
+              transactionViewModelProvider.notifier,
+            );
+            transactionViewModel.loadTransactionsAroundToday(accountId);
+          }
         })
         .catchError((error) {
           // Échec silencieux - le Counterparty reste sans icône
