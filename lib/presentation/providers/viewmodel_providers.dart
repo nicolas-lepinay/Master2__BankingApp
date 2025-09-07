@@ -225,14 +225,19 @@ final logoSearchViewModelProvider = StateNotifierProvider<LogoSearchViewModel, L
   );
 });
 
-final transactionCreationViewModelProvider = StateNotifierProvider<
-    TransactionCreationViewModel, TransactionCreationViewState>((ref) {
-  return TransactionCreationViewModel(
-    ref.watch(transactionRepositoryProvider),
-    ref.watch(counterpartyRepositoryProvider),
-    ref.watch(imageDownloadRepositoryProvider),
-  );
-});
+/// Provider pour TransactionCreationViewModel avec WidgetRef
+/// Utilise .family pour passer le WidgetRef nécessaire à l'invalidation des providers
+final transactionCreationViewModelProvider = StateNotifierProvider
+    .family<TransactionCreationViewModel, TransactionCreationViewState, WidgetRef>(
+  (ref, widgetRef) {
+    return TransactionCreationViewModel(
+      ref.watch(transactionRepositoryProvider),
+      ref.watch(counterpartyRepositoryProvider),
+      ref.watch(imageDownloadRepositoryProvider),
+      widgetRef, // 🆕 Passer le WidgetRef pour l'invalidation
+    );
+  },
+);
 
 // ============================================================================
 // CONVENIENCE PROVIDERS

@@ -3,8 +3,10 @@ import 'package:bankapp/domain/entities/entities.dart';
 import 'package:bankapp/domain/repositories/counterparty_repository.dart';
 import 'package:bankapp/domain/repositories/image_download_repository.dart';
 import 'package:bankapp/domain/repositories/transaction_repository.dart';
+import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/viewmodels/base_view_model.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// États de création de transaction
 enum TransactionCreationStep {
@@ -71,11 +73,13 @@ class TransactionCreationViewModel
   final TransactionRepository _transactionRepository;
   final CounterpartyRepository _counterpartyRepository;
   final ImageDownloadRepository _imageDownloadRepository;
+  final WidgetRef? _ref;
 
   TransactionCreationViewModel(
     this._transactionRepository,
     this._counterpartyRepository,
     this._imageDownloadRepository,
+    this._ref,
   ) : super(const TransactionCreationViewState());
 
   /// Orchestrateur principal : reproduit fidèlement la logique de _validateTransaction
@@ -166,6 +170,19 @@ class TransactionCreationViewModel
       final createdTransaction = await _transactionRepository.createTransaction(
         newTransaction,
       );
+
+      // 🆕 INVALIDATION DES PROVIDERS pour réactivité automatique
+      if (_ref != null) {
+        _ref.invalidate(accountSummaryByIdProvider);
+        _ref.invalidate(accountsProvider);
+        _ref.invalidate(accountTransactionsProvider);
+
+        // Recharger explicitement les transactions pour le compte concerné
+        final transactionViewModel = _ref.read(
+          transactionViewModelProvider.notifier,
+        );
+        transactionViewModel.loadTransactionsAroundToday(accountId);
+      }
 
       state = state.copyWith(
         currentStep: TransactionCreationStep.completed,

@@ -292,8 +292,9 @@ class _AddTransactionBottomSheet
 
     try {
       // ✅ ARCHITECTURE MVVM : Widget → ViewModel (pas Repository directement)
+      // 🆕 Utiliser le nouveau provider avec WidgetRef pour l'invalidation des providers
       final transactionCreationViewModel = ref.read(
-        transactionCreationViewModelProvider.notifier,
+        transactionCreationViewModelProvider(ref).notifier,
       );
 
       // 🔥 LOGIQUE PRÉSERVÉE INTACTE : Tous les paramètres identiques
@@ -306,7 +307,9 @@ class _AddTransactionBottomSheet
         title: _transactionTitle.isEmpty ? null : _transactionTitle,
         comment: _transactionComment.isEmpty ? null : _transactionComment,
         selectedCounterpartyId: _selectedCounterparty?.id,
-        counterpartySearchText: _counterpartySearchText.trim().isEmpty ? null : _counterpartySearchText,
+        counterpartySearchText: _counterpartySearchText.trim().isEmpty
+            ? null
+            : _counterpartySearchText,
         selectedLogo: _selectedLogo,
         categoryIds: _selectedCategoryIds,
         status: _selectedStatus,
