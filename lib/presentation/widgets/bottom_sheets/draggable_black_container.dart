@@ -531,7 +531,9 @@ class _DraggableBlackContainerState
     // On peut construire PerspectiveListView en toute sécurité
 
     return PerspectiveListView(
-      key: ValueKey('perspective_${transactions.length}_${transactions.isEmpty ? 'empty' : transactions.first.transaction.id}'),
+      key: ValueKey(
+        'perspective_${transactions.length}_${transactions.isEmpty ? 'empty' : transactions.first.transaction.id}',
+      ),
       visualizedItems: visualizedItems,
       itemExtent: itemExtent,
       minScale: minScale,
@@ -545,7 +547,7 @@ class _DraggableBlackContainerState
       onChangeFrontItem: (index) {
         // Callback quand la transaction au premier plan change
       },
-      children: transactions.map((transactionWithBalance) {
+      children: transactions.reversed.map((transactionWithBalance) {
         return PerspectiveTransactionItem(
           transactionWithCounterparty: transactionWithBalance,
           onTap: () =>
@@ -556,6 +558,7 @@ class _DraggableBlackContainerState
   }
 
   /// Trouve l'index de la transaction la plus proche d'aujourd'hui
+  /// Pour PerspectiveListView avec ordre inversé (transactions.reversed)
   int _findTodayTransactionIndex(
     List<domain.TransactionWithBalance> transactions,
   ) {
@@ -567,6 +570,7 @@ class _DraggableBlackContainerState
     int closestIndex = 0;
     Duration smallestDifference = Duration.zero;
 
+    // Chercher dans la liste originale (non inversée)
     for (int i = 0; i < transactions.length; i++) {
       final transactionDate = transactions[i].transaction.date;
       final transactionDateOnly = DateTime(
@@ -582,7 +586,9 @@ class _DraggableBlackContainerState
       }
     }
 
-    return closestIndex;
+    // Convertir l'index pour la liste inversée
+    // Si closestIndex = 0 dans la liste normale, il devient (length-1) dans la liste inversée
+    return transactions.length - 1 - closestIndex;
   }
 
   void _showFullTransactionsBottomSheet() {
