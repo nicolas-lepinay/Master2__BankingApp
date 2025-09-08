@@ -42,8 +42,8 @@ class PerspectiveListViewState extends State<PerspectiveListView> {
   void initState() {
     _currentIndex = widget.initialIndex;
     _pageController = PageController(
-      viewportFraction: 1 / widget.visualizedItems!,
-      initialPage: _currentIndex!,
+      viewportFraction: 1 / (widget.visualizedItems ?? 3),
+      initialPage: _currentIndex ?? 0,
     );
     _pagePercent = 0.0;
     _pageController!.addListener(_pageListener);
@@ -60,7 +60,7 @@ class PerspectiveListViewState extends State<PerspectiveListView> {
 
   void _pageListener() {
     _currentIndex = _pageController!.page!.floor();
-    _pagePercent = (_pageController!.page! - _currentIndex!).abs();
+    _pagePercent = (_pageController!.page! - (_currentIndex ?? 0)).abs();
     setState(() {});
   }
 
@@ -76,14 +76,16 @@ class PerspectiveListViewState extends State<PerspectiveListView> {
             //---------------------------------------
             Padding(
               padding: widget.padding,
-              child: _PerspectiveItems(
-                generatedItems: widget.visualizedItems! - 1,
-                currentIndex: _currentIndex,
-                heightItem: widget.itemExtent,
-                pagePercent: _pagePercent,
-                minScale: widget.minScale, // Transmettre le paramètre
-                children: widget.children,
-              ),
+              child: widget.children.isEmpty
+                  ? const SizedBox()
+                  : _PerspectiveItems(
+                      generatedItems: widget.visualizedItems! - 1,
+                      currentIndex: _currentIndex,
+                      heightItem: widget.itemExtent,
+                      pagePercent: _pagePercent,
+                      minScale: widget.minScale, // Transmettre le paramètre
+                      children: widget.children,
+                    ),
             ),
             //---------------------------------------
             // Back Items Shadow
@@ -150,16 +152,6 @@ class _PerspectiveItems extends StatelessWidget {
   final double minScale; // Échelle minimale configurable
   final List<Widget> children;
 
-  /// Fonction utilitaire pour vérifier si un index est valide
-  bool _isValidIndex(int index) {
-    return index >= 0 && index < children.length;
-  }
-
-  /// Obtient un widget enfant de manière sécurisée
-  Widget _getSafeChild(int index) {
-    return _isValidIndex(index) ? children[index] : const SizedBox();
-  }
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -176,7 +168,7 @@ class _PerspectiveItems extends StatelessWidget {
                 heightItem: heightItem,
                 factorChange: 1,
                 endScale: minScale, // Utilise le paramètre configurable
-                child: _getSafeChild(currentIndex! - generatedItems),
+                child: children[currentIndex! - generatedItems],
               )
             else
               const SizedBox(),
@@ -202,8 +194,9 @@ class _PerspectiveItems extends StatelessWidget {
                       ), // Utilise minScale
                       endTranslateY:
                           (height - heightItem!) * (index / generatedItems),
-                      child: _getSafeChild(currentIndex! -
-                          (((generatedItems - 2) - index) + 1)),
+                      child:
+                          children[currentIndex! -
+                              (((generatedItems - 2) - index) + 1)],
                     )
                   : const SizedBox(),
             //---------------------------------

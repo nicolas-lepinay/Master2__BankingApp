@@ -205,36 +205,54 @@ class _DraggableBlackContainerState
     final accountToUse = selectedAccount ?? accounts.first;
 
     // Récupérer les transactions via TransactionListViewModel (MVVM)
-    final transactionListViewModel = ref.watch(transactionListViewModelProvider);
+    final transactionListViewModel = ref.watch(
+      transactionListViewModelProvider,
+    );
     final transactions = transactionListViewModel.items;
 
-    // Vérifier si des transactions sont chargées pour ce compte
-    final bool hasTransactionsForAccount =
-        transactionListViewModel.selectedAccountId == accountToUse.id &&
-        transactions.isNotEmpty;
+    // 🛡️ GARDE PRINCIPALE RENFORCÉE - Gérer tous les états possibles
 
-    // Charger les transactions si nécessaire
+    // Charger les transactions si nécessaire (en premier)
     if (transactionListViewModel.selectedAccountId != accountToUse.id) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref
             .read(transactionListViewModelProvider.notifier)
             .loadTransactionsAroundToday(accountToUse.id);
       });
-    }
-
-    if (transactionListViewModel.isLoading) {
+      // État transitoire : afficher loading pendant changement de compte
       return _buildLoadingTransactionsContainer();
     }
 
+    // Vérification d'erreur
     if (transactionListViewModel.hasError) {
       return _buildErrorTransactionsContainer();
     }
 
-    if (!hasTransactionsForAccount) {
+    // État de chargement
+    if (transactionListViewModel.isLoading) {
+      return _buildLoadingTransactionsContainer();
+    }
+
+    // Vérification cohérence des données avec conditions renforcées
+    final bool hasValidTransactions =
+        transactionListViewModel.selectedAccountId == accountToUse.id &&
+        transactions.isNotEmpty;
+
+    final bool isCorrectAccountWithNoTransactions =
+        transactionListViewModel.selectedAccountId == accountToUse.id &&
+        transactions.isEmpty;
+
+    // Cas spécial : bon compte, pas de transactions → Empty container
+    if (isCorrectAccountWithNoTransactions) {
       return _buildEmptyTransactionsContainer(
         onAddTransaction: _showAddTransactionBottomSheet,
         l10n: l10n,
       );
+    }
+
+    // Cas critique : incohérence de données (protection contre RangeError)
+    if (!hasValidTransactions) {
+      return _buildLoadingTransactionsContainer();
     }
 
     // Les transactions sont déjà limitées à 50 (25 passées + 25 futures)
@@ -254,28 +272,13 @@ class _DraggableBlackContainerState
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(28.r),
-          child: PerspectiveListView(
-            visualizedItems: perspectiveVisualizedItems, // Utilise la variable
-            itemExtent: perspectiveItemExtent.h, // Utilise la variable
-            minScale: perspectiveMinScale, // Nouveau paramètre personnalisé
-            initialIndex: _findTodayTransactionIndex(transactions),
-            padding: EdgeInsets.only(top: 20.r, bottom: 20.r),
-            onTapFrontItem: (index) {
-              if (index != null && index < transactions.length) {
-                _navigateToTransactionDetail(transactions[index].transaction);
-              }
-            },
-            onChangeFrontItem: (index) {
-              // Callback quand la transaction au premier plan change
-            },
-            children: transactions.map((transactionWithBalance) {
-              return PerspectiveTransactionItem(
-                transactionWithCounterparty: transactionWithBalance,
-                onTap: () => _navigateToTransactionDetail(
-                  transactionWithBalance.transaction,
-                ),
-              );
-            }).toList(),
+          child: _buildTransactionListContent(
+            transactions,
+            hasValidTransactions,
+            transactionListViewModel.isLoading,
+            perspectiveVisualizedItems,
+            perspectiveItemExtent.h,
+            perspectiveMinScale,
           ),
         ),
       ),
@@ -512,6 +515,43 @@ class _DraggableBlackContainerState
           textAlign: TextAlign.center,
         ),
       ),
+    );
+  }
+
+  /// Construit le contenu de la liste des transactions (données déjà validées par garde principale)
+  Widget _buildTransactionListContent(
+    List<domain.TransactionWithBalance> transactions,
+    bool hasValidTransactions,
+    bool isLoading,
+    int visualizedItems,
+    double itemExtent,
+    double minScale,
+  ) {
+    // 🎯 À ce stade, les données ont été validées par la garde principale
+    // On peut construire PerspectiveListView en toute sécurité
+
+    return PerspectiveListView(
+      key: ValueKey('perspective_${transactions.length}_${transactions.isEmpty ? 'empty' : transactions.first.transaction.id}'),
+      visualizedItems: visualizedItems,
+      itemExtent: itemExtent,
+      minScale: minScale,
+      initialIndex: _findTodayTransactionIndex(transactions),
+      padding: EdgeInsets.only(top: 20.r, bottom: 20.r),
+      onTapFrontItem: (index) {
+        if (index != null && index < transactions.length) {
+          _navigateToTransactionDetail(transactions[index].transaction);
+        }
+      },
+      onChangeFrontItem: (index) {
+        // Callback quand la transaction au premier plan change
+      },
+      children: transactions.map((transactionWithBalance) {
+        return PerspectiveTransactionItem(
+          transactionWithCounterparty: transactionWithBalance,
+          onTap: () =>
+              _navigateToTransactionDetail(transactionWithBalance.transaction),
+        );
+      }).toList(),
     );
   }
 
