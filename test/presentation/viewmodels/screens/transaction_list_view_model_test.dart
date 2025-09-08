@@ -3,6 +3,7 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 
 import 'package:bankapp/core/events/app_event_bus.dart';
+import 'package:bankapp/core/events/account_events.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/domain/repositories/transaction_repository.dart';
 import 'package:bankapp/domain/value_objects/date_range.dart';
@@ -375,6 +376,77 @@ void main() {
       
       // For now, just verify the basic functionality works
       // Event testing will be added in a future iteration
+    });
+
+    test('should refresh transactions when CounterpartyLogoDownloadedEvent is fired for current account', () async {
+      // Set up: Load transactions for account 1
+      await viewModel.loadTransactionsForAccount(1);
+      expect(viewModel.state.selectedAccountId, 1);
+      expect(viewModel.state.items.length, 2);
+      
+      // Verify initial repository call
+      verify(mockRepository.getTransactionsWithBalance(1)).called(1);
+      
+      // Reset mock to track new calls
+      clearInteractions(mockRepository);
+      when(mockRepository.getTransactionsWithBalance(1))
+          .thenAnswer((_) async => testTransactions);
+      
+      // Create and fire CounterpartyLogoDownloadedEvent for the current account
+      final logoDownloadedEvent = CounterpartyLogoDownloadedEvent(
+        counterpartyId: 1,
+        counterpartyName: 'Test Merchant',
+        logoPath: '/path/to/logo.png',
+        accountId: 1, // Same as current account
+        timestamp: DateTime.now(),
+        eventId: 'test_logo_downloaded_event',
+      );
+      
+      // Fire the event through the Event Bus
+      eventBus.fire(logoDownloadedEvent);
+      
+      // Wait a short time for the event to be processed
+      await Future.delayed(const Duration(milliseconds: 10));
+      
+      // Verify that the repository was called again to refresh transactions
+      verify(mockRepository.getTransactionsWithBalance(1)).called(1);
+      
+      // Verify state is still correct
+      expect(viewModel.state.selectedAccountId, 1);
+      expect(viewModel.state.items.length, 2);
+      expect(viewModel.state.isLoading, false);
+      expect(viewModel.state.error, isNull);
+    });
+
+    test('should NOT refresh when CounterpartyLogoDownloadedEvent is fired for different account', () async {
+      // Set up: Load transactions for account 1
+      await viewModel.loadTransactionsForAccount(1);
+      expect(viewModel.state.selectedAccountId, 1);
+      
+      // Verify initial repository call
+      verify(mockRepository.getTransactionsWithBalance(1)).called(1);
+      
+      // Reset mock to track new calls
+      clearInteractions(mockRepository);
+      
+      // Create and fire CounterpartyLogoDownloadedEvent for a DIFFERENT account
+      final logoDownloadedEvent = CounterpartyLogoDownloadedEvent(
+        counterpartyId: 1,
+        counterpartyName: 'Test Merchant',
+        logoPath: '/path/to/logo.png',
+        accountId: 2, // Different account
+        timestamp: DateTime.now(),
+        eventId: 'test_logo_downloaded_event_diff_account',
+      );
+      
+      // Fire the event through the Event Bus
+      eventBus.fire(logoDownloadedEvent);
+      
+      // Wait a short time for the event to be processed
+      await Future.delayed(const Duration(milliseconds: 10));
+      
+      // Verify that the repository was NOT called again (no refresh)
+      verifyNever(mockRepository.getTransactionsWithBalance(any));
     });
   });
 

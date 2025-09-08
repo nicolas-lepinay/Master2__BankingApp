@@ -1,4 +1,6 @@
 import 'package:bankapp/core/extensions/string_extensions.dart';
+import 'package:bankapp/core/events/app_event_bus.dart';
+import 'package:bankapp/core/events/account_events.dart';
 import 'package:bankapp/domain/entities/entities.dart';
 import 'package:bankapp/domain/repositories/counterparty_repository.dart';
 import 'package:bankapp/domain/repositories/image_download_repository.dart';
@@ -260,13 +262,16 @@ class TransactionCreationViewModel
           }
           state = state.copyWith(isDownloadingLogo: false);
 
-          // 🆕 RECHARGEMENT après téléchargement logo pour afficher l'icône
-          if (_ref != null) {
-            final transactionListViewModel = _ref.read(
-              transactionListViewModelProvider.notifier,
-            );
-            transactionListViewModel.loadTransactionsAroundToday(accountId);
-          }
+          // 🆕 ÉMISSION D'ÉVÉNEMENT pour signaler le téléchargement terminé
+          // L'Event Bus notifiera automatiquement tous les ViewModels concernés
+          final eventBus = AppEventBus.instance;
+          eventBus.fire(CounterpartyLogoDownloadedEvent(
+            counterpartyId: counterpartyId,
+            counterpartyName: domain,
+            accountId: accountId,
+            timestamp: DateTime.now(),
+            eventId: '${DateTime.now().millisecondsSinceEpoch}_logo_downloaded_$counterpartyId',
+          ));
         })
         .catchError((error) {
           // Échec silencieux - le Counterparty reste sans icône

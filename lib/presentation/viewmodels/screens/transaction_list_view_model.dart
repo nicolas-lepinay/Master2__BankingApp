@@ -155,6 +155,10 @@ class TransactionListViewModel extends BaseListViewModel<TransactionListViewStat
         // Peut nécessiter un rechargement si cela affecte les soldes affichés
         _refreshIfAccountMatches(event.accountId);
         break;
+      case CounterpartyLogoDownloadedEvent():
+        // Recharger les transactions pour afficher le nouveau logo téléchargé
+        _refreshIfAccountMatches(event.accountId);
+        break;
       default:
         break;
     }

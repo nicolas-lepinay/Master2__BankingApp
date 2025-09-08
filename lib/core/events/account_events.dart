@@ -97,6 +97,33 @@ class AccountDeletedEvent extends AccountEvent {
   String toString() => 'AccountDeletedEvent(accountId: $accountId)';
 }
 
+/// Événement déclenché lorsqu'un logo de Counterparty a été téléchargé
+class CounterpartyLogoDownloadedEvent extends AccountEvent {
+  /// ID du Counterparty dont le logo a été téléchargé
+  final int counterpartyId;
+  
+  /// Nom du Counterparty pour logging
+  final String? counterpartyName;
+  
+  /// Chemin du logo téléchargé
+  final String? logoPath;
+  
+  const CounterpartyLogoDownloadedEvent({
+    required this.counterpartyId,
+    this.counterpartyName,
+    this.logoPath,
+    required super.accountId,
+    required super.timestamp,
+    required super.eventId,
+  });
+  
+  @override
+  List<Object?> get props => [...super.props, counterpartyId, counterpartyName, logoPath];
+  
+  @override
+  String toString() => 'CounterpartyLogoDownloadedEvent(counterpartyId: $counterpartyId, accountId: $accountId)';
+}
+
 /// Événement de sélection d'un compte (changement de compte actuel)
 class AccountSelectedEvent extends AccountEvent {
   /// ID du compte précédemment sélectionné
