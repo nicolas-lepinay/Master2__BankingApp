@@ -150,6 +150,16 @@ class _PerspectiveItems extends StatelessWidget {
   final double minScale; // Échelle minimale configurable
   final List<Widget> children;
 
+  /// Fonction utilitaire pour vérifier si un index est valide
+  bool _isValidIndex(int index) {
+    return index >= 0 && index < children.length;
+  }
+
+  /// Obtient un widget enfant de manière sécurisée
+  Widget _getSafeChild(int index) {
+    return _isValidIndex(index) ? children[index] : const SizedBox();
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -166,7 +176,7 @@ class _PerspectiveItems extends StatelessWidget {
                 heightItem: heightItem,
                 factorChange: 1,
                 endScale: minScale, // Utilise le paramètre configurable
-                child: children[currentIndex! - generatedItems],
+                child: _getSafeChild(currentIndex! - generatedItems),
               )
             else
               const SizedBox(),
@@ -192,9 +202,8 @@ class _PerspectiveItems extends StatelessWidget {
                       ), // Utilise minScale
                       endTranslateY:
                           (height - heightItem!) * (index / generatedItems),
-                      child:
-                          children[currentIndex! -
-                              (((generatedItems - 2) - index) + 1)],
+                      child: _getSafeChild(currentIndex! -
+                          (((generatedItems - 2) - index) + 1)),
                     )
                   : const SizedBox(),
             //---------------------------------

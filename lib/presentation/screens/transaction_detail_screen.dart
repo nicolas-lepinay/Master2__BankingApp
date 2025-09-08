@@ -17,7 +17,15 @@ class TransactionDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final transaction = ref.watch(transactionByIdProvider(transactionId));
+    final viewModel = ref.read(transactionDetailViewModelProvider(transactionId).notifier);
+    final state = ref.watch(transactionDetailViewModelProvider(transactionId));
+
+    // Initialiser le ViewModel si nécessaire
+    if (!state.hasTransaction && !viewModel.isLoading && !viewModel.hasError) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        viewModel.initialize();
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -26,7 +34,16 @@ class TransactionDetailScreen extends ConsumerWidget {
           // Bouton d'édition
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () => _showEditTransaction(context, ref),
+            onPressed: viewModel.canEdit 
+                ? () => _showEditTransaction(context, ref)
+                : null,
+          ),
+          // Bouton de suivi
+          IconButton(
+            icon: Icon(state.isFollowed ? Icons.star : Icons.star_border),
+            onPressed: viewModel.canToggleFollow
+                ? () => _toggleFollowTransaction(context, viewModel)
+                : null,
           ),
           // Menu avec plus d'options
           PopupMenuButton<String>(
@@ -34,16 +51,18 @@ class TransactionDetailScreen extends ConsumerWidget {
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'toggle_status',
+                enabled: viewModel.canToggleStatus,
                 child: Row(
                   children: [
                     const Icon(Icons.check_circle_outline),
                     const SizedBox(width: 8),
-                    Text('Basculer le statut'),
+                    Text(state.isCompleted ? 'Marquer en attente' : 'Marquer comme complété'),
                   ],
                 ),
               ),
               PopupMenuItem(
                 value: 'delete',
+                enabled: viewModel.canDelete,
                 child: Row(
                   children: [
                     const Icon(Icons.delete_outline, color: Colors.red),
@@ -56,30 +75,54 @@ class TransactionDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: transaction == null
-          ? const Center(child: Text('Transaction introuvable'))
-          : _buildTransactionDetail(context, ref, transaction),
+      body: _buildBody(context, ref, viewModel, state, l10n),
     );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic viewModel,
+    dynamic state,
+    AppLocalizations l10n,
+  ) {
+    if (viewModel.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (viewModel.hasError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: Colors.red),
+            SizedBox(height: 16),
+            Text('${l10n.error}: ${viewModel.errorMessage}'),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => viewModel.refresh(),
+              child: Text(l10n.retry),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (!state.hasTransaction) {
+      return const Center(child: Text('Transaction introuvable'));
+    }
+
+    return _buildTransactionDetail(context, ref, state.transaction!, state.account);
   }
 
   Widget _buildTransactionDetail(
     BuildContext context,
     WidgetRef ref,
-    domain.TransactionWithBalance transactionWithBalance,
+    domain.Transaction transaction,
+    domain.Account? account,
   ) {
     final l10n = AppLocalizations.of(context)!;
-    final transaction = transactionWithBalance.transaction;
     final isExpense = transaction.isExpense;
-
-    // Récupérer les informations du compte
-    final accounts = ref.watch(accountsProvider);
-    domain.Account? account;
-
-    try {
-      account = accounts.firstWhere((a) => a.id == transaction.accountId);
-    } catch (e) {
-      // Compte non trouvé
-    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
@@ -333,52 +376,55 @@ class TransactionDetailScreen extends ConsumerWidget {
     WidgetRef ref,
     String action,
   ) async {
+    final viewModel = ref.read(transactionDetailViewModelProvider(transactionId).notifier);
+    
     switch (action) {
       case 'toggle_status':
-        await _toggleTransactionStatus(context, ref);
+        await _toggleTransactionStatus(context, viewModel);
         break;
       case 'delete':
-        await _deleteTransaction(context, ref);
+        await _deleteTransaction(context, viewModel);
         break;
     }
   }
 
   Future<void> _toggleTransactionStatus(
     BuildContext context,
-    WidgetRef ref,
+    dynamic viewModel,
   ) async {
-    try {
-      final transactionRepository = ref.read(transactionRepositoryProvider);
-      final transaction = ref.read(transactionByIdProvider(transactionId));
+    final success = await viewModel.toggleTransactionStatus();
 
-      if (transaction == null) {
-        throw Exception('Transaction non trouvée');
-      }
-
-      await transactionRepository.toggleTransactionStatus(transactionId);
-
-      // Invalider les providers pour rafraîchir les données
-      ref.invalidate(accountsProvider);
-      ref.invalidate(accountTransactionsProvider);
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Statut de la transaction modifié'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
-        );
-      }
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(success 
+              ? 'Statut de la transaction modifié'
+              : 'Erreur lors de la modification du statut'),
+          backgroundColor: success ? Colors.green : Colors.red,
+        ),
+      );
     }
   }
 
-  Future<void> _deleteTransaction(BuildContext context, WidgetRef ref) async {
+  Future<void> _toggleFollowTransaction(
+    BuildContext context,
+    dynamic viewModel,
+  ) async {
+    final success = await viewModel.toggleFollowTransaction();
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(success 
+              ? 'Transaction ${viewModel.state.isFollowed ? "ajoutée aux" : "retirée des"} suivis'
+              : 'Erreur lors de la modification du suivi'),
+          backgroundColor: success ? Colors.green : Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _deleteTransaction(BuildContext context, dynamic viewModel) async {
     // Confirmer la suppression
     final confirmed = await showDialog<bool>(
       context: context,
@@ -402,21 +448,10 @@ class TransactionDetailScreen extends ConsumerWidget {
     );
 
     if (confirmed == true) {
-      try {
-        final transactionRepository = ref.read(transactionRepositoryProvider);
-        final transaction = ref.read(transactionByIdProvider(transactionId));
+      final success = await viewModel.deleteTransaction();
 
-        if (transaction == null) {
-          throw Exception('Transaction non trouvée');
-        }
-
-        await transactionRepository.deleteTransaction(transactionId);
-
-        // Invalider les providers pour rafraîchir les données
-        ref.invalidate(accountsProvider);
-        ref.invalidate(accountTransactionsProvider);
-
-        if (context.mounted) {
+      if (context.mounted) {
+        if (success) {
           Navigator.of(context).pop(); // Retour à l'écran précédent
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -424,12 +459,10 @@ class TransactionDetailScreen extends ConsumerWidget {
               backgroundColor: Colors.green,
             ),
           );
-        }
-      } catch (e) {
-        if (context.mounted) {
+        } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erreur lors de la suppression: $e'),
+            const SnackBar(
+              content: Text('Erreur lors de la suppression'),
               backgroundColor: Colors.red,
             ),
           );

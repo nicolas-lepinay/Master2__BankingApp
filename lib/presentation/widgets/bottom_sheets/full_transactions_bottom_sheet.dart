@@ -4,7 +4,6 @@ import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
-import 'package:bankapp/presentation/providers/transaction_search_provider.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
 import 'package:bankapp/presentation/widgets/lists/transactions_list/transactions_list.dart';
@@ -61,17 +60,22 @@ class _FullTransactionsBottomSheetState
         _keywordController.clear();
         _keywordFocusNode.unfocus();
         // Effacer la recherche quand on ferme la barre
-        ref.read(transactionSearchProvider.notifier).clearSearch();
+        ref.read(transactionListViewModelProvider.notifier).clearSearch();
       }
     });
   }
 
   void _onAmountSearchChanged(String value) {
-    ref.read(transactionSearchProvider.notifier).searchByAmount(value);
+    if (value.isNotEmpty) {
+      final double? amount = double.tryParse(value);
+      ref.read(transactionListViewModelProvider.notifier).filterByAmount(amount, null);
+    } else {
+      ref.read(transactionListViewModelProvider.notifier).clearFilters();
+    }
   }
 
   void _onKeywordSearchChanged(String value) {
-    ref.read(transactionSearchProvider.notifier).searchByKeyword(value);
+    ref.read(transactionListViewModelProvider.notifier).updateSearchQuery(value);
   }
 
   void _dismissKeyboard() {
@@ -97,7 +101,8 @@ class _FullTransactionsBottomSheetState
     final Brightness brightness = Theme.of(context).brightness;
     final bool isDarkMode = brightness == Brightness.dark;
 
-    final accounts = ref.watch(accountsProvider);
+    final homeScreenViewModel = ref.watch(homeScreenViewModelProvider);
+    final accounts = homeScreenViewModel.accounts;
 
     return DraggableScrollableSheet(
       controller: _dragController,
@@ -234,46 +239,38 @@ class _FullTransactionsBottomSheetState
                       : Builder(
                           builder: (context) {
                             // Récupérer le compte sélectionné
-                            final selectedAccountFromProvider = ref.watch(
-                              selectedAccountProvider,
-                            );
-                            final selectedAccount =
-                                selectedAccountFromProvider ?? accounts.first;
+                            final selectedAccount = homeScreenViewModel.selectedAccount ?? accounts.first;
 
-                            // Récupérer les transactions via TransactionViewModel (MVVM)
-                            final transactionViewModel = ref.watch(
-                              transactionViewModelProvider,
-                            );
-                            final transactions =
-                                transactionViewModel.transactions;
+                            // Récupérer les transactions via TransactionListViewModel (MVVM)
+                            final transactionListViewModel = ref.watch(transactionListViewModelProvider);
+                            final transactions = transactionListViewModel.items;
 
                             // Vérifier si des transactions sont chargées pour ce compte
                             final bool hasTransactionsForAccount =
-                                transactionViewModel.selectedAccountId ==
+                                transactionListViewModel.selectedAccountId ==
                                     selectedAccount.id &&
                                 transactions.isNotEmpty;
 
                             // Charger les transactions si nécessaire
-                            if (transactionViewModel.selectedAccountId !=
+                            if (transactionListViewModel.selectedAccountId !=
                                 selectedAccount.id) {
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 ref
-                                    .read(transactionViewModelProvider.notifier)
-                                    .loadTransactions(selectedAccount.id);
+                                    .read(transactionListViewModelProvider.notifier)
+                                    .loadTransactionsForAccount(selectedAccount.id);
                               });
                             }
 
-                            if (transactionViewModel.isLoading) {
+                            if (transactionListViewModel.isLoading) {
                               return const Center(
                                 child: CircularProgressIndicator(),
                               );
                             }
 
-                            if (transactionViewModel.hasError) {
+                            if (transactionListViewModel.hasError) {
                               return Center(
                                 child: Text(
-                                  transactionViewModel.error ??
-                                      'Erreur inconnue',
+                                  'Erreur lors du chargement des transactions',
                                 ),
                               );
                             }
@@ -282,32 +279,20 @@ class _FullTransactionsBottomSheetState
                               return _buildEmptyTransactionsState(l10n);
                             }
 
-                            // Initialiser le provider de recherche avec les transactions (MVVM)
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              ref
-                                  .read(transactionSearchProvider.notifier)
-                                  .setOriginalTransactions(transactions);
-                            });
+                            // Les transactions sont déjà gérées par TransactionListViewModel
 
-                            // Écouter l'état de la recherche
-                            final searchState = ref.watch(
-                              transactionSearchProvider,
-                            );
-                            final transactionsToDisplay =
-                                searchState.isSearchActive
-                                ? searchState.filteredTransactions
-                                : transactions;
+                            // Utiliser les transactions du ViewModel (déjà filtrées)
+                            final transactionsToDisplay = transactions;
+                            final isSearchActive = transactionListViewModel.isFiltered;
 
-                            if (transactionsToDisplay.isEmpty &&
-                                searchState.isSearchActive) {
+                            if (transactionsToDisplay.isEmpty && isSearchActive) {
                               return _buildNoResultsState(l10n, appTheme);
                             }
 
                             return TransactionsList(
                               transactions: transactionsToDisplay,
                               onTransactionTap: _navigateToTransactionDetail,
-                              scrollToToday: !searchState
-                                  .isSearchActive, // Pas de scroll auto si recherche active
+                              scrollToToday: !isSearchActive, // Pas de scroll auto si recherche active
                               accountCurrency: selectedAccount.currency,
                             );
                           },

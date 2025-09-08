@@ -4,7 +4,6 @@ import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
-import 'package:bankapp/presentation/providers/transaction_search_provider.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
 import 'package:bankapp/presentation/widgets/bottom_sheets/add_transaction_bottom_sheet.dart';
@@ -185,8 +184,9 @@ class _DraggableBlackContainerState
   }
 
   Widget _buildTransactionsContainer(AppLocalizations l10n) {
-    final accounts = ref.watch(accountsProvider);
-    final selectedAccount = ref.watch(selectedAccountProvider);
+    final homeScreenViewModel = ref.watch(homeScreenViewModelProvider);
+    final accounts = homeScreenViewModel.accounts;
+    final selectedAccount = homeScreenViewModel.selectedAccount;
 
     // Configuration centralisée de la liste perspective
     const int perspectiveVisualizedItems = 3; // Nombre d'items visibles
@@ -204,29 +204,29 @@ class _DraggableBlackContainerState
     // Utiliser le compte sélectionné du provider ou fallback sur le premier
     final accountToUse = selectedAccount ?? accounts.first;
 
-    // Récupérer les transactions via TransactionViewModel (MVVM)
-    final transactionViewModel = ref.watch(transactionViewModelProvider);
-    final transactions = transactionViewModel.transactions;
+    // Récupérer les transactions via TransactionListViewModel (MVVM)
+    final transactionListViewModel = ref.watch(transactionListViewModelProvider);
+    final transactions = transactionListViewModel.items;
 
     // Vérifier si des transactions sont chargées pour ce compte
     final bool hasTransactionsForAccount =
-        transactionViewModel.selectedAccountId == accountToUse.id &&
+        transactionListViewModel.selectedAccountId == accountToUse.id &&
         transactions.isNotEmpty;
 
     // Charger les transactions si nécessaire
-    if (transactionViewModel.selectedAccountId != accountToUse.id) {
+    if (transactionListViewModel.selectedAccountId != accountToUse.id) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref
-            .read(transactionViewModelProvider.notifier)
+            .read(transactionListViewModelProvider.notifier)
             .loadTransactionsAroundToday(accountToUse.id);
       });
     }
 
-    if (transactionViewModel.isLoading) {
+    if (transactionListViewModel.isLoading) {
       return _buildLoadingTransactionsContainer();
     }
 
-    if (transactionViewModel.hasError) {
+    if (transactionListViewModel.hasError) {
       return _buildErrorTransactionsContainer();
     }
 
@@ -557,7 +557,7 @@ class _DraggableBlackContainerState
       // Reset de la recherche quand la BottomSheet se ferme, après 1 seconde
       if (mounted) {
         Future.delayed(const Duration(milliseconds: 1000), () {
-          ref.read(transactionSearchProvider.notifier).clearSearch();
+          ref.read(transactionListViewModelProvider.notifier).clearSearch();
         });
       }
     });
@@ -572,10 +572,10 @@ class _DraggableBlackContainerState
       enableDrag: true,
       builder: (context) => const AddTransactionBottomSheet(),
     ).then((_) {
-      // Invalider les providers liés aux transactions après fermeture
+      // Recharger les données après fermeture (les nouvelles architectures MVVM + Event Bus gèrent automatiquement la réactivité)
       if (mounted) {
-        ref.invalidate(accountsProvider);
-        ref.invalidate(accountTransactionsProvider);
+        // Les ViewModels écoutent les événements du Event Bus automatiquement
+        // Pas besoin d'invalidation manuelle avec la nouvelle architecture
       }
     });
   }

@@ -1,5 +1,5 @@
 import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/core/constants/gradient_colors.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/domain/entities/account.dart';
 import 'package:bankapp/domain/entities/transaction.dart';
@@ -9,8 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
-import '../../../core/constants/gradient_colors.dart';
 
 class AmountInputWidget extends ConsumerStatefulWidget {
   final TransactionType transactionType;
@@ -219,7 +217,7 @@ class _AmountInputWidgetV2State extends ConsumerState<AmountInputWidget> {
   @override
   Widget build(BuildContext context) {
     final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
-    final l10n = AppLocalizations.of(context)!;
+    //final l10n = AppLocalizations.of(context)!;
 
     final accountCurrency = widget.selectedAccount?.currency ?? 'EUR';
     final transactionCurrency = widget.conversionCurrency ?? accountCurrency;

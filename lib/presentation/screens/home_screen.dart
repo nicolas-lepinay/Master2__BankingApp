@@ -115,7 +115,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
-    final welcomeMessage = ref.watch(welcomeMessageProvider);
+    final homeState = ref.watch(homeScreenViewModelProvider);
+    final welcomeMessage = homeState.welcomeMessage;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.r, vertical: 16.r),
@@ -178,19 +179,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           offset: Offset(0, verticalOffset),
           child: Consumer(
             builder: (context, ref, child) {
-              final accounts = ref.watch(accountsProvider);
-              final accountState = ref.watch(accountViewModelProvider);
+              final homeViewModel = ref.read(homeScreenViewModelProvider.notifier);
+              final homeState = ref.watch(homeScreenViewModelProvider);
 
-              // Conserver la vérification des erreurs et empty state
-              if (accountState.hasError) {
-                return _buildErrorState(context, accountState.error!);
+              // Initialiser si nécessaire
+              if (!homeState.hasAccounts && !homeViewModel.isLoading && !homeViewModel.hasError) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  homeViewModel.initialize();
+                });
               }
 
-              if (accounts.isEmpty) {
+              // Conserver la vérification des erreurs et empty state
+              if (homeViewModel.hasError) {
+                return _buildErrorState(context, homeViewModel.errorMessage ?? 'Unknown error');
+              }
+
+              if (homeViewModel.isLoading) {
+                return _buildLoadingState(context);
+              }
+
+              if (!homeState.hasAccounts) {
                 return _buildEmptyState(context, l10n);
               }
 
-              return _buildAccountCards(context, l10n, accounts);
+              return _buildAccountCards(context, l10n, homeState.accounts);
             },
           ),
         );
@@ -209,10 +221,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           cardData: accounts,
           onCardChange: (index) {
             if (index >= 0 && index < accounts.length) {
-              final accountViewModel = ref.read(
-                accountViewModelProvider.notifier,
-              );
-              accountViewModel.selectAccount(accounts[index].id);
+              final homeViewModel = ref.read(homeScreenViewModelProvider.notifier);
+              homeViewModel.selectAccountByIndex(index);
               ref.read(selectedCardProvider.notifier).setSelectedCard(index);
             }
           },
@@ -330,6 +340,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
+  Widget _buildLoadingState(BuildContext context) {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+
   Widget _buildErrorState(BuildContext context, String error) {
     final l10n = AppLocalizations.of(context)!;
     return Center(
@@ -342,10 +358,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           SizedBox(height: 16.h),
           ElevatedButton(
             onPressed: () {
-              final accountViewModel = ref.read(
-                accountViewModelProvider.notifier,
-              );
-              accountViewModel.refresh();
+              final homeViewModel = ref.read(homeScreenViewModelProvider.notifier);
+              homeViewModel.refresh();
             },
             child: Text(l10n.retry),
           ),

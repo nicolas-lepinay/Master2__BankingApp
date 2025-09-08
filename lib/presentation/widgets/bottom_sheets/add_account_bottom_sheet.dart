@@ -202,23 +202,33 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
     });
 
     try {
-      final accountViewModel = ref.read(accountViewModelProvider.notifier);
+      final accountManagementViewModel = ref.read(accountManagementViewModelProvider.notifier);
 
-      // Utiliser le ViewModel pour créer le compte
-      await accountViewModel.createAccount(
-        name: _nameController.text.trim(),
-        currency: _selectedCurrency,
-        initialBalance: double.parse(_balanceController.text),
-      );
-
+      // Utiliser le nouveau ViewModel pour créer le compte
+      accountManagementViewModel.updateName(_nameController.text.trim());
+      accountManagementViewModel.updateCurrency(_selectedCurrency);
+      accountManagementViewModel.updateInitialBalance(double.parse(_balanceController.text));
+      
+      final success = await accountManagementViewModel.createAccount();
+      
       if (mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Compte créé avec succès'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        if (success) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Compte créé avec succès'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          final error = ref.read(accountManagementViewModelProvider).validationMessage ?? 'Erreur lors de la création du compte';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(error),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

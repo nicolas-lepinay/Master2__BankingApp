@@ -6,7 +6,7 @@ import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/domain/entities/entities.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
-import 'package:bankapp/presentation/viewmodels/logo_search_view_model.dart';
+import 'package:bankapp/presentation/viewmodels/shared/logo_search_view_model.dart';
 import 'package:bankapp/presentation/widgets/helpers/superellipse_clipper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

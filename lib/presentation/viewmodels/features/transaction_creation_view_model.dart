@@ -4,7 +4,7 @@ import 'package:bankapp/domain/repositories/counterparty_repository.dart';
 import 'package:bankapp/domain/repositories/image_download_repository.dart';
 import 'package:bankapp/domain/repositories/transaction_repository.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
-import 'package:bankapp/presentation/viewmodels/base_view_model.dart';
+import 'package:bankapp/presentation/viewmodels/base/base_view_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

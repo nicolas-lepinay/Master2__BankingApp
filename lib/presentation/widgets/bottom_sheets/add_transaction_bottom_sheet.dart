@@ -96,8 +96,9 @@ class _AddTransactionBottomSheet
   void _initializeDefaultAccount() {
     // Récupérer le compte sélectionné depuis home_screen.dart
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final selectedAccount = ref.read(selectedAccountProvider);
-      final accounts = ref.read(accountsProvider);
+      final homeScreenViewModel = ref.read(homeScreenViewModelProvider);
+      final selectedAccount = homeScreenViewModel.selectedAccount;
+      final accounts = homeScreenViewModel.accounts;
 
       if (selectedAccount != null) {
         // Utiliser le compte sélectionné dans le HomeScreen
@@ -458,7 +459,8 @@ class _AddTransactionBottomSheet
           // Account Carousel avec Consumer pour récupérer les AccountSummary
           Consumer(
             builder: (context, ref, child) {
-              final accounts = ref.watch(accountsProvider);
+              final homeScreenViewModel = ref.watch(homeScreenViewModelProvider);
+              final accounts = homeScreenViewModel.accounts;
               final accountSummariesAsync = accounts
                   .map(
                     (account) =>

@@ -1,6 +1,4 @@
 import 'package:bankapp/core/services/image_download_service.dart';
-import 'package:bankapp/data/cache/cache_manager.dart';
-import 'package:bankapp/data/models/models.dart';
 import 'package:bankapp/domain/repositories/counterparty_repository.dart';
 import 'package:bankapp/domain/repositories/image_download_repository.dart';
 import 'package:flutter/foundation.dart';
