@@ -133,24 +133,14 @@ class _AddTransactionBottomSheet
 
   /// Gérer les changements de focus des TextFields pour auto-scroll
   Future<void> _onTextFieldFocusChanged(bool hasFocus) async {
-    print(
-      '🎯 BottomSheet _onTextFieldFocusChanged - hasFocus: $hasFocus, _bottomPadding: $_bottomPadding',
-    );
     if (hasFocus) {
-      print(
-        '🎯 BottomSheet setting _bottomPadding to 435 and scrolling to bottom',
-      );
       setState(() {
         _bottomPadding = 435;
       });
       _scrollToBottom();
     } else {
-      print(
-        '🎯 BottomSheet scheduling scroll to initial position after 200ms delay',
-      );
       // Attendre un peu avant de scroller vers le début pour laisser le temps au clavier de se fermer
       Future.delayed(const Duration(milliseconds: 200), () {
-        print('🎯 BottomSheet executing scroll to initial position');
         _scrollToInitialPosition();
       });
 
