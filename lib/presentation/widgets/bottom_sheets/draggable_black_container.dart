@@ -588,7 +588,8 @@ class _DraggableBlackContainerState
 
     // Convertir l'index pour la liste inversée
     // Si closestIndex = 0 dans la liste normale, il devient (length-1) dans la liste inversée
-    return transactions.length - 1 - closestIndex;
+    final int index = transactions.length - 1 - closestIndex;
+    return index > 0 ? transactions.length - 1 - closestIndex : 0;
   }
 
   void _showFullTransactionsBottomSheet() {

@@ -208,8 +208,8 @@ class _TransactionTypeToggleState extends State<TransactionTypeToggle>
                               10.w,
                           top: 10.h,
                           child: Container(
-                            width: 45.w,
-                            height: 45.h,
+                            width: 45.r,
+                            height: 45.r,
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(

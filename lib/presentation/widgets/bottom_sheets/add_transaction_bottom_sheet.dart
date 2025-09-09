@@ -32,7 +32,7 @@ class _AddTransactionBottomSheet
   late PageController _pageController;
   late ScrollController _scrollController;
   int _currentPageIndex = 0;
-  double _bottomPadding = 150;
+  double _bottomPadding = 160;
   final int _totalPages = 3;
 
   // État de validation du formulaire - Nouvelle sémantique
@@ -133,21 +133,31 @@ class _AddTransactionBottomSheet
 
   /// Gérer les changements de focus des TextFields pour auto-scroll
   Future<void> _onTextFieldFocusChanged(bool hasFocus) async {
+    print(
+      '🎯 BottomSheet _onTextFieldFocusChanged - hasFocus: $hasFocus, _bottomPadding: $_bottomPadding',
+    );
     if (hasFocus) {
+      print(
+        '🎯 BottomSheet setting _bottomPadding to 435 and scrolling to bottom',
+      );
       setState(() {
         _bottomPadding = 435;
       });
       _scrollToBottom();
     } else {
+      print(
+        '🎯 BottomSheet scheduling scroll to initial position after 200ms delay',
+      );
       // Attendre un peu avant de scroller vers le début pour laisser le temps au clavier de se fermer
       Future.delayed(const Duration(milliseconds: 200), () {
+        print('🎯 BottomSheet executing scroll to initial position');
         _scrollToInitialPosition();
       });
 
       // Attendre un peu pour éviter une animation "juttered"
       Future.delayed(const Duration(milliseconds: 600), () {
         setState(() {
-          _bottomPadding = 150;
+          _bottomPadding = 160;
         });
       });
     }
@@ -459,7 +469,9 @@ class _AddTransactionBottomSheet
           // Account Carousel avec Consumer pour récupérer les AccountSummary
           Consumer(
             builder: (context, ref, child) {
-              final homeScreenViewModel = ref.watch(homeScreenViewModelProvider);
+              final homeScreenViewModel = ref.watch(
+                homeScreenViewModelProvider,
+              );
               final accounts = homeScreenViewModel.accounts;
               final accountSummariesAsync = accounts
                   .map(
