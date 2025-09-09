@@ -88,7 +88,7 @@ class _AddTransactionBottomSheet
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    _pageController = PageController(viewportFraction: 1.1);
     _scrollController = ScrollController();
     _initializeDefaultAccount();
   }
@@ -393,18 +393,17 @@ class _AddTransactionBottomSheet
 
                     // PageView qui prend toute la hauteur disponible
                     Expanded(
-                      child: PageView(
+                      child: PageView.builder(
                         controller: _pageController,
                         scrollDirection: Axis.horizontal,
                         onPageChanged: _onPageChanged,
-                        children: [
-                          // Page 1 - Amount, Type, Account, Currency (critiques)
-                          _buildAmountPage(),
-                          // Page 2 - Counterparty Selection
-                          _buildCounterpartyPage(),
-                          // Page 3 - Additional Fields (minimaliste)
-                          _buildOthersPage(),
-                        ],
+                        itemCount: 3,
+                        itemBuilder: (BuildContext context, int index) {
+                          return FractionallySizedBox(
+                            widthFactor: 1 / _pageController.viewportFraction,
+                            child: _buildPageContent(index),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -564,6 +563,19 @@ class _AddTransactionBottomSheet
           ? _counterpartySearchText
           : null,
     );
+  }
+
+  Widget _buildPageContent(int index) {
+    switch (index) {
+      case 0:
+        return _buildAmountPage();
+      case 1:
+        return _buildCounterpartyPage();
+      case 2:
+        return _buildOthersPage();
+      default:
+        return Container();
+    }
   }
 
   Widget _buildOthersPage() {
