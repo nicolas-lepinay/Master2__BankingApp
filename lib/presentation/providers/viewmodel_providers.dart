@@ -1,3 +1,4 @@
+import 'package:bankapp/core/events/app_event_bus.dart';
 import 'package:bankapp/core/services/brandfetch_service.dart';
 import 'package:bankapp/core/services/currency_conversion_service.dart';
 import 'package:bankapp/core/services/firebase_functions_service.dart';
@@ -304,9 +305,26 @@ final welcomeMessageProvider = Provider<String>((ref) {
 // ============================================================================
 
 
-/// Provider pour obtenir l'AccountSummary d'un compte spécifique
+/// Provider réactif pour obtenir l'AccountSummary d'un compte spécifique
+/// Se met à jour automatiquement via les événements Event Bus
 final accountSummaryByIdProvider =
     FutureProvider.family<domain.AccountSummary, int>((ref, accountId) async {
+      // 🔥 Écouter les événements Event Bus pour invalider automatiquement
+      final eventBus = AppEventBus.instance;
+      
+      // S'abonner aux événements de transaction pour ce compte
+      final subscription = eventBus.transactionEvents
+          .where((event) => event.accountId == accountId)
+          .listen((_) {
+        // Invalider ce provider quand une transaction change pour ce compte
+        ref.invalidateSelf();
+      });
+      
+      // Cleanup de la souscription
+      ref.onDispose(() {
+        subscription.cancel();
+      });
+      
       final accountRepository = ref.watch(accountRepositoryProvider);
       return accountRepository.getAccountSummary(accountId);
     });

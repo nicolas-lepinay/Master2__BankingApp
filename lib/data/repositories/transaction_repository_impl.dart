@@ -1,3 +1,5 @@
+import 'package:bankapp/core/events/app_event_bus.dart';
+import 'package:bankapp/core/events/transaction_events.dart';
 import 'package:bankapp/data/cache/cache_manager.dart';
 import 'package:bankapp/data/datasources/local/local_datasources.dart';
 import 'package:bankapp/data/models/models.dart';
@@ -76,7 +78,18 @@ class TransactionRepositoryImpl implements TransactionRepository {
       await _cacheManager.addTransaction(savedModel);
     }
 
-    return savedModel.toEntity();
+    final savedTransaction = savedModel.toEntity();
+
+    // 🔥 FIX CRITIQUE : Émettre l'événement TransactionCreatedEvent pour réactivité
+    AppEventBus.instance.fire(
+      TransactionEventFactory.createTransactionCreatedEvent(
+        transaction: savedTransaction,
+        accountId: savedTransaction.accountId,
+        context: 'repository_create',
+      ),
+    );
+
+    return savedTransaction;
   }
 
   @override
@@ -96,17 +109,43 @@ class TransactionRepositoryImpl implements TransactionRepository {
       ); // addTransaction fait aussi update
     }
 
-    return savedModel.toEntity();
+    final updatedTransaction = savedModel.toEntity();
+
+    // 🔥 RÉACTIVITÉ : Émettre l'événement TransactionUpdatedEvent
+    AppEventBus.instance.fire(
+      TransactionEventFactory.createTransactionUpdatedEvent(
+        updatedTransaction: updatedTransaction,
+        accountId: updatedTransaction.accountId,
+        context: 'repository_update',
+      ),
+    );
+
+    return updatedTransaction;
   }
 
   @override
   Future<void> deleteTransaction(int id) async {
+    // Récupérer la transaction avant suppression pour l'événement
+    final transaction = await getTransactionById(id);
+    
     // Supprimer de la base de données
     await _localDataSource.deleteTransaction(id);
 
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
       await _cacheManager.removeTransaction(id);
+    }
+
+    // 🔥 RÉACTIVITÉ : Émettre l'événement TransactionDeletedEvent
+    if (transaction != null) {
+      AppEventBus.instance.fire(
+        TransactionEventFactory.createTransactionDeletedEvent(
+          transactionId: id,
+          accountId: transaction.accountId,
+          deletedTransaction: transaction,
+          context: 'repository_delete',
+        ),
+      );
     }
   }
 
