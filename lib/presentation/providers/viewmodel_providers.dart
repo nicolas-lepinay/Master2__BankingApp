@@ -12,8 +12,9 @@ import 'package:bankapp/data/repositories/repositories.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/domain/repositories/repositories.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
-import 'package:bankapp/presentation/viewmodels/logo_search_view_model.dart';
 import 'package:bankapp/presentation/viewmodels/viewmodels.dart';
+import 'package:bankapp/presentation/viewmodels/features/account_cards_view_model.dart';
+import 'package:bankapp/presentation/viewmodels/screens/icon_test_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ============================================================================
@@ -151,7 +152,9 @@ final imageDownloadServiceProvider = Provider<ImageDownloadService>((ref) {
   return ImageDownloadService();
 });
 
-final imageDownloadRepositoryProvider = Provider<ImageDownloadRepository>((ref) {
+final imageDownloadRepositoryProvider = Provider<ImageDownloadRepository>((
+  ref,
+) {
   return ImageDownloadRepositoryImpl(
     ref.watch(imageDownloadServiceProvider),
     ref.watch(counterpartyRepositoryProvider),
@@ -177,21 +180,7 @@ final appViewModelProvider = StateNotifierProvider<AppViewModel, AppViewState>((
   );
 });
 
-final accountViewModelProvider =
-    StateNotifierProvider<AccountViewModel, AccountViewState>((ref) {
-      return AccountViewModel(
-        ref.watch(accountRepositoryProvider),
-        ref.watch(smartExchangeRateServiceProvider),
-      );
-    });
 
-final transactionViewModelProvider =
-    StateNotifierProvider<TransactionViewModel, TransactionViewState>((ref) {
-      return TransactionViewModel(
-        ref.watch(transactionRepositoryProvider),
-        ref,
-      );
-    });
 
 final counterpartyViewModelProvider =
     StateNotifierProvider<CounterpartyViewModel, CounterpartyViewState>((ref) {
@@ -199,8 +188,10 @@ final counterpartyViewModelProvider =
     });
 
 final searchViewModelProvider =
-    StateNotifierProvider<SearchViewModel, SearchViewState>((ref) {
-      return SearchViewModel(
+    StateNotifierProvider<SearchResultsViewModel, SearchResultsViewState>((
+      ref,
+    ) {
+      return SearchResultsViewModel(
         ref.watch(transactionRepositoryProvider),
         ref.watch(categoryRepositoryProvider),
         ref.watch(counterpartyRepositoryProvider),
@@ -212,32 +203,76 @@ final currencyViewModelProvider =
       return CurrencyViewModel(ref.watch(currencyConversionServiceProvider));
     });
 
-final followedTransactionViewModelProvider = StateNotifierProvider<
-    FollowedTransactionViewModel, FollowedTransactionViewState>((ref) {
-  return FollowedTransactionViewModel(
-    ref.watch(transactionRepositoryProvider),
-  );
-});
+final followedTransactionViewModelProvider =
+    StateNotifierProvider<
+      FollowedTransactionViewModel,
+      FollowedTransactionViewState
+    >((ref) {
+      return FollowedTransactionViewModel(
+        ref.watch(transactionRepositoryProvider),
+      );
+    });
 
-final logoSearchViewModelProvider = StateNotifierProvider<LogoSearchViewModel, LogoSearchViewState>((ref) {
-  return LogoSearchViewModel(
-    brandfetchService: ref.watch(brandfetchServiceProvider),
-  );
-});
+final logoSearchViewModelProvider =
+    StateNotifierProvider<LogoSearchViewModel, LogoSearchViewState>((ref) {
+      return LogoSearchViewModel(
+        brandfetchService: ref.watch(brandfetchServiceProvider),
+      );
+    });
 
 /// Provider pour TransactionCreationViewModel avec WidgetRef
 /// Utilise .family pour passer le WidgetRef nécessaire à l'invalidation des providers
-final transactionCreationViewModelProvider = StateNotifierProvider
-    .family<TransactionCreationViewModel, TransactionCreationViewState, WidgetRef>(
-  (ref, widgetRef) {
-    return TransactionCreationViewModel(
-      ref.watch(transactionRepositoryProvider),
-      ref.watch(counterpartyRepositoryProvider),
-      ref.watch(imageDownloadRepositoryProvider),
-      widgetRef, // 🆕 Passer le WidgetRef pour l'invalidation
-    );
-  },
-);
+final transactionCreationViewModelProvider =
+    StateNotifierProvider.family<
+      TransactionCreationViewModel,
+      TransactionCreationViewState,
+      WidgetRef
+    >((ref, widgetRef) {
+      return TransactionCreationViewModel(
+        ref.watch(transactionRepositoryProvider),
+        ref.watch(counterpartyRepositoryProvider),
+        ref.watch(imageDownloadRepositoryProvider),
+        widgetRef, // 🆕 Passer le WidgetRef pour l'invalidation
+      );
+    });
+
+/// Provider pour TransactionListViewModel - nouveau ViewModel par écran
+/// Utilise l'Event Bus pour la communication découplée
+final transactionListViewModelProvider =
+    StateNotifierProvider<TransactionListViewModel, TransactionListViewState>((
+      ref,
+    ) {
+      return TransactionListViewModel(ref.watch(transactionRepositoryProvider));
+    });
+
+/// Provider pour HomeScreenViewModel - ViewModel pour l'écran d'accueil
+/// Gère les comptes, messages de bienvenue et états d'animation
+final homeScreenViewModelProvider =
+    StateNotifierProvider<HomeScreenViewModel, HomeScreenViewState>((ref) {
+      return HomeScreenViewModel(ref.watch(accountRepositoryProvider));
+    });
+
+/// Provider pour AccountCardsViewModel - ViewModel uniforme pour les cartes de comptes
+/// Utilise l'Event Bus comme tous les autres ViewModels pour une architecture cohérente
+final accountCardsViewModelProvider =
+    StateNotifierProvider<AccountCardsViewModel, AccountCardsViewState>((ref) {
+      return AccountCardsViewModel(ref.watch(accountRepositoryProvider));
+    });
+
+/// Provider pour TransactionDetailViewModel - ViewModel pour l'écran de détail d'une transaction
+/// Utilise .family pour passer l'ID de la transaction nécessaire au ViewModel
+final transactionDetailViewModelProvider =
+    StateNotifierProvider.family<
+      TransactionDetailViewModel,
+      TransactionDetailViewState,
+      int
+    >((ref, transactionId) {
+      return TransactionDetailViewModel(
+        transactionId,
+        ref.watch(transactionRepositoryProvider),
+        ref.watch(accountRepositoryProvider),
+      );
+    });
 
 // ============================================================================
 // CONVENIENCE PROVIDERS
@@ -273,178 +308,14 @@ final welcomeMessageProvider = Provider<String>((ref) {
   return appState.welcomeMessage;
 });
 
-/// Provider pour les comptes
-final accountsProvider = Provider<List<domain.Account>>((ref) {
-  final accountState = ref.watch(accountViewModelProvider);
-  return accountState.accounts;
-});
-
-/// Provider pour le compte sélectionné
-final selectedAccountProvider = Provider<domain.Account?>((ref) {
-  final accountState = ref.watch(accountViewModelProvider);
-  return accountState.selectedAccount;
-});
-
-/// Provider pour le résumé du compte sélectionné
-final selectedAccountSummaryProvider = Provider<domain.AccountSummary?>((ref) {
-  final accountState = ref.watch(accountViewModelProvider);
-  return accountState.selectedAccountSummary;
-});
-
-/// Provider pour les transactions filtrées
-final filteredTransactionsProvider =
-    Provider<List<domain.TransactionWithBalance>>((ref) {
-      final transactionState = ref.watch(transactionViewModelProvider);
-      return transactionState.filteredTransactions;
-    });
-
-/// Provider pour les transactions paginées
-final paginatedTransactionsProvider =
-    Provider<List<domain.TransactionWithBalance>>((ref) {
-      final transactionState = ref.watch(transactionViewModelProvider);
-      return transactionState.paginatedTransactions;
-    });
-
-/// Provider pour les résultats de recherche
-final searchResultsProvider = Provider<List<domain.TransactionWithBalance>>((
-  ref,
-) {
-  final searchState = ref.watch(searchViewModelProvider);
-  return searchState.searchResults;
-});
-
-/// Provider pour les résultats de recherche paginés
-final paginatedSearchResultsProvider =
-    Provider<List<domain.TransactionWithBalance>>((ref) {
-      final searchState = ref.watch(searchViewModelProvider);
-      return searchState.paginatedResults;
-    });
-
-/// Provider pour les contreparties
-final counterpartiesProvider = Provider<List<domain.Counterparty>>((ref) {
-  final counterpartyState = ref.watch(counterpartyViewModelProvider);
-  return counterpartyState.counterparties;
-});
-
-/// Provider pour la contrepartie sélectionnée
-final selectedCounterpartyProvider = Provider<domain.Counterparty?>((ref) {
-  final counterpartyState = ref.watch(counterpartyViewModelProvider);
-  return counterpartyState.selectedCounterparty;
-});
-
-/// Provider pour les transactions suivies
-final followedTransactionsListProvider = Provider<List<domain.TransactionWithBalance>>((ref) {
-  final followedState = ref.watch(followedTransactionViewModelProvider);
-  return followedState.followedTransactions;
-});
-
 // ============================================================================
 // FAMILY PROVIDERS (avec paramètres)
 // ============================================================================
 
-/// Provider pour charger les transactions d'un compte spécifique
-final accountTransactionsProvider =
-    FutureProvider.family<List<domain.TransactionWithBalance>, int>((
-      ref,
-      accountId,
-    ) async {
-      final transactionViewModel = ref.watch(
-        transactionViewModelProvider.notifier,
-      );
-      await transactionViewModel.loadTransactions(accountId);
-      return ref.watch(filteredTransactionsProvider);
-    });
 
-/// Provider pour obtenir un compte par ID
-final accountByIdProvider = Provider.family<domain.Account?, int>((
-  ref,
-  accountId,
-) {
-  final accountViewModel = ref.watch(accountViewModelProvider.notifier);
-  return accountViewModel.getAccountById(accountId);
-});
+// ❌ SUPPRIMÉ : accountSummaryByIdProvider remplacé par AccountCardsViewModel
+// pour une architecture uniforme utilisant l'Event Bus comme PerspectiveListView
 
-/// Provider pour obtenir une transaction par ID
-final transactionByIdProvider =
-    Provider.family<domain.TransactionWithBalance?, int>((ref, transactionId) {
-      final transactionViewModel = ref.watch(
-        transactionViewModelProvider.notifier,
-      );
-      return transactionViewModel.getTransactionById(transactionId);
-    });
-
-/// Provider pour obtenir l'AccountSummary d'un compte spécifique
-final accountSummaryByIdProvider =
-    FutureProvider.family<domain.AccountSummary, int>((ref, accountId) async {
-      final accountRepository = ref.watch(accountRepositoryProvider);
-      return accountRepository.getAccountSummary(accountId);
-    });
-
-// ============================================================================
-// COMPUTED PROVIDERS
-// ============================================================================
-
-/// Provider pour le solde actuel du compte sélectionné
-final currentBalanceProvider = Provider<double?>((ref) {
-  final accountViewModel = ref.watch(accountViewModelProvider.notifier);
-  return accountViewModel.currentBalance;
-});
-
-/// Provider pour le total des revenus filtrés
-final filteredIncomeTotalProvider = Provider<double>((ref) {
-  final transactionViewModel = ref.watch(transactionViewModelProvider.notifier);
-  return transactionViewModel.filteredIncomeTotal;
-});
-
-/// Provider pour le total des dépenses filtrées
-final filteredExpenseTotalProvider = Provider<double>((ref) {
-  final transactionViewModel = ref.watch(transactionViewModelProvider.notifier);
-  return transactionViewModel.filteredExpenseTotal;
-});
-
-/// Provider pour le montant net filtré
-final filteredNetAmountProvider = Provider<double>((ref) {
-  final transactionViewModel = ref.watch(transactionViewModelProvider.notifier);
-  return transactionViewModel.filteredNetAmount;
-});
-
-/// Provider pour les statistiques de l'application
-final appStatsProvider = Provider<Map<String, dynamic>>((ref) {
-  final appViewModel = ref.watch(appViewModelProvider.notifier);
-  return appViewModel.getAppStats();
-});
-
-/// Provider pour les statistiques de recherche
-final searchStatsProvider = Provider<Map<String, dynamic>>((ref) {
-  final searchViewModel = ref.watch(searchViewModelProvider.notifier);
-  return searchViewModel.getSearchStats();
-});
-
-// ============================================================================
-// UTILITY PROVIDERS
-// ============================================================================
-
-/// Provider pour savoir si l'application est prête
-final isAppReadyProvider = Provider<bool>((ref) {
-  final appViewModel = ref.watch(appViewModelProvider.notifier);
-  return appViewModel.isAppReady;
-});
-
-/// Provider pour obtenir les transactions récentes
-final recentTransactionsProvider =
-    Provider<List<domain.TransactionWithBalance>>((ref) {
-      final accountViewModel = ref.watch(accountViewModelProvider.notifier);
-      return accountViewModel.recentTransactions;
-    });
-
-/// Provider pour obtenir les suggestions de recherche
-final searchSuggestionsProvider = Provider.family<List<String>, String>((
-  ref,
-  query,
-) {
-  final searchViewModel = ref.watch(searchViewModelProvider.notifier);
-  return searchViewModel.getSearchSuggestions(query);
-});
 
 // ============================================================================
 // FOLLOWED TRANSACTIONS PROVIDERS
@@ -480,27 +351,57 @@ final isTransactionFollowedProvider = FutureProvider.family<bool, int>((
 // INVALIDATION HELPERS
 // ============================================================================
 
-/// Invalide tous les providers liés aux comptes et leurs résumés
-void invalidateAccountProviders(Ref ref) {
-  // Invalider les providers des comptes
-  ref.invalidate(accountViewModelProvider);
-  ref.invalidate(accountsProvider);
-  ref.invalidate(selectedAccountProvider);
-  ref.invalidate(selectedAccountSummaryProvider);
 
-  // Invalider les providers d'account summary (tous les ID)
-  ref.invalidate(accountSummaryByIdProvider);
-}
 
-/// Invalide tous les providers liés aux transactions
-void invalidateTransactionProviders(Ref ref) {
-  // Invalider les providers des transactions
-  ref.invalidate(transactionViewModelProvider);
-  ref.invalidate(filteredTransactionsProvider);
-  ref.invalidate(paginatedTransactionsProvider);
+// ============================================================================
+// FEATURE VIEWMODELS PROVIDERS - Par fonctionnalité spécifique
+// ============================================================================
 
-  // Invalider aussi les résumés de comptes car ils dépendent des transactions
-  invalidateAccountProviders(ref);
-}
+/// Provider pour le TransactionEditViewModel
+/// Utilise un provider.family pour accepter l'ID de la transaction
+final transactionEditViewModelProvider =
+    StateNotifierProvider.family<
+      TransactionEditViewModel,
+      TransactionEditViewState,
+      int
+    >((ref, transactionId) {
+      return TransactionEditViewModel(
+        transactionId,
+        ref.watch(transactionRepositoryProvider),
+      );
+    });
 
-// Provider supprimé car inutilisé et remplacé par l'architecture MVVM des repositories
+/// Provider pour le TransactionDeletionViewModel
+/// Utilise un provider.family pour accepter l'ID de la transaction
+final transactionDeletionViewModelProvider =
+    StateNotifierProvider.family<
+      TransactionDeletionViewModel,
+      TransactionDeletionViewState,
+      int
+    >((ref, transactionId) {
+      return TransactionDeletionViewModel(
+        transactionId,
+        ref.watch(transactionRepositoryProvider),
+      );
+    });
+
+/// Provider pour le AccountManagementViewModel
+/// ViewModel pour la gestion CRUD des comptes
+final accountManagementViewModelProvider = StateNotifierProvider<
+    AccountManagementViewModel,
+    AccountManagementViewState
+>((ref) {
+  return AccountManagementViewModel(
+    ref.watch(accountRepositoryProvider),
+    ref.watch(smartExchangeRateServiceProvider),
+  );
+});
+
+/// Provider pour le IconTestViewModel
+/// ViewModel pour la page de test de recherche d'icônes
+final iconTestViewModelProvider = StateNotifierProvider<
+    IconTestViewModel,
+    IconTestViewState
+>((ref) {
+  return IconTestViewModel();
+});

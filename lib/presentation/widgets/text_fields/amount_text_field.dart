@@ -44,7 +44,6 @@ class _AmountTextFieldState extends State<AmountTextField> {
 
     // Ajouter listener pour détecter les changements de focus
     _focusNode.addListener(() {
-      print('🎯 AmountTextField FocusNode - hasFocus: ${_focusNode.hasFocus}');
       if (widget.onFocusChanged != null) {
         widget.onFocusChanged!(_focusNode.hasFocus);
       }

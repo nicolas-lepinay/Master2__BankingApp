@@ -1,3 +1,5 @@
+import 'package:bankapp/core/events/app_event_bus.dart';
+import 'package:bankapp/core/events/transaction_events.dart';
 import 'package:bankapp/data/cache/cache_manager.dart';
 import 'package:bankapp/data/datasources/local/local_datasources.dart';
 import 'package:bankapp/data/models/models.dart';
@@ -76,7 +78,18 @@ class TransactionRepositoryImpl implements TransactionRepository {
       await _cacheManager.addTransaction(savedModel);
     }
 
-    return savedModel.toEntity();
+    final savedTransaction = savedModel.toEntity();
+
+    // 🔥 FIX CRITIQUE : Émettre l'événement TransactionCreatedEvent pour réactivité
+    AppEventBus.instance.fire(
+      TransactionEventFactory.createTransactionCreatedEvent(
+        transaction: savedTransaction,
+        accountId: savedTransaction.accountId,
+        context: 'repository_create',
+      ),
+    );
+
+    return savedTransaction;
   }
 
   @override
@@ -96,17 +109,43 @@ class TransactionRepositoryImpl implements TransactionRepository {
       ); // addTransaction fait aussi update
     }
 
-    return savedModel.toEntity();
+    final updatedTransaction = savedModel.toEntity();
+
+    // 🔥 RÉACTIVITÉ : Émettre l'événement TransactionUpdatedEvent
+    AppEventBus.instance.fire(
+      TransactionEventFactory.createTransactionUpdatedEvent(
+        updatedTransaction: updatedTransaction,
+        accountId: updatedTransaction.accountId,
+        context: 'repository_update',
+      ),
+    );
+
+    return updatedTransaction;
   }
 
   @override
   Future<void> deleteTransaction(int id) async {
+    // Récupérer la transaction avant suppression pour l'événement
+    final transaction = await getTransactionById(id);
+    
     // Supprimer de la base de données
     await _localDataSource.deleteTransaction(id);
 
     // Mettre à jour le cache si initialisé
     if (_cacheManager.isInitialized) {
       await _cacheManager.removeTransaction(id);
+    }
+
+    // 🔥 RÉACTIVITÉ : Émettre l'événement TransactionDeletedEvent
+    if (transaction != null) {
+      AppEventBus.instance.fire(
+        TransactionEventFactory.createTransactionDeletedEvent(
+          transactionId: id,
+          accountId: transaction.accountId,
+          deletedTransaction: transaction,
+          context: 'repository_delete',
+        ),
+      );
     }
   }
 
@@ -286,10 +325,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
         title: txWithCounterparty.transaction.title,
         comment: txWithCounterparty.transaction.comment,
         counterpartyId: txWithCounterparty.transaction.counterpartyId,
-        category1Id: txWithCounterparty.transaction.category1Id,
-        category2Id: txWithCounterparty.transaction.category2Id,
-        category3Id: txWithCounterparty.transaction.category3Id,
-        category4Id: txWithCounterparty.transaction.category4Id,
+        deepestCategoryId: txWithCounterparty.transaction.deepestCategoryId,
         status: TransactionStatus.values.firstWhere(
           (s) => s.index == txWithCounterparty.transaction.status,
         ),
@@ -468,20 +504,39 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
   
   /// Récupère les catégories d'une transaction (fallback)
+  /// Récupère la hiérarchie complète des catégories d'une transaction (fallback DB)
+  /// Utilise le même algorithme que le CacheManager mais avec accès direct à la DB
   Future<List<Category>> _getTransactionCategoriesFallback(
     Transaction transaction,
   ) async {
-    final categories = <Category>[];
+    if (transaction.deepestCategoryId == null) return [];
     
-    // Récupérer chaque catégorie si elle existe
-    for (final categoryId in transaction.categoryIds) {
-      final categoryModel = await _categoryLocalDataSource.getCategoryById(categoryId);
-      if (categoryModel != null) {
-        categories.add(categoryModel.toEntity());
+    final hierarchy = <Category>[];
+    int? currentCategoryId = transaction.deepestCategoryId;
+    
+    // Remonter la hiérarchie jusqu'à la racine (même algorithme que le cache)
+    while (currentCategoryId != null) {
+      final categoryModel = await _categoryLocalDataSource.getCategoryById(currentCategoryId);
+      if (categoryModel == null) {
+        // Catégorie introuvable, arrêter la remontée
+        break;
+      }
+      
+      final category = categoryModel.toEntity();
+      hierarchy.add(category);
+      
+      // Remonter vers le parent
+      currentCategoryId = categoryModel.parentId;
+      
+      // Sécurité : arrêter si on atteint la racine (level 1) ou si pas de parent
+      if (category.level <= 1 || categoryModel.parentId == null) {
+        break;
       }
     }
     
-    return categories;
+    // Retourner dans l'ordre : [Fast Food, Restaurants, Food, Expenses]
+    // (du plus spécifique au plus général)
+    return hierarchy;
   }
 
 }

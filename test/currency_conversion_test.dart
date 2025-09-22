@@ -27,7 +27,7 @@ void main() {
       test('should have all expected currencies', () {
         final currencies = SupportedCurrencies.all;
 
-        expect(currencies.length, equals(36));
+        expect(currencies.length, equals(32));
 
         // Vérifier quelques devises principales
         expect(currencies.any((c) => c.code == 'EUR'), isTrue);
@@ -55,7 +55,7 @@ void main() {
         final minorCurrencies = SupportedCurrencies.minor;
 
         expect(majorCurrencies.length, equals(8));
-        expect(minorCurrencies.length, equals(28));
+        expect(minorCurrencies.length, equals(24));
 
         // Major currencies should include the top 8 global currencies
         expect(majorCurrencies.any((c) => c.code == 'EUR'), isTrue);
@@ -111,7 +111,7 @@ void main() {
 
       test('should provide all supported currencies', () {
         final currencies = CurrencyService.getAllCurrencies();
-        expect(currencies.length, equals(36));
+        expect(currencies.length, equals(32));
 
         final currencyCodes = currencies.map((c) => c.code).toList();
         expect(

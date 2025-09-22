@@ -109,8 +109,11 @@ class _AccountCarouselSelectionState
   Widget build(BuildContext context) {
     final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
 
+    // Calculer la dimension finale basée sur la largeur pour garantir un ratio carré
+    final effectiveCardSize = widget.cardSize.w;
+
     return SizedBox(
-      height: widget.cardSize.h,
+      height: effectiveCardSize,
       child: widget.accountSummaries.isEmpty
           ? Center(
               child: Text(
@@ -148,6 +151,7 @@ class _AccountCarouselSelectionState
                     allAccounts: allAccounts,
                     isSelected: isSelected,
                     appTheme: appTheme,
+                    cardSize: effectiveCardSize,
                   ),
                 );
               },
@@ -160,6 +164,7 @@ class _AccountCarouselSelectionState
     required List<Account> allAccounts,
     required bool isSelected,
     required AppColorsExtended appTheme,
+    required double cardSize,
   }) {
     // Récupération de la couleur selon les spécifications
     final account = accountSummary.account;
@@ -168,145 +173,141 @@ class _AccountCarouselSelectionState
 
     return GestureDetector(
       onTap: () => widget.onAccountSelected(account),
-      child: Stack(
-        children: [
-          // Carte de compte avec filtre N&B si non sélectionnée
-          Container(
+      child: AspectRatio(
+        aspectRatio: 1.0, // Force un ratio carré parfait (1:1)
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(32.r),
+            border: isSelected
+                ? Border.all(color: appTheme.text1!, width: 2)
+                : null,
+          ),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32.r),
-              border: isSelected
-                  ? Border.all(color: appTheme.text1!, width: 2)
-                  : null,
+              color: isSelected ? cardColor : AppColors.greyCard,
+              borderRadius: BorderRadius.circular(30.r),
+              border: Border.all(color: appTheme.background1!, width: 5.w),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: cardColor.withValues(alpha: 0.3),
+                        blurRadius: 8.r,
+                        offset: Offset(0, 4.h),
+                      ),
+                    ]
+                  : [],
             ),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              width: widget.cardSize.w,
-              height: widget.cardSize.h,
-              decoration: BoxDecoration(
-                color: isSelected ? cardColor : AppColors.greyCard,
-                borderRadius: BorderRadius.circular(30.r),
-                border: Border.all(color: appTheme.background1!, width: 5.w),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: cardColor.withValues(alpha: 0.3),
-                          blurRadius: 8.r,
-                          offset: Offset(0, 4.h),
-                        ),
-                      ]
-                    : [],
-              ),
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: DotPatternPainter(backgroundColor: cardColor),
-                    ),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: DotPatternPainter(backgroundColor: cardColor),
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: 14.r,
-                      right: 14.r,
-                      top: 16.r,
-                      bottom: 12.r,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Row avec trou et icône
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // Disque simulant un trou
-                            Container(
-                              width: 22.r,
-                              height: 22.r,
-                              decoration: BoxDecoration(
-                                color: appTheme.background1,
-                                shape: BoxShape.circle,
-                                border: isSelected
-                                    ? Border.all(
-                                        color: appTheme.text1!,
-                                        width: 6.r,
-                                      )
-                                    : null,
-                              ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: 14.r,
+                    right: 14.r,
+                    top: 16.r,
+                    bottom: 12.r,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Row avec trou et icône
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Disque simulant un trou
+                          Container(
+                            width: 22.r,
+                            height: 22.r,
+                            decoration: BoxDecoration(
+                              color: appTheme.background1,
+                              shape: BoxShape.circle,
+                              border: isSelected
+                                  ? Border.all(
+                                      color: appTheme.text1!,
+                                      width: 6.r,
+                                    )
+                                  : null,
                             ),
-                            // Icône du compte
-                            Icon(
-                              Icons.account_balance,
-                              color: isSelected
-                                  ? textColor
-                                  : AppColors.textLight100,
-                              size: 20.sp,
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 6.r),
+                          ),
+                          // Icône du compte
+                          Icon(
+                            Icons.account_balance,
+                            color: isSelected
+                                ? textColor
+                                : AppColors.textLight100,
+                            size: 20.sp,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 6.r),
 
-                        // Devise du compte
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 6.w,
-                            vertical: 3.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(6.r),
-                          ),
-                          child: Text(
-                            account.currency,
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w600,
-                              color: isSelected
-                                  ? textColor
-                                  : AppColors.textLight100,
-                            ),
-                          ),
+                      // Devise du compte
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 6.w,
+                          vertical: 3.h,
                         ),
-
-                        // Nom du compte
-                        Text(
-                          account.name,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        child: Text(
+                          account.currency,
                           style: TextStyle(
-                            fontSize: 16.sp,
-                            //fontWeight: FontWeight.w400,
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w600,
                             color: isSelected
                                 ? textColor
                                 : AppColors.textLight100,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
+                      ),
 
-                        // Solde du compte (solde courant)
-                        Text(
-                          AppFormatters.formatAmountClean(
-                            accountSummary.currentBalance.amount,
-                            account.currency,
-                            showSign: false,
-                            context: context,
-                          ),
-                          style: AppTextStyles.cardBalanceAmount.copyWith(
-                            fontSize: 16.sp,
-                            color: isSelected
-                                ? textColor
-                                : AppColors.textLight100,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      // Nom du compte
+                      Text(
+                        account.name,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          //fontWeight: FontWeight.w400,
+                          color: isSelected
+                              ? textColor
+                              : AppColors.textLight100,
                         ),
-                      ],
-                    ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+
+                      // Solde du compte (solde courant)
+                      Text(
+                        AppFormatters.formatAmountClean(
+                          accountSummary.currentBalance.amount,
+                          account.currency,
+                          showSign: false,
+                          context: context,
+                        ),
+                        style: AppTextStyles.cardBalanceAmount.copyWith(
+                          fontSize: 16.sp,
+                          color: isSelected
+                              ? textColor
+                              : AppColors.textLight100,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

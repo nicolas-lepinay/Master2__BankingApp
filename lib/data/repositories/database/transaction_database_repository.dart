@@ -125,10 +125,7 @@ class TransactionDatabaseRepository {
   Future<int> createTransaction({
     required int accountId,
     int? counterpartyId,
-    int? category1Id,
-    int? category2Id,
-    int? category3Id,
-    int? category4Id,
+    int? deepestCategoryId,
     required String transactionType,
     required String currency,
     required double amount,
@@ -144,10 +141,7 @@ class TransactionDatabaseRepository {
           TransactionsCompanion(
             accountId: Value(accountId),
             counterpartyId: Value(counterpartyId),
-            category1Id: Value(category1Id),
-            category2Id: Value(category2Id),
-            category3Id: Value(category3Id),
-            category4Id: Value(category4Id),
+            deepestCategoryId: Value(deepestCategoryId),
             transactionType: Value(transactionType),
             currency: Value(currency),
             amount: Value(amount),
@@ -165,10 +159,7 @@ class TransactionDatabaseRepository {
     int id, {
     int? accountId,
     int? counterpartyId,
-    int? category1Id,
-    int? category2Id,
-    int? category3Id,
-    int? category4Id,
+    int? deepestCategoryId,
     String? transactionType,
     String? currency,
     double? amount,
@@ -183,17 +174,8 @@ class TransactionDatabaseRepository {
       counterpartyId: counterpartyId != null
           ? Value(counterpartyId)
           : const Value.absent(),
-      category1Id: category1Id != null
-          ? Value(category1Id)
-          : const Value.absent(),
-      category2Id: category2Id != null
-          ? Value(category2Id)
-          : const Value.absent(),
-      category3Id: category3Id != null
-          ? Value(category3Id)
-          : const Value.absent(),
-      category4Id: category4Id != null
-          ? Value(category4Id)
+      deepestCategoryId: deepestCategoryId != null
+          ? Value(deepestCategoryId)
           : const Value.absent(),
       transactionType: transactionType != null
           ? Value(transactionType)

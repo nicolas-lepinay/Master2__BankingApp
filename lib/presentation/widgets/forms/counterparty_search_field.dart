@@ -1,4 +1,3 @@
-import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/domain/entities/counterparty.dart';
 import 'package:flutter/material.dart';
@@ -101,7 +100,7 @@ class _CounterpartySearchFieldState extends State<CounterpartySearchField> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    //final l10n = AppLocalizations.of(context)!;
     final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
 
     return IntrinsicWidth(

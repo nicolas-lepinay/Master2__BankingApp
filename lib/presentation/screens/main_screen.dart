@@ -1,4 +1,3 @@
-import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/presentation/providers/navigation_provider.dart';
 import 'package:bankapp/presentation/screens/home_screen.dart';
 import 'package:bankapp/presentation/screens/settings_screen.dart';
@@ -12,7 +11,7 @@ class MainScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentIndex = ref.watch(navigationProvider);
-    final l10n = AppLocalizations.of(context)!;
+    //final l10n = AppLocalizations.of(context)!;
 
     // Déterminer si le fond est sombre pour adapter la navbar
     bool isDarkBackground = _isDarkBackground(currentIndex);

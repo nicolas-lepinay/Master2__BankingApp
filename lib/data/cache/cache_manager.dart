@@ -222,31 +222,43 @@ class CacheManager {
     );
   }
 
-  /// Obtient les catégories d'une transaction
+  /// Obtient la hiérarchie complète des catégories d'une transaction
+  /// à partir de la catégorie la plus profonde
   List<Category> _getTransactionCategories(TransactionModel transaction) {
-    final categories = <Category>[];
+    if (transaction.deepestCategoryId == null) return [];
+    
+    return _buildCategoryHierarchyFromDeepest(transaction.deepestCategoryId!);
+  }
 
-    if (transaction.category1Id != null) {
-      final category = _categories[transaction.category1Id!];
-      if (category != null) categories.add(category.toEntity());
+  /// Construit la hiérarchie complète d'une catégorie en remontant via parentId
+  /// Utilise l'attribut level pour optimiser la performance et éviter les boucles infinies
+  List<Category> _buildCategoryHierarchyFromDeepest(int deepestCategoryId) {
+    final hierarchy = <Category>[];
+    int? currentCategoryId = deepestCategoryId;
+    
+    // Remonter la hiérarchie jusqu'à la racine (level 1)
+    while (currentCategoryId != null) {
+      final categoryModel = _categories[currentCategoryId];
+      if (categoryModel == null) {
+        // Catégorie introuvable, arrêter la remontée
+        break;
+      }
+      
+      final category = categoryModel.toEntity();
+      hierarchy.add(category);
+      
+      // Remonter vers le parent
+      currentCategoryId = categoryModel.parentId;
+      
+      // Sécurité : arrêter si on atteint la racine (level 1) ou si pas de parent
+      if (category.level <= 1 || categoryModel.parentId == null) {
+        break;
+      }
     }
-
-    if (transaction.category2Id != null) {
-      final category = _categories[transaction.category2Id!];
-      if (category != null) categories.add(category.toEntity());
-    }
-
-    if (transaction.category3Id != null) {
-      final category = _categories[transaction.category3Id!];
-      if (category != null) categories.add(category.toEntity());
-    }
-
-    if (transaction.category4Id != null) {
-      final category = _categories[transaction.category4Id!];
-      if (category != null) categories.add(category.toEntity());
-    }
-
-    return categories;
+    
+    // Retourner dans l'ordre : [Fast Food, Restaurants, Food, Expenses]
+    // (du plus spécifique au plus général)
+    return hierarchy;
   }
 
   /// Calcule les résumés de tous les comptes

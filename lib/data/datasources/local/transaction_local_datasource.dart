@@ -150,11 +150,7 @@ class TransactionLocalDataSourceImpl implements TransactionLocalDataSource {
         await (_database.select(_database.transactions)
               ..where((tbl) => tbl.accountId.equals(accountId))
               ..where(
-                (tbl) =>
-                    tbl.category1Id.equals(categoryId) |
-                    tbl.category2Id.equals(categoryId) |
-                    tbl.category3Id.equals(categoryId) |
-                    tbl.category4Id.equals(categoryId),
+                (tbl) => tbl.deepestCategoryId.equals(categoryId),
               )
               ..orderBy([
                 (tbl) =>

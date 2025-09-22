@@ -6,10 +6,7 @@ class TransactionModel {
   final int id;
   final int accountId;
   final int? counterpartyId;
-  final int? category1Id;
-  final int? category2Id;
-  final int? category3Id;
-  final int? category4Id;
+  final int? deepestCategoryId;
   final domain.TransactionType type;
   final double amount; // Montant toujours dans la devise du compte
   final String currency; // Devise du compte (identique à account.currency)
@@ -24,10 +21,7 @@ class TransactionModel {
     required this.id,
     required this.accountId,
     this.counterpartyId,
-    this.category1Id,
-    this.category2Id,
-    this.category3Id,
-    this.category4Id,
+    this.deepestCategoryId,
     required this.type,
     required this.amount,
     required this.currency,
@@ -44,10 +38,7 @@ class TransactionModel {
       id: data.id,
       accountId: data.accountId,
       counterpartyId: data.counterpartyId,
-      category1Id: data.category1Id,
-      category2Id: data.category2Id,
-      category3Id: data.category3Id,
-      category4Id: data.category4Id,
+      deepestCategoryId: data.deepestCategoryId,
       type: _mapTransactionType(data.transactionType),
       amount: data.amount,
       currency: data.currency,
@@ -65,10 +56,7 @@ class TransactionModel {
       id: transaction.id,
       accountId: transaction.accountId,
       counterpartyId: transaction.counterpartyId,
-      category1Id: transaction.category1Id,
-      category2Id: transaction.category2Id,
-      category3Id: transaction.category3Id,
-      category4Id: transaction.category4Id,
+      deepestCategoryId: transaction.deepestCategoryId,
       type: transaction.type,
       amount: transaction.amount,
       currency: transaction.currency,
@@ -86,10 +74,7 @@ class TransactionModel {
       id: id,
       accountId: accountId,
       counterpartyId: counterpartyId,
-      category1Id: category1Id,
-      category2Id: category2Id,
-      category3Id: category3Id,
-      category4Id: category4Id,
+      deepestCategoryId: deepestCategoryId,
       type: type,
       amount: amount,
       currency: currency,
@@ -107,10 +92,7 @@ class TransactionModel {
       id: id == 0 ? const Value.absent() : Value(id),
       accountId: Value(accountId),
       counterpartyId: Value(counterpartyId),
-      category1Id: Value(category1Id),
-      category2Id: Value(category2Id),
-      category3Id: Value(category3Id),
-      category4Id: Value(category4Id),
+      deepestCategoryId: Value(deepestCategoryId),
       transactionType: Value(_mapTransactionTypeToString(type)),
       amount: Value(amount),
       currency: Value(currency),
@@ -167,10 +149,7 @@ class TransactionModel {
     int? id,
     int? accountId,
     int? counterpartyId,
-    int? category1Id,
-    int? category2Id,
-    int? category3Id,
-    int? category4Id,
+    int? deepestCategoryId,
     domain.TransactionType? type,
     double? amount,
     String? currency,
@@ -185,10 +164,7 @@ class TransactionModel {
       id: id ?? this.id,
       accountId: accountId ?? this.accountId,
       counterpartyId: counterpartyId ?? this.counterpartyId,
-      category1Id: category1Id ?? this.category1Id,
-      category2Id: category2Id ?? this.category2Id,
-      category3Id: category3Id ?? this.category3Id,
-      category4Id: category4Id ?? this.category4Id,
+      deepestCategoryId: deepestCategoryId ?? this.deepestCategoryId,
       type: type ?? this.type,
       amount: amount ?? this.amount,
       currency: currency ?? this.currency,

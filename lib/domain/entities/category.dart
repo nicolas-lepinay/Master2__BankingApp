@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
 class Category extends Equatable {
   final int id;
@@ -6,6 +7,7 @@ class Category extends Equatable {
   final int level;
   final int? parentId;
   final String? icon;
+  final Color? iconColor; // Type Flutter typé et validé
 
   const Category({
     required this.id,
@@ -13,6 +15,7 @@ class Category extends Equatable {
     required this.level,
     this.parentId,
     this.icon,
+    this.iconColor,
   });
 
   Category copyWith({
@@ -21,6 +24,7 @@ class Category extends Equatable {
     int? level,
     int? parentId,
     String? icon,
+    Color? iconColor,
   }) {
     return Category(
       id: id ?? this.id,
@@ -28,6 +32,7 @@ class Category extends Equatable {
       level: level ?? this.level,
       parentId: parentId ?? this.parentId,
       icon: icon ?? this.icon,
+      iconColor: iconColor ?? this.iconColor,
     );
   }
 
@@ -35,7 +40,7 @@ class Category extends Equatable {
   bool get isSubCategory => parentId != null;
 
   @override
-  List<Object?> get props => [id, label, level, parentId, icon];
+  List<Object?> get props => [id, label, level, parentId, icon, iconColor];
 
   @override
   bool get stringify => true;

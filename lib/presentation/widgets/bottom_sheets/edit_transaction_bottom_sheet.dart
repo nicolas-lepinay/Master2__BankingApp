@@ -5,6 +5,7 @@ import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/core/utils/formatters.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
+import 'package:bankapp/presentation/viewmodels/features/transaction_edit_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,14 +27,7 @@ class _EditTransactionBottomSheetState
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _commentController = TextEditingController();
-  int? _selectedCounterpartyId;
-
-  domain.TransactionType _transactionType = domain.TransactionType.expense;
-  String _selectedCurrency = 'EUR';
-  int? _selectedAccountId;
-  DateTime _selectedDate = DateTime.now();
-  domain.TransactionStatus _status = domain.TransactionStatus.completed;
-  bool _isLoading = false;
+  
   bool _isInitialized = false;
 
   @override
@@ -44,40 +38,43 @@ class _EditTransactionBottomSheetState
     super.dispose();
   }
 
-  void _initializeFromTransaction(
-    domain.TransactionWithBalance transactionWithBalance,
-  ) {
+  void _initializeControllers() {
     if (_isInitialized) return;
 
-    final transaction = transactionWithBalance.transaction;
-
-    _titleController.text = transaction.title ?? '';
-    _amountController.text = transaction.amount.toString();
-    _commentController.text = transaction.comment ?? '';
-    _selectedCounterpartyId = transaction.counterpartyId;
-    _transactionType = transaction.type;
-    _selectedCurrency = transaction.currency;
-    _selectedAccountId = transaction.accountId;
-    _selectedDate = transaction.date;
-    _status = transaction.status;
+    final editViewModel = ref.read(transactionEditViewModelProvider(widget.transactionId).notifier);
+    
+    _titleController.text = editViewModel.currentTitle ?? '';
+    _amountController.text = editViewModel.currentAmount?.toString() ?? '';
+    _commentController.text = editViewModel.currentComment ?? '';
+    
     _isInitialized = true;
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final transactionAsync = ref.watch(
-      transactionByIdProvider(widget.transactionId),
-    );
-    final accounts = ref.watch(accountsProvider);
+    final editViewModelProvider = transactionEditViewModelProvider(widget.transactionId);
+    final editViewModel = ref.watch(editViewModelProvider.notifier);
+    final editState = ref.watch(editViewModelProvider);
+    final homeScreenViewModel = ref.watch(homeScreenViewModelProvider);
+    final accounts = homeScreenViewModel.accounts;
 
-    final transactionWithBalance = transactionAsync;
-
-    if (transactionWithBalance == null) {
-      return const Center(child: Text('Transaction non trouvée'));
+    // Initialiser le ViewModel au premier build
+    if (!editState.hasTransaction && !editViewModel.isLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        editViewModel.initialize();
+      });
     }
 
-    _initializeFromTransaction(transactionWithBalance);
+    // Si pas de transaction chargée, afficher loading ou erreur
+    if (!editState.hasTransaction) {
+      if (editViewModel.hasError) {
+        return Center(child: Text('Erreur: ${editViewModel.errorMessage ?? "Transaction non trouvée"}'));
+      }
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    _initializeControllers();
 
     return Container(
       padding: EdgeInsets.only(
@@ -133,7 +130,7 @@ class _EditTransactionBottomSheetState
                   accounts.isEmpty
                       ? const Text('Aucun compte disponible')
                       : DropdownButtonFormField<int>(
-                          initialValue: _selectedAccountId,
+                          initialValue: editViewModel.currentAccountId,
                           decoration: const InputDecoration(
                             labelText: 'Compte',
                           ),
@@ -144,9 +141,9 @@ class _EditTransactionBottomSheetState
                             );
                           }).toList(),
                           onChanged: (value) {
-                            setState(() {
-                              _selectedAccountId = value;
-                            });
+                            if (value != null) {
+                              editViewModel.updateAccount(value);
+                            }
                           },
                           validator: (value) {
                             if (value == null) {
@@ -181,7 +178,7 @@ class _EditTransactionBottomSheetState
                       }
 
                       return DropdownButtonFormField<int>(
-                        initialValue: _selectedCounterpartyId,
+                        initialValue: editViewModel.currentCounterpartyId,
                         decoration: InputDecoration(
                           labelText: l10n.counterparty,
                           hintText: 'Sélectionnez un tiers',
@@ -200,9 +197,7 @@ class _EditTransactionBottomSheetState
                           }),
                         ],
                         onChanged: (value) {
-                          setState(() {
-                            _selectedCounterpartyId = value;
-                          });
+                          editViewModel.updateCounterparty(value);
                         },
                       );
                     },
@@ -212,7 +207,7 @@ class _EditTransactionBottomSheetState
 
                   // Type de transaction
                   DropdownButtonFormField<domain.TransactionType>(
-                    initialValue: _transactionType,
+                    initialValue: editViewModel.currentType,
                     decoration: const InputDecoration(labelText: 'Type'),
                     items: [
                       DropdownMenuItem(
@@ -226,9 +221,7 @@ class _EditTransactionBottomSheetState
                     ],
                     onChanged: (value) {
                       if (value != null) {
-                        setState(() {
-                          _transactionType = value;
-                        });
+                        editViewModel.updateType(value);
                       }
                     },
                   ),
@@ -241,10 +234,16 @@ class _EditTransactionBottomSheetState
                     decoration: InputDecoration(
                       labelText: l10n.title,
                       hintText: 'Ex: Abonnement Netflix',
+                      errorText: editState.validationMessage?.contains('titre') == true 
+                          ? editState.validationMessage : null,
                     ),
+                    onChanged: (value) {
+                      editViewModel.updateTitle(value);
+                    },
                     validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Le titre est requis';
+                      final validationResult = editViewModel.validateTransaction();
+                      if (validationResult?.contains('titre') == true) {
+                        return validationResult;
                       }
                       return null;
                     },
@@ -259,8 +258,10 @@ class _EditTransactionBottomSheetState
                       labelText: l10n.amount,
                       hintText: '0.00',
                       suffixText: AppFormatters.getCurrencySymbol(
-                        _selectedCurrency,
+                        editViewModel.currentCurrency ?? 'EUR',
                       ),
+                      errorText: editState.validationMessage?.contains('montant') == true 
+                          ? editState.validationMessage : null,
                     ),
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
@@ -270,13 +271,16 @@ class _EditTransactionBottomSheetState
                         RegExp(r'^\d*\.?\d{0,2}'),
                       ),
                     ],
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Le montant est requis';
-                      }
+                    onChanged: (value) {
                       final amount = double.tryParse(value);
-                      if (amount == null || amount <= 0) {
-                        return 'Veuillez entrer un montant valide';
+                      if (amount != null) {
+                        editViewModel.updateAmount(amount);
+                      }
+                    },
+                    validator: (value) {
+                      final validationResult = editViewModel.validateTransaction();
+                      if (validationResult?.contains('montant') == true) {
+                        return validationResult;
                       }
                       return null;
                     },
@@ -286,7 +290,7 @@ class _EditTransactionBottomSheetState
 
                   // Devise
                   DropdownButtonFormField<String>(
-                    initialValue: _selectedCurrency,
+                    initialValue: editViewModel.currentCurrency,
                     decoration: InputDecoration(labelText: l10n.currency),
                     items: SupportedCurrencies.allCodes.map((currency) {
                       final symbol = AppFormatters.getCurrencySymbol(currency);
@@ -297,9 +301,7 @@ class _EditTransactionBottomSheetState
                     }).toList(),
                     onChanged: (value) {
                       if (value != null) {
-                        setState(() {
-                          _selectedCurrency = value;
-                        });
+                        editViewModel.updateCurrency(value);
                       }
                     },
                   ),
@@ -308,7 +310,7 @@ class _EditTransactionBottomSheetState
 
                   // Date
                   InkWell(
-                    onTap: _selectDate,
+                    onTap: () => _selectDate(editViewModel),
                     child: InputDecorator(
                       decoration: InputDecoration(labelText: l10n.date),
                       child: Row(
@@ -316,7 +318,7 @@ class _EditTransactionBottomSheetState
                         children: [
                           Text(
                             AppFormatters.formatDateShort(
-                              _selectedDate,
+                              editViewModel.currentDate ?? DateTime.now(),
                               context,
                             ),
                           ),
@@ -330,7 +332,7 @@ class _EditTransactionBottomSheetState
 
                   // Statut
                   DropdownButtonFormField<domain.TransactionStatus>(
-                    initialValue: _status,
+                    initialValue: editViewModel.currentStatus,
                     decoration: InputDecoration(labelText: l10n.status),
                     items: [
                       DropdownMenuItem(
@@ -354,9 +356,7 @@ class _EditTransactionBottomSheetState
                     ],
                     onChanged: (value) {
                       if (value != null) {
-                        setState(() {
-                          _status = value;
-                        });
+                        editViewModel.updateStatus(value);
                       }
                     },
                   ),
@@ -371,6 +371,9 @@ class _EditTransactionBottomSheetState
                       hintText: 'Commentaire optionnel',
                     ),
                     maxLines: 2,
+                    onChanged: (value) {
+                      editViewModel.updateComment(value);
+                    },
                   ),
 
                   SizedBox(height: AppConstants.largePadding.h),
@@ -380,7 +383,7 @@ class _EditTransactionBottomSheetState
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: _isLoading
+                          onPressed: editState.isUpdating
                               ? null
                               : () => Navigator.of(context).pop(),
                           child: Text(l10n.cancel),
@@ -391,8 +394,10 @@ class _EditTransactionBottomSheetState
 
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _updateTransaction,
-                          child: _isLoading
+                          onPressed: editState.isUpdating || !editState.canSave
+                              ? null 
+                              : () => _updateTransaction(editViewModel),
+                          child: editState.isUpdating
                               ? SizedBox(
                                   width: 20.w,
                                   height: 20.h,
@@ -414,57 +419,52 @@ class _EditTransactionBottomSheetState
     );
   }
 
-  Future<void> _selectDate() async {
+  Future<void> _selectDate(TransactionEditViewModel editViewModel) async {
     final pickedDate = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
+      initialDate: editViewModel.currentDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
 
     if (pickedDate != null) {
-      setState(() {
-        _selectedDate = pickedDate;
-      });
+      editViewModel.updateDate(pickedDate);
     }
   }
 
-  Future<void> _updateTransaction() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() {
-      _isLoading = true;
-    });
+  Future<void> _updateTransaction(TransactionEditViewModel editViewModel) async {
+    // Valider avant de sauvegarder
+    final validationResult = editViewModel.validateTransaction();
+    if (validationResult != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(validationResult),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
 
     try {
-      final transactionViewModel = ref.read(
-        transactionViewModelProvider.notifier,
-      );
-
-      // Créer la transaction mise à jour avec les nouvelles valeurs
-      await transactionViewModel.updateTransaction(
-        transactionId: widget.transactionId,
-        accountId: _selectedAccountId!,
-        type: _transactionType,
-        currency: _selectedCurrency,
-        amount: double.parse(_amountController.text),
-        title: _titleController.text.trim(),
-        comment: _commentController.text.trim().isEmpty
-            ? null
-            : _commentController.text.trim(),
-        date: _selectedDate,
-        status: _status,
-        counterpartyId: _selectedCounterpartyId,
-      );
-
+      final success = await editViewModel.saveTransaction();
+      
       if (mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Transaction modifiée avec succès'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        if (success) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Transaction modifiée avec succès'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Erreur lors de la modification'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -474,12 +474,6 @@ class _EditTransactionBottomSheetState
             backgroundColor: Colors.red,
           ),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }

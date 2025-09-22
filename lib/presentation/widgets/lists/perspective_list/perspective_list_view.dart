@@ -42,8 +42,8 @@ class PerspectiveListViewState extends State<PerspectiveListView> {
   void initState() {
     _currentIndex = widget.initialIndex;
     _pageController = PageController(
-      viewportFraction: 1 / widget.visualizedItems!,
-      initialPage: _currentIndex!,
+      viewportFraction: 1 / (widget.visualizedItems ?? 3),
+      initialPage: _currentIndex ?? 0,
     );
     _pagePercent = 0.0;
     _pageController!.addListener(_pageListener);
@@ -60,7 +60,7 @@ class PerspectiveListViewState extends State<PerspectiveListView> {
 
   void _pageListener() {
     _currentIndex = _pageController!.page!.floor();
-    _pagePercent = (_pageController!.page! - _currentIndex!).abs();
+    _pagePercent = (_pageController!.page! - (_currentIndex ?? 0)).abs();
     setState(() {});
   }
 
@@ -76,14 +76,16 @@ class PerspectiveListViewState extends State<PerspectiveListView> {
             //---------------------------------------
             Padding(
               padding: widget.padding,
-              child: _PerspectiveItems(
-                generatedItems: widget.visualizedItems! - 1,
-                currentIndex: _currentIndex,
-                heightItem: widget.itemExtent,
-                pagePercent: _pagePercent,
-                minScale: widget.minScale, // Transmettre le paramètre
-                children: widget.children,
-              ),
+              child: widget.children.isEmpty
+                  ? const SizedBox()
+                  : _PerspectiveItems(
+                      generatedItems: widget.visualizedItems! - 1,
+                      currentIndex: _currentIndex,
+                      heightItem: widget.itemExtent,
+                      pagePercent: _pagePercent,
+                      minScale: widget.minScale, // Transmettre le paramètre
+                      children: widget.children,
+                    ),
             ),
             //---------------------------------------
             // Back Items Shadow

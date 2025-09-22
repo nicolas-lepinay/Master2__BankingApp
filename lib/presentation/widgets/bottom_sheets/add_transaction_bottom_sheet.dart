@@ -2,6 +2,7 @@ import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/utils/formatters.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/domain/entities/account.dart';
 import 'package:bankapp/domain/entities/brand_logo.dart';
 import 'package:bankapp/domain/entities/counterparty.dart';
@@ -32,7 +33,7 @@ class _AddTransactionBottomSheet
   late PageController _pageController;
   late ScrollController _scrollController;
   int _currentPageIndex = 0;
-  double _bottomPadding = 150;
+  double _bottomPadding = 160;
   final int _totalPages = 3;
 
   // État de validation du formulaire - Nouvelle sémantique
@@ -88,7 +89,7 @@ class _AddTransactionBottomSheet
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    _pageController = PageController(viewportFraction: 1.1);
     _scrollController = ScrollController();
     _initializeDefaultAccount();
   }
@@ -96,8 +97,9 @@ class _AddTransactionBottomSheet
   void _initializeDefaultAccount() {
     // Récupérer le compte sélectionné depuis home_screen.dart
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final selectedAccount = ref.read(selectedAccountProvider);
-      final accounts = ref.read(accountsProvider);
+      final homeScreenViewModel = ref.read(homeScreenViewModelProvider);
+      final selectedAccount = homeScreenViewModel.selectedAccount;
+      final accounts = homeScreenViewModel.accounts;
 
       if (selectedAccount != null) {
         // Utiliser le compte sélectionné dans le HomeScreen
@@ -146,7 +148,7 @@ class _AddTransactionBottomSheet
       // Attendre un peu pour éviter une animation "juttered"
       Future.delayed(const Duration(milliseconds: 600), () {
         setState(() {
-          _bottomPadding = 150;
+          _bottomPadding = 160;
         });
       });
     }
@@ -392,18 +394,17 @@ class _AddTransactionBottomSheet
 
                     // PageView qui prend toute la hauteur disponible
                     Expanded(
-                      child: PageView(
+                      child: PageView.builder(
                         controller: _pageController,
                         scrollDirection: Axis.horizontal,
                         onPageChanged: _onPageChanged,
-                        children: [
-                          // Page 1 - Amount, Type, Account, Currency (critiques)
-                          _buildAmountPage(),
-                          // Page 2 - Counterparty Selection
-                          _buildCounterpartyPage(),
-                          // Page 3 - Additional Fields (minimaliste)
-                          _buildOthersPage(),
-                        ],
+                        itemCount: 3,
+                        itemBuilder: (BuildContext context, int index) {
+                          return FractionallySizedBox(
+                            widthFactor: 1 / _pageController.viewportFraction,
+                            child: _buildPageContent(index),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -458,31 +459,28 @@ class _AddTransactionBottomSheet
           // Account Carousel avec Consumer pour récupérer les AccountSummary
           Consumer(
             builder: (context, ref, child) {
-              final accounts = ref.watch(accountsProvider);
-              final accountSummariesAsync = accounts
-                  .map(
-                    (account) =>
-                        ref.watch(accountSummaryByIdProvider(account.id)),
-                  )
+              final homeScreenViewModel = ref.watch(
+                homeScreenViewModelProvider,
+              );
+              final accounts = homeScreenViewModel.accounts;
+              
+              // 🎯 ARCHITECTURE UNIFORME : Utiliser AccountCardsViewModel comme HomeScreen
+              final cardsState = ref.watch(accountCardsViewModelProvider);
+              
+              // Vérifier si tous les AccountSummary sont chargés
+              final accountSummaries = accounts
+                  .map((account) => cardsState.getAccountSummary(account.id))
+                  .where((summary) => summary != null)
+                  .cast<domain.AccountSummary>()
                   .toList();
 
-              // Vérifier si tous les AccountSummary sont chargés
-              final allLoaded = accountSummariesAsync.every(
-                (async) => async.hasValue,
-              );
-
-              if (!allLoaded) {
-                // Afficher un indicateur de chargement pendant que les données se chargent
+              // Si pas tous les comptes ont leur résumé chargé, afficher le chargement
+              if (accountSummaries.length < accounts.length) {
                 return SizedBox(
                   height: 175.0.h,
                   child: const Center(child: CircularProgressIndicator()),
                 );
               }
-
-              // Extraire toutes les données chargées
-              final accountSummaries = accountSummariesAsync
-                  .map((async) => async.value!)
-                  .toList();
 
               return AccountCarouselSelection(
                 selectedAccount: _selectedAccount,
@@ -560,6 +558,19 @@ class _AddTransactionBottomSheet
           ? _counterpartySearchText
           : null,
     );
+  }
+
+  Widget _buildPageContent(int index) {
+    switch (index) {
+      case 0:
+        return _buildAmountPage();
+      case 1:
+        return _buildCounterpartyPage();
+      case 2:
+        return _buildOthersPage();
+      default:
+        return Container();
+    }
   }
 
   Widget _buildOthersPage() {

@@ -10,13 +10,7 @@ class Transactions extends Table {
   IntColumn get accountId => integer().references(Accounts, #id)();
   IntColumn get counterpartyId =>
       integer().nullable().references(Counterparties, #id)();
-  IntColumn get category1Id =>
-      integer().nullable().references(Categories, #id)();
-  IntColumn get category2Id =>
-      integer().nullable().references(Categories, #id)();
-  IntColumn get category3Id =>
-      integer().nullable().references(Categories, #id)();
-  IntColumn get category4Id =>
+  IntColumn get deepestCategoryId =>
       integer().nullable().references(Categories, #id)();
   TextColumn get transactionType => text()(); // 'DEBIT' or 'CREDIT'
   RealColumn get amount => real()(); // Montant toujours dans la devise du compte

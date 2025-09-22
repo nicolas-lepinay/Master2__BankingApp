@@ -4,7 +4,6 @@ import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
-import 'package:bankapp/presentation/providers/transaction_search_provider.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/screens/transaction_detail_screen.dart';
 import 'package:bankapp/presentation/widgets/bottom_sheets/add_transaction_bottom_sheet.dart';
@@ -185,8 +184,9 @@ class _DraggableBlackContainerState
   }
 
   Widget _buildTransactionsContainer(AppLocalizations l10n) {
-    final accounts = ref.watch(accountsProvider);
-    final selectedAccount = ref.watch(selectedAccountProvider);
+    final homeScreenViewModel = ref.watch(homeScreenViewModelProvider);
+    final accounts = homeScreenViewModel.accounts;
+    final selectedAccount = homeScreenViewModel.selectedAccount;
 
     // Configuration centralisée de la liste perspective
     const int perspectiveVisualizedItems = 3; // Nombre d'items visibles
@@ -204,37 +204,55 @@ class _DraggableBlackContainerState
     // Utiliser le compte sélectionné du provider ou fallback sur le premier
     final accountToUse = selectedAccount ?? accounts.first;
 
-    // Récupérer les transactions via TransactionViewModel (MVVM)
-    final transactionViewModel = ref.watch(transactionViewModelProvider);
-    final transactions = transactionViewModel.transactions;
+    // Récupérer les transactions via TransactionListViewModel (MVVM)
+    final transactionListViewModel = ref.watch(
+      transactionListViewModelProvider,
+    );
+    final transactions = transactionListViewModel.items;
 
-    // Vérifier si des transactions sont chargées pour ce compte
-    final bool hasTransactionsForAccount =
-        transactionViewModel.selectedAccountId == accountToUse.id &&
-        transactions.isNotEmpty;
+    // 🛡️ GARDE PRINCIPALE RENFORCÉE - Gérer tous les états possibles
 
-    // Charger les transactions si nécessaire
-    if (transactionViewModel.selectedAccountId != accountToUse.id) {
+    // Charger les transactions si nécessaire (en premier)
+    if (transactionListViewModel.selectedAccountId != accountToUse.id) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref
-            .read(transactionViewModelProvider.notifier)
+            .read(transactionListViewModelProvider.notifier)
             .loadTransactionsAroundToday(accountToUse.id);
       });
-    }
-
-    if (transactionViewModel.isLoading) {
+      // État transitoire : afficher loading pendant changement de compte
       return _buildLoadingTransactionsContainer();
     }
 
-    if (transactionViewModel.hasError) {
+    // Vérification d'erreur
+    if (transactionListViewModel.hasError) {
       return _buildErrorTransactionsContainer();
     }
 
-    if (!hasTransactionsForAccount) {
+    // État de chargement
+    if (transactionListViewModel.isLoading) {
+      return _buildLoadingTransactionsContainer();
+    }
+
+    // Vérification cohérence des données avec conditions renforcées
+    final bool hasValidTransactions =
+        transactionListViewModel.selectedAccountId == accountToUse.id &&
+        transactions.isNotEmpty;
+
+    final bool isCorrectAccountWithNoTransactions =
+        transactionListViewModel.selectedAccountId == accountToUse.id &&
+        transactions.isEmpty;
+
+    // Cas spécial : bon compte, pas de transactions → Empty container
+    if (isCorrectAccountWithNoTransactions) {
       return _buildEmptyTransactionsContainer(
         onAddTransaction: _showAddTransactionBottomSheet,
         l10n: l10n,
       );
+    }
+
+    // Cas critique : incohérence de données (protection contre RangeError)
+    if (!hasValidTransactions) {
+      return _buildLoadingTransactionsContainer();
     }
 
     // Les transactions sont déjà limitées à 50 (25 passées + 25 futures)
@@ -254,28 +272,13 @@ class _DraggableBlackContainerState
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(28.r),
-          child: PerspectiveListView(
-            visualizedItems: perspectiveVisualizedItems, // Utilise la variable
-            itemExtent: perspectiveItemExtent.h, // Utilise la variable
-            minScale: perspectiveMinScale, // Nouveau paramètre personnalisé
-            initialIndex: _findTodayTransactionIndex(transactions),
-            padding: EdgeInsets.only(top: 20.r, bottom: 20.r),
-            onTapFrontItem: (index) {
-              if (index != null && index < transactions.length) {
-                _navigateToTransactionDetail(transactions[index].transaction);
-              }
-            },
-            onChangeFrontItem: (index) {
-              // Callback quand la transaction au premier plan change
-            },
-            children: transactions.map((transactionWithBalance) {
-              return PerspectiveTransactionItem(
-                transactionWithCounterparty: transactionWithBalance,
-                onTap: () => _navigateToTransactionDetail(
-                  transactionWithBalance.transaction,
-                ),
-              );
-            }).toList(),
+          child: _buildTransactionListContent(
+            transactions,
+            hasValidTransactions,
+            transactionListViewModel.isLoading,
+            perspectiveVisualizedItems,
+            perspectiveItemExtent.h,
+            perspectiveMinScale,
           ),
         ),
       ),
@@ -515,7 +518,47 @@ class _DraggableBlackContainerState
     );
   }
 
+  /// Construit le contenu de la liste des transactions (données déjà validées par garde principale)
+  Widget _buildTransactionListContent(
+    List<domain.TransactionWithBalance> transactions,
+    bool hasValidTransactions,
+    bool isLoading,
+    int visualizedItems,
+    double itemExtent,
+    double minScale,
+  ) {
+    // 🎯 À ce stade, les données ont été validées par la garde principale
+    // On peut construire PerspectiveListView en toute sécurité
+
+    return PerspectiveListView(
+      key: ValueKey(
+        'perspective_${transactions.length}_${transactions.isEmpty ? 'empty' : transactions.first.transaction.id}',
+      ),
+      visualizedItems: visualizedItems,
+      itemExtent: itemExtent,
+      minScale: minScale,
+      initialIndex: _findTodayTransactionIndex(transactions),
+      padding: EdgeInsets.only(top: 20.r, bottom: 20.r),
+      onTapFrontItem: (index) {
+        if (index != null && index < transactions.length) {
+          _navigateToTransactionDetail(transactions[index].transaction);
+        }
+      },
+      onChangeFrontItem: (index) {
+        // Callback quand la transaction au premier plan change
+      },
+      children: transactions.reversed.map((transactionWithBalance) {
+        return PerspectiveTransactionItem(
+          transactionWithCounterparty: transactionWithBalance,
+          onTap: () =>
+              _navigateToTransactionDetail(transactionWithBalance.transaction),
+        );
+      }).toList(),
+    );
+  }
+
   /// Trouve l'index de la transaction la plus proche d'aujourd'hui
+  /// Pour PerspectiveListView avec ordre inversé (transactions.reversed)
   int _findTodayTransactionIndex(
     List<domain.TransactionWithBalance> transactions,
   ) {
@@ -527,6 +570,7 @@ class _DraggableBlackContainerState
     int closestIndex = 0;
     Duration smallestDifference = Duration.zero;
 
+    // Chercher dans la liste originale (non inversée)
     for (int i = 0; i < transactions.length; i++) {
       final transactionDate = transactions[i].transaction.date;
       final transactionDateOnly = DateTime(
@@ -542,7 +586,10 @@ class _DraggableBlackContainerState
       }
     }
 
-    return closestIndex;
+    // Convertir l'index pour la liste inversée
+    // Si closestIndex = 0 dans la liste normale, il devient (length-1) dans la liste inversée
+    final int index = transactions.length - 1 - closestIndex;
+    return index > 0 ? transactions.length - 1 - closestIndex : 0;
   }
 
   void _showFullTransactionsBottomSheet() {
@@ -557,7 +604,7 @@ class _DraggableBlackContainerState
       // Reset de la recherche quand la BottomSheet se ferme, après 1 seconde
       if (mounted) {
         Future.delayed(const Duration(milliseconds: 1000), () {
-          ref.read(transactionSearchProvider.notifier).clearSearch();
+          ref.read(transactionListViewModelProvider.notifier).clearSearch();
         });
       }
     });
@@ -572,10 +619,10 @@ class _DraggableBlackContainerState
       enableDrag: true,
       builder: (context) => const AddTransactionBottomSheet(),
     ).then((_) {
-      // Invalider les providers liés aux transactions après fermeture
+      // Recharger les données après fermeture (les nouvelles architectures MVVM + Event Bus gèrent automatiquement la réactivité)
       if (mounted) {
-        ref.invalidate(accountsProvider);
-        ref.invalidate(accountTransactionsProvider);
+        // Les ViewModels écoutent les événements du Event Bus automatiquement
+        // Pas besoin d'invalidation manuelle avec la nouvelle architecture
       }
     });
   }

@@ -6,5 +6,6 @@ class Categories extends Table {
   TextColumn get label => text()();
   IntColumn get level => integer()();
   IntColumn get parentId => integer().nullable().references(Categories, #id)();
-  TextColumn get icon => text().nullable()();
+  TextColumn get icon => text().nullable()(); // Nom d'icône ou chemin SVG
+  TextColumn get iconColor => text().nullable()(); // Couleur HEX "#FF5733"
 }
