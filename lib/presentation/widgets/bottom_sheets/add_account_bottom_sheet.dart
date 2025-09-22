@@ -181,7 +181,10 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
                                   strokeWidth: 2.w,
                                 ),
                               )
-                            : Text(l10n.save),
+                            : Text(
+                                l10n.save,
+                                style: TextStyle(fontSize: 20.sp),
+                              ),
                       ),
                     ),
                   ],
@@ -202,15 +205,19 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
     });
 
     try {
-      final accountManagementViewModel = ref.read(accountManagementViewModelProvider.notifier);
+      final accountManagementViewModel = ref.read(
+        accountManagementViewModelProvider.notifier,
+      );
 
       // Utiliser le nouveau ViewModel pour créer le compte
       accountManagementViewModel.updateName(_nameController.text.trim());
       accountManagementViewModel.updateCurrency(_selectedCurrency);
-      accountManagementViewModel.updateInitialBalance(double.parse(_balanceController.text));
-      
+      accountManagementViewModel.updateInitialBalance(
+        double.parse(_balanceController.text),
+      );
+
       final success = await accountManagementViewModel.createAccount();
-      
+
       if (mounted) {
         if (success) {
           Navigator.of(context).pop();
@@ -221,12 +228,11 @@ class _AddAccountBottomSheetState extends ConsumerState<AddAccountBottomSheet> {
             ),
           );
         } else {
-          final error = ref.read(accountManagementViewModelProvider).validationMessage ?? 'Erreur lors de la création du compte';
+          final error =
+              ref.read(accountManagementViewModelProvider).validationMessage ??
+              'Erreur lors de la création du compte';
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(error),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text(error), backgroundColor: Colors.red),
           );
         }
       }

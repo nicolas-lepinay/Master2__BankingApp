@@ -8,10 +8,7 @@ class Transaction extends Equatable {
   final int id;
   final int accountId;
   final int? counterpartyId;
-  final int? category1Id;
-  final int? category2Id;
-  final int? category3Id;
-  final int? category4Id;
+  final int? deepestCategoryId;
   final TransactionType type;
   final double amount; // Montant toujours dans la devise du compte
   final String currency; // Devise du compte (identique à account.currency)
@@ -26,10 +23,7 @@ class Transaction extends Equatable {
     required this.id,
     required this.accountId,
     this.counterpartyId,
-    this.category1Id,
-    this.category2Id,
-    this.category3Id,
-    this.category4Id,
+    this.deepestCategoryId,
     required this.type,
     required this.amount,
     required this.currency,
@@ -45,10 +39,7 @@ class Transaction extends Equatable {
     int? id,
     int? accountId,
     int? counterpartyId,
-    int? category1Id,
-    int? category2Id,
-    int? category3Id,
-    int? category4Id,
+    int? deepestCategoryId,
     TransactionType? type,
     double? amount,
     String? currency,
@@ -63,10 +54,7 @@ class Transaction extends Equatable {
       id: id ?? this.id,
       accountId: accountId ?? this.accountId,
       counterpartyId: counterpartyId ?? this.counterpartyId,
-      category1Id: category1Id ?? this.category1Id,
-      category2Id: category2Id ?? this.category2Id,
-      category3Id: category3Id ?? this.category3Id,
-      category4Id: category4Id ?? this.category4Id,
+      deepestCategoryId: deepestCategoryId ?? this.deepestCategoryId,
       type: type ?? this.type,
       amount: amount ?? this.amount,
       currency: currency ?? this.currency,
@@ -87,32 +75,24 @@ class Transaction extends Equatable {
   bool get isPending => status == TransactionStatus.pending;
 
   bool get hasCounterparty => counterpartyId != null;
-  bool get hasCategories =>
-      category1Id != null ||
-      category2Id != null ||
-      category3Id != null ||
-      category4Id != null;
+  bool get hasCategories => deepestCategoryId != null;
 
   // Nouveaux getters pour la conversion
   bool get hasConversion => currencyBeforeConversion != null && amountBeforeConversion != null;
   bool get isConverted => hasConversion;
 
-  List<int> get categoryIds => [
-    if (category1Id != null) category1Id!,
-    if (category2Id != null) category2Id!,
-    if (category3Id != null) category3Id!,
-    if (category4Id != null) category4Id!,
-  ];
+  /// Getter de compatibilité - retourne une liste avec le deepestCategoryId
+  /// Note: La hiérarchie complète sera récupérée via le CacheManager
+  List<int> get categoryIds {
+    return deepestCategoryId != null ? [deepestCategoryId!] : [];
+  }
 
   @override
   List<Object?> get props => [
     id,
     accountId,
     counterpartyId,
-    category1Id,
-    category2Id,
-    category3Id,
-    category4Id,
+    deepestCategoryId,
     type,
     amount,
     currency,

@@ -7,6 +7,7 @@ import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/presentation/providers/settings_provider.dart';
 import 'package:bankapp/presentation/providers/theme_provider.dart'
     as theme_provider;
+import 'package:bankapp/presentation/screens/icon_test_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,6 +69,25 @@ class SettingsScreen extends ConsumerWidget {
                   trailing: Icon(Icons.arrow_forward_ios, size: 16.sp),
                   onTap: () =>
                       _showLanguageSelector(context, ref, currentLanguage),
+                ),
+              ),
+
+              SizedBox(height: AppConstants.largePadding.h),
+
+              // Section Développement
+              _buildSectionHeader(context, 'Développement'),
+
+              // Test des icônes
+              Card(
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.palette_outlined,
+                    color: AppColors.primary,
+                  ),
+                  title: const Text('Test Recherche d\'Icônes'),
+                  subtitle: const Text('Tester le système de génération d\'icônes'),
+                  trailing: Icon(Icons.arrow_forward_ios, size: 16.sp),
+                  onTap: () => _navigateToIconTest(context),
                 ),
               ),
 
@@ -256,6 +276,14 @@ class SettingsScreen extends ConsumerWidget {
       case AppLanguage.french:
         return Icons.flag; // Ou une icône spécifique
     }
+  }
+
+  void _navigateToIconTest(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => const IconTestScreen(),
+      ),
+    );
   }
 
   void _showAboutDialog(BuildContext context) {

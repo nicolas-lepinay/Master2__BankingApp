@@ -433,7 +433,7 @@ class AccountManagementViewModel extends BaseViewModel<AccountManagementViewStat
     // Exécuter en arrière-plan sans bloquer l'UI
     Future(() async {
       try {
-        await _smartExchangeRateService!.ensureCurrencyAvailable(currency);
+        await _smartExchangeRateService.ensureCurrencyAvailable(currency);
         // Succès : les taux de change sont maintenant disponibles
       } catch (e) {
         // Échec non-bloquant : l'utilisateur pourra utiliser l'app normalement

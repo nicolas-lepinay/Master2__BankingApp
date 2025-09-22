@@ -253,21 +253,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   ) {
     return Consumer(
       builder: (context, ref, child) {
-        // Utiliser le provider pour obtenir l'AccountSummary spécifique à ce compte
-        final accountSummaryAsync = ref.watch(
-          accountSummaryByIdProvider(account.id),
-        );
+        // 🎯 ARCHITECTURE UNIFORME : Utiliser AccountCardsViewModel comme PerspectiveListView
+        final cardsState = ref.watch(accountCardsViewModelProvider);
+        final accountSummary = cardsState.getAccountSummary(account.id);
 
-        return accountSummaryAsync.when(
-          data: (accountSummary) {
-            return BankCardWidget(
-              accountSummary: accountSummary,
-              allAccounts: allAccounts,
-            );
-          },
-          loading: () => _buildLoadingCard(account.id, allAccounts),
-          error: (error, stack) => _buildErrorCard(account.id, allAccounts),
-        );
+        if (accountSummary != null) {
+          return BankCardWidget(
+            accountSummary: accountSummary,
+            allAccounts: allAccounts,
+          );
+        } else if (cardsState.isAccountLoading(account.id)) {
+          return _buildLoadingCard(account.id, allAccounts);
+        } else {
+          return _buildErrorCard(account.id, allAccounts);
+        }
       },
     );
   }

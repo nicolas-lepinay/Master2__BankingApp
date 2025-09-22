@@ -308,10 +308,10 @@ class TransactionDetailScreen extends ConsumerWidget {
               ),
             ],
 
-            if (transaction.category1Id != null) ...[
+            if (transaction.deepestCategoryId != null) ...[
               _buildDetailRow(
                 'ID Catégorie',
-                '#${transaction.category1Id}',
+                '#${transaction.deepestCategoryId}',
                 Icons.category,
               ),
             ],

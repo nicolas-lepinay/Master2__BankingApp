@@ -66,10 +66,7 @@ class TransactionEditViewState extends BaseViewState {
            a.date == b.date &&
            a.status == b.status &&
            a.counterpartyId == b.counterpartyId &&
-           a.category1Id == b.category1Id &&
-           a.category2Id == b.category2Id &&
-           a.category3Id == b.category3Id &&
-           a.category4Id == b.category4Id;
+           a.deepestCategoryId == b.deepestCategoryId;
   }
 
   List<Object?> get props => [
@@ -274,11 +271,13 @@ class TransactionEditViewModel extends BaseViewModel<TransactionEditViewState> {
   void updateCategories(List<int>? categoryIds) {
     if (state.editingTransaction == null) return;
     
+    // Avec la nouvelle architecture, nous prenons la catégorie la plus profonde
+    final deepestCategoryId = categoryIds?.isNotEmpty == true 
+        ? categoryIds!.last  // Dernière catégorie = plus profonde
+        : null;
+    
     final updatedTransaction = state.editingTransaction!.copyWith(
-      category1Id: categoryIds?.isNotEmpty == true ? categoryIds![0] : null,
-      category2Id: categoryIds != null && categoryIds.length > 1 ? categoryIds[1] : null,
-      category3Id: categoryIds != null && categoryIds.length > 2 ? categoryIds[2] : null,
-      category4Id: categoryIds != null && categoryIds.length > 3 ? categoryIds[3] : null,
+      deepestCategoryId: deepestCategoryId,
     );
     
     state = state.copyWith(
@@ -421,13 +420,8 @@ class TransactionEditViewModel extends BaseViewModel<TransactionEditViewState> {
     final transaction = state.editingTransaction;
     if (transaction == null) return [];
     
-    final categoryIds = <int>[];
-    if (transaction.category1Id != null) categoryIds.add(transaction.category1Id!);
-    if (transaction.category2Id != null) categoryIds.add(transaction.category2Id!);
-    if (transaction.category3Id != null) categoryIds.add(transaction.category3Id!);
-    if (transaction.category4Id != null) categoryIds.add(transaction.category4Id!);
-    
-    return categoryIds;
+    // Avec la nouvelle architecture, nous utilisons le getter categoryIds de Transaction
+    return transaction.categoryIds;
   }
 
   /// Statut actuel

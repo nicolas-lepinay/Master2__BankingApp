@@ -325,10 +325,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
         title: txWithCounterparty.transaction.title,
         comment: txWithCounterparty.transaction.comment,
         counterpartyId: txWithCounterparty.transaction.counterpartyId,
-        category1Id: txWithCounterparty.transaction.category1Id,
-        category2Id: txWithCounterparty.transaction.category2Id,
-        category3Id: txWithCounterparty.transaction.category3Id,
-        category4Id: txWithCounterparty.transaction.category4Id,
+        deepestCategoryId: txWithCounterparty.transaction.deepestCategoryId,
         status: TransactionStatus.values.firstWhere(
           (s) => s.index == txWithCounterparty.transaction.status,
         ),
@@ -507,20 +504,39 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
   
   /// Récupère les catégories d'une transaction (fallback)
+  /// Récupère la hiérarchie complète des catégories d'une transaction (fallback DB)
+  /// Utilise le même algorithme que le CacheManager mais avec accès direct à la DB
   Future<List<Category>> _getTransactionCategoriesFallback(
     Transaction transaction,
   ) async {
-    final categories = <Category>[];
+    if (transaction.deepestCategoryId == null) return [];
     
-    // Récupérer chaque catégorie si elle existe
-    for (final categoryId in transaction.categoryIds) {
-      final categoryModel = await _categoryLocalDataSource.getCategoryById(categoryId);
-      if (categoryModel != null) {
-        categories.add(categoryModel.toEntity());
+    final hierarchy = <Category>[];
+    int? currentCategoryId = transaction.deepestCategoryId;
+    
+    // Remonter la hiérarchie jusqu'à la racine (même algorithme que le cache)
+    while (currentCategoryId != null) {
+      final categoryModel = await _categoryLocalDataSource.getCategoryById(currentCategoryId);
+      if (categoryModel == null) {
+        // Catégorie introuvable, arrêter la remontée
+        break;
+      }
+      
+      final category = categoryModel.toEntity();
+      hierarchy.add(category);
+      
+      // Remonter vers le parent
+      currentCategoryId = categoryModel.parentId;
+      
+      // Sécurité : arrêter si on atteint la racine (level 1) ou si pas de parent
+      if (category.level <= 1 || categoryModel.parentId == null) {
+        break;
       }
     }
     
-    return categories;
+    // Retourner dans l'ordre : [Fast Food, Restaurants, Food, Expenses]
+    // (du plus spécifique au plus général)
+    return hierarchy;
   }
 
 }

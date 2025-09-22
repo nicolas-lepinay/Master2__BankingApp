@@ -219,9 +219,7 @@ void main() {
       viewModel.updateCategories([1, 2, 3]);
 
       // Assert
-      expect(viewModel.state.editingTransaction?.category1Id, 1);
-      expect(viewModel.state.editingTransaction?.category2Id, 2);
-      expect(viewModel.state.editingTransaction?.category3Id, 3);
+      expect(viewModel.state.editingTransaction?.deepestCategoryId, 3);
       expect(viewModel.state.hasChanges, true);
       expect(viewModel.currentCategoryIds, [1, 2, 3]);
     });

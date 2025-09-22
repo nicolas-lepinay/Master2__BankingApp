@@ -1,4 +1,3 @@
-import 'package:bankapp/core/events/app_event_bus.dart';
 import 'package:bankapp/core/services/brandfetch_service.dart';
 import 'package:bankapp/core/services/currency_conversion_service.dart';
 import 'package:bankapp/core/services/firebase_functions_service.dart';
@@ -14,6 +13,8 @@ import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/domain/repositories/repositories.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/viewmodels/viewmodels.dart';
+import 'package:bankapp/presentation/viewmodels/features/account_cards_view_model.dart';
+import 'package:bankapp/presentation/viewmodels/screens/icon_test_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ============================================================================
@@ -251,6 +252,13 @@ final homeScreenViewModelProvider =
       return HomeScreenViewModel(ref.watch(accountRepositoryProvider));
     });
 
+/// Provider pour AccountCardsViewModel - ViewModel uniforme pour les cartes de comptes
+/// Utilise l'Event Bus comme tous les autres ViewModels pour une architecture cohérente
+final accountCardsViewModelProvider =
+    StateNotifierProvider<AccountCardsViewModel, AccountCardsViewState>((ref) {
+      return AccountCardsViewModel(ref.watch(accountRepositoryProvider));
+    });
+
 /// Provider pour TransactionDetailViewModel - ViewModel pour l'écran de détail d'une transaction
 /// Utilise .family pour passer l'ID de la transaction nécessaire au ViewModel
 final transactionDetailViewModelProvider =
@@ -305,29 +313,8 @@ final welcomeMessageProvider = Provider<String>((ref) {
 // ============================================================================
 
 
-/// Provider réactif pour obtenir l'AccountSummary d'un compte spécifique
-/// Se met à jour automatiquement via les événements Event Bus
-final accountSummaryByIdProvider =
-    FutureProvider.family<domain.AccountSummary, int>((ref, accountId) async {
-      // 🔥 Écouter les événements Event Bus pour invalider automatiquement
-      final eventBus = AppEventBus.instance;
-      
-      // S'abonner aux événements de transaction pour ce compte
-      final subscription = eventBus.transactionEvents
-          .where((event) => event.accountId == accountId)
-          .listen((_) {
-        // Invalider ce provider quand une transaction change pour ce compte
-        ref.invalidateSelf();
-      });
-      
-      // Cleanup de la souscription
-      ref.onDispose(() {
-        subscription.cancel();
-      });
-      
-      final accountRepository = ref.watch(accountRepositoryProvider);
-      return accountRepository.getAccountSummary(accountId);
-    });
+// ❌ SUPPRIMÉ : accountSummaryByIdProvider remplacé par AccountCardsViewModel
+// pour une architecture uniforme utilisant l'Event Bus comme PerspectiveListView
 
 
 // ============================================================================
@@ -408,4 +395,13 @@ final accountManagementViewModelProvider = StateNotifierProvider<
     ref.watch(accountRepositoryProvider),
     ref.watch(smartExchangeRateServiceProvider),
   );
+});
+
+/// Provider pour le IconTestViewModel
+/// ViewModel pour la page de test de recherche d'icônes
+final iconTestViewModelProvider = StateNotifierProvider<
+    IconTestViewModel,
+    IconTestViewState
+>((ref) {
+  return IconTestViewModel();
 });

@@ -58,12 +58,10 @@ class AccountUpdatedEvent extends AccountEvent {
     this.previousAccount,
     this.modifiedFields = const [],
     this.context,
-    required DateTime timestamp,
-    required String eventId,
+    required super.timestamp,
+    required super.eventId,
   }) : super(
          accountId: updatedAccount.id,
-         timestamp: timestamp,
-         eventId: eventId,
        );
 
   @override

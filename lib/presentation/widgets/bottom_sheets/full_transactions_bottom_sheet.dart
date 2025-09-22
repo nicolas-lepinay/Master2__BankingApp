@@ -39,6 +39,14 @@ class _FullTransactionsBottomSheetState
   void initState() {
     super.initState();
     _dragController = DraggableScrollableController();
+    // 🎯 RÉINITIALISATION : S'assurer que les filtres sont effacés à l'ouverture
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final transactionViewModel = ref.read(
+        transactionListViewModelProvider.notifier,
+      );
+      transactionViewModel.clearSearch();
+      transactionViewModel.filterByAmount(null, null);
+    });
   }
 
   @override
@@ -59,8 +67,15 @@ class _FullTransactionsBottomSheetState
         _amountFocusNode.unfocus();
         _keywordController.clear();
         _keywordFocusNode.unfocus();
-        // Effacer la recherche quand on ferme la barre
-        ref.read(transactionListViewModelProvider.notifier).clearSearch();
+        // Effacer tous les filtres de recherche quand on ferme la barre
+        final transactionViewModel = ref.read(
+          transactionListViewModelProvider.notifier,
+        );
+        transactionViewModel.clearSearch(); // Effacer le texte de recherche
+        transactionViewModel.filterByAmount(
+          null,
+          null,
+        ); // Effacer le filtre de montant
       }
     });
   }
@@ -68,14 +83,25 @@ class _FullTransactionsBottomSheetState
   void _onAmountSearchChanged(String value) {
     if (value.isNotEmpty) {
       final double? amount = double.tryParse(value);
-      ref.read(transactionListViewModelProvider.notifier).filterByAmount(amount, null);
+      if (amount != null) {
+        // Filtrer par montant exact ou proche (±10% de marge)
+        final margin = amount * 0.1;
+        ref
+            .read(transactionListViewModelProvider.notifier)
+            .filterByAmount(amount - margin, amount + margin);
+      }
     } else {
-      ref.read(transactionListViewModelProvider.notifier).clearFilters();
+      // Effacer seulement le filtre de montant, pas tous les filtres
+      ref
+          .read(transactionListViewModelProvider.notifier)
+          .filterByAmount(null, null);
     }
   }
 
   void _onKeywordSearchChanged(String value) {
-    ref.read(transactionListViewModelProvider.notifier).updateSearchQuery(value);
+    ref
+        .read(transactionListViewModelProvider.notifier)
+        .updateSearchQuery(value);
   }
 
   void _dismissKeyboard() {
@@ -239,25 +265,38 @@ class _FullTransactionsBottomSheetState
                       : Builder(
                           builder: (context) {
                             // Récupérer le compte sélectionné
-                            final selectedAccount = homeScreenViewModel.selectedAccount ?? accounts.first;
+                            final selectedAccount =
+                                homeScreenViewModel.selectedAccount ??
+                                accounts.first;
 
                             // Récupérer les transactions via TransactionListViewModel (MVVM)
-                            final transactionListViewModel = ref.watch(transactionListViewModelProvider);
-                            final transactions = transactionListViewModel.items;
+                            final transactionListViewModel = ref.watch(
+                              transactionListViewModelProvider,
+                            );
+                            // 🎯 CORRECTION : Utiliser la bonne liste selon l'état des filtres
+                            final isFiltered =
+                                transactionListViewModel.isFiltered;
+                            final transactions = isFiltered
+                                ? transactionListViewModel.filteredItems
+                                : transactionListViewModel.items;
 
-                            // Vérifier si des transactions sont chargées pour ce compte
+                            // Vérifier si des transactions sont chargées pour ce compte (données de base)
                             final bool hasTransactionsForAccount =
                                 transactionListViewModel.selectedAccountId ==
                                     selectedAccount.id &&
-                                transactions.isNotEmpty;
+                                transactionListViewModel.items.isNotEmpty;
 
                             // Charger les transactions si nécessaire
                             if (transactionListViewModel.selectedAccountId !=
                                 selectedAccount.id) {
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 ref
-                                    .read(transactionListViewModelProvider.notifier)
-                                    .loadTransactionsForAccount(selectedAccount.id);
+                                    .read(
+                                      transactionListViewModelProvider.notifier,
+                                    )
+                                    .loadTransactionsForAccount(
+                                      selectedAccount.id,
+                                    );
                               });
                             }
 
@@ -275,24 +314,30 @@ class _FullTransactionsBottomSheetState
                               );
                             }
 
+                            // 🎯 DIFFÉRENCIATION : Compte vide vs Recherche sans résultat
                             if (!hasTransactionsForAccount) {
+                              // Cas 1: Le compte n'a aucune transaction
                               return _buildEmptyTransactionsState(l10n);
                             }
 
-                            // Les transactions sont déjà gérées par TransactionListViewModel
-
-                            // Utiliser les transactions du ViewModel (déjà filtrées)
+                            // Utiliser les transactions du ViewModel
                             final transactionsToDisplay = transactions;
-                            final isSearchActive = transactionListViewModel.isFiltered;
 
-                            if (transactionsToDisplay.isEmpty && isSearchActive) {
-                              return _buildNoResultsState(l10n, appTheme);
+                            if (transactionsToDisplay.isEmpty) {
+                              if (isFiltered) {
+                                // Cas 2: Des transactions existent mais la recherche ne retourne rien
+                                return _buildNoResultsState(l10n, appTheme);
+                              } else {
+                                // Cas 3: Sécurité - normalement ne devrait pas arriver car hasTransactionsForAccount vérifie déjà
+                                return _buildEmptyTransactionsState(l10n);
+                              }
                             }
 
                             return TransactionsList(
                               transactions: transactionsToDisplay,
                               onTransactionTap: _navigateToTransactionDetail,
-                              scrollToToday: !isSearchActive, // Pas de scroll auto si recherche active
+                              scrollToToday:
+                                  !isFiltered, // Pas de scroll auto si recherche active
                               accountCurrency: selectedAccount.currency,
                             );
                           },

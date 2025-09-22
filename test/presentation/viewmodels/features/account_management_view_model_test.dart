@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:bankapp/core/events/app_event_bus.dart';
-import 'package:bankapp/core/events/account_events.dart';
 import 'package:bankapp/core/services/smart_exchange_rate_service.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/domain/repositories/repositories.dart';

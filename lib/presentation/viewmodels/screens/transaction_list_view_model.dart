@@ -306,10 +306,7 @@ class TransactionListViewModel extends BaseListViewModel<TransactionListViewStat
     if (state.selectedCategoryId != null) {
       filteredItems = filteredItems.where((item) {
         final transaction = item.transaction;
-        return transaction.category1Id == state.selectedCategoryId ||
-               transaction.category2Id == state.selectedCategoryId ||
-               transaction.category3Id == state.selectedCategoryId ||
-               transaction.category4Id == state.selectedCategoryId;
+        return transaction.deepestCategoryId == state.selectedCategoryId;
       }).toList();
     }
 
@@ -337,7 +334,12 @@ class TransactionListViewModel extends BaseListViewModel<TransactionListViewStat
 
   /// Filtre les transactions par plage de montant
   Future<void> filterByAmount(double? minAmount, double? maxAmount) async {
-    state = state.copyWith(minAmount: minAmount, maxAmount: maxAmount);
+    state = state.copyWith(
+      minAmount: minAmount, 
+      maxAmount: maxAmount,
+      clearMinAmount: minAmount == null,
+      clearMaxAmount: maxAmount == null,
+    );
     await _reapplyFilters();
   }
 

@@ -2,6 +2,7 @@ import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/utils/formatters.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/domain/entities/account.dart';
 import 'package:bankapp/domain/entities/brand_logo.dart';
 import 'package:bankapp/domain/entities/counterparty.dart';
@@ -462,30 +463,24 @@ class _AddTransactionBottomSheet
                 homeScreenViewModelProvider,
               );
               final accounts = homeScreenViewModel.accounts;
-              final accountSummariesAsync = accounts
-                  .map(
-                    (account) =>
-                        ref.watch(accountSummaryByIdProvider(account.id)),
-                  )
+              
+              // 🎯 ARCHITECTURE UNIFORME : Utiliser AccountCardsViewModel comme HomeScreen
+              final cardsState = ref.watch(accountCardsViewModelProvider);
+              
+              // Vérifier si tous les AccountSummary sont chargés
+              final accountSummaries = accounts
+                  .map((account) => cardsState.getAccountSummary(account.id))
+                  .where((summary) => summary != null)
+                  .cast<domain.AccountSummary>()
                   .toList();
 
-              // Vérifier si tous les AccountSummary sont chargés
-              final allLoaded = accountSummariesAsync.every(
-                (async) => async.hasValue,
-              );
-
-              if (!allLoaded) {
-                // Afficher un indicateur de chargement pendant que les données se chargent
+              // Si pas tous les comptes ont leur résumé chargé, afficher le chargement
+              if (accountSummaries.length < accounts.length) {
                 return SizedBox(
                   height: 175.0.h,
                   child: const Center(child: CircularProgressIndicator()),
                 );
               }
-
-              // Extraire toutes les données chargées
-              final accountSummaries = accountSummariesAsync
-                  .map((async) => async.value!)
-                  .toList();
 
               return AccountCarouselSelection(
                 selectedAccount: _selectedAccount,

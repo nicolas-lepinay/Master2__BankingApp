@@ -1,5 +1,6 @@
 import 'package:bankapp/data/database/app_database.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
+import 'package:bankapp/core/utils/color_utils.dart';
 import 'package:drift/drift.dart';
 
 class CategoryModel {
@@ -8,6 +9,7 @@ class CategoryModel {
   final int level;
   final int? parentId;
   final String? icon;
+  final String? iconColor; // Format HEX depuis la DB
 
   const CategoryModel({
     required this.id,
@@ -15,6 +17,7 @@ class CategoryModel {
     required this.level,
     this.parentId,
     this.icon,
+    this.iconColor,
   });
 
   factory CategoryModel.fromDrift(Category data) {
@@ -24,6 +27,7 @@ class CategoryModel {
       level: data.level,
       parentId: data.parentId,
       icon: data.icon,
+      iconColor: data.iconColor,
     );
   }
 
@@ -34,6 +38,7 @@ class CategoryModel {
       level: category.level,
       parentId: category.parentId,
       icon: category.icon,
+      iconColor: category.iconColor != null ? ColorUtils.toHex(category.iconColor!) : null,
     );
   }
 
@@ -44,6 +49,7 @@ class CategoryModel {
       level: level,
       parentId: parentId,
       icon: icon,
+      iconColor: ColorUtils.fromHex(iconColor), // Conversion automatique String -> Color
     );
   }
 
@@ -54,6 +60,7 @@ class CategoryModel {
       level: Value(level),
       parentId: Value(parentId),
       icon: Value(icon),
+      iconColor: Value(iconColor),
     );
   }
 
@@ -63,6 +70,7 @@ class CategoryModel {
     int? level,
     int? parentId,
     String? icon,
+    String? iconColor,
   }) {
     return CategoryModel(
       id: id ?? this.id,
@@ -70,6 +78,7 @@ class CategoryModel {
       level: level ?? this.level,
       parentId: parentId ?? this.parentId,
       icon: icon ?? this.icon,
+      iconColor: iconColor ?? this.iconColor,
     );
   }
 }

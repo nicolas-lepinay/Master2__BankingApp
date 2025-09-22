@@ -154,10 +154,7 @@ class TransactionCreationViewModel
         id: 0, // Sera assigné par la DB
         accountId: accountId,
         counterpartyId: finalCounterpartyId,
-        category1Id: categoryIds.isNotEmpty ? categoryIds[0] : null,
-        category2Id: categoryIds.length > 1 ? categoryIds[1] : null,
-        category3Id: categoryIds.length > 2 ? categoryIds[2] : null,
-        category4Id: categoryIds.length > 3 ? categoryIds[3] : null,
+        deepestCategoryId: categoryIds.isNotEmpty ? categoryIds[0] : null,
         type: type,
         currency: currency,
         amount: amount,
