@@ -51,7 +51,7 @@ class IconsRegistry {
         category: category,
         style: style,
         setName: setName,
-        limit: limit * 2, // Récupérer plus pour calculer le total
+        limit: limit,
       );
 
       stopwatch.stop();

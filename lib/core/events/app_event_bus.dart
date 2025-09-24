@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:bankapp/core/events/app_events.dart';
 import 'package:bankapp/core/events/transaction_events.dart';
 import 'package:bankapp/core/events/account_events.dart';
+import 'package:bankapp/core/events/category_events.dart';
 import 'package:bankapp/domain/entities/transaction.dart';
 import 'package:flutter/foundation.dart';
 
@@ -31,6 +32,7 @@ class AppEventBus {
   /// Streams typés pour des abonnements optimisés
   late final StreamController<TransactionEvent> _transactionController;
   late final StreamController<AccountEvent> _accountController;
+  late final StreamController<CategoryEvent> _categoryController;
   late final StreamController<GlobalAppEvent> _globalController;
   
   /// Statistiques d'événements (pour debugging et monitoring)
@@ -44,8 +46,9 @@ class AppEventBus {
   void _initializeEventTracking() {
     _transactionController = StreamController<TransactionEvent>.broadcast();
     _accountController = StreamController<AccountEvent>.broadcast();
+    _categoryController = StreamController<CategoryEvent>.broadcast();
     _globalController = StreamController<GlobalAppEvent>.broadcast();
-    
+
     // Écouteur principal pour distribuer les événements dans les streams typés
     _mainController.stream.listen(_distributeEvent, onError: _handleStreamError);
   }
@@ -71,6 +74,9 @@ class AppEventBus {
           break;
         case AccountEvent accountEvent:
           _accountController.add(accountEvent);
+          break;
+        case CategoryEvent categoryEvent:
+          _categoryController.add(categoryEvent);
           break;
         case GlobalAppEvent globalEvent:
           _globalController.add(globalEvent);
@@ -170,7 +176,10 @@ class AppEventBus {
   
   /// Stream de tous les événements de comptes
   Stream<AccountEvent> get accountEvents => _accountController.stream;
-  
+
+  /// Stream de tous les événements de catégories
+  Stream<CategoryEvent> get categoryEvents => _categoryController.stream;
+
   /// Stream de tous les événements globaux de l'app
   Stream<GlobalAppEvent> get globalEvents => _globalController.stream;
   
@@ -231,6 +240,7 @@ class AppEventBus {
     await _mainController.close();
     await _transactionController.close();
     await _accountController.close();
+    await _categoryController.close();
     await _globalController.close();
     
     _eventCounts.clear();

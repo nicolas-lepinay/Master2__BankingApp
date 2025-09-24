@@ -167,6 +167,20 @@ extension AppLocalizationsExtensions on AppLocalizations {
       case 'sarCountryName':
         return sarCountryName;
       
+      // Catégories par défaut
+      case 'expenses':
+        return expenses;
+      case 'incomes':
+        return incomes;
+      case 'fixedExpenses':
+        return fixedExpenses;
+      case 'variableExpenses':
+        return variableExpenses;
+      case 'fixedIncomes':
+        return fixedIncomes;
+      case 'variableIncomes':
+        return variableIncomes;
+      
       // Fallback pour les clés non trouvées
       default:
         return key; // Retourne la clé elle-même si aucune traduction n'est trouvée
@@ -222,5 +236,16 @@ extension AppLocalizationsExtensions on AppLocalizations {
     final name = getCurrencyName(currencyCode);
     final country = getCurrencyCountry(currencyCode);
     return '$currencyCode - $name ($country)';
+  }
+
+  /// Obtient le nom d'une catégorie par défaut à partir de sa clé
+  /// 
+  /// Exemple d'utilisation :
+  /// ```dart
+  /// final l10n = AppLocalizations.of(context)!;
+  /// final name = l10n.getCategoryName('expenses'); // Retourne "Dépenses"
+  /// ```
+  String getCategoryName(String categoryKey) {
+    return getTranslation(categoryKey);
   }
 }

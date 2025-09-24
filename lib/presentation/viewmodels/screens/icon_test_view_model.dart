@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
-
 import 'package:bankapp/core/icons/icon_entry.dart';
 import 'package:bankapp/core/icons/icons_registry.dart';
 import 'package:bankapp/presentation/viewmodels/base/base_view_model.dart';
+import 'package:flutter/material.dart';
 
 /// État pour le IconTestViewModel - gestion de la page de test des icônes
 class IconTestViewState extends BaseViewState {
@@ -57,9 +56,13 @@ class IconTestViewState extends BaseViewState {
     return IconTestViewState(
       icons: icons ?? this.icons,
       searchQuery: searchQuery ?? this.searchQuery,
-      searchResult: clearSearchResult ? null : (searchResult ?? this.searchResult),
+      searchResult: clearSearchResult
+          ? null
+          : (searchResult ?? this.searchResult),
       isSearching: isSearching ?? this.isSearching,
-      selectedCategory: clearSelectedCategory ? null : (selectedCategory ?? this.selectedCategory),
+      selectedCategory: clearSelectedCategory
+          ? null
+          : (selectedCategory ?? this.selectedCategory),
       selectedSet: clearSelectedSet ? null : (selectedSet ?? this.selectedSet),
       displayType: displayType ?? this.displayType,
       displayMessage: displayMessage ?? this.displayMessage,
@@ -75,7 +78,7 @@ class IconTestViewState extends BaseViewState {
   /// Message d'état en fonction du type d'affichage
   String get statusMessage {
     if (displayMessage != null) return displayMessage!;
-    
+
     switch (displayType) {
       case IconDisplayType.popular:
         return 'Icônes populaires ($iconCount)';
@@ -91,16 +94,12 @@ class IconTestViewState extends BaseViewState {
   }
 
   @override
-  String toString() => 'IconTestViewState(icons: ${icons.length}, searchQuery: $searchQuery, displayType: $displayType)';
+  String toString() =>
+      'IconTestViewState(icons: ${icons.length}, searchQuery: $searchQuery, displayType: $displayType)';
 }
 
 /// Types d'affichage des icônes
-enum IconDisplayType {
-  popular,
-  search,
-  category,
-  set,
-}
+enum IconDisplayType { popular, search, category, set }
 
 /// ViewModel pour la page de test des icônes
 class IconTestViewModel extends BaseViewModel<IconTestViewState> {
@@ -116,7 +115,7 @@ class IconTestViewModel extends BaseViewModel<IconTestViewState> {
         displayType: IconDisplayType.popular,
       );
 
-      final popularIcons = IconsRegistry.getPopularIcons(limit: 100);
+      final popularIcons = IconsRegistry.getPopularIcons(limit: 500);
 
       state = state.copyWith(
         icons: popularIcons,
@@ -141,7 +140,8 @@ class IconTestViewModel extends BaseViewModel<IconTestViewState> {
     }
 
     // Éviter les recherches redondantes
-    if (trimmedQuery == state.searchQuery && state.displayType == IconDisplayType.search) {
+    if (trimmedQuery == state.searchQuery &&
+        state.displayType == IconDisplayType.search) {
       return;
     }
 
@@ -156,7 +156,7 @@ class IconTestViewModel extends BaseViewModel<IconTestViewState> {
         query: trimmedQuery,
         category: state.selectedCategory,
         setName: state.selectedSet,
-        limit: 100,
+        limit: 500,
       );
 
       state = state.copyWith(
@@ -182,14 +182,16 @@ class IconTestViewModel extends BaseViewModel<IconTestViewState> {
         icons = IconsRegistry.getIconsByCategory(category);
       } else {
         // Retour aux icônes populaires si aucune catégorie
-        icons = IconsRegistry.getPopularIcons(limit: 100);
+        icons = IconsRegistry.getPopularIcons(limit: 500);
       }
 
       state = state.copyWith(
-        icons: icons.take(100).toList(),
+        icons: icons.take(500).toList(),
         isSearching: false,
         searchQuery: '',
-        displayType: category != null ? IconDisplayType.category : IconDisplayType.popular,
+        displayType: category != null
+            ? IconDisplayType.category
+            : IconDisplayType.popular,
         clearSearchResult: true,
       );
     });
@@ -209,14 +211,16 @@ class IconTestViewModel extends BaseViewModel<IconTestViewState> {
         icons = IconsRegistry.getIconsBySet(setName);
       } else {
         // Retour aux icônes populaires si aucun set
-        icons = IconsRegistry.getPopularIcons(limit: 100);
+        icons = IconsRegistry.getPopularIcons(limit: 500);
       }
 
       state = state.copyWith(
-        icons: icons.take(100).toList(),
+        icons: icons.take(500).toList(),
         isSearching: false,
         searchQuery: '',
-        displayType: setName != null ? IconDisplayType.set : IconDisplayType.popular,
+        displayType: setName != null
+            ? IconDisplayType.set
+            : IconDisplayType.popular,
         clearSearchResult: true,
       );
     });

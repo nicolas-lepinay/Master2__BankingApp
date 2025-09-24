@@ -1,6 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
+import 'package:bankapp/core/extensions/app_localizations_extensions.dart';
+import 'package:bankapp/core/l10n/app_localizations.dart';
+
 class Category extends Equatable {
   final int id;
   final String label;
@@ -38,6 +41,14 @@ class Category extends Equatable {
 
   bool get isRootCategory => parentId == null;
   bool get isSubCategory => parentId != null;
+
+  /// Obtient le nom d'affichage de la catégorie (localisé si clé trouvée)
+  /// 
+  /// Si le label correspond à une clé de localisation, retourne la traduction.
+  /// Sinon, retourne le label tel quel (catégorie créée par l'utilisateur).
+  String getDisplayName(AppLocalizations l10n) {
+    return l10n.getCategoryName(label);
+  }
 
   @override
   List<Object?> get props => [id, label, level, parentId, icon, iconColor];

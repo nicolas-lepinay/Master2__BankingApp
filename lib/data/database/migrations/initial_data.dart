@@ -64,6 +64,73 @@ Future<void> insertInitialData(AppDatabase database) async {
         ),
       );
 
+  // Insert default categories with localization keys
+  // Niveau 1: Catégories principales (pas d'icônes)
+  final expensesCategoryId = await database
+      .into(database.categories)
+      .insert(
+        CategoriesCompanion(
+          label: const Value('expenses'), // Clé de localisation
+          level: const Value(1),
+          // Pas d'icône pour les catégories de niveau 1
+        ),
+      );
+
+  final incomesCategoryId = await database
+      .into(database.categories)
+      .insert(
+        CategoriesCompanion(
+          label: const Value('incomes'), // Clé de localisation
+          level: const Value(1),
+          // Pas d'icône pour les catégories de niveau 1
+        ),
+      );
+
+  // Niveau 2: Sous-catégories avec icônes
+  await database
+      .into(database.categories)
+      .insert(
+        CategoriesCompanion(
+          label: const Value('fixedExpenses'), // Clé de localisation
+          level: const Value(2),
+          parentId: Value(expensesCategoryId),
+          icon: const Value('boxicons_bx_lock_alt'), // ID de l'icône
+        ),
+      );
+
+  await database
+      .into(database.categories)
+      .insert(
+        CategoriesCompanion(
+          label: const Value('variableExpenses'), // Clé de localisation
+          level: const Value(2),
+          parentId: Value(expensesCategoryId),
+          icon: const Value('boxicons_bx_lock_open_alt'), // ID de l'icône
+        ),
+      );
+
+  await database
+      .into(database.categories)
+      .insert(
+        CategoriesCompanion(
+          label: const Value('fixedIncomes'), // Clé de localisation
+          level: const Value(2),
+          parentId: Value(incomesCategoryId),
+          icon: const Value('boxicons_bx_lock_alt'), // ID de l'icône
+        ),
+      );
+
+  await database
+      .into(database.categories)
+      .insert(
+        CategoriesCompanion(
+          label: const Value('variableIncomes'), // Clé de localisation
+          level: const Value(2),
+          parentId: Value(incomesCategoryId),
+          icon: const Value('boxicons_bx_lock_open_alt'), // ID de l'icône
+        ),
+      );
+
   // Insert initial counterparties
   await database
       .into(database.counterparties)

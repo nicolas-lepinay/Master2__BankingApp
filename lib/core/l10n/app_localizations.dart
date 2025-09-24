@@ -152,6 +152,30 @@ abstract class AppLocalizations {
   /// **'Income'**
   String get income;
 
+  /// No description provided for @fixedExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed Expenses'**
+  String get fixedExpenses;
+
+  /// No description provided for @variableExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Variable Expenses'**
+  String get variableExpenses;
+
+  /// No description provided for @fixedIncomes.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed Incomes'**
+  String get fixedIncomes;
+
+  /// No description provided for @variableIncomes.
+  ///
+  /// In en, this message translates to:
+  /// **'Variable Incomes'**
+  String get variableIncomes;
+
   /// No description provided for @addAccount.
   ///
   /// In en, this message translates to:
@@ -415,6 +439,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error'**
   String get error;
+
+  /// No description provided for @newCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'New category'**
+  String get newCategory;
+
+  /// No description provided for @addCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a category'**
+  String get addCategory;
+
+  /// No description provided for @searchCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a category...'**
+  String get searchCategory;
+
+  /// No description provided for @categoryParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent category'**
+  String get categoryParent;
+
+  /// No description provided for @categoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Category name'**
+  String get categoryName;
+
+  /// No description provided for @createCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Create category'**
+  String get createCategory;
 
   /// No description provided for @euroCurrencyName.
   ///

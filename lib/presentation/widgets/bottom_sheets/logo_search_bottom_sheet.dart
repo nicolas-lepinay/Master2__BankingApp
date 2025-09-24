@@ -152,7 +152,10 @@ class _LogoSearchBottomSheetState extends ConsumerState<LogoSearchBottomSheet> {
                 ),
                 decoration: InputDecoration(
                   hintText: l10n.searchForLogo,
-                  hintStyle: TextStyle(fontSize: 16.sp, color: appTheme.text4),
+                  hintStyle: TextStyle(
+                    fontSize: 16.sp,
+                    color: appTheme.text4!.withValues(alpha: 0.6),
+                  ),
                   border: InputBorder.none,
                   filled: false,
                   contentPadding: EdgeInsets.only(

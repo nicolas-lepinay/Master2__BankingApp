@@ -14,6 +14,8 @@ import 'package:bankapp/domain/repositories/repositories.dart';
 import 'package:bankapp/presentation/providers/database_provider.dart';
 import 'package:bankapp/presentation/viewmodels/viewmodels.dart';
 import 'package:bankapp/presentation/viewmodels/features/account_cards_view_model.dart';
+import 'package:bankapp/presentation/viewmodels/features/category_selection_view_model.dart';
+import 'package:bankapp/presentation/viewmodels/features/category_creation_view_model.dart';
 import 'package:bankapp/presentation/viewmodels/screens/icon_test_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -404,4 +406,26 @@ final iconTestViewModelProvider = StateNotifierProvider<
     IconTestViewState
 >((ref) {
   return IconTestViewModel();
+});
+
+/// Provider pour CategorySelectionViewModel
+/// ViewModel pour la sélection hiérarchique de catégories (réutilisable)
+final categorySelectionViewModelProvider = StateNotifierProvider<
+    CategorySelectionViewModel,
+    CategorySelectionViewState
+>((ref) {
+  return CategorySelectionViewModel(
+    ref.watch(categoryRepositoryProvider),
+  );
+});
+
+/// Provider pour CategoryCreationViewModel
+/// ViewModel pour la création de nouvelles catégories
+final categoryCreationViewModelProvider = StateNotifierProvider<
+    CategoryCreationViewModel,
+    CategoryCreationViewState
+>((ref) {
+  return CategoryCreationViewModel(
+    ref.watch(categoryRepositoryProvider),
+  );
 });

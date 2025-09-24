@@ -36,6 +36,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get income => 'Revenu';
 
   @override
+  String get fixedExpenses => 'Dépenses fixes';
+
+  @override
+  String get variableExpenses => 'Dépenses variables';
+
+  @override
+  String get fixedIncomes => 'Revenus fixes';
+
+  @override
+  String get variableIncomes => 'Revenus variables';
+
+  @override
   String get addAccount => 'Ajouter un compte';
 
   @override
@@ -75,7 +87,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get date => 'Date';
 
   @override
-  String get category => 'Catégorie';
+  String get category => 'Rubrique';
 
   @override
   String get counterparty => 'Tiers';
@@ -167,6 +179,24 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get error => 'Erreur';
+
+  @override
+  String get newCategory => 'Nouvelle rubrique';
+
+  @override
+  String get addCategory => 'Ajouter une rubrique';
+
+  @override
+  String get searchCategory => 'Chercher une rubrique...';
+
+  @override
+  String get categoryParent => 'Catégorie parent';
+
+  @override
+  String get categoryName => 'Nom de la catégorie';
+
+  @override
+  String get createCategory => 'Créer la catégorie';
 
   @override
   String get euroCurrencyName => 'Euro';

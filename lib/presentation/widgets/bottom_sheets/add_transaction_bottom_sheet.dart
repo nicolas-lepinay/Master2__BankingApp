@@ -2,15 +2,16 @@ import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/utils/formatters.dart';
-import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/domain/entities/account.dart';
 import 'package:bankapp/domain/entities/brand_logo.dart';
 import 'package:bankapp/domain/entities/counterparty.dart';
+import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/domain/entities/transaction.dart';
 import 'package:bankapp/presentation/providers/viewmodel_providers.dart';
 import 'package:bankapp/presentation/widgets/buttons/floating_action_button_custom.dart';
 import 'package:bankapp/presentation/widgets/buttons/transaction_type_toggle.dart';
 import 'package:bankapp/presentation/widgets/carousels/account_carousel_selection.dart';
+import 'package:bankapp/presentation/widgets/forms/category_selection_widget.dart';
 import 'package:bankapp/presentation/widgets/forms/counterparty_selection_widget.dart';
 import 'package:bankapp/presentation/widgets/page_indicators.dart';
 import 'package:bankapp/presentation/widgets/text_fields/amount_input_widget.dart';
@@ -34,7 +35,7 @@ class _AddTransactionBottomSheet
   late ScrollController _scrollController;
   int _currentPageIndex = 0;
   double _bottomPadding = 160;
-  final int _totalPages = 3;
+  final int _totalPages = 4;
 
   // État de validation du formulaire - Nouvelle sémantique
   String _transactionAmount =
@@ -52,8 +53,13 @@ class _AddTransactionBottomSheet
   Counterparty? _selectedCounterparty;
   String _counterpartySearchText =
       ''; // Texte saisi dans le TextField counterparty
+
+  // Champs de la page 2 (catégorie)
+  domain.Category? _selectedCategory;
+
+  // Champs de la page 3 (optionnels)
   List<int> _selectedCategoryIds = [];
-  TransactionStatus _selectedStatus = TransactionStatus.completed;
+  TransactionStatus _selectedStatus = TransactionStatus.pending;
   BrandLogo? _selectedLogo; // Logo sélectionné pour nouveau counterparty
 
   bool get _isFormValid {
@@ -313,7 +319,7 @@ class _AddTransactionBottomSheet
             ? null
             : _counterpartySearchText,
         selectedLogo: _selectedLogo,
-        categoryIds: _selectedCategoryIds,
+        categoryIds: _selectedCategory != null ? [_selectedCategory!.id] : [],
         status: _selectedStatus,
         // 🔥 PROPRIÉTÉS CRITIQUES : Conversion de devises préservées
         amountBeforeConversion: _hasConversion
@@ -398,7 +404,7 @@ class _AddTransactionBottomSheet
                         controller: _pageController,
                         scrollDirection: Axis.horizontal,
                         onPageChanged: _onPageChanged,
-                        itemCount: 3,
+                        itemCount: 4,
                         itemBuilder: (BuildContext context, int index) {
                           return FractionallySizedBox(
                             widthFactor: 1 / _pageController.viewportFraction,
@@ -463,10 +469,10 @@ class _AddTransactionBottomSheet
                 homeScreenViewModelProvider,
               );
               final accounts = homeScreenViewModel.accounts;
-              
+
               // 🎯 ARCHITECTURE UNIFORME : Utiliser AccountCardsViewModel comme HomeScreen
               final cardsState = ref.watch(accountCardsViewModelProvider);
-              
+
               // Vérifier si tous les AccountSummary sont chargés
               final accountSummaries = accounts
                   .map((account) => cardsState.getAccountSummary(account.id))
@@ -567,10 +573,29 @@ class _AddTransactionBottomSheet
       case 1:
         return _buildCounterpartyPage();
       case 2:
+        return _buildCategoryPage();
+      case 3:
         return _buildOthersPage();
       default:
         return Container();
     }
+  }
+
+  Widget _buildCategoryPage() {
+    final l10n = AppLocalizations.of(context)!;
+
+    return CategorySelectionWidget(
+      title: l10n.category,
+      initialSelection: _selectedCategory,
+      onCategorySelected: (domain.Category? category) {
+        setState(() {
+          _selectedCategory = category;
+        });
+      },
+      showTitle: true,
+      showSearchBar: true,
+      height: double.infinity,
+    );
   }
 
   Widget _buildOthersPage() {
@@ -609,10 +634,6 @@ class _AddTransactionBottomSheet
 
           // Champ Commentaire
           _buildCommentField(),
-          SizedBox(height: 20.h),
-
-          // Champ Catégories
-          _buildCategoryField(),
           SizedBox(height: 20.h),
 
           // Champ Statut
@@ -788,65 +809,6 @@ class _AddTransactionBottomSheet
             ),
           ),
           style: TextStyle(fontSize: 16.sp, color: appTheme.text1),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCategoryField() {
-    final l10n = AppLocalizations.of(context)!;
-    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.category,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-            color: appTheme.text1,
-          ),
-        ),
-        SizedBox(height: 8.h),
-        GestureDetector(
-          onTap: () {
-            // TODO: Ouvrir sélecteur de catégories
-            // showCategorySelector();
-          },
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color: appTheme.buttonBackgroundDisabled!.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(
-                color: appTheme.text5!.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  _selectedCategoryIds.isNotEmpty
-                      ? '${_selectedCategoryIds.length} catégories sélectionnées'
-                      : 'Sélectionner des catégories',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    color: _selectedCategoryIds.isNotEmpty
-                        ? appTheme.text1
-                        : appTheme.text3,
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16.sp,
-                  color: appTheme.text3,
-                ),
-              ],
-            ),
-          ),
         ),
       ],
     );
