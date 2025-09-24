@@ -34,7 +34,8 @@ class _AddTransactionBottomSheet
   late PageController _pageController;
   late ScrollController _scrollController;
   int _currentPageIndex = 0;
-  double _bottomPadding = 160;
+  final double _initialBottomPadding = 220;
+  late double _bottomPadding = _initialBottomPadding;
   final int _totalPages = 4;
 
   // État de validation du formulaire - Nouvelle sémantique
@@ -154,7 +155,7 @@ class _AddTransactionBottomSheet
       // Attendre un peu pour éviter une animation "juttered"
       Future.delayed(const Duration(milliseconds: 600), () {
         setState(() {
-          _bottomPadding = 160;
+          _bottomPadding = _initialBottomPadding;
         });
       });
     }

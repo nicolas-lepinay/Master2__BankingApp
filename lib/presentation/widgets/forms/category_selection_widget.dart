@@ -54,6 +54,11 @@ class _CategorySelectionWidgetState
   late AnimationController _animationController;
   bool _isNavigatingForward = true;
 
+  // État pour la recherche animée
+  bool _isSearchVisible = false;
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -88,9 +93,23 @@ class _CategorySelectionWidgetState
     });
   }
 
+  /// Bascule l'affichage de la barre de recherche
+  void _toggleSearch() {
+    setState(() {
+      _isSearchVisible = !_isSearchVisible;
+      if (!_isSearchVisible) {
+        _searchController.clear();
+        _searchFocusNode.unfocus();
+        // TODO: Effacer les filtres de recherche dans le ViewModel
+      }
+    });
+  }
+
   @override
   void dispose() {
     _animationController.dispose();
+    _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -101,7 +120,9 @@ class _CategorySelectionWidgetState
     final viewState = ref.watch(categorySelectionViewModelProvider);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppConstants.veryLargePadding.w,
+      ),
       child: SizedBox(
         height: widget.height,
         child: Column(
@@ -109,16 +130,19 @@ class _CategorySelectionWidgetState
           children: [
             SizedBox(height: AppConstants.veryLargePadding.h),
 
-            // Titre statique "Rubrique" (toujours affiché si showTitle)
+            // Titre avec icône de recherche (toujours affiché si showTitle)
             if (widget.showTitle) ...[
               _buildTitle(l10n, appTheme),
-              SizedBox(height: AppConstants.largePadding.h * 2),
+              SizedBox(height: AppConstants.veryLargePadding.h),
             ],
 
-            // Barre de recherche avec nouveau style (toujours sous "Rubrique")
+            // Barre de recherche animée (contrôlée par _isSearchVisible)
             if (widget.showSearchBar) ...[
               _buildSearchBar(l10n, appTheme),
-              SizedBox(height: AppConstants.largePadding.h * 2),
+              // Espace dynamique selon visibilité de la recherche
+              _isSearchVisible
+                  ? SizedBox(height: AppConstants.veryLargePadding.h)
+                  : SizedBox(height: AppConstants.largePadding.h),
             ],
 
             // Titre de navigation avec flèche back (mode subcategoryDetail uniquement)
@@ -128,7 +152,7 @@ class _CategorySelectionWidgetState
             // Contenu principal avec gestion des états et AnimatedSwitcher
             Expanded(
               child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 600),
+                duration: const Duration(milliseconds: 500),
                 transitionBuilder: (child, animation) {
                   // Animation slide selon la direction de navigation
                   final offset = _isNavigatingForward
@@ -165,17 +189,36 @@ class _CategorySelectionWidgetState
     );
   }
 
-  /// Construit le titre statique centré "Rubrique"
+  /// Construit le titre avec icône de recherche
   Widget _buildTitle(AppLocalizations l10n, AppColorsExtended appTheme) {
-    return Center(
-      child: Text(
-        l10n.category, // "Rubrique" - statique, pas de navigation
-        style: AppTextStyles.h1.copyWith(
-          color: appTheme.text2,
-          fontFamily: AppTextStyles.playfairFontFamily,
-          fontSize: 36.sp,
-          fontWeight: FontWeight.w400,
-        ),
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppConstants.verySmallPadding.h,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(width: 28),
+          // Titre "Rubrique" avec police Playfair
+          Text(
+            l10n.category, // "Rubrique"
+            style: AppTextStyles.h1.copyWith(
+              fontFamily: AppTextStyles.playfairFontFamily,
+              color: appTheme.text2,
+            ),
+          ),
+
+          // Icône loupe/fermer
+          GestureDetector(
+            onTap: _toggleSearch,
+            child: Icon(
+              _isSearchVisible ? CupertinoIcons.xmark : CupertinoIcons.search,
+              size: 28.sp,
+              color: appTheme.text4,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -200,7 +243,7 @@ class _CategorySelectionWidgetState
           Expanded(
             child: Text(
               viewState.currentParent!.getDisplayName(l10n),
-              style: AppTextStyles.h2.copyWith(
+              style: AppTextStyles.h3.copyWith(
                 color: appTheme.text2,
                 fontFamily: AppTextStyles.playfairFontFamily,
                 fontWeight: FontWeight.w500,
@@ -214,55 +257,64 @@ class _CategorySelectionWidgetState
     );
   }
 
-  /// Construit la barre de recherche (style LogoSearchBottomSheet)
+  /// Construit la barre de recherche animée
   Widget _buildSearchBar(AppLocalizations l10n, AppColorsExtended appTheme) {
-    return Center(
-      child: Container(
-        //width: MediaQuery.sizeOf(context).width * 0.55,
-        decoration: BoxDecoration(
-          color: appTheme.text5?.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(100.r),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                //enabled: false, // Désactivé pour l'instant
-                style: AppTextStyles.bodyVeryLarge.copyWith(
-                  color: appTheme.text2,
-                ),
-                decoration: InputDecoration(
-                  hintText: l10n.searchCategory,
-                  hintStyle: TextStyle(
-                    fontSize: 18.sp,
-                    color: appTheme.text4!.withValues(alpha: 0.6),
-                  ),
-                  border: InputBorder.none,
-                  filled: false,
-                  contentPadding: EdgeInsets.only(
-                    left: AppConstants.veryLargePadding.w,
-                  ),
-                ),
-              ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      height: _isSearchVisible ? 60.h : 0,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 300),
+        opacity: _isSearchVisible ? 1.0 : 0.0,
+        child: Center(
+          child: Container(
+            width: MediaQuery.sizeOf(context).width * 0.75,
+            decoration: BoxDecoration(
+              color: appTheme.background3!,
+              borderRadius: BorderRadius.circular(100.r),
             ),
-            // Icône de recherche
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 10.r, vertical: 8.r),
-              child: Container(
-                width: 48.r,
-                height: 48.r,
-                decoration: BoxDecoration(
-                  color: appTheme.background2!,
-                  borderRadius: BorderRadius.circular(100.r),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    //enabled: false, // Désactivé pour l'instant
+                    style: AppTextStyles.bodyVeryLarge.copyWith(
+                      color: appTheme.text2,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: l10n.searchCategory,
+                      hintStyle: TextStyle(
+                        fontSize: 18.sp,
+                        color: appTheme.text4!.withValues(alpha: 0.6),
+                      ),
+                      border: InputBorder.none,
+                      filled: false,
+                      contentPadding: EdgeInsets.only(
+                        left: AppConstants.largePadding.w,
+                      ),
+                    ),
+                  ),
                 ),
-                child: Icon(
-                  CupertinoIcons.search,
-                  color: appTheme.text1,
-                  size: 24.sp,
+                // Icône de recherche
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 10.r, vertical: 6.r),
+                  child: Container(
+                    width: 46.r,
+                    height: 46.r,
+                    decoration: BoxDecoration(
+                      color: appTheme.background1!,
+                      borderRadius: BorderRadius.circular(100.r),
+                    ),
+                    child: Icon(
+                      CupertinoIcons.search,
+                      color: appTheme.text1,
+                      size: 24.sp,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -358,7 +410,7 @@ class _CategorySelectionWidgetState
   ) {
     return Text(
       parentCategory.getDisplayName(l10n),
-      style: AppTextStyles.h2.copyWith(
+      style: AppTextStyles.h3.copyWith(
         color: appTheme.text2,
         fontFamily: AppTextStyles.playfairFontFamily,
         fontWeight: FontWeight.w500,

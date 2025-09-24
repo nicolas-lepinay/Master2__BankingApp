@@ -310,7 +310,7 @@ class _AmountInputWidgetV2State extends ConsumerState<AmountInputWidget> {
           onFocusChanged: _onMainTextFieldFocusChange,
         ),
 
-        SizedBox(height: AppConstants.largePadding.r),
+        SizedBox(height: AppConstants.veryLargePadding.r),
 
         // Bouton devise avec icône swap
         GestureDetector(
@@ -318,7 +318,7 @@ class _AmountInputWidgetV2State extends ConsumerState<AmountInputWidget> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
             decoration: BoxDecoration(
-              color: appTheme.buttonBackgroundDisabled!.withValues(alpha: 0.2),
+              color: appTheme.background3!,
               borderRadius: BorderRadius.circular(20.r),
             ),
             child: Row(

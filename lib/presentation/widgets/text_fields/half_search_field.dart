@@ -45,7 +45,7 @@ class HalfSearchField extends StatelessWidget {
           color: appTheme.text5!.withValues(alpha: 0.7),
         ),
         filled: true,
-        fillColor: appTheme.background3!.withValues(alpha: 0.4),
+        fillColor: appTheme.background3!,
         enabledBorder: OutlineInputBorder(
           borderRadius: isLeftSide
               ? BorderRadius.only(

@@ -1,3 +1,4 @@
+import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/extensions/color_extensions.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
@@ -166,12 +167,12 @@ class _CounterpartySelectionWidgetState
           if (widget.customTitle != null || widget.transactionType != null)
             _buildTitle(l10n, appTheme),
 
-          SizedBox(height: 20.h),
+          SizedBox(height: AppConstants.veryLargePadding.h),
 
           // Widget Orb ou Icône Counterparty
           _buildOrbOrIcon(appTheme),
 
-          //SizedBox(height: 20.h),
+          SizedBox(height: AppConstants.defaultPadding.h),
 
           // Champ de recherche transparent
           CounterpartySearchField(

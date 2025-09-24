@@ -1,6 +1,7 @@
 import 'package:bankapp/core/constants/app_constants.dart';
 import 'package:bankapp/core/icons/generated_icons_registry.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/domain/entities/category.dart' as domain;
@@ -9,8 +10,6 @@ import 'package:bankapp/presentation/widgets/miscellaneous/category_breadcrumbs.
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import '../../../core/theme/app_colors.dart';
 
 /// Type d'affichage pour les items de catégorie
 enum CategoryItemType {
@@ -93,7 +92,7 @@ class CategoryListItem extends StatelessWidget {
         n: 2.9, // Même valeur que exchange_rates_bottom_sheet
         backgroundColor: isSelected
             ? AppColors.primaryPink.withValues(alpha: 0.15)
-            : appTheme.text5?.withValues(alpha: 0.15),
+            : appTheme.background3!,
         border: isSelected
             ? BorderSide(
                 color: AppColors.primaryPink.withValues(alpha: 0.5),

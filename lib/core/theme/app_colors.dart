@@ -86,7 +86,7 @@ class AppColors {
   // Greyscale
   static const Color dark100 = Color(0xFF0E0E0C); // Backgrounds
   static const Color dark87 = Color(0xFF18181D); // Bottom Sheets
-  static const Color dark81 = Color(0xFF1C1C21); // Text Field
+  static const Color dark81 = Color(0xFF1C1C21); // Text Fields
   static const Color dark75 = Color(0xFF1F1F1F); // Buttons
   static const Color dark50 = Color(0xFF2E2E48);
   static const Color dark25 = Color(0xFF47516B);
@@ -94,12 +94,13 @@ class AppColors {
   static const Color defaultGray = Color(0xFF79819A);
   static const Color light25 = Color(0xFFACB1C3);
   static const Color light50 = Color(0xFFD9DFE8);
-  static const Color light75 = Color(0xFFE2E6EE);
+  static const Color light75 = Color(0xFFF0F4F9);
   static const Color light87 = Color(0xFFF5F7FA); // Backgrounds, BottomSheets
   static const Color light100 = Color(0xFFFAFBFD); // Backgrounds
 
   // Typography
   static const Color textDark100 = dark100;
+  static const Color textDark75 = dark75;
   static const Color textDark50 = dark50;
   static const Color textDark25 = dark25;
   static const Color textDark12 = dark12;

@@ -120,7 +120,7 @@ class _CounterpartySearchFieldState extends State<CounterpartySearchField> {
           hintStyle: TextStyle(
             fontSize: 48.sp,
             fontWeight: FontWeight.w600,
-            color: appTheme.text6!.withValues(alpha: 0.8),
+            color: appTheme.text6!,
             height: 1.3,
           ),
           border: InputBorder.none,
