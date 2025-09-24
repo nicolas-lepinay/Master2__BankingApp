@@ -4,7 +4,7 @@ import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
 import 'package:bankapp/core/theme/app_text_styles.dart';
 import 'package:bankapp/domain/entities/category.dart' as domain;
-import 'package:bankapp/presentation/widgets/helpers/superellipse_clipper.dart';
+import 'package:bankapp/presentation/widgets/helpers/bordered_squircle.dart';
 import 'package:bankapp/presentation/widgets/miscellaneous/category_breadcrumbs.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -71,7 +71,7 @@ class CategoryListItem extends StatelessWidget {
             // Squircle avec icône
             _buildIconSquircle(appTheme),
 
-            SizedBox(width: AppConstants.defaultPadding.w),
+            SizedBox(width: AppConstants.largePadding.w),
 
             // Contenu principal (nom + breadcrumbs)
             Expanded(child: _buildContent(l10n, appTheme)),
@@ -86,22 +86,24 @@ class CategoryListItem extends StatelessWidget {
 
   /// Construit le squircle avec l'icône de la catégorie
   Widget _buildIconSquircle(AppColorsExtended appTheme) {
-    return ClipPath(
-      clipper: SuperellipseClipper(
-        n: 2.9,
-      ), // Même valeur que exchange_rates_bottom_sheet
-      child: Container(
-        width: 50.r,
-        height: 50.r,
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primaryPink.withValues(
-                  alpha: 0.15,
-                ) // Rose plus intense si sélectionné
-              : appTheme.text5?.withValues(alpha: 0.15), // Couleur par défaut
+    return SizedBox(
+      width: 50.r,
+      height: 50.r,
+      child: BorderedSquircle(
+        n: 2.9, // Même valeur que exchange_rates_bottom_sheet
+        backgroundColor: isSelected
+            ? AppColors.primaryPink.withValues(alpha: 0.15)
+            : appTheme.text5?.withValues(alpha: 0.15),
+        border: isSelected
+            ? BorderSide(
+                color: AppColors.primaryPink.withValues(alpha: 0.5),
+                width: 3.0,
+              )
+            : null, // Pas de bordure si non sélectionné
+        child: Align(
+          alignment: Alignment.center,
+          child: _buildCategoryIcon(appTheme),
         ),
-        alignment: Alignment.center,
-        child: _buildCategoryIcon(appTheme),
       ),
     );
   }

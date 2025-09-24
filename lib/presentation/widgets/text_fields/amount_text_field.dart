@@ -161,7 +161,7 @@ class _AmountTextFieldState extends State<AmountTextField> {
                   hintStyle: TextStyle(
                     fontSize: 48.sp,
                     fontWeight: FontWeight.w600,
-                    color: widget.textColor.withValues(alpha: 0.15),
+                    color: widget.textColor.withValues(alpha: 0.20),
                     height: 1.0,
                   ),
                   border: InputBorder.none,
