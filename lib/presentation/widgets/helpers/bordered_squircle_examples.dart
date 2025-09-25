@@ -8,7 +8,6 @@ import 'bordered_squircle.dart';
 /// Ce fichier contient des exemples pratiques d'utilisation
 /// du widget BorderedSquircle avec différentes configurations
 class BorderedSquircleExamples {
-
   /// Squircle simple sans bordure
   static Widget basicSquircle({required Widget child}) {
     return SizedBox(
@@ -16,7 +15,7 @@ class BorderedSquircleExamples {
       height: 50.r,
       child: BorderedSquircle(
         n: 2.9,
-        backgroundColor: Colors.blue.withOpacity(0.1),
+        backgroundColor: Colors.blue.withValues(alpha: 0.1),
         child: child,
       ),
     );
@@ -33,11 +32,8 @@ class BorderedSquircleExamples {
       height: 50.r,
       child: BorderedSquircle(
         n: 2.9,
-        backgroundColor: backgroundColor ?? Colors.grey.withOpacity(0.1),
-        border: BorderSide(
-          color: borderColor ?? Colors.grey,
-          width: 1.0,
-        ),
+        backgroundColor: backgroundColor ?? Colors.grey.withValues(alpha: 0.1),
+        border: BorderSide(color: borderColor ?? Colors.grey, width: 1.0),
         child: child,
       ),
     );
@@ -54,11 +50,8 @@ class BorderedSquircleExamples {
       height: 50.r,
       child: BorderedSquircle(
         n: 2.9,
-        backgroundColor: backgroundColor ?? Colors.pink.withOpacity(0.15),
-        border: BorderSide(
-          color: borderColor ?? Colors.pink,
-          width: 2.0,
-        ),
+        backgroundColor: backgroundColor ?? Colors.pink.withValues(alpha: 0.15),
+        border: BorderSide(color: borderColor ?? Colors.pink, width: 2.0),
         child: child,
       ),
     );
@@ -79,11 +72,9 @@ class BorderedSquircleExamples {
       height: 50.r,
       child: BorderedSquircle(
         n: 2.9,
-        backgroundColor: backgroundColor ?? Colors.orange.withOpacity(0.1),
-        border: BorderSide(
-          color: borderColor ?? Colors.orange,
-          width: 1.5,
-        ),
+        backgroundColor:
+            backgroundColor ?? Colors.orange.withValues(alpha: 0.1),
+        border: BorderSide(color: borderColor ?? Colors.orange, width: 1.5),
         child: child,
       ),
     );
@@ -103,13 +94,10 @@ class BorderedSquircleExamples {
       child: BorderedSquircle(
         n: 2.9,
         backgroundColor: isSelected
-            ? (selectedBackgroundColor ?? Colors.pink.withOpacity(0.15))
-            : (defaultBackgroundColor ?? Colors.grey.withOpacity(0.1)),
+            ? (selectedBackgroundColor ?? Colors.pink.withValues(alpha: 0.15))
+            : (defaultBackgroundColor ?? Colors.grey.withValues(alpha: 0.1)),
         border: isSelected
-            ? BorderSide(
-                color: selectedBorderColor ?? Colors.pink,
-                width: 2.0,
-              )
+            ? BorderSide(color: selectedBorderColor ?? Colors.pink, width: 2.0)
             : null, // Pas de bordure si non sélectionné
         child: child,
       ),
@@ -127,7 +115,7 @@ class BorderedSquircleExamples {
           height: 40.r,
           child: BorderedSquircle(
             n: 2.0,
-            backgroundColor: Colors.blue.withOpacity(0.2),
+            backgroundColor: Colors.blue.withValues(alpha: 0.2),
             border: const BorderSide(color: Colors.blue, width: 1.0),
             child: const Icon(Icons.circle, size: 20),
           ),
@@ -139,7 +127,7 @@ class BorderedSquircleExamples {
           height: 40.r,
           child: BorderedSquircle(
             n: 2.9,
-            backgroundColor: Colors.green.withOpacity(0.2),
+            backgroundColor: Colors.green.withValues(alpha: 0.2),
             border: const BorderSide(color: Colors.green, width: 1.0),
             child: const Icon(Icons.square, size: 20),
           ),
@@ -151,7 +139,7 @@ class BorderedSquircleExamples {
           height: 40.r,
           child: BorderedSquircle(
             n: 4.0,
-            backgroundColor: Colors.orange.withOpacity(0.2),
+            backgroundColor: Colors.orange.withValues(alpha: 0.2),
             border: const BorderSide(color: Colors.orange, width: 1.0),
             child: const Icon(Icons.crop_square, size: 20),
           ),
