@@ -65,6 +65,8 @@ class DashedButton extends StatelessWidget {
                   Expanded(
                     child: Text(
                       text!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.buttonTextLarge.copyWith(
                         color: dashColor,
                         fontWeight:

@@ -17,6 +17,7 @@ import 'package:bankapp/presentation/widgets/forms/counterparty_selection_widget
 import 'package:bankapp/presentation/widgets/page_indicators.dart';
 import 'package:bankapp/presentation/widgets/text_fields/amount_input_widget.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -103,6 +104,7 @@ class _AddTransactionBottomSheet
     _pageController = PageController(viewportFraction: 1.1);
     _scrollController = ScrollController();
     _initializeDefaultAccount();
+    _preloadCategoryData(); // Pré-charger les catégories pour navigation fluide
   }
 
   void _initializeDefaultAccount() {
@@ -126,6 +128,29 @@ class _AddTransactionBottomSheet
           _targetCurrency =
               accounts.first.currency; // Initialiser avec la devise du compte
         });
+      }
+    });
+  }
+
+  /// Pré-charge les données de catégories en arrière-plan pour améliorer les performances
+  /// Cette méthode force la création du CategorySelectionViewModel et charge les données
+  /// immédiatement à l'ouverture de la bottom sheet, éliminant le délai lors de la
+  /// première navigation vers la page Category
+  void _preloadCategoryData() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        // Forcer la création du provider et charger les données immédiatement
+        final categoryViewModel = ref.read(categorySelectionViewModelProvider.notifier);
+        categoryViewModel.loadCategories(restoreState: _categoryNavigationState);
+
+        if (kDebugMode) {
+          print('🚀 AddTransactionBottomSheet: Category data preloaded in background');
+        }
+      } catch (e) {
+        // Gestion silencieuse des erreurs - fallback vers chargement normal
+        if (kDebugMode) {
+          print('⚠️ AddTransactionBottomSheet: Category preload failed: $e (will use normal loading)');
+        }
       }
     });
   }

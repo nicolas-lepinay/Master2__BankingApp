@@ -143,9 +143,7 @@ class _AccountCarouselSelectionState
                     .toList();
 
                 return Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: widget.spacing.w / 2,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: widget.spacing.w),
                   child: _buildAccountCard(
                     accountSummary: accountSummary,
                     allAccounts: allAccounts,
