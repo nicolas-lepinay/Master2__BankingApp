@@ -16,6 +16,42 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 /// Callback pour la sélection d'une catégorie
 typedef OnCategorySelected = void Function(domain.Category? category);
 
+/// Callback pour les changements d'état de navigation
+typedef OnNavigationStateChanged =
+    void Function({
+      CategoryDisplayMode? displayMode,
+      domain.Category? currentParent,
+      List<domain.Category>? navigationStack,
+    });
+
+/// État initial pour la navigation des catégories
+class CategoryNavigationState {
+  final CategoryDisplayMode displayMode;
+  final domain.Category? currentParent;
+  final List<domain.Category> navigationStack;
+
+  const CategoryNavigationState({
+    this.displayMode = CategoryDisplayMode.rootOverview,
+    this.currentParent,
+    this.navigationStack = const [],
+  });
+
+  CategoryNavigationState copyWith({
+    CategoryDisplayMode? displayMode,
+    domain.Category? currentParent,
+    List<domain.Category>? navigationStack,
+    bool clearCurrentParent = false,
+  }) {
+    return CategoryNavigationState(
+      displayMode: displayMode ?? this.displayMode,
+      currentParent: clearCurrentParent
+          ? null
+          : (currentParent ?? this.currentParent),
+      navigationStack: navigationStack ?? this.navigationStack,
+    );
+  }
+}
+
 /// Widget réutilisable pour la sélection hiérarchique de catégories
 ///
 /// Fonctionnalités :
@@ -24,11 +60,14 @@ typedef OnCategorySelected = void Function(domain.Category? category);
 /// - Navigation par double-tap ou chevron
 /// - Création de nouvelles catégories
 /// - Architecture MVVM avec Event Bus
+/// - Persistance d'état externe pour réutilisabilité
 /// - Complètement réutilisable
 class CategorySelectionWidget extends ConsumerStatefulWidget {
   final String? title;
   final domain.Category? initialSelection;
+  final CategoryNavigationState? initialNavigationState;
   final OnCategorySelected? onCategorySelected;
+  final OnNavigationStateChanged? onNavigationStateChanged;
   final bool showTitle;
   final bool showSearchBar;
   final double? height;
@@ -37,7 +76,9 @@ class CategorySelectionWidget extends ConsumerStatefulWidget {
     super.key,
     this.title,
     this.initialSelection,
+    this.initialNavigationState,
     this.onCategorySelected,
+    this.onNavigationStateChanged,
     this.showTitle = true,
     this.showSearchBar = true,
     this.height,
@@ -84,13 +125,26 @@ class _CategorySelectionWidgetState
   void _loadInitialData() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final viewModel = ref.read(categorySelectionViewModelProvider.notifier);
-      viewModel.loadCategories();
 
-      // Sélectionner la catégorie initiale si fournie
-      if (widget.initialSelection != null) {
-        viewModel.toggleCategorySelection(widget.initialSelection!);
-      }
+      // Charger les catégories avec restauration d'état si nécessaire
+      viewModel.loadCategories(restoreState: widget.initialNavigationState);
+
+      // Note: La sélection est maintenant gérée par le parent
+      // via initialSelection et onCategorySelected callback
+      // Plus besoin d'appeler toggleCategorySelection ici
     });
+  }
+
+  /// Notifie les changements d'état de navigation au parent
+  void _notifyNavigationStateChanged() {
+    if (widget.onNavigationStateChanged != null) {
+      final viewState = ref.read(categorySelectionViewModelProvider);
+      widget.onNavigationStateChanged!(
+        displayMode: viewState.displayMode,
+        currentParent: viewState.currentParent,
+        navigationStack: viewState.navigationStack,
+      );
+    }
   }
 
   /// Bascule l'affichage de la barre de recherche
@@ -424,7 +478,8 @@ class _CategorySelectionWidgetState
     CategorySelectionViewState viewState,
     AppLocalizations l10n,
   ) {
-    final isSelected = viewState.selectedCategory?.id == subcategory.id;
+    // Utiliser la sélection externe du parent au lieu de celle du ViewModel
+    final isSelected = widget.initialSelection?.id == subcategory.id;
 
     return CategoryListItem.root(
       category: subcategory,
@@ -465,7 +520,8 @@ class _CategorySelectionWidgetState
     AppLocalizations l10n,
   ) {
     final viewModel = ref.read(categorySelectionViewModelProvider.notifier);
-    final isSelected = viewState.selectedCategory?.id == category.id;
+    // Utiliser la sélection externe du parent au lieu de celle du ViewModel
+    final isSelected = widget.initialSelection?.id == category.id;
     final breadcrumbs = viewModel.getCurrentBreadcrumbs();
 
     return CategoryListItem.subcategory(
@@ -517,13 +573,16 @@ class _CategorySelectionWidgetState
 
   /// Gère le tap simple (sélection/désélection)
   void _onCategoryTap(domain.Category category) {
-    final viewModel = ref.read(categorySelectionViewModelProvider.notifier);
-    viewModel.toggleCategorySelection(category);
+    // Empêcher la sélection des catégories niveau 1
+    if (category.level == 1) {
+      return;
+    }
 
-    // Notifier le parent du changement de sélection
-    final newSelection = ref
-        .read(categorySelectionViewModelProvider)
-        .selectedCategory;
+    // Logique de toggle : si c'est la catégorie actuellement sélectionnée, désélectionner
+    final isCurrentlySelected = widget.initialSelection?.id == category.id;
+    final newSelection = isCurrentlySelected ? null : category;
+
+    // Notifier le parent du changement (qui gère maintenant la sélection)
     widget.onCategorySelected?.call(newSelection);
   }
 
@@ -532,6 +591,11 @@ class _CategorySelectionWidgetState
     _isNavigatingForward = true; // Navigation vers l'avant
     final viewModel = ref.read(categorySelectionViewModelProvider.notifier);
     viewModel.navigateToSubcategories(category);
+
+    // Notifier le changement d'état de navigation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _notifyNavigationStateChanged();
+    });
   }
 
   /// Navigation retour
@@ -539,6 +603,11 @@ class _CategorySelectionWidgetState
     _isNavigatingForward = false; // Navigation vers l'arrière
     final viewModel = ref.read(categorySelectionViewModelProvider.notifier);
     viewModel.navigateBack();
+
+    // Notifier le changement d'état de navigation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _notifyNavigationStateChanged();
+    });
   }
 
   /// Affiche la bottom sheet de création de catégorie

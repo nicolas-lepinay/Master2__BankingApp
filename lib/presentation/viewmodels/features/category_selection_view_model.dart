@@ -5,6 +5,7 @@ import 'package:bankapp/core/events/category_events.dart';
 import 'package:bankapp/domain/entities/category.dart' as domain;
 import 'package:bankapp/domain/repositories/category_repository.dart';
 import 'package:bankapp/presentation/viewmodels/base/base_view_model.dart';
+import 'package:bankapp/presentation/widgets/forms/category_selection_widget.dart';
 import 'package:flutter/foundation.dart';
 
 /// Mode d'affichage pour la sélection de catégories
@@ -184,27 +185,55 @@ class CategorySelectionViewModel extends BaseViewModel<CategorySelectionViewStat
     }
   }
 
-  /// Charge toutes les catégories et initialise la vue d'ensemble (niveau 1+2)
-  Future<void> loadCategories() async {
+  /// Charge toutes les catégories et initialise l'état (vue d'ensemble ou restauration)
+  Future<void> loadCategories({CategoryNavigationState? restoreState}) async {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
       final categories = await _categoryRepository.getAllCategories();
-      final categoryGroups = _buildCategoryGroups(categories);
 
-      state = state.copyWith(
-        allCategories: categories,
-        categoryGroups: categoryGroups,
-        displayMode: CategoryDisplayMode.rootOverview,
-        currentLevel: 1,
-        currentParent: null,
-        navigationStack: [],
-        currentLevelCategories: [], // Vide en mode overview
-        isLoading: false,
-      );
+      // Si un état de restauration est fourni, l'appliquer
+      if (restoreState != null &&
+          restoreState.displayMode == CategoryDisplayMode.subcategoryDetail &&
+          restoreState.currentParent != null) {
 
-      if (kDebugMode) {
-        print('📂 Loaded ${categories.length} categories, ${categoryGroups.length} groups in overview mode');
+        // Mode détail : restaurer la navigation
+        final currentLevelCategories = categories
+            .where((cat) => cat.parentId == restoreState.currentParent!.id)
+            .toList();
+
+        state = state.copyWith(
+          allCategories: categories,
+          displayMode: restoreState.displayMode,
+          currentParent: restoreState.currentParent,
+          currentLevel: restoreState.currentParent!.level + 1,
+          navigationStack: restoreState.navigationStack,
+          currentLevelCategories: currentLevelCategories,
+          categoryGroups: [], // Vide en mode detail
+          isLoading: false,
+        );
+
+        if (kDebugMode) {
+          print('📂 Loaded ${categories.length} categories, restored to detail mode: ${restoreState.currentParent!.label}');
+        }
+      } else {
+        // Mode par défaut : vue d'ensemble
+        final categoryGroups = _buildCategoryGroups(categories);
+
+        state = state.copyWith(
+          allCategories: categories,
+          categoryGroups: categoryGroups,
+          displayMode: CategoryDisplayMode.rootOverview,
+          currentLevel: 1,
+          currentParent: null,
+          navigationStack: [],
+          currentLevelCategories: [], // Vide en mode overview
+          isLoading: false,
+        );
+
+        if (kDebugMode) {
+          print('📂 Loaded ${categories.length} categories, ${categoryGroups.length} groups in overview mode');
+        }
       }
     } catch (e) {
       state = state.copyWith(
@@ -398,6 +427,42 @@ class CategorySelectionViewModel extends BaseViewModel<CategorySelectionViewStat
   /// Réinitialise la sélection
   void clearSelection() {
     state = state.copyWith(selectedCategory: null);
+  }
+
+  /// Restaure un état de navigation spécifique (pour persistance externe)
+  Future<void> restoreNavigationState({
+    required CategoryDisplayMode displayMode,
+    required domain.Category currentParent,
+    required List<domain.Category> navigationStack,
+  }) async {
+    try {
+      if (displayMode == CategoryDisplayMode.subcategoryDetail) {
+        // Calculer les catégories du niveau actuel à partir du parent
+        final currentLevelCategories = state.allCategories
+            .where((cat) => cat.parentId == currentParent.id)
+            .toList();
+
+        // Appliquer l'état restauré
+        state = state.copyWith(
+          displayMode: displayMode,
+          currentParent: currentParent,
+          currentLevel: currentParent.level + 1,
+          navigationStack: navigationStack,
+          currentLevelCategories: currentLevelCategories,
+          categoryGroups: [], // Vide en mode detail
+        );
+
+        if (kDebugMode) {
+          print('📂 Navigation state restored: ${currentParent.label} (level ${currentParent.level + 1}, stack depth: ${navigationStack.length})');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error restoring navigation state: $e');
+      }
+      // En cas d'erreur, revenir à la vue d'ensemble
+      navigateToOverview();
+    }
   }
 
   /// Réinitialise la navigation à la vue d'ensemble

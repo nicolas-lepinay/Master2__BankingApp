@@ -12,6 +12,7 @@ import 'package:bankapp/presentation/widgets/buttons/floating_action_button_cust
 import 'package:bankapp/presentation/widgets/buttons/transaction_type_toggle.dart';
 import 'package:bankapp/presentation/widgets/carousels/account_carousel_selection.dart';
 import 'package:bankapp/presentation/widgets/forms/category_selection_widget.dart';
+import 'package:bankapp/presentation/viewmodels/features/category_selection_view_model.dart';
 import 'package:bankapp/presentation/widgets/forms/counterparty_selection_widget.dart';
 import 'package:bankapp/presentation/widgets/page_indicators.dart';
 import 'package:bankapp/presentation/widgets/text_fields/amount_input_widget.dart';
@@ -57,6 +58,9 @@ class _AddTransactionBottomSheet
 
   // Champs de la page 2 (catégorie)
   domain.Category? _selectedCategory;
+
+  // État de navigation des catégories (pour persistance)
+  CategoryNavigationState _categoryNavigationState = const CategoryNavigationState();
 
   // Champs de la page 3 (optionnels)
   List<int> _selectedCategoryIds = [];
@@ -128,9 +132,18 @@ class _AddTransactionBottomSheet
 
   @override
   void dispose() {
+    // Réinitialiser l'état de navigation des catégories pour la prochaine ouverture
+    _resetCategoryNavigationState();
+
     _pageController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  /// Réinitialise l'état de navigation des catégories et la sélection
+  void _resetCategoryNavigationState() {
+    _categoryNavigationState = const CategoryNavigationState();
+    _selectedCategory = null; // Réinitialiser aussi la sélection
   }
 
   void _onPageChanged(int index) {
@@ -588,9 +601,24 @@ class _AddTransactionBottomSheet
     return CategorySelectionWidget(
       title: l10n.category,
       initialSelection: _selectedCategory,
+      initialNavigationState: _categoryNavigationState,
       onCategorySelected: (domain.Category? category) {
         setState(() {
           _selectedCategory = category;
+        });
+      },
+      onNavigationStateChanged: ({
+        CategoryDisplayMode? displayMode,
+        domain.Category? currentParent,
+        List<domain.Category>? navigationStack,
+      }) {
+        // Sauvegarder l'état de navigation pour persistance
+        setState(() {
+          _categoryNavigationState = _categoryNavigationState.copyWith(
+            displayMode: displayMode,
+            currentParent: currentParent,
+            navigationStack: navigationStack,
+          );
         });
       },
       showTitle: true,
