@@ -1,5 +1,4 @@
 import 'package:bankapp/core/constants/app_constants.dart';
-import 'package:bankapp/core/icons/generated_icons_registry.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
 import 'package:bankapp/core/theme/app_colors.dart';
 import 'package:bankapp/core/theme/app_colors_extended.dart';
@@ -109,15 +108,8 @@ class CategoryListItem extends StatelessWidget {
 
   /// Construit l'icône de la catégorie
   Widget _buildCategoryIcon(AppColorsExtended appTheme) {
-    // Récupérer l'icône depuis le registry si définie
-    IconData? iconData;
-    if (category.icon != null && category.icon!.isNotEmpty) {
-      final iconEntry = GeneratedIconsRegistry.getIconById(category.icon!);
-      iconData = iconEntry?.iconData;
-    }
-
-    // Icône par défaut si pas d'icône définie
-    iconData ??= Icons.folder_outlined;
+    // ✅ OPTIMISÉ: Accès direct à l'IconData pré-résolu (zéro lookup!)
+    final iconData = category.displayIcon;
 
     // Couleur de l'icône
     final iconColor = isSelected

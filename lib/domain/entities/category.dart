@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 
 import 'package:bankapp/core/extensions/app_localizations_extensions.dart';
 import 'package:bankapp/core/l10n/app_localizations.dart';
+import 'package:bankapp/core/utils/icon_data_utils.dart';
 
 class Category extends Equatable {
   final int id;
   final String label;
   final int level;
   final int? parentId;
-  final String? icon;
+  final IconData? icon; // Type Flutter typé et validé (comme iconColor)
   final Color? iconColor; // Type Flutter typé et validé
 
   const Category({
@@ -26,7 +27,7 @@ class Category extends Equatable {
     String? label,
     int? level,
     int? parentId,
-    String? icon,
+    IconData? icon,
     Color? iconColor,
   }) {
     return Category(
@@ -41,6 +42,12 @@ class Category extends Equatable {
 
   bool get isRootCategory => parentId == null;
   bool get isSubCategory => parentId != null;
+
+  /// Obtient l'icône d'affichage pour cette catégorie
+  ///
+  /// Retourne l'icône définie ou l'icône par défaut si aucune n'est spécifiée.
+  /// Cette propriété optimise l'accès direct dans l'UI sans lookup.
+  IconData get displayIcon => IconDataUtils.getDisplayIcon(icon);
 
   /// Obtient le nom d'affichage de la catégorie (localisé si clé trouvée)
   /// 

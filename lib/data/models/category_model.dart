@@ -1,6 +1,7 @@
 import 'package:bankapp/data/database/app_database.dart';
 import 'package:bankapp/domain/entities/entities.dart' as domain;
 import 'package:bankapp/core/utils/color_utils.dart';
+import 'package:bankapp/core/utils/icon_data_utils.dart';
 import 'package:drift/drift.dart';
 
 class CategoryModel {
@@ -37,7 +38,7 @@ class CategoryModel {
       label: category.label,
       level: category.level,
       parentId: category.parentId,
-      icon: category.icon,
+      icon: IconDataUtils.iconDataToId(category.icon), // Conversion automatique IconData -> String
       iconColor: category.iconColor != null ? ColorUtils.toHex(category.iconColor!) : null,
     );
   }
@@ -48,7 +49,7 @@ class CategoryModel {
       label: label,
       level: level,
       parentId: parentId,
-      icon: icon,
+      icon: IconDataUtils.idToIconData(icon), // Conversion automatique String -> IconData
       iconColor: ColorUtils.fromHex(iconColor), // Conversion automatique String -> Color
     );
   }
