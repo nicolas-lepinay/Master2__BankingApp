@@ -1,8 +1,3 @@
-import 'package:drift/drift.dart';
-
-/// Table des utilisateurs de l'application
-class Users extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get name => text()();
-  DateTimeColumn get creationDate => dateTime()();
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:aaf2586e76b8cdba2aa5f75c846246fa0eaf4ed3d0d5de7dfe2d62be96b237f7
+size 253

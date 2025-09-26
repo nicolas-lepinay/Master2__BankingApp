@@ -1,31 +1,3 @@
-import 'package:equatable/equatable.dart';
-
-class Counterparty extends Equatable {
-  final int id;
-  final String name;
-  final String? icon;
-
-  const Counterparty({
-    required this.id,
-    required this.name,
-    this.icon,
-  });
-
-  Counterparty copyWith({
-    int? id,
-    String? name,
-    String? icon,
-  }) {
-    return Counterparty(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      icon: icon ?? this.icon,
-    );
-  }
-
-  @override
-  List<Object?> get props => [id, name, icon];
-
-  @override
-  bool get stringify => true;
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:c823bbfb96016716dcfc536b6b312aa53a1b86204393b3268d1a7ef40a39a148
+size 573

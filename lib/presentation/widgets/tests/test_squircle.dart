@@ -1,20 +1,3 @@
-import 'package:flutter/material.dart';
-
-class TestSquircle extends StatelessWidget {
-  const TestSquircle({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        minimumSize: const Size(240, 240), // width, height
-        shape: ContinuousRectangleBorder(
-          side: BorderSide.none,
-          borderRadius: BorderRadius.all(Radius.circular(125)),
-        ),
-      ),
-      onPressed: () {},
-      child: Text('Test Squircle'),
-    );
-  }
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:cb53196897610f4fad2e214b49d5c867b4c71de83d8aa06080ab37911e7053d6
+size 551

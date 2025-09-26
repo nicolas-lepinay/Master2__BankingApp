@@ -26,6 +26,9 @@ dependencies:
   animate_gradient: ^0.0.3
   flutter_svg: ^2.2.0
   flutter_screenutil: ^5.9.3
+  rive: ^0.13.20
+
+  # Icons Packs
   cupertino_icons: ^1.0.8
   icons_plus: ^5.0.0
   fluentui_system_icons: ^1.1.273
@@ -34,6 +37,7 @@ dependencies:
   health_icons: ^0.0.2
   tdesign_flutter: ^0.2.5
   solar_icons: ^0.0.5
+  flutter_material_design_icons: ^1.1.7447
 
   # Utilities
   intl: ^0.20.2
