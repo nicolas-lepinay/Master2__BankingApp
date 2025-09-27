@@ -27,6 +27,7 @@ dependencies:
   flutter_svg: ^2.2.0
   flutter_screenutil: ^5.9.3
   rive: ^0.13.20
+  flex_color_picker: ^3.7.1
 
   # Icons Packs
   cupertino_icons: ^1.0.8
