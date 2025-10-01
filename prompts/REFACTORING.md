@@ -428,7 +428,7 @@ await _exchangeRateRepository
 // Le Repository recharge automatiquement le cache aprés sauvegarde (pattern cohérent)
 ```
 
-#### [ ] 3.4 - Tests d'intégration Phase 3
+#### [x] 3.4 - Tests d'intégration Phase 3
 
 **Test manuel** :
 1. Désinstaller l'app complétement
@@ -474,7 +474,7 @@ Nettoyer le code legacy aprés validation compléte.
 **Fichier** : `lib/data/cache/cache_manager.dart`
 
 **Supprimer la méthode compléte** :
-```dart
+```dart 
 @Deprecated('Use Repository.updateExchangeRates() followed by reloadExchangeRatesFromDatabase()')
 Future<void> updateExchangeRates(String baseCurrency) async {
   // ... supprimer tout le contenu ...
@@ -500,6 +500,1252 @@ flutter analyze
 ```
 
 **Critére de succés** : Aucune erreur, warnings stables ou réduits
+
+---
+
+##  Phase 4bis : Architecture Exchange Rates Avancée (Recommandations Peer Review)
+
+### 🎯 Objectif
+
+Finaliser l'architecture des Exchange Rates en adoptant les meilleures pratiques identifiées lors de la peer review :
+1. **Pattern cohérent** : `Repository → CacheManager.addExchangeRates()` (comme `addTransaction`)
+2. **État granulaire** : `ExchangeRatesStatus` enum pour UI conditionnelle
+3. **Analyse centralisée** : Méthode dédiée dans `SmartExchangeRateService`
+4. **UI propre** : Logique métier dans ViewModel, pas dans Widget
+
+### 📊 Architecture Cible
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ ExchangeRatesBottomSheet (UI Pure)                      │
+│  ↓ Lit state                                            │
+│ CurrencyViewModel (Business Logic)                      │
+│  ├─ exchangeRatesStatus: ExchangeRatesStatus            │
+│  ├─ getExchangeRateForCurrency(String): ExchangeRate?  │
+│  └─ retryMissingCurrency(String)                        │
+│  ↓ Utilise                                              │
+│ SmartExchangeRateService (Orchestration)               │
+│  ├─ analyzeExchangeRateStatus()                         │
+│  └─ ensureRatesAvailable()                              │
+│  ↓ Appelle                                              │
+│ ExchangeRateRepository (Data Access)                    │
+│  └─ updateExchangeRates() → CacheManager.addExchangeRates()│
+└─────────────────────────────────────────────────────────┘
+```
+
+### 🔄 Flux de Données Unifié
+
+**Pattern Transactions (existant)** :
+```dart
+Repository.createTransaction()
+  → LocalDataSource.save()
+  → CacheManager.addTransaction()  // ✅ Méthode publique
+    → _transactions[id] = transaction
+    → _transactionsController.add()
+```
+
+**Pattern Exchange Rates (après Phase 4bis)** :
+```dart
+Repository.updateExchangeRates()
+  → RemoteDataSource.fetch()
+  → LocalDataSource.save()
+  → CacheManager.addExchangeRates()  // ✅ Nouveau, cohérent !
+    → _exchangeRates[key] = rate
+    → _exchangeRatesController.add()
+```
+
+---
+
+### 📝 Tâches Détaillées
+
+#### [x] 4bis.1 - Créer `ExchangeRatesStatus` enum
+
+**Fichier** : `lib/presentation/viewmodels/shared/currency_view_model.dart`
+
+**Ajouter l'enum AVANT la classe `CurrencyViewState`** :
+
+```dart
+/// Statut global des taux de change pour l'UI
+enum ExchangeRatesStatus {
+  /// Tous les taux nécessaires sont disponibles et valides
+  available,
+
+  /// Tous les taux sont disponibles mais certains sont expirés
+  expired,
+
+  /// Certains taux manquent complètement
+  partial,
+
+  /// Aucun taux disponible
+  unavailable,
+
+  /// Chargement en cours (état transitoire)
+  loading,
+}
+```
+
+**Ajouter le champ dans `CurrencyViewState`** :
+
+```dart
+class CurrencyViewState extends BaseListViewState<ExchangeRate> {
+  // ... champs existants ...
+
+  /// Statut global des taux de change
+  final ExchangeRatesStatus exchangeRatesStatus;
+
+  /// Devises manquantes (pour status = partial)
+  final Set<String> missingCurrencies;
+
+  /// Indique si des taux sont expirés (pour status = expired)
+  final bool hasExpiredRates;
+
+  const CurrencyViewState({
+    // ... paramètres existants ...
+    this.exchangeRatesStatus = ExchangeRatesStatus.available,
+    this.missingCurrencies = const {},
+    this.hasExpiredRates = false,
+  });
+
+  @override
+  CurrencyViewState copyWith({
+    // ... paramètres existants ...
+    Defaulted<ExchangeRatesStatus>? exchangeRatesStatus = const Omit(),
+    Defaulted<Set<String>>? missingCurrencies = const Omit(),
+    Defaulted<bool>? hasExpiredRates = const Omit(),
+  }) {
+    return CurrencyViewState(
+      // ... copying existants ...
+      exchangeRatesStatus: exchangeRatesStatus is Omit
+          ? this.exchangeRatesStatus
+          : exchangeRatesStatus as ExchangeRatesStatus,
+      missingCurrencies: missingCurrencies is Omit
+          ? this.missingCurrencies
+          : missingCurrencies as Set<String>,
+      hasExpiredRates: hasExpiredRates is Omit
+          ? this.hasExpiredRates
+          : hasExpiredRates as bool,
+    );
+  }
+}
+```
+
+**Tests unitaires** :
+
+```dart
+// test/viewmodels/currency_view_model_test.dart
+group('ExchangeRatesStatus', () {
+  test('initial state should be available', () {
+    final state = CurrencyViewState.initial();
+    expect(state.exchangeRatesStatus, ExchangeRatesStatus.available);
+  });
+
+  test('copyWith should update status correctly', () {
+    final state = CurrencyViewState.initial();
+    final updated = state.copyWith(
+      exchangeRatesStatus: ExchangeRatesStatus.partial,
+      missingCurrencies: {'USD', 'GBP'},
+    );
+
+    expect(updated.exchangeRatesStatus, ExchangeRatesStatus.partial);
+    expect(updated.missingCurrencies, {'USD', 'GBP'});
+  });
+});
+```
+
+**Exécuter les tests** :
+```bash
+flutter test test/viewmodels/currency_view_model_test.dart
+```
+
+---
+
+#### [ ] 4bis.2 - Créer la méthode d'analyse centralisée
+
+**Fichier** : `lib/core/services/smart_exchange_rate_service.dart`
+
+**Ajouter la classe `ExchangeRateAnalysis`** (après `ExchangeRateUpdateResult`) :
+
+```dart
+/// Résultat de l'analyse des taux de change pour un ensemble de devises
+class ExchangeRateAnalysis {
+  /// Devises analysées
+  final Set<String> analyzedCurrencies;
+
+  /// Devises pour lesquelles aucun taux n'est disponible
+  final Set<String> missingCurrencies;
+
+  /// Devises qui ont des taux mais tous expirés
+  final Set<String> expiredCurrencies;
+
+  /// Devises qui ont au moins un taux valide
+  final Set<String> availableCurrencies;
+
+  /// Indique si au moins un taux est expiré
+  final bool hasExpiredRates;
+
+  /// Indique si tous les taux nécessaires sont disponibles
+  final bool isComplete;
+
+  /// Nombre total de taux analysés
+  final int totalRatesCount;
+
+  /// Nombre de taux valides
+  final int validRatesCount;
+
+  /// Nombre de taux expirés
+  final int expiredRatesCount;
+
+  const ExchangeRateAnalysis({
+    required this.analyzedCurrencies,
+    required this.missingCurrencies,
+    required this.expiredCurrencies,
+    required this.availableCurrencies,
+    required this.hasExpiredRates,
+    required this.isComplete,
+    required this.totalRatesCount,
+    required this.validRatesCount,
+    required this.expiredRatesCount,
+  });
+
+  /// Détermine le statut global pour l'UI
+  ExchangeRatesStatus get overallStatus {
+    if (missingCurrencies.isNotEmpty) {
+      return ExchangeRatesStatus.partial;
+    }
+    if (hasExpiredRates) {
+      return ExchangeRatesStatus.expired;
+    }
+    if (totalRatesCount == 0) {
+      return ExchangeRatesStatus.unavailable;
+    }
+    return ExchangeRatesStatus.available;
+  }
+
+  @override
+  String toString() {
+    return 'ExchangeRateAnalysis('
+        'total: $totalRatesCount, '
+        'valid: $validRatesCount, '
+        'expired: $expiredRatesCount, '
+        'missing: ${missingCurrencies.length}, '
+        'status: $overallStatus)';
+  }
+}
+```
+
+**Ajouter la méthode d'analyse dans `SmartExchangeRateService`** :
+
+```dart
+class SmartExchangeRateService with AppLoggerMixin {
+  // ... champs existants ...
+
+  /// Analyse l'état des taux de change pour un ensemble de devises
+  ///
+  /// Cette méthode vérifie pour chaque paire de devises :
+  /// - Si un taux existe dans le cache
+  /// - Si le taux est valide ou expiré
+  /// - Génère des statistiques détaillées
+  ///
+  /// Utilisé pour déterminer si une mise à jour API est nécessaire
+  ExchangeRateAnalysis analyzeExchangeRateStatus(List<String> currencies) {
+    final currencySet = currencies.map((c) => c.toUpperCase()).toSet();
+
+    final missingCurrencies = <String>{};
+    final expiredCurrencies = <String>{};
+    final availableCurrencies = <String>{};
+
+    int totalRatesCount = 0;
+    int validRatesCount = 0;
+    int expiredRatesCount = 0;
+    bool hasExpiredRates = false;
+
+    // Récupérer tous les taux en cache
+    final allRates = _cacheManager.getAllExchangeRates();
+
+    // Analyser chaque paire de devises
+    for (final fromCurrency in currencySet) {
+      bool hasSomeValidRates = false;
+      bool hasSomeExpiredRates = false;
+      bool hasNoRates = true;
+
+      for (final toCurrency in currencySet) {
+        if (fromCurrency == toCurrency) continue;
+
+        final rate = _cacheManager.getExchangeRate(fromCurrency, toCurrency);
+
+        if (rate != null) {
+          hasNoRates = false;
+          totalRatesCount++;
+
+          if (rate.isValid) {
+            validRatesCount++;
+            hasSomeValidRates = true;
+          } else {
+            expiredRatesCount++;
+            hasSomeExpiredRates = true;
+            hasExpiredRates = true;
+          }
+        }
+      }
+
+      // Classifier la devise
+      if (hasNoRates) {
+        missingCurrencies.add(fromCurrency);
+      } else if (hasSomeValidRates) {
+        availableCurrencies.add(fromCurrency);
+        if (hasSomeExpiredRates) {
+          expiredCurrencies.add(fromCurrency);
+        }
+      } else {
+        // Seulement des taux expirés
+        expiredCurrencies.add(fromCurrency);
+      }
+    }
+
+    final analysis = ExchangeRateAnalysis(
+      analyzedCurrencies: currencySet,
+      missingCurrencies: missingCurrencies,
+      expiredCurrencies: expiredCurrencies,
+      availableCurrencies: availableCurrencies,
+      hasExpiredRates: hasExpiredRates,
+      isComplete: missingCurrencies.isEmpty,
+      totalRatesCount: totalRatesCount,
+      validRatesCount: validRatesCount,
+      expiredRatesCount: expiredRatesCount,
+    );
+
+    logInfo('analyzeExchangeRateStatus', analysis.toString());
+    return analysis;
+  }
+
+  /// Analyse spécifiquement les devises des comptes utilisateur
+  ExchangeRateAnalysis analyzeAccountCurrenciesStatus() {
+    final accountCurrencies = getAccountCurrencies();
+    return analyzeExchangeRateStatus(accountCurrencies);
+  }
+}
+```
+
+**Tests unitaires** :
+
+```dart
+// test/services/smart_exchange_rate_service_test.dart
+group('analyzeExchangeRateStatus', () {
+  test('should detect missing currencies', () {
+    // Setup: Cache vide
+    when(mockCacheManager.getAllExchangeRates()).thenReturn({});
+    when(mockCacheManager.getExchangeRate(any, any)).thenReturn(null);
+
+    final analysis = service.analyzeExchangeRateStatus(['USD', 'EUR']);
+
+    expect(analysis.missingCurrencies, {'USD', 'EUR'});
+    expect(analysis.overallStatus, ExchangeRatesStatus.partial);
+  });
+
+  test('should detect expired rates', () {
+    // Setup: Taux expirés
+    final expiredRate = ExchangeRate(
+      fromCurrency: 'USD',
+      toCurrency: 'EUR',
+      rate: 0.85,
+      lastUpdated: DateTime.now().subtract(Duration(hours: 2)),
+    );
+
+    when(mockCacheManager.getExchangeRate('USD', 'EUR'))
+        .thenReturn(expiredRate);
+
+    final analysis = service.analyzeExchangeRateStatus(['USD', 'EUR']);
+
+    expect(analysis.hasExpiredRates, true);
+    expect(analysis.overallStatus, ExchangeRatesStatus.expired);
+  });
+
+  test('should report available when all valid', () {
+    // Setup: Taux valides
+    final validRate = ExchangeRate.withDefaultExpiration(
+      fromCurrency: 'USD',
+      toCurrency: 'EUR',
+      rate: 0.85,
+    );
+
+    when(mockCacheManager.getExchangeRate('USD', 'EUR'))
+        .thenReturn(validRate);
+
+    final analysis = service.analyzeExchangeRateStatus(['USD', 'EUR']);
+
+    expect(analysis.overallStatus, ExchangeRatesStatus.available);
+    expect(analysis.validRatesCount, 1);
+  });
+});
+```
+
+**Exécuter les tests** :
+```bash
+flutter test test/services/smart_exchange_rate_service_test.dart
+```
+
+---
+
+#### [ ] 4bis.3 - Créer `CacheManager.addExchangeRates()`
+
+**Fichier** : `lib/data/cache/cache_manager.dart`
+
+**Ajouter la méthode publique** (inspirée de `addTransaction`) :
+
+```dart
+/// Ajoute ou met à jour des taux de change dans le cache
+/// Pattern cohérent avec addTransaction, addAccount, etc.
+///
+/// Cette méthode :
+/// 1. Ajoute/met à jour les taux dans _exchangeRates
+/// 2. Émet le stream pour notifier les listeners
+///
+/// Utilisée par ExchangeRateRepository après sauvegarde en DB
+Future<void> addExchangeRates(List<ExchangeRate> rates) async {
+  if (rates.isEmpty) {
+    print('⚠️ CacheManager.addExchangeRates() called with empty list');
+    return;
+  }
+
+  print('📥 CacheManager.addExchangeRates() - Adding ${rates.length} rates');
+
+  for (final rate in rates) {
+    final key = '${rate.fromCurrency}_${rate.toCurrency}';
+    _exchangeRates[key] = rate;
+  }
+
+  _lastExchangeRateUpdate = DateTime.now();
+
+  // Émettre le stream pour notifier les ViewModels
+  _exchangeRatesController.add(Map.from(_exchangeRates));
+
+  print('✅ CacheManager: ${_exchangeRates.length} total rates in cache');
+}
+
+/// Ajoute ou met à jour un seul taux de change
+/// Utile pour les updates unitaires (retry d'une seule devise)
+Future<void> addExchangeRate(ExchangeRate rate) async {
+  await addExchangeRates([rate]);
+}
+```
+
+**Modifier `Repository.updateExchangeRates()`** pour utiliser la nouvelle méthode :
+
+**Fichier** : `lib/data/repositories/exchange_rate_repository_impl.dart`
+
+```dart
+@override
+Future<void> updateExchangeRates(String baseCurrency) async {
+  if (!CurrencyService.isValidCurrency(baseCurrency)) {
+    throw UnsupportedCurrencyException('Currency $baseCurrency is not supported');
+  }
+
+  try {
+    print('📥 ExchangeRateRepository.updateExchangeRates($baseCurrency) called');
+
+    // 1. Télécharger depuis l'API remote
+    final remoteRates = await _remoteDataSource.getExchangeRates(baseCurrency);
+    print('✓ Downloaded ${remoteRates.length} rates for $baseCurrency');
+
+    // 2. Sauvegarder dans la base de données locale
+    await _localDataSource.saveExchangeRates(remoteRates);
+    print('✓ Saved ${remoteRates.length} rates to SQLite');
+
+    // 3. Mettre à jour le cache mémoire via méthode publique
+    // ✅ Pattern cohérent : Repository → CacheManager.addExchangeRates()
+    // (comme Repository → CacheManager.addTransaction)
+    if (_cacheManager.isInitialized) {
+      final entities = remoteRates.map((model) => model.toEntity()).toList();
+      await _cacheManager.addExchangeRates(entities);
+      print('✓ Updated cache with ${entities.length} rates');
+    }
+
+    print('✅ ExchangeRateRepository.updateExchangeRates($baseCurrency) completed');
+  } catch (e) {
+    print('❌ ExchangeRateRepository.updateExchangeRates($baseCurrency) failed: $e');
+    throw ExchangeRateUpdateException('Failed to update exchange rates: $e');
+  }
+}
+```
+
+**Supprimer les méthodes obsolètes** :
+
+1. **Supprimer `reloadExchangeRatesFromDatabase()`** dans `cache_manager.dart` (plus nécessaire)
+2. **Supprimer `getAllRatesFromDatabase()`** dans `exchange_rate_repository.dart` (plus nécessaire)
+
+**Tests unitaires** :
+
+```dart
+// test/data/cache/cache_manager_test.dart
+group('addExchangeRates', () {
+  test('should add rates to cache and emit stream', () async {
+    final rates = [
+      ExchangeRate.withDefaultExpiration(
+        fromCurrency: 'USD',
+        toCurrency: 'EUR',
+        rate: 0.85,
+      ),
+      ExchangeRate.withDefaultExpiration(
+        fromCurrency: 'USD',
+        toCurrency: 'GBP',
+        rate: 0.73,
+      ),
+    ];
+
+    await cacheManager.addExchangeRates(rates);
+
+    final cachedRates = cacheManager.getAllExchangeRates();
+    expect(cachedRates.length, 2);
+    expect(cachedRates['USD_EUR']?.rate, 0.85);
+    expect(cachedRates['USD_GBP']?.rate, 0.73);
+  });
+
+  test('should update existing rates', () async {
+    // Add initial rate
+    await cacheManager.addExchangeRate(
+      ExchangeRate.withDefaultExpiration(
+        fromCurrency: 'USD',
+        toCurrency: 'EUR',
+        rate: 0.85,
+      ),
+    );
+
+    // Update with new rate
+    await cacheManager.addExchangeRate(
+      ExchangeRate.withDefaultExpiration(
+        fromCurrency: 'USD',
+        toCurrency: 'EUR',
+        rate: 0.90,
+      ),
+    );
+
+    final rate = cacheManager.getExchangeRate('USD', 'EUR');
+    expect(rate?.rate, 0.90);
+  });
+});
+```
+
+**Exécuter les tests** :
+```bash
+flutter test test/data/cache/cache_manager_test.dart
+flutter test test/data/repositories/exchange_rate_repository_test.dart
+```
+
+---
+
+#### [ ] 4bis.4 - Ajouter méthodes ViewModel pour UI
+
+**Fichier** : `lib/presentation/viewmodels/shared/currency_view_model.dart`
+
+**Ajouter les méthodes suivantes dans `CurrencyViewModel`** :
+
+```dart
+class CurrencyViewModel extends BaseListViewModel<CurrencyViewState, ExchangeRate> {
+  // ... existant ...
+
+  final SmartExchangeRateService? _smartExchangeRateService;
+
+  CurrencyViewModel(
+    this._conversionService,
+    this._smartExchangeRateService,  // Nouveau paramètre
+  ) : super(CurrencyViewState.initial()) {
+    _loadAvailableCurrencies();
+    _subscribeToExchangeRates();
+  }
+
+  /// Analyse les taux de change et met à jour le status
+  /// Appelé automatiquement lors des mises à jour du cache
+  void _updateExchangeRatesStatus() {
+    if (_smartExchangeRateService == null) return;
+
+    // Analyser uniquement les devises des comptes
+    final analysis = _smartExchangeRateService!.analyzeAccountCurrenciesStatus();
+
+    state = state.copyWith(
+      exchangeRatesStatus: analysis.overallStatus,
+      missingCurrencies: analysis.missingCurrencies,
+      hasExpiredRates: analysis.hasExpiredRates,
+    );
+
+    print('📊 CurrencyViewModel: Exchange rates status updated to ${analysis.overallStatus}');
+  }
+
+  /// Obtient le taux de change pour une devise spécifique (méthode helper pour UI)
+  /// Gère automatiquement les cas edge (même devise, taux inverse)
+  ExchangeRate? getExchangeRateForCurrency(
+    String baseCurrency,
+    String targetCurrency,
+  ) {
+    if (baseCurrency == targetCurrency) {
+      return ExchangeRate.withDefaultExpiration(
+        fromCurrency: baseCurrency,
+        toCurrency: targetCurrency,
+        rate: 1.0,
+      );
+    }
+
+    // Essayer taux direct
+    final directRate = _conversionService.getExchangeRate(baseCurrency, targetCurrency);
+    if (directRate != null) return directRate;
+
+    // Essayer taux inverse
+    final inverseRate = _conversionService.getExchangeRate(targetCurrency, baseCurrency);
+    if (inverseRate != null && inverseRate.rate != 0) {
+      return ExchangeRate(
+        fromCurrency: baseCurrency,
+        toCurrency: targetCurrency,
+        rate: 1.0 / inverseRate.rate,
+        lastUpdated: inverseRate.lastUpdated,
+      );
+    }
+
+    return null;
+  }
+
+  /// Vérifie si une devise spécifique a des taux disponibles
+  bool isCurrencyAvailable(String currencyCode) {
+    final accountCurrencies = _smartExchangeRateService?.getAccountCurrencies() ?? [];
+
+    for (final accountCurrency in accountCurrencies) {
+      if (accountCurrency == currencyCode) continue;
+
+      final rate = getExchangeRateForCurrency(accountCurrency, currencyCode);
+      if (rate != null && rate.isValid) return true;
+    }
+
+    return false;
+  }
+
+  /// Retry pour une devise spécifique (appelé par bouton "Réessayer" dans UI)
+  /// Version améliorée avec feedback d'état
+  @override
+  Future<void> retryMissingCurrencyRate(String currency) async {
+    if (_smartExchangeRateService == null) return;
+
+    try {
+      // Marquer comme en cours de chargement
+      final newLoadingStates = Map<String, bool>.from(state.currencyLoadingStates);
+      newLoadingStates[currency] = true;
+
+      state = state.copyWith(currencyLoadingStates: newLoadingStates);
+
+      // Tenter la mise à jour via le service
+      final result = await _smartExchangeRateService!.ensureCurrencyAvailable(currency);
+
+      // Mettre à jour l'état selon le résultat
+      final finalLoadingStates = Map<String, bool>.from(state.currencyLoadingStates);
+      final finalErrors = Map<String, String?>.from(state.currencyErrors);
+
+      finalLoadingStates[currency] = false;
+
+      if (result.success) {
+        finalErrors.remove(currency);
+        print('✅ Currency $currency rates updated successfully');
+      } else {
+        finalErrors[currency] = result.error ?? 'Échec de mise à jour';
+        print('❌ Failed to update currency $currency: ${result.error}');
+      }
+
+      state = state.copyWith(
+        currencyLoadingStates: finalLoadingStates,
+        currencyErrors: finalErrors,
+      );
+
+      // Mettre à jour le status global
+      _updateExchangeRatesStatus();
+
+    } catch (e) {
+      print('❌ Error in retryMissingCurrencyRate for $currency: $e');
+
+      // Marquer l'erreur
+      final finalLoadingStates = Map<String, bool>.from(state.currencyLoadingStates);
+      final finalErrors = Map<String, String?>.from(state.currencyErrors);
+
+      finalLoadingStates[currency] = false;
+      finalErrors[currency] = e.toString();
+
+      state = state.copyWith(
+        currencyLoadingStates: finalLoadingStates,
+        currencyErrors: finalErrors,
+      );
+    }
+  }
+}
+```
+
+**Modifier `_subscribeToExchangeRates()` pour appeler `_updateExchangeRatesStatus()`** :
+
+```dart
+void _subscribeToExchangeRates() {
+  print('🎧 CurrencyViewModel subscribing to exchange rates stream');
+  _conversionService.exchangeRatesStream.listen((ratesMap) {
+    print('📨 CurrencyViewModel received stream with ${ratesMap.length} rates');
+
+    final ratesList = ratesMap.values.toList();
+
+    state = state.copyWith(
+      items: ratesList,
+      filteredItems: ratesList,
+    );
+
+    // ✅ NOUVEAU : Analyser et mettre à jour le status
+    _updateExchangeRatesStatus();
+
+    print('✅ CurrencyViewModel.state updated with ${state.totalExchangeRates} rates');
+  });
+
+  // Initialisation synchrone
+  final currentRatesMap = _conversionService.getAllExchangeRates();
+  final currentRatesList = currentRatesMap.values.toList();
+
+  state = state.copyWith(
+    items: currentRatesList,
+    filteredItems: currentRatesList,
+  );
+
+  // ✅ NOUVEAU : Analyser status initial
+  _updateExchangeRatesStatus();
+
+  print('✅ CurrencyViewModel initialized with ${state.totalExchangeRates} rates');
+}
+```
+
+**Mettre à jour le provider** :
+
+**Fichier** : `lib/presentation/providers/viewmodel_providers.dart`
+
+```dart
+final currencyViewModelProvider =
+    StateNotifierProvider<CurrencyViewModel, CurrencyViewState>((ref) {
+  final conversionService = ref.watch(currencyConversionServiceProvider);
+  final smartExchangeRateService = ref.watch(smartExchangeRateServiceProvider);
+
+  return CurrencyViewModel(
+    conversionService,
+    smartExchangeRateService,  // ✅ Nouveau paramètre
+  );
+});
+```
+
+**Tests unitaires** :
+
+```dart
+// test/viewmodels/currency_view_model_test.dart
+group('Exchange Rates Status Management', () {
+  test('should update status to partial when rates missing', () {
+    // Setup: Cache vide
+    when(mockSmartService.analyzeAccountCurrenciesStatus())
+        .thenReturn(ExchangeRateAnalysis(
+          analyzedCurrencies: {'USD', 'EUR'},
+          missingCurrencies: {'EUR'},
+          expiredCurrencies: {},
+          availableCurrencies: {'USD'},
+          hasExpiredRates: false,
+          isComplete: false,
+          totalRatesCount: 1,
+          validRatesCount: 1,
+          expiredRatesCount: 0,
+        ));
+
+    viewModel._updateExchangeRatesStatus();
+
+    expect(viewModel.state.exchangeRatesStatus, ExchangeRatesStatus.partial);
+    expect(viewModel.state.missingCurrencies, {'EUR'});
+  });
+
+  test('getExchangeRateForCurrency should return inverse rate', () {
+    final inverseRate = ExchangeRate.withDefaultExpiration(
+      fromCurrency: 'EUR',
+      toCurrency: 'USD',
+      rate: 1.18,
+    );
+
+    when(mockConversionService.getExchangeRate('USD', 'EUR'))
+        .thenReturn(null);
+    when(mockConversionService.getExchangeRate('EUR', 'USD'))
+        .thenReturn(inverseRate);
+
+    final rate = viewModel.getExchangeRateForCurrency('USD', 'EUR');
+
+    expect(rate, isNotNull);
+    expect(rate!.rate, closeTo(1.0 / 1.18, 0.01));
+  });
+});
+```
+
+**Exécuter les tests** :
+```bash
+flutter test test/viewmodels/currency_view_model_test.dart
+```
+
+---
+
+#### [ ] 4bis.5 - Refactorer `ExchangeRatesBottomSheet`
+
+**Objectif** : Déplacer toute la logique métier du Widget vers le ViewModel
+
+**Fichier** : `lib/presentation/widgets/bottom_sheets/exchange_rates_bottom_sheet.dart`
+
+**Supprimer les méthodes métier du Widget** :
+- `_getExchangeRate()` → Remplacer par `viewModel.getExchangeRateForCurrency()`
+- Calcul de `availableCurrencies` → Déléguer au ViewModel
+- Logique de filtrage → Utiliser `currencyState` directement
+
+**Nouvelle structure simplifiée** :
+
+```dart
+class _ExchangeRatesBottomSheetState extends ConsumerState<ExchangeRatesBottomSheet> {
+  @override
+  Widget build(BuildContext context) {
+    final appTheme = Theme.of(context).extension<AppColorsExtended>()!;
+    final l10n = AppLocalizations.of(context)!;
+    final currencyState = ref.watch(currencyViewModelProvider);
+    final viewModel = ref.read(currencyViewModelProvider.notifier);
+
+    return Container(
+      // ... design inchangé ...
+      child: Column(
+        children: [
+          // Handle bar, Header (inchangés)
+
+          // Option devise du compte (inchangée)
+
+          // Liste des devises - LOGIQUE DÉLÉGUÉE AU VIEWMODEL
+          Flexible(
+            child: _buildCurrencyListFromState(
+              appTheme,
+              l10n,
+              currencyState,
+              viewModel,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCurrencyListFromState(
+    AppColorsExtended appTheme,
+    AppLocalizations l10n,
+    CurrencyViewState currencyState,
+    CurrencyViewModel viewModel,
+  ) {
+    // ✅ AMÉLIORÉ : Utiliser le status pour afficher le bon widget
+    switch (currencyState.exchangeRatesStatus) {
+      case ExchangeRatesStatus.unavailable:
+        return _buildEmptyCacheState(appTheme, l10n);
+
+      case ExchangeRatesStatus.loading:
+        return _buildLoadingState(appTheme, l10n);
+
+      default:
+        return _buildCurrencyList(appTheme, l10n, currencyState, viewModel);
+    }
+  }
+
+  Widget _buildCurrencyList(
+    AppColorsExtended appTheme,
+    AppLocalizations l10n,
+    CurrencyViewState currencyState,
+    CurrencyViewModel viewModel,
+  ) {
+    // ✅ SIMPLIFIÉ : Liste des devises (exclure devise de base)
+    final availableCurrencies = SupportedCurrencies.all
+        .where((currency) => currency.code != widget.baseCurrency)
+        .toList();
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.only(
+        left: AppConstants.defaultPadding.w,
+        right: AppConstants.defaultPadding.w,
+        bottom: AppConstants.veryLargePadding.h,
+      ),
+      itemCount: availableCurrencies.length,
+      itemBuilder: (context, index) {
+        final currency = availableCurrencies[index];
+
+        // ✅ DÉLÉGUÉ AU VIEWMODEL : Récupérer les données
+        final isLoading = currencyState.isCurrencyLoading(currency.code);
+        final hasError = currencyState.hasCurrencyError(currency.code);
+        final exchangeRate = viewModel.getExchangeRateForCurrency(
+          widget.baseCurrency,
+          currency.code,
+        );
+
+        // UI conditionnelle selon l'état
+        if (isLoading) {
+          return _buildLoadingCurrencyItem(currency, appTheme, l10n);
+        }
+
+        if (hasError || exchangeRate == null) {
+          return _buildErrorCurrencyItem(currency, appTheme, l10n, viewModel);
+        }
+
+        return _buildCurrencyItem(
+          currencyCode: currency.code,
+          isAccountCurrency: false,
+          exchangeRate: exchangeRate.rate,
+          isExpired: exchangeRate.isExpired,  // ✅ NOUVEAU : Indicateur visuel
+          appTheme: appTheme,
+          l10n: l10n,
+        );
+      },
+    );
+  }
+
+  // ✅ AMÉLIORÉ : Afficher indicateur si expiré
+  Widget _buildCurrencyItem({
+    required String currencyCode,
+    required bool isAccountCurrency,
+    required double exchangeRate,
+    bool isExpired = false,  // Nouveau paramètre
+    required AppColorsExtended appTheme,
+    required AppLocalizations l10n,
+  }) {
+    final currency = SupportedCurrencies.all.firstWhere(
+      (c) => c.code == currencyCode,
+      orElse: () => SupportedCurrencies.eur,
+    );
+
+    final isSelected = currencyCode == widget.selectedCurrency;
+
+    return InkWell(
+      onTap: () {
+        widget.onCurrencySelected(currencyCode);
+        Navigator.of(context).pop();
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppConstants.defaultPadding.w,
+          vertical: AppConstants.defaultPadding.h,
+        ),
+        margin: EdgeInsets.only(bottom: AppConstants.smallPadding.h),
+        // ✅ NOUVEAU : Bordure orange si expiré
+        decoration: isExpired
+            ? BoxDecoration(
+                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                borderRadius: BorderRadius.circular(8.r),
+              )
+            : null,
+        child: Row(
+          children: [
+            // Symbole devise (inchangé)
+            ClipPath(/* ... */),
+
+            SizedBox(width: AppConstants.largePadding.w),
+
+            // Informations devise
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Nom devise (inchangé)
+                  Text(/* ... */),
+
+                  SizedBox(height: 4.h),
+
+                  // Taux + indicateur expiré
+                  Row(
+                    children: [
+                      Text(
+                        isAccountCurrency
+                            ? l10n.accountCurrency.toUpperCase()
+                            : '1 ${widget.baseCurrency} = ${AppFormatters.formatAmount(exchangeRate, currencyCode, showSign: false, context: context)}',
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          color: isExpired ? Colors.orange : appTheme.text4,
+                        ),
+                      ),
+                      // ✅ NOUVEAU : Badge "Expiré" si besoin
+                      if (isExpired) ...[
+                        SizedBox(width: 8.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6.w,
+                            vertical: 2.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
+                          child: Text(
+                            'Expiré',
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              color: Colors.orange,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(width: AppConstants.largePadding.w),
+
+            // Indicateur sélection (inchangé)
+            Container(/* ... */),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorCurrencyItem(
+    Currency currency,
+    AppColorsExtended appTheme,
+    AppLocalizations l10n,
+    CurrencyViewModel viewModel,  // ✅ Recevoir le ViewModel
+  ) {
+    return Container(
+      // ... design inchangé ...
+      child: Row(
+        children: [
+          // Icône, nom (inchangés)
+
+          // ✅ MODIFIÉ : Bouton retry appelle le ViewModel
+          InkWell(
+            onTap: () {
+              viewModel.retryMissingCurrencyRate(currency.code);
+            },
+            child: Container(/* ... */),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Supprimer complètement _getExchangeRate() - plus nécessaire !
+}
+```
+
+**Tests d'intégration UI** :
+
+```dart
+// test/widgets/exchange_rates_bottom_sheet_test.dart
+void main() {
+  group('ExchangeRatesBottomSheet', () {
+    testWidgets('should display currencies from ViewModel', (tester) async {
+      // Setup mock state
+      when(mockCurrencyViewModel.state).thenReturn(
+        CurrencyViewState(
+          items: [mockExchangeRate],
+          exchangeRatesStatus: ExchangeRatesStatus.available,
+        ),
+      );
+
+      await tester.pumpWidget(createTestWidget());
+
+      expect(find.text('EUR'), findsOneWidget);
+      expect(find.text('Expiré'), findsNothing);
+    });
+
+    testWidgets('should show expired badge when rate is expired', (tester) async {
+      final expiredRate = ExchangeRate(
+        fromCurrency: 'USD',
+        toCurrency: 'EUR',
+        rate: 0.85,
+        lastUpdated: DateTime.now().subtract(Duration(hours: 2)),
+      );
+
+      when(mockCurrencyViewModel.getExchangeRateForCurrency('USD', 'EUR'))
+          .thenReturn(expiredRate);
+
+      await tester.pumpWidget(createTestWidget());
+
+      expect(find.text('Expiré'), findsOneWidget);
+    });
+
+    testWidgets('should call viewModel retry on button tap', (tester) async {
+      when(mockCurrencyViewModel.state).thenReturn(
+        CurrencyViewState(
+          exchangeRatesStatus: ExchangeRatesStatus.partial,
+          currencyErrors: {'EUR': 'No rate'},
+        ),
+      );
+
+      await tester.pumpWidget(createTestWidget());
+      await tester.tap(find.text(l10n.retry));
+
+      verify(mockCurrencyViewModel.retryMissingCurrencyRate('EUR')).called(1);
+    });
+  });
+}
+```
+
+**Exécuter les tests** :
+```bash
+flutter test test/widgets/exchange_rates_bottom_sheet_test.dart
+```
+
+---
+
+#### [ ] 4bis.6 - Tests d'intégration complets Phase 4bis
+
+**Tests manuels** :
+
+1. **Scénario : Cache vide (premier lancement)** :
+   - Désinstaller l'app
+   - Relancer → `exchangeRatesStatus` devrait être `unavailable` puis `available`
+   - Vérifier widget "Aucun taux disponible" puis liste normale
+
+2. **Scénario : Taux expirés** :
+   - Modifier temporairement `ExchangeRate.expirationDuration` à 1 seconde
+   - Attendre expiration → `exchangeRatesStatus` devrait passer à `expired`
+   - Vérifier badges "Expiré" affichés
+
+3. **Scénario : Devise manquante** :
+   - Créer un compte avec devise rare (ex: JPY)
+   - Si taux manquants → `exchangeRatesStatus` = `partial`
+   - Vérifier bouton "Réessayer" fonctionne
+
+4. **Scénario : Retry réussi** :
+   - Cliquer "Réessayer" sur une devise
+   - Vérifier spinner puis disparition de l'erreur
+   - `exchangeRatesStatus` devrait passer à `available`
+
+**Commandes de test** :
+
+```bash
+# Tests unitaires complets
+flutter test test/viewmodels/currency_view_model_test.dart
+flutter test test/services/smart_exchange_rate_service_test.dart
+flutter test test/data/cache/cache_manager_test.dart
+
+# Tests d'intégration
+flutter test test/widgets/exchange_rates_bottom_sheet_test.dart
+
+# Analyse statique
+flutter analyze
+```
+
+**Critères de succès** :
+- ✅ Tous les tests unitaires passent
+- ✅ Aucune erreur `flutter analyze`
+- ✅ Les 4 scénarios manuels fonctionnent
+- ✅ Pas de régression dans les features existantes
+
+---
+
+#### [ ] 4bis.7 - Documentation et cleanup
+
+**Mettre à jour `_README.md`** :
+
+```markdown
+## Phase 4bis : Architecture Exchange Rates Avancée (✅ Completed)
+
+### Améliorations apportées
+
+1. **ExchangeRatesStatus enum** : État granulaire pour UI conditionnelle
+   - `available` : Tous les taux valides
+   - `expired` : Taux disponibles mais expirés
+   - `partial` : Certains taux manquants
+   - `unavailable` : Aucun taux
+
+2. **Analyse centralisée** : `SmartExchangeRateService.analyzeExchangeRateStatus()`
+   - Génère `ExchangeRateAnalysis` avec statistiques détaillées
+   - Détermine automatiquement le `ExchangeRatesStatus`
+
+3. **Pattern cohérent** : `Repository → CacheManager.addExchangeRates()`
+   - Aligné avec `addTransaction`, `addAccount`, etc.
+   - Suppression de `reloadExchangeRatesFromDatabase()` et `getAllRatesFromDatabase()`
+
+4. **UI propre** : Logique métier déplacée dans `CurrencyViewModel`
+   - `getExchangeRateForCurrency()` : Gère taux directs et inverses
+   - `retryMissingCurrencyRate()` : Retry avec feedback d'état
+   - Widget purement déclaratif
+
+### Architecture finale
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ ExchangeRatesBottomSheet (UI)                           │
+│  ↓                                                       │
+│ CurrencyViewModel (Business Logic)                      │
+│  ├─ exchangeRatesStatus: ExchangeRatesStatus            │
+│  ├─ getExchangeRateForCurrency()                        │
+│  └─ retryMissingCurrencyRate()                          │
+│  ↓                                                       │
+│ SmartExchangeRateService (Orchestration)               │
+│  ├─ analyzeExchangeRateStatus()                         │
+│  └─ ensureRatesAvailable()                              │
+│  ↓                                                       │
+│ ExchangeRateRepository                                  │
+│  └─ updateExchangeRates() → CacheManager.addExchangeRates()│
+└─────────────────────────────────────────────────────────┘
+```
+
+### Tests
+
+- ✅ Tests unitaires : 15+ nouveaux tests
+- ✅ Tests d'intégration UI : 5 scénarios
+- ✅ Tests manuels : 4 scénarios critiques
+```
+
+**Supprimer code deprecated** :
+
+1. Dans `cache_manager.dart` : Méthode `updateExchangeRates()` marquée `@Deprecated`
+2. Dans `exchange_rate_repository.dart` : Méthodes obsolètes
+
+**Flutter analyze final** :
+
+```bash
+flutter analyze
+```
+
+---
+
+### 🎯 Récapitulatif Phase 4bis
+
+#### Fichiers modifiés
+
+1. ✅ `lib/presentation/viewmodels/shared/currency_view_model.dart`
+   - Ajout `ExchangeRatesStatus` enum
+   - Nouveaux champs dans `CurrencyViewState`
+   - Méthodes `_updateExchangeRatesStatus()`, `getExchangeRateForCurrency()`, etc.
+
+2. ✅ `lib/core/services/smart_exchange_rate_service.dart`
+   - Classe `ExchangeRateAnalysis`
+   - Méthode `analyzeExchangeRateStatus()`
+
+3. ✅ `lib/data/cache/cache_manager.dart`
+   - Méthode `addExchangeRates()`
+   - Méthode `addExchangeRate()`
+   - Suppression méthodes obsolètes
+
+4. ✅ `lib/data/repositories/exchange_rate_repository_impl.dart`
+   - Modification `updateExchangeRates()` pour utiliser `addExchangeRates()`
+   - Suppression appels à `reloadExchangeRatesFromDatabase()`
+
+5. ✅ `lib/domain/repositories/exchange_rate_repository.dart`
+   - Suppression `getAllRatesFromDatabase()`
+
+6. ✅ `lib/presentation/widgets/bottom_sheets/exchange_rates_bottom_sheet.dart`
+   - Refactoring complet : logique → ViewModel
+   - Suppression `_getExchangeRate()`
+   - Widgets conditionnels selon `ExchangeRatesStatus`
+
+7. ✅ `lib/presentation/providers/viewmodel_providers.dart`
+   - Ajout `smartExchangeRateService` au `CurrencyViewModel`
+
+#### Tests ajoutés
+
+- `test/viewmodels/currency_view_model_test.dart` : +8 tests
+- `test/services/smart_exchange_rate_service_test.dart` : +5 tests
+- `test/data/cache/cache_manager_test.dart` : +3 tests
+- `test/widgets/exchange_rates_bottom_sheet_test.dart` : +4 tests
+
+#### Métriques de succès
+
+- ✅ Pattern cohérent avec Transactions/Accounts/Categories
+- ✅ UI conditionnelle selon `ExchangeRatesStatus`
+- ✅ Logique métier centralisée dans ViewModel
+- ✅ Code testable et maintenable
+- ✅ Aucune régression fonctionnelle
 
 ---
 
@@ -844,7 +2090,7 @@ abstract class RemoteTransactionDataSource {
 }
 ```
 
-#### [ ] 7.2 - Implémenter TursoDataSource
+#### [ ] 7.2 - Implémenter TursoDataSource : plus tard (attendre implémentation Turso)
 
 **Fichier** : `lib/data/datasources/remote/turso_datasource.dart`
 
@@ -882,7 +2128,7 @@ class TursoTransactionDataSource implements RemoteTransactionDataSource {
 }
 ```
 
-#### [ ] 7.3 - Créer SmartSyncService
+#### [ ] 7.3 - Créer SmartSyncService : plus tard (attendre implémentation Turso)
 
 **Fichier** : `lib/core/services/smart_sync_service.dart`
 
@@ -935,7 +2181,7 @@ class SmartSyncService {
 }
 ```
 
-#### [ ] 7.4 - Tests d'intégration Turso
+#### [ ] 7.4 - Tests d'intégration Turso : plus tard (attendre implémentation Turso)
 
 **Tests manuels** :
 - [ ] Créer transaction sur Device 1 → apparaét sur Device 2
@@ -967,7 +2213,7 @@ class SmartSyncService {
 - [ ]  Méme pattern que CurrencyViewModel
 - [ ]  Réactivité automatique create/update/delete
 
-### Phase 7 : Infrastructure Turso
+### Phase 7 : Infrastructure Turso : plus tard (attendre implémentation Turso)
 
 - [ ]  RemoteDataSource interface définie
 - [ ]  TursoDataSource implémenté
