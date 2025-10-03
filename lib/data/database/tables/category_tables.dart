@@ -1,11 +1,3 @@
-import 'package:drift/drift.dart';
-
-/// Table des catégories avec support hiérarchique
-class Categories extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get label => text()();
-  IntColumn get level => integer()();
-  IntColumn get parentId => integer().nullable().references(Categories, #id)();
-  TextColumn get icon => text().nullable()(); // Nom d'icône ou chemin SVG
-  TextColumn get iconColor => text().nullable()(); // Couleur HEX "#FF5733"
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:92ddb6b0ffdf75cfa2f8205a022968939a03adb73d85b1734ccd0e7ab3af49f7
+size 490

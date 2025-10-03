@@ -1,26 +1,3 @@
-/// Test simple du résolveur de chemins
-import 'icon_generator/path_resolver.dart';
-
-void main() {
-  print('🧪 Test du résolveur de chemins Windows\n');
-  
-  // Afficher l'environnement
-  PubCachePathResolver.printEnvironmentInfo();
-  
-  print('\n🔍 Recherche d\'icons_plus...');
-  
-  // Tester la recherche
-  final iconsPlusPath = PubCachePathResolver.findLatestIconsPlusVersion();
-  
-  if (iconsPlusPath != null) {
-    print('\n✅ SUCCESS: icons_plus trouvé!');
-    print('📍 Chemin: $iconsPlusPath');
-    
-    // Valider le package
-    final isValid = PubCachePathResolver.validateIconsPlusPath(iconsPlusPath);
-    print('🔍 Validation: ${isValid ? 'VALIDE ✅' : 'INVALIDE ❌'}');
-  } else {
-    print('\n❌ FAILURE: icons_plus non trouvé');
-    print('💡 Assurez-vous que icons_plus est installé avec: dart pub add icons_plus');
-  }
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:00b7005e8fdec505234d95fa5c0a703641e5f0164ae1b337ad7e46dcbbc5e337
+size 892

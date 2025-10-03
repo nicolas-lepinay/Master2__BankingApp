@@ -1,7 +1,3 @@
-// Data repositories implementations barrel file
-export 'account_repository_impl.dart';
-export 'category_repository_impl.dart';
-export 'counterparty_repository_impl.dart';
-export 'exchange_rate_repository_impl.dart';
-export 'image_download_repository_impl.dart';
-export 'transaction_repository_impl.dart';
+version https://git-lfs.github.com/spec/v1
+oid sha256:8689dc3527c61827fd2e7639fea421426f4e9ec5375def5cfa58205267719ab4
+size 313

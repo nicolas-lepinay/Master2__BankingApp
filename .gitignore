@@ -57,6 +57,9 @@ app.*.map.json
 # Claude README
 _README.md
 CLAUDE.md
-INSTRUCTIONS.md
-ICONS_ARCHITECTURE.md
-ICONS_CONVERSATION.md
+/prompts
+CONVERSATION.md
+
+# Windows reserved filenames
+nul
+NUL

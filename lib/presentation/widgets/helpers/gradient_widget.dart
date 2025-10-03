@@ -1,21 +1,3 @@
-import 'package:flutter/material.dart';
-
-class GradientWidget extends StatelessWidget {
-  const GradientWidget({super.key, required this.child, this.gradient});
-
-  final Widget child;
-  final Gradient? gradient;
-
-  @override
-  Widget build(BuildContext context) {
-    return gradient != null
-        ? ShaderMask(
-            blendMode: BlendMode.srcIn,
-            shaderCallback: (bounds) => gradient!.createShader(
-              Rect.fromLTWH(0, 0, bounds.width, bounds.height),
-            ),
-            child: child,
-          )
-        : child;
-  }
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:fb12f866a88a6e6afbb15a8b3d57e865f1e90e5bce0898910283c7070408eccf
+size 579

@@ -1,7 +1,3 @@
-// Local datasources barrel file
-export 'account_local_datasource.dart';
-export 'category_local_datasource.dart';
-export 'counterparty_local_datasource.dart';
-export 'exchange_rate_local_datasource.dart';
-export 'local_datasource.dart';
-export 'transaction_local_datasource.dart';
+version https://git-lfs.github.com/spec/v1
+oid sha256:61901f2869e1266253dad48ae2d6700c7ffebbf2f20866c5256c11069ad05c1d
+size 288
