@@ -25,7 +25,7 @@
 
   "@_CALLS_TO_ACTION": {},
       "addAccount": "Ajouter un compte",
-      "save": "Sauvegarder",
+      "save": "Enregistrer",
       "cancel": "Annuler",
       "addTransaction": "Ajouter une transaction",
       "close": "Fermer",
