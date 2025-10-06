@@ -66,8 +66,10 @@ flutter:
   # Assets
   assets:
     - assets/icons/system/
+    - assets/icons/flags/
     - assets/animations/gif/
     - assets/animations/rive/
+    - assets/animations/lottie/
     - .env
   # Custom fonts
   fonts:
