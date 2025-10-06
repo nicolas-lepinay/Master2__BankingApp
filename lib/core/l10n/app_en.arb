@@ -97,7 +97,7 @@
       "noIconSelectedForColor": "No icon selected",
       "selectIconFirstInstruction": "Please select an icon first to choose a color",
       "automaticTranslation": "Automatic translation",
-      "automaticTranslationDescription": "Icon names are in English. Would you like to automatically translate searches to English?",
+      "automaticTranslationDescription": "Icon must be searched in English. Would you like to automatically translate your search keywords to English?",
 
   "@_CURRENCIES": {},
       "euroCurrencyName": "Euro",
