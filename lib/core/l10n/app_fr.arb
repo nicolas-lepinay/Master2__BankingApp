@@ -31,6 +31,8 @@
       "close": "Fermer",
       "retry": "Réessayer",
       "validateTransaction": "Valider la transaction",
+      "yes": "Oui",
+      "no": "Non",
 
   "@_DATES": {},
       "date": "Date",
@@ -89,11 +91,13 @@
       "categoryName": "Nom de la catégorie",
       "createCategory": "Créer la catégorie",
       "findIcon": "Chercher une icône",
-      "noResult": "Aucun résultat",
+      "noResult": "Hmm... Aucun résultat.",
       "iconColor": "Couleur de l'icône",
       "clearSelection": "Supprimer la sélection",
       "noIconSelectedForColor": "Aucune icône sélectionnée",
       "selectIconFirstInstruction": "Veuillez d'abord sélectionner une icône pour choisir une couleur",
+      "automaticTranslation": "Traduction automatique",
+      "automaticTranslationDescription": "Les icônes doivent être recherchées en anglais. Voulez-vous traduire automatiquement votre recherche en anglais pour vous aider ?",
 
   "@_CURRENCIES": {},
       "euroCurrencyName": "Euro",

@@ -50,6 +50,7 @@ dependencies:
   flutter_dotenv: ^5.2.1
   translator: ^1.0.4+1
   toastification: ^3.0.3
+  lottie: ^3.3.2
 
 dev_dependencies:
   flutter_test:
