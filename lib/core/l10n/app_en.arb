@@ -89,6 +89,7 @@
       "categoryName": "Category name",
       "createCategory": "Create category",
       "findIcon": "Find an icon",
+      "noResult": "No results",
       "iconColor": "Icon color",
       "clearSelection": "Clear selection",
       "noIconSelectedForColor": "No icon selected",

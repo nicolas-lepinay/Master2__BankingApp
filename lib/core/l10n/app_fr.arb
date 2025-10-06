@@ -89,6 +89,7 @@
       "categoryName": "Nom de la catégorie",
       "createCategory": "Créer la catégorie",
       "findIcon": "Chercher une icône",
+      "noResult": "Aucun résultat",
       "iconColor": "Couleur de l'icône",
       "clearSelection": "Supprimer la sélection",
       "noIconSelectedForColor": "Aucune icône sélectionnée",
