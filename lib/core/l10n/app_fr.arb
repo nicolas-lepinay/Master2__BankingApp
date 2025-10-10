@@ -33,6 +33,7 @@
       "validateTransaction": "Valider la transaction",
       "yes": "Oui",
       "no": "Non",
+      "noThanks": "Non, merci",
 
   "@_DATES": {},
       "date": "Date",
@@ -93,6 +94,7 @@
       "findIcon": "Chercher une icône",
       "noResult": "Hmm... Aucun résultat.",
       "iconColor": "Couleur de l'icône",
+      "clearColor": "Effacer la couleur",
       "clearSelection": "Supprimer la sélection",
       "noIconSelectedForColor": "Aucune icône sélectionnée",
       "selectIconFirstInstruction": "Veuillez d'abord sélectionner une icône pour choisir une couleur",

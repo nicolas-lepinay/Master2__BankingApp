@@ -33,6 +33,7 @@
       "validateTransaction": "Confirm transaction",
       "yes": "Yes",
       "no": "No",
+      "noThanks": "No, thanks",
 
   "@_DATES": {},
       "date": "Date",
@@ -93,6 +94,7 @@
       "findIcon": "Find an icon",
       "noResult": "Hmm.. No results found.",
       "iconColor": "Icon color",
+      "clearColor": "Clear color",
       "clearSelection": "Clear selection",
       "noIconSelectedForColor": "No icon selected",
       "selectIconFirstInstruction": "Please select an icon first to choose a color",
