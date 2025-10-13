@@ -10,7 +10,7 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  exclude: [build/**, lib/core/icons/segmented_icons_registry_data.dart]
+  exclude: [build/**, lib\core\icons\icon_mapping.dart]
 
 linter:
   # The lint rules applied to this project can be customized in the
