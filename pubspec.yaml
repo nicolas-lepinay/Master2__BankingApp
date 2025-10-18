@@ -193,3 +193,38 @@ flutter:
           weight: 200
         - asset: assets/fonts/Roboto-ThinItalic.ttf
           weight: 100
+
+    - family: Paralucent
+      fonts:
+        # Regular
+        - asset: assets/fonts/Paralucent_Heavy.otf
+          weight: 900
+        - asset: assets/fonts/Paralucent_Bold.otf
+          weight: 700
+        - asset: assets/fonts/Paralucent_Demi_Bold.otf
+          weight: 500
+        - asset: assets/fonts/Paralucent_Light.otf
+          weight: 300
+        - asset: assets/fonts/Paralucent_Extra_Light.otf
+          weight: 200
+        - asset: assets/fonts/Paralucent_Thin.otf
+          weight: 100
+        # Italic
+        - asset: assets/fonts/Paralucent_Heavy.otf
+          weight: 900
+          style: italic
+        - asset: assets/fonts/Paralucent_Bold.otf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/Paralucent_Demi_Bold.otf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/Paralucent_Light.otf
+          weight: 300
+          style: italic
+        - asset: assets/fonts/Paralucent_Extra_Light.otf
+          weight: 200
+          style: italic
+        - asset: assets/fonts/Paralucent_Thin.otf
+          weight: 100
+          style: italic
