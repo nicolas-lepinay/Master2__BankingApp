@@ -26,14 +26,25 @@
   "@_CALLS_TO_ACTION": {},
       "addAccount": "Ajouter un compte",
       "save": "Enregistrer",
+      "confirm": "Confirmer",
       "cancel": "Annuler",
       "addTransaction": "Ajouter une transaction",
       "close": "Fermer",
       "retry": "Réessayer",
       "validateTransaction": "Valider la transaction",
+      "continueLabel": "Continuer",
       "yes": "Oui",
       "no": "Non",
       "noThanks": "Non, merci",
+      "@_FUNKY_YES": {},
+          "automagic": "Automagique !",
+          "yess": "Ouiii !",
+          "letsGo": "C'est parti !",
+      "@_FUNKY_NO": {},
+          "nope": "Non merci (mais merci)",
+          "notNow": "Pas pour l'instant",
+          "maybeLater": "Plus tard, peut-être",
+      "longPressToModifySeries": "Rester appuyé pour modifier la série",
 
   "@_DATES": {},
       "date": "Date",
@@ -80,10 +91,10 @@
   "@_CATEGORIES": {},
       "expenses": "Dépenses",
       "incomes": "Revenus",
-      "fixedExpenses": "Dépenses fixes",
-      "variableExpenses": "Dépenses variables",
-      "fixedIncomes": "Revenus fixes",
-      "variableIncomes": "Revenus variables",
+      "fixedExpenses": "Factures & Abonnements",
+      "variableExpenses": "Dépenses quotidiennes",
+      "fixedIncomes": "Revenus réguliers",
+      "variableIncomes": "Revenus exceptionnels",
       "category": "Rubrique",
       "newCategory": "Nouvelle rubrique",
       "addCategory": "Ajouter une rubrique",
@@ -100,6 +111,67 @@
       "selectIconFirstInstruction": "Veuillez d'abord sélectionner une icône pour choisir une couleur",
       "automaticTranslation": "Traduction automatique",
       "automaticTranslationDescription": "Les icônes doivent être recherchées en anglais. Voulez-vous traduire automatiquement votre recherche en anglais pour vous aider ?",
+
+  "@_SERIES": {},
+      "@_MAIN_SCREEN": {},
+          "repeat": "Répétition",
+          "repeatExpense": "Programme ta dépense pour qu'elle se répète automatiquement",
+          "repeatIncome": "Programme ce revenu pour qu'il se répète automatiquement",
+
+      "@_NAME_SELECTION": {},
+          "newSeries": "Nouvelle série",
+          "repeatTransaction": "La transaction se répètera automatiquement",
+
+      "@_FREQUENCY_SELECTION": {},
+          "frequencyPrompt": "Se répète tous les...",
+          "frequencyPromptDescription": "Toutes les 2 semaines, tous les mois...",
+
+      "@_END_DATE_SELECTION": {},
+          "untilPrompt": "Jusqu'à quand ?",
+          "untilPromptDescription": "Jusqu'au 31 décembre, après 4 répétitions...",
+
+      "@_END_DATE_OPTIONS": {},
+          "indefinite": "Toujours",
+          "untilEndDate": "Jusqu'à une date de fin",
+          "endDate": "Date de fin",
+          "afterRepetitions": "Après plusieurs répétitions",
+          "numberOfRepetitions": "Combien de fois ?",
+
+      "@_APPEARANCE_DELAY_SELECTION": {},
+          "appearanceDelayPrompt": "Afficher à l'avance",
+          "appearanceDelayPromptDescription": "7 jours avant l'échéance, 1 jour avant...",
+
+      "oneDayBefore": "1 jour avant",
+      "daysBeforeCount": "{count} jours avant",
+      "@daysBeforeCount": {
+        "placeholders": {
+          "count": {
+            "type": "int"
+          }
+        }
+      },
+      "repetitionsCount": "{count} répétitions",
+      "@repetitionsCount": {
+        "placeholders": {
+          "count": {
+            "type": "int"
+          }
+        }
+      },
+      "oneRepetition": "1 répétition",
+      "selectEndDate": "Sélectionner la date de fin",
+      "selectOccurrences": "Nombre de répétitions",
+      "occurrencesHint": "Nombre de fois que la transaction se répétera",
+
+  "@_FREQUENCY_UNITS": {},
+      "day": "jour",
+      "week": "semaine",
+      "month": "mois",
+      "year": "année",
+      "days": "jours",
+      "weeks": "semaines",
+      "months": "mois",
+      "years": "années",
 
   "@_CURRENCIES": {},
       "euroCurrencyName": "Euro",
@@ -215,21 +287,15 @@
       "enableRecurrence": "Activer la récurrence",
       "enableRecurrenceHint": "Créer une série de transactions récurrentes",
       "seriesName": "Nom de la série",
-      "seriesNameHint": "ex: Abonnement Netflix",
+      "seriesNameHint": "Mon abonnement",
       "startDate": "Date de début",
       "frequency": "Tous les",
       "frequencyUnit": "Unité",
-      "days": "Jours",
-      "weeks": "Semaines",
-      "months": "Mois",
-      "years": "Années",
       "seriesEndType": "Fin de la série",
-      "indefinite": "Indéfini",
       "indefiniteHint": "Cette série continuera indéfiniment",
       "byOccurrences": "Après un nombre d'occurrences",
       "numberOfOccurrences": "Nombre d'occurrences",
       "byEndDate": "À une date spécifique",
-      "endDate": "Date de fin",
       "appearanceDaysAhead": "Délai d'apparition",
       "appearanceDaysAheadHint": "Nombre de jours avant la date d'échéance",
       "appearanceDaysAheadMaxHelper": "Maximum 60 jours (limite technique de pré-génération)",

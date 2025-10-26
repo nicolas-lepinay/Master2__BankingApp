@@ -26,14 +26,25 @@
   "@_CALLS_TO_ACTION": {},
       "addAccount": "Add a new account",
       "save": "Save",
+      "confirm": "Confirm",
       "cancel": "Cancel",
       "addTransaction": "Add a transaction",
       "close": "Close",
       "retry": "Try again",
       "validateTransaction": "Confirm transaction",
+      "continueLabel": "Continue",
       "yes": "Yes",
       "no": "No",
       "noThanks": "No, thanks",
+      "@_FUNKY_YES": {},
+          "automagic": "Auto-magic!",
+          "yess": "Yesss !",
+          "letsGo": "Let's go!",
+      "@_FUNKY_NO": {},
+          "nope": "Nope",
+          "notNow": "Not now (but thanks)",
+          "maybeLater": "Maybe later",
+      "longPressToModifySeries": "Long press to edit series",
 
   "@_DATES": {},
       "date": "Date",
@@ -47,7 +58,7 @@
 
   "@_TRANSATIONS": {},
       "transactions": "Transactions",
-      "expense": "Expense",
+      "expense": "Spending",
       "income": "Income",
       "debit": "Debit",
       "credit": "Credit",
@@ -78,12 +89,12 @@
       "searchError": "An unexpected error occurred during the logo search.",
 
   "@_CATEGORIES": {},
-      "expenses": "Expenses",
-      "incomes": "Incomes",
-      "fixedExpenses": "Fixed Expenses",
-      "variableExpenses": "Variable Expenses",
-      "fixedIncomes": "Fixed Incomes",
-      "variableIncomes": "Variable Incomes",
+      "expenses": "Money out",
+      "incomes": "Money in",
+      "fixedExpenses": "Bills & Subscriptions",
+      "variableExpenses": "Daily expenses",
+      "fixedIncomes": "Regular pay",
+      "variableIncomes": "Extra money",
       "category": "Category",
       "newCategory": "New category",
       "addCategory": "Add a category",
@@ -100,6 +111,67 @@
       "selectIconFirstInstruction": "Please select an icon first to choose a color",
       "automaticTranslation": "Automatic translation",
       "automaticTranslationDescription": "Icon must be searched in English. Would you like to automatically translate your search keywords to English?",
+
+  "@_SERIES": {},
+      "@_MAIN_SCREEN": {},
+          "repeat": "Repeat",
+          "repeatExpense": "Schedule this payment to repeat automatically",
+          "repeatIncome": "Schedule this income to repeat automatically",
+
+      "@_NAME_SELECTION": {},
+          "newSeries": "New series",
+          "repeatTransaction": "This transaction will repeat automatically",
+
+      "@_FREQUENCY_SELECTION": {},
+          "frequencyPrompt": "Repeats every...",
+          "frequencyPromptDescription": "Every 2 weeks, every month...",
+
+      "@_END_DATE_SELECTION": {},
+          "untilPrompt": "Until when?",
+          "untilPromptDescription": "Until December 31st, after 4 repetitions...",
+
+      "@_END_DATE_OPTIONS": {},
+          "indefinite": "Forever",
+          "untilEndDate": "Until a specific end date",
+          "endDate": "End date",
+          "afterRepetitions": "After several repetitions",
+          "numberOfRepetitions": "How many times?",
+
+      "@_APPEARANCE_DELAY_SELECTION": {},
+          "appearanceDelayPrompt": "Display in advance",
+          "appearanceDelayPromptDescription": "7 days before due date, 1 day before...",
+
+      "oneDayBefore": "1 day before",
+      "daysBeforeCount": "{count} days before",
+      "@daysBeforeCount": {
+        "placeholders": {
+          "count": {
+            "type": "int"
+          }
+        }
+      },
+      "repetitionsCount": "{count} repetitions",
+      "@repetitionsCount": {
+        "placeholders": {
+          "count": {
+            "type": "int"
+          }
+        }
+      },
+      "oneRepetition": "1 repetition",
+      "selectEndDate": "Select end date",
+      "selectOccurrences": "Number of repetitions",
+      "occurrencesHint": "Number of times the transaction will repeat",
+
+  "@_FREQUENCY_UNITS": {},
+      "day": "day",
+      "week": "week",
+      "month": "month",
+      "year": "year",
+      "days": "days",
+      "weeks": "weeks",
+      "months": "months",
+      "years": "years",
 
   "@_CURRENCIES": {},
       "euroCurrencyName": "Euro",
@@ -215,21 +287,15 @@
       "enableRecurrence": "Enable recurrence",
       "enableRecurrenceHint": "Create a series of recurring transactions",
       "seriesName": "Series name",
-      "seriesNameHint": "e.g., Netflix Subscription",
+      "seriesNameHint": "My subscription",
       "startDate": "Start date",
       "frequency": "Every",
       "frequencyUnit": "Unit",
-      "days": "Days",
-      "weeks": "Weeks",
-      "months": "Months",
-      "years": "Years",
       "seriesEndType": "End of series",
-      "indefinite": "Indefinite",
       "indefiniteHint": "This series will continue indefinitely",
       "byOccurrences": "After a number of occurrences",
       "numberOfOccurrences": "Number of occurrences",
       "byEndDate": "On a specific date",
-      "endDate": "End date",
       "appearanceDaysAhead": "Appearance delay",
       "appearanceDaysAheadHint": "Number of days before the due date",
       "appearanceDaysAheadMaxHelper": "Maximum 60 days (technical pre-generation limit)",
