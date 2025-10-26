@@ -117,6 +117,8 @@
           "repeat": "Répétition",
           "repeatExpense": "Programme ta dépense pour qu'elle se répète automatiquement",
           "repeatIncome": "Programme ce revenu pour qu'il se répète automatiquement",
+          "on": "Activé",
+          "off": "Désactivé",
 
       "@_NAME_SELECTION": {},
           "newSeries": "Nouvelle série",

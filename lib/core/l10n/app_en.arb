@@ -92,7 +92,7 @@
       "expenses": "Money out",
       "incomes": "Money in",
       "fixedExpenses": "Bills & Subscriptions",
-      "variableExpenses": "Daily expenses",
+      "variableExpenses": "Daily spending",
       "fixedIncomes": "Regular pay",
       "variableIncomes": "Extra money",
       "category": "Category",
@@ -117,6 +117,8 @@
           "repeat": "Repeat",
           "repeatExpense": "Schedule this payment to repeat automatically",
           "repeatIncome": "Schedule this income to repeat automatically",
+          "on": "On",
+          "off": "Off",
 
       "@_NAME_SELECTION": {},
           "newSeries": "New series",
