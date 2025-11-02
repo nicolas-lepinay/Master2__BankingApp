@@ -160,6 +160,7 @@
           }
         }
       },
+      "startDate": "Date de début",
       "oneRepetition": "1 répétition",
       "selectEndDate": "Sélectionner la date de fin",
       "selectOccurrences": "Nombre de répétitions",
@@ -290,7 +291,6 @@
       "enableRecurrenceHint": "Créer une série de transactions récurrentes",
       "seriesName": "Nom de la série",
       "seriesNameHint": "Mon abonnement",
-      "startDate": "Date de début",
       "frequency": "Tous les",
       "frequencyUnit": "Unité",
       "seriesEndType": "Fin de la série",
@@ -303,5 +303,12 @@
       "appearanceDaysAheadMaxHelper": "Maximum 60 jours (limite technique de pré-génération)",
       "appearanceDaysAheadMaxError": "Le délai ne peut pas dépasser 60 jours",
       "invalidValue": "Valeur invalide",
-      "valueMustBePositive": "La valeur doit être positive"
+      "valueMustBePositive": "La valeur doit être positive",
+
+  "@_VALIDATION_ERRORS": {},
+      "errorNoAccount": "N'oublie pas de sélectionner un compte.",
+      "errorNoAmount": "Oups ! Tu as oublié de saisir un montant.",
+      "errorNoConvertedAmount": "Oups ! Tu as oublié de saisir le montant converti.",
+      "errorStartDateNotBeforeEndDate": "La date de début de la série doit être antérieure à sa date de fin.",
+      "formInvalid": "Oups ! Le formulaire n'est pas valide."
 }

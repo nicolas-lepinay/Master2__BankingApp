@@ -28,6 +28,8 @@ dependencies:
   flutter_screenutil: ^5.9.3
   rive: ^0.13.20
   flex_color_picker: ^3.7.1
+  auto_size_text: ^3.0.0
+  scroll_datetime_picker: ^0.2.2
 
   # Icons Packs
   cupertino_icons: ^1.0.8
@@ -51,7 +53,6 @@ dependencies:
   translator: ^1.0.4+1
   toastification: ^3.0.3
   lottie: ^3.3.2
-  auto_size_text: ^3.0.0
 
 dev_dependencies:
   flutter_test:
